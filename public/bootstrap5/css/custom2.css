@@ -1,0 +1,5 @@
+.hover:hover{ background-color: rgb(240, 246, 255) }
+.fs-7 { font-size: 12px; }
+.charts-table tr{ border-block-end: 1px #d7d7d7; }
+.charts-table tr th, .charts-table tr td {padding: 0px;}
+.charts-table tbody .highcharts-text{ text-align: end;}
