@@ -77,7 +77,7 @@
                         <small class="error text-danger" id="FK_CAT_id_err" ></small>
                     </div>
                     <div class="">
-                        <label class="form-label">Nombre:</label>
+                        <label class="form-label">Nombre de la categoría:</label>
                         <input type="text" class="form-control" id="CAT_categoria" name="CAT_categoria">
                         <small class="error text-danger" id="CAT_categoria_err" ></small>
                     </div>

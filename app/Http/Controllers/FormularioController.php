@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModAdjuntoArchivo, ModArchivo};
+use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModAdjuntoArchivo, ModArchivo, ModEstablecimiento};
 
 use Illuminate\Http\Request;
 use Validator;
@@ -15,8 +15,7 @@ class FormularioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($rend = null)
-    {
+    public function index($rend = null){
         // DB::enableQueryLog();
 
         $formularios = ModFormulario::select('FRM_id', 'FRM_titulo', 'FRM_version', 'FRM_fecha')
@@ -59,6 +58,7 @@ class FormularioController extends Controller
             'FRM_titulo' => 'required|max:300',
             'FK_EST_id' => 'required',
             'FRM_version' => 'required',
+            'FRM_tipoVisita' => 'required',
             'FRM_fecha' => 'required|min:10',
         ], [
             'required' => 'El dato es requerido!',
@@ -80,21 +80,33 @@ class FormularioController extends Controller
         }
     }
 
-    /* Muestra en una nueva ventana los archivos anexos en cada formulario */
-    public function adjuntosFormulario($id = null){
-        $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-        ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-        ->where('FRM_id', $id)->first()->toArray();
+    /* Muestra en una nueva ventana los archivos adjuntos en cada formulario */
+    // *************
+    public function adjuntosFormulario($EST_id, $FRM_id = null){
+        DB::enableQueryLog();
 
-        $adjuntos = ModAdjunto::from( 'adjuntos as ad' )
-        ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
+        // $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
+        // ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
+        // ->where('FRM_id', $FRM_id)->first();
+
+        $adj = ModAdjunto::from( 'adjuntos as ad' )
+        ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id', 'f.FRM_titulo', 'e.EST_nombre')
         ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
         ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-        ->where ('ad.FK_FRM_id', $id)
-        ->orderBy('ad.ADJ_id', 'desc')
-        ->get();
+        ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
+        ->rightjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
+        ->where ('e.EST_id', $EST_id);
 
-        return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
+        if( $FRM_id ){
+            $adjuntos = $adj->where ('ad.FK_FRM_id', $FRM_id)->orderBy('ad.ADJ_id', 'desc')->get();
+        }else{
+            $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
+        }
+
+        $quries = DB::getQueryLog();
+        // dump($quries);
+        // exit;
+        return view('formulario.formularios-adjuntos', compact('adjuntos', 'EST_id', 'FRM_id'));
     }
 
     /* Adiciona nuevos archivos adjuntos por formulario (es diferente de las recomendaciones) */
@@ -111,7 +123,7 @@ class FormularioController extends Controller
             'ADJ_resumen' => 'required|min:5',
             'ARC_archivo' => 'required',
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
-            'ARC_descripcion.*' => 'required|min:5',
+            'ARC_descripcion.*' => 'required',
         ], [
             'required' => '¡El dato es requerido!',
             'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
@@ -137,7 +149,7 @@ class FormularioController extends Controller
             }
 
             /* Guarda datos en la tabla adjuntos */
-            $adjunto = ModAdjunto::create(['FK_FRM_id' => $request->FK_FRM_id, 'ADJ_titulo' => $request->ADJ_titulo, 'ADJ_fecha' => $request->ADJ_fecha, 'ADJ_responsables' => $ADJ_responsables, 'ADJ_entrevistados' => $ADJ_entrevistados, 'ADJ_resumen' => $request->ADJ_resumen]);
+            $adjunto = ModAdjunto::create(['FK_FRM_id' => $request->FK_FRM_id, 'ADJ_titulo' => $request->ADJ_titulo, 'ADJ_fecha' => $request->ADJ_fecha, 'ADJ_responsables' => json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT), 'ADJ_entrevistados' => json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT), 'ADJ_resumen' => $request->ADJ_resumen]);
 
             $adjuntos_archivos = [];
             foreach ($ARC_ids as $key => $value) {

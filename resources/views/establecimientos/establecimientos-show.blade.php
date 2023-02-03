@@ -39,8 +39,12 @@
             $avance = (($cumplido)/$total)*100;
         } else {
             $avance = 0;
+            $incumplido = 0;
+            $cumplido = 0;
+            $parcial = 0;
+            $total = 0;
         }
-        // dump($avance);
+        // dump($avance); //exit;
     @endphp
     <h3 class="text-center">{{ ( $establecimientos[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $establecimientos[0]->EST_nombre : $establecimientos[0]->EST_nombre }}</h3>
 
@@ -49,7 +53,9 @@
         @include('formulario.formulario-nuevo', ['EST_id' => $establecimientos[0]->EST_id, 'EST_nombre' => $establecimientos[0]->EST_nombre])
     </div>
     @if( isset( $establecimientos[0]->FRM_id ) )
-        @if ($avance > 0)
+    {{-- @if($avance > 0) --}}
+        {{-- CARDS para mostrar los avances de las recomendaciones --}}
+        {{-- @if ($avance != 0)
             <div class="row mt-4 px-3">
                 <div class="btn col-sm card text-white bg-primary bg-gradient mb-3 mx-1 text-shadow" style="max-width: 18rem;">
                     <div class="card-body row">
@@ -84,20 +90,48 @@
                     </div>
                 </div>
             </div>
-        @endif
+        @endif --}}
 
-        <div class="row mt-1">
-            <a href="/recomendaciones/{{$establecimientos[0]->EST_id}}/{{$establecimientos[0]->FRM_id}}" class="text-decoration-none px-2">
-                <label class="mx-5"> Recomendaciones: <b>{{$avance}}%</b> </label>
-                <div class="progress mx-5" style="height: 30px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated  " role="progressbar" style="width: {{$avance}}%;" aria-valuenow="{{$avance}}" aria-valuemin="0" aria-valuemax="100"><span class="fs-6">Recomendaciones cumplidas <strong>{{$avance}}%</strong></span></div>
+        {{-- BARRA para mostrar el % de avance --}}
+        {{-- <div class="row mt-1">
+
+        </div> --}}
+        <div class="row">
+            <div class="col mt-1">
+                <div class="card text-white bg-danger ">
+                    <a href="/recomendaciones/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">Recomendaciones </h5>
+                            <div class="progress " style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated  " role="progressbar" style="width: {{$avance}}%;" aria-valuenow="{{$avance}}" aria-valuemin="0" aria-valuemax="100"><span class="fs-6 text-shadow"><strong>{{ round($avance, 1) }}%</strong></span></div>
+                            </div>
+                            <ul class="lh-1">
+                                <li> <b class="fs-4">{{$total}}</b> Recomendaciones en total </li>
+                                <li> <b class="fs-4">{{$cumplido}}</b> Recomendacion/es cumplidas</li>
+                                <li> <b class="fs-4">{{$parcial}}</b> Cumplimiento parcial</li>
+                                <li> <b class="fs-4">{{$incumplido}}</b> Recomendaciones no cumplidas</li>
+                            </ul>
+                        </div>
+                    </a>
                 </div>
-            </a>
+            </div>
+            <div class="col mt-1">
+                <div class="card text-white bg-warning mb-3">
+                    <a href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Archivos adjuntos</h5>
+                            <img src="/img/adjuntos.png" class="img-fluid rounded" alt="Archivos adjuntos">
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
+
+
 
         <div class="container py-2 mt-4 mb-4">
             @foreach ($establecimientos as $key=>$establecimiento)
-            <!-- START timeline item 1 -->
+            <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
                 <div class="row no-gutters">
                     <div class="col align-self-center text-end">
                         <!--spacer-->
@@ -134,8 +168,12 @@
 
                                         <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Responder/llenar cuestionario</a></li>
 
+                                        {{-- <li class="list-group-item border-0">
+                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
+                                        </li> --}}
+
                                         <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
+                                            <a class="text-decoration-none" id="{{$establecimiento->FRM_id}}"><i class="bi bi-journal-bookmark-fill"></i> {{ $establecimiento->FRM_tipoVisita }}</a>
                                         </li>
 
                                     </ul>
@@ -149,15 +187,15 @@
         </div>
     @endif
 
-    @if( $avance == 0 )
-        <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
-            Aún no se asignaron recomendaciones a este establecimiento
+    @if( !isset($establecimiento->FRM_id) )
+        <div class="alert alert-warning mx-5 mt-2 text-center" role="alert" data-bs-toggle="modal" data-bs-target="#nuevoFormulario">
+            Aún no se aplicaron formularios a este establecimiento
         </div>
     @endif
 
-    @if( !isset($establecimiento->FRM_id) )
-        <div class="alert alert-warning mx-5 mt-2 text-center" role="alert">
-            Aún no se aplicaron formularios a este establecimiento
+    @if( count($recomendaciones) == 0 )
+        <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
+            Aún no se asignaron recomendaciones a este establecimiento
         </div>
     @endif
 

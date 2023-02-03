@@ -20,7 +20,7 @@ class RecomendacionesController extends Controller{
     /* SE DEBEN PREPARAR ARRAY DE CADA ELEMENTO Y GUARDARLOS CON OPCION DE ROLLBACK */
     public function nuevaRecomendacion( Request $request ){
         $ids = [];
-        // dump($request->except('_token'));//exit;
+        // dump($request->except('_token'));exit;
 
         $validator = Validator::make( $request->all(), [
             'REC_fechaRecomendacion' => 'required',
@@ -87,25 +87,33 @@ class RecomendacionesController extends Controller{
     }
 
 
-    public function recomendaciones( $est_id, $frm_id ){
+    public function recomendaciones( $est_id = null, $frm_id = null ){
         // dump($est_id, $frm_id);exit;
         $establecimiento = ModEstablecimiento::select( 'EST_nombre' )
         ->where( 'EST_id', $est_id )
         ->first();
+        //$frm_id=null;
 
         DB::enableQueryLog();
-        $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'FK_ARC_id')
+        $r = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'FK_ARC_id')
         ->leftJoin( 'r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
         ->leftJoin( 'archivos as a', 'ra.FK_ARC_id', 'a.ARC_id')
         ->leftJoin( 'formularios as f', 'f.FRM_id', 'recomendaciones.FK_FRM_id' )
         ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
-        ->where( 'e.EST_id', $est_id )
-        ->orderBy('recomendaciones.REC_id', 'desc')
-        ->get();
+        ->where( 'e.EST_id', $est_id );
+        if( $frm_id ){
+            $recomendaciones = $r->where('f.FRM_id', $frm_id)->orderBy('recomendaciones.REC_id', 'desc')->get() ;
+        } else {
+            $recomendaciones = $r->orderBy('recomendaciones.REC_id', 'desc')->get();
+        }
+
         $quries = DB::getQueryLog();
         // dump( $quries );
         // exit;
+
         return view('establecimientos.establecimientos-recomendaciones',compact('recomendaciones', 'establecimiento', 'est_id', 'frm_id') );
+
+
     }
 
     public function guardarCumplimientoRecomendaciones( Request $request ){

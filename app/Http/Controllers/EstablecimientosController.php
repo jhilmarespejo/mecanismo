@@ -24,6 +24,7 @@ class EstablecimientosController extends Controller
         $tiposEstablecimientos = DB::table('tipo_establecimiento')
             ->select('TES_id', 'TES_tipo')
             ->get();
+
         DB::enableQueryLog();
         $establecimientos = ModEstablecimiento::select('establecimientos.EST_id','establecimientos.EST_nombre','establecimientos.EST_direccion', 'establecimientos.EST_telefonoContacto', 'tes.TES_tipo', 'c.CID_nombre as Municipio', 'c2.CID_nombre as Provincia', 'c3.CID_nombre as Departamento')
             ->join('tipo_establecimiento as tes', 'establecimientos.FK_TES_id', 'tes.TES_id')
@@ -53,13 +54,16 @@ class EstablecimientosController extends Controller
     // public function show($id){
     public function historial($id){
         DB::enableQueryLog();
-        $establecimientos = ModFormulario::select('formularios.FRM_id','formularios.FRM_titulo','formularios.FRM_version','formularios.FRM_fecha','formularios.FK_EST_id', 'establecimientos.EST_id', 'establecimientos.EST_nombre')
+
+        /* Consulta para obtener los establecimientos */
+        $establecimientos = ModFormulario::select('formularios.FRM_id','formularios.FRM_titulo','formularios.FRM_version','formularios.FRM_fecha','formularios.FK_EST_id','formularios.FRM_tipoVisita', 'establecimientos.EST_id', 'establecimientos.EST_nombre')
         ->rightJoin('establecimientos', 'formularios.FK_EST_id', 'establecimientos.EST_id')
         ->where('establecimientos.EST_id', $id)
         ->orderby('formularios.createdAt', 'desc')
         ->where('establecimientos.estado', '1')
         ->get();
 
+        /*Consulta para obtener las recomendaciones */
         $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
         ->select( 'e.EST_nombre','e.EST_id',
             DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
@@ -71,10 +75,9 @@ class EstablecimientosController extends Controller
         ->where( 'e.EST_id', $id )
         ->groupBy('e.EST_nombre','e.EST_id')->get();
 
-        $quries = DB::getQueryLog();
+        // $quries = DB::getQueryLog();
         // dump($quries);
         // exit;
-
         return view('establecimientos.establecimientos-show', compact('establecimientos', 'id', 'recomendaciones'));
 
     }

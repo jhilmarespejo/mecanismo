@@ -8,7 +8,6 @@
         }elseif ( isset($archivo['FK_RES_id']) ){
             $archivoId = $archivo['FK_RES_id'];
         }
-
     @endphp
 
     @if ( $id == $archivoId )
@@ -19,7 +18,6 @@
             @endif
             @if( $archivo['ARC_extension'] == 'pdf' )
                 <i class="text-danger fs-1 bi bi-file-earmark-pdf-fill"></i>
-
                 <img style="height: 50px" src="/{{ $archivo['ARC_ruta'] }}" class="d-none" alt="{{ $archivo['ARC_descripcion'] }}">
                 <p class="d-none descripcion">{{ $archivo['ARC_descripcion'] }}</p>
             @endif

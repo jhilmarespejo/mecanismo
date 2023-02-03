@@ -1,3 +1,4 @@
+
 /*Se inserta los valores de src, descripcion para desplegar los archivos de imagenes o documentos*/
 $(document).on('click', '.getFileModal', function(e){
 // $('').on("click", function () {
@@ -157,17 +158,17 @@ $(document).on('click', '.getFileModal', function(e){
                         let id = $(this).attr('id');
                         $('#'+id+'_err').empty();
                         if ( $('#'+id ).val() == '' ) {
-                            console.log('vacio');
+                            // console.log('vacio');
                             $('#'+id+'_err').append('El dato es necesario!');
                             vacio = true;
                         }else{
                             $('#'+id+'_err').empty();
-                            console.log('lleno');
+                            // console.log('lleno');
                         }
                     });
                     if (vacio) {
                         return false;
-                        console.log('error');
+                        // console.log('error');
                     }
                 }
             },

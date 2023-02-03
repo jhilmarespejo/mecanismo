@@ -3,7 +3,7 @@
 </button>
 
 <!-- Modal -->
-<div class="modal fade" id="nuevoFormulario" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="nuevoFormulario" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
@@ -17,13 +17,27 @@
                     <label class="form-label" >Establecimiento</label>
                     <input class="form-control" list="establecimientos" value="{{$EST_nombre}}" disabled>
                     <input type="hidden" name="FK_EST_id" id="FK_EST_id" value="{{$EST_id}}">
-
                 </div>
                 <div class="mb-4">
                     <label class="form-label">Título del formulario</label>
                     <input class="form-control" type="text" name="FRM_titulo" max="100" min="0">
                     <small class="text-danger" id="FRM_titulo_err"></small>
                 </div>
+                <div class="mb-4">
+                    <label class="form-label">Tipo de visita</label>
+                    {{-- <input class="form-control" type="text" name="FRM_titulo" max="100" min="0"> --}}
+                    <select class="form-select" name="FRM_tipoVisita">
+                        <option value="" selected>Seleccione</option>
+                        <option value="Visita en profundidad">Visita en profundidad</option>
+                        <option value="Visita Temática">Visita Temática</option>
+                        <option value="Visita de seguimiento">Visita de seguimiento</option>
+                        <option value="Visita reactiva">Visita reactiva</option>
+                        <option value="Visita Ad hoc">Visita Ad hoc</option>
+                        <option value="Entrevista a usuarios o PPLs">Entrevista a usuarios o PPLs</option>
+                    </select>
+                    <small class="text-danger" id="FRM_tipoVisita_err"></small>
+                </div>
+
                 <div class="mb-4">
                     <label class="form-label">Número de formulario</label>
                     <input class="form-control" type="number" name="FRM_version" max="100" min="0">

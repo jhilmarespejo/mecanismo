@@ -104,16 +104,16 @@
                         <i class="bi bi-ui-checks-grid"></i> Responder cuestionario
                     </a>
                   </li>
-                  <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/formulario/adjuntos/{{$formulario->FRM_id}}" >
+                  {{-- <li class="nav-item p-1 px-3">
+                    <a class="text-decoration-none" href="/formulario/adjuntos/{{$formulario->FK_EST_id}}/" >
                         <i class="bi bi-folder-symlink"></i> Archivos adjuntos
                     </a>
                   </li>
                   <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/recomendaciones/{{$formulario->FK_EST_id}}/{{$formulario->FRM_id}}" >
+                    <a class="text-decoration-none" href="/recomendaciones/{{$formulario->FK_EST_id}}/" >
                         <i class="bi bi-chat-right-dots"></i></i> Recomendaciones
                     </a>
-                  </li>
+                  </li> --}}
                 </ul>
               </div>
             </div>

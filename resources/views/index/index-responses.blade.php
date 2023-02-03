@@ -15,7 +15,7 @@
 
 {{-- Lista desplegable para mostrar las categorias del formulario selecciondo --}}
 @if ( isset( $categoriasFormulario ) )
-    <form method="POST" id="form_categorias" action="{{route('index.buscarAfirmaciones')}}" >
+    <form method="POST" id="form_categorias" action="{{route('index.busquedaDinamica')}}" >
         <label for="exampleFormControlInput1" class="form-label">Categorias: </label>
         <div class="input-group">
             <select class="form-select" id="select_categorias" name="categoria">
@@ -40,116 +40,105 @@
             <div id="containerAfirmaciones"> </div>
         </figure>
         @php
-            $series = array();
+            // $series = array();
             $items = json_decode(json_encode($afirmaciones), true);
             // dump($items);
 
             for ( $i=0; $i < count( $items ); $i++ ){
-                array_push( $series, ['name' => $items[$i]['EST_nombre'], 'data' => array_values( array_slice($items[$i], 2)) ] );
-                // if (condition) {
-                //     # code...
-                // }
+                $series[$i]= $items[$i]['BCP_pregunta'];
+                $si[$i]= $items[$i]['si'];
+                $no[$i]= $items[$i]['no'];
+                $nulo[$i]= $items[$i]['nulo'];
             }
 
-            $series = json_encode( $series );
-            $categorias = json_encode(array_keys(array_slice($items[0], 2)), JSON_UNESCAPED_UNICODE );
+            // $series = json_encode( $series, JSON_UNESCAPED_UNICODE );
+
+            // $categorias = json_encode(array_keys(array_slice($items[0], 2)), JSON_UNESCAPED_UNICODE );
             // $titulo = ' ';
             // dump( $series, $categorias );
+            // echo ($series); //exit;
         @endphp
-
         <script >
-            var datos = <?php echo $categorias; ?>;
+
+            var series = <?php echo json_encode( $series, JSON_UNESCAPED_UNICODE ); ?>;
+            var si = <?php echo json_encode( $si ); ?>;
+            var no = <?php echo json_encode( $no ); ?>;
+            var nulo = <?php echo json_encode( $nulo ); ?>;
             var titulo = '{{ $titulo }}';
-            var series = <?php echo $series; ?>;
-            console.log( datos, series );
+
+            // console.log(series);
             Highcharts.chart('containerAfirmaciones', {
-                chart: {
-                    type: 'bar',
-                    borderColor: '#ced4da',
-                    borderWidth: 1,
-                },
-                plotOptions: {
-                    bar: { stacking: 'normal' },
-                    column: {
-                        dataLabels: {
-                            // enabled: true
-                        },
-                    },
-                },
+                chart: { type: 'column' },
+                // title: { text: 'Historic World Population by Region' },
+                xAxis: { categories: series },
+                yAxis: [{ stackLabels: { enabled: true, } }],
+                plotOptions: { column: { dataLabels: { enabled: true } } },
                 title: { text: titulo },
-                xAxis: { categories: datos,},
-                yAxis: {
-                    allowDecimals: false,
-                    min: 0,
-                    title: {
-                        text: 'Cantidad'
-                    },
-                    stackLabels: {
-                        enabled: true,
-                        style: {
-                            color: 'black',
-                        },
-                        formatter: function () {
-                            return this.total + "";
-                        }
-                    }
-                },
-                tooltip: {
-                    formatter: function () {
-                        return this.series.name + ': ' + this.y ;
-                    }
-                },
-                legend: {
-                    layout: 'horizontal',
-                    align: 'center',
-                    verticalAlign: 'bottom',
-                    // x: -40, // y: 300,
-                    floating: false,
-                    borderWidth: 2,
-                    backgroundColor:
-                    Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
-                    shadow: true
-                },
-                credits: {
-                    text: 'MNP - Mecanismo Nacional de la Prevención de la Tortura',
-                    href: 'https://www.defensoria.gob.bo'
-                },
-                series: series,
+                series: [{ name: 'Si', data: si }, { name: 'No', data: no }, { name: 'Sin respuesta', data: nulo } ]
             });
+
+            // var datos = <?php echo '$categorias'; ?>;
+                //     var titulo = '{{ $titulo }}';
+                //     var series = <?php echo '$series'; ?>;
+                //     console.log( datos, series );
+                //     Highcharts.chart('containerAfirmaciones', {
+                //             chart: {
+                //                 type: 'bar',
+                //                 borderColor: '#ced4da',
+                //                 borderWidth: 1,
+                //             },
+                //             plotOptions: {
+                //                 bar: { stacking: 'normal' },
+                //                 column: {
+                //                     dataLabels: {
+                //                         // enabled: true
+                //                     },
+                //                 },
+                //             },
+                //             title: { text: titulo },
+                //             xAxis: { categories: datos,},
+                //             yAxis: {
+                //                 allowDecimals: false,
+                //                 min: 0,
+                //                 title: {
+                //                     text: 'Cantidad'
+                //                 },
+                //                 stackLabels: {
+                //                     enabled: true,
+                //                     style: {
+                //                         color: 'black',
+                //                     },
+                //                     formatter: function () {
+                //                         return this.total + "";
+                //                     }
+                //                 }
+                //             },
+                //             tooltip: {
+                //                 formatter: function () {
+                //                     return this.series.name + ': ' + this.y ;
+                //                 }
+                //             },
+                //             legend: {
+                //                 layout: 'horizontal',
+                //                 align: 'center',
+                //                 verticalAlign: 'bottom',
+                //                 // x: -40, // y: 300,
+                //                 floating: false,
+                //                 borderWidth: 2,
+                //                 backgroundColor:
+                //                 Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+                //                 shadow: true
+                //             },
+                //             credits: {
+                //                 text: 'MNP - Mecanismo Nacional de la Prevención de la Tortura',
+                //                 href: 'https://www.defensoria.gob.bo'
+                //             },
+                //             series: series,
+        // });
         </script>
     @else
         <p class="text-danger">Esta categoría es diferente</p>
     @endif
-
-    {{-- @if ( count($afirmaciones) > 0 )
-        <figure class="highcharts-figure">
-            <div id="containerAfirmaciones"> </div>
-        </figure>
-        @php
-            dump($afirmaciones);
-        @endphp
-        <script>
-            Highcharts.chart('containerAfirmaciones', {
-                chart: { type: 'column' },
-                // title: { text: 'Historic World Population by Region' },
-                xAxis: { categories: ['Africa', 'America', 'Asia', 'Europe', 'Oceania'], },
-                yAxis: [{ stackLabels: { enabled: true, } }],
-                plotOptions: { column: { dataLabels: { enabled: true } } },
-                series: [{
-                    name: 'SI',
-                    data: [631, 727, 3202, 721, 26]
-                }, {
-                    name: 'NO',
-                    data: [814, 841, 3714, 726, 31]
-                },
-                ]
-            });
-        </script>
-    @else
-        <p class="text-danger">Esta categoría es diferente</p>
-    @endif --}}
-
-
 
 @endif
 

@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -32,14 +32,14 @@ Route::middleware([
 });
 
 
-Route::get('formulario/adjuntos/{id}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos');
+Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos');
 
 Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo');
 
 
 Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm');
 
-Route::post('index/buscarAfirmaciones', [IndexController::class, 'buscarAfirmaciones'])->name('index.buscarAfirmaciones');
+Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica');
 
 Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas');
 
@@ -54,18 +54,27 @@ Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class);
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store');
 
 Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index');
-Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimir'])->name('cuestionario.imprimir');
-Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder');
-Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario');
-Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store');
 
+Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimir'])->name('cuestionario.imprimir');
+
+Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder');
+
+Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario');
+
+Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store');
 
 Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones');
 
 
+// Route::get('cuestionario/adjuntos/{est_id}/{frm_id?}', [CuestionarioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos');
+
+// Route::post('cuestionario/adjuntosNuevo', [CuestionarioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo');
+
+
+
 Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento');
 
-Route::get('recomendaciones/{est_id}/{frm_id}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones');
+Route::get('recomendaciones/{est_id}/{frm_id?}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones');
 Route::post('recomendaciones/nuevaRecomendacion', [RecomendacionesController::class, 'nuevaRecomendacion'])->name('recomendaciones.nueva');
 
 
@@ -84,7 +93,10 @@ Route::get('establecimientos/historial/{id}', [EstablecimientosController::class
 Route::post('establecimientos/listar', [EstablecimientosController::class, 'listar'])->name('establecimientos.listar');
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.guardarNuevoEstablecimiento');
 
+Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
-
+Route::get('/offline', function () {
+    return view('modules/laravelpwa/offline');
+});
 
 

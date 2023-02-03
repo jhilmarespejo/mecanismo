@@ -1,7 +1,7 @@
 <nav id="nav1" class="navbar navbar-expand-md navbar-light bg-white border-bottom sticky-top">
     <div class="container">
         <!-- Logo -->
-        <span class="navbar-brand me-4" href="/">
+        <span class="navbar-brandx col" href="/">
             <x-jet-application-mark width="36" />
         </span>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -24,8 +24,11 @@
                     <li class="nav-item">
                         <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
                     </li>
+                    {{-- <li class="nav-item">
+                        <a class="nav-link " aria-current="page" href="/reportes">Reportes</a>
+                    </li> --}}
                     <li class="nav-item">
-                        <a class="nav-link " aria-current="page" href="/formularios">.</a>
+                        <a class="nav-link " aria-current="page" href="/formularios">&nbsp;</a>
                     </li>
 
 

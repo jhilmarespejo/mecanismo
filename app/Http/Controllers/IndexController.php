@@ -15,10 +15,8 @@ class IndexController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
     public function dashboard(){
         DB::enableQueryLog();
-
         // Mostrar cantidad total de recomendaciones, cumplidas e incumplidas por establecomiento
         $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
         ->select( 'e.EST_nombre','e.EST_id',
@@ -42,6 +40,7 @@ class IndexController extends Controller
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */
     public function buscarIdFormulario( Request $request ){
+        // dump($request->except('_token'));
         $ids = ModFormulario::select( 'FRM_id' )
         ->where( 'FRM_titulo', $request->formulario )
         ->get();
@@ -50,8 +49,9 @@ class IndexController extends Controller
             $idFromularios[$key] = $idFormulario->FRM_id;
         }
         //$ids = json_encode( $ids );
+        // dump( $idFromularios );
 
-        // Busca las categorias que pertenecen al formulario seleccionado
+        // Busca las categorias que pertenecen al/los formularios seleccionados
         $categoriasFormulario = ModCategoria::from( 'categorias as c' )
         ->select( 'c.CAT_categoria', 'c.CAT_id' )
         ->leftJoin( 'banco_preguntas as bp', 'c.CAT_id', 'bp.FK_CAT_id' )
@@ -59,7 +59,7 @@ class IndexController extends Controller
         ->leftJoin( 'formularios as f', 'rbf.FK_FRM_id', 'f.FRM_id' )
         ->whereIn( 'f.FRM_id', $idFromularios)
         ->groupBy( 'c.CAT_categoria', 'c.CAT_id' )
-        ->orderBy('c.CAT_id')
+        ->orderBy( 'c.CAT_id' )
         ->get();
 
         // dump( $categoriasFormulario->toArray() );
@@ -68,13 +68,14 @@ class IndexController extends Controller
     }
 
     /* Busca todas las preguntas (con tipo de respuesta AFIRMACION) relacionadas a la categoria del formulario seleccionado  */
-    public function buscarAfirmaciones( Request $request ){
-        // dump($request->except('_token'));//exit;
+    public function busquedaDinamica( Request $request ){
+        // dump($request->except('_token'));
+        // exit;
+
         $idsForm = json_decode($request->formularios);
-
         $titulo = $request->nombreCategoria;
-
         DB::enableQueryLog();
+
         /* 1RO. Consulta para obtener una lista de las preguntas de tipo afirmacion (si/no), que pertenezcan al FORMULARIO y CATEGORIA seleccionada  */
         $afirmaciones =  ModBancoPregunta::from( 'banco_preguntas as bp' )
         ->select( DB::raw('DISTINCT("bp"."BCP_id") ') , 'bp.BCP_pregunta' )
@@ -91,33 +92,34 @@ class IndexController extends Controller
         /* 2DO. con la lista anterior se ensambla la 2da parte de la consulta */
         $opciones=''; $bcpIds='';
         foreach( $afirmaciones as $k=>$afirmacion ){
-            $opciones .= 'SUM( ("bp"."BCP_id" = '.$afirmacion->BCP_id.')::int) as "'.$afirmacion->BCP_pregunta.'",';
+            // $opciones .= 'SUM( ("r"."RES_respuesta" = "Si")::int) as "si", SUM( ("r"."RES_respuesta" = "No")::int) as "no", SUM( ("r"."RES_respuesta" IS NULL)::int) as "nulo" ';
             $bcpIds .= $afirmacion->BCP_id.',';
         }
-        $opciones = rtrim($opciones, ",");
+        //$opciones = rtrim($opciones, ",");
         $formularios = preg_replace("/[\[\]]/", "", $request->formularios);
 
         /* CONSULTA PARA RESPUESTAS DE TIPO AFIRMACION */
-        /* 3RA parte (FINAL) se insertan las $opciones en la consulta final
-            Si $opciones tiene valor, se realiza la consulta */
-        if( $opciones != '' ){
-            $consultaAfirmaciones = 'select "rbf"."FK_FRM_id", "e"."EST_nombre", '.rtrim($opciones, ",").' from "respuestas" as "r" right join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id" left join "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "formularios" as "f" on "rbf"."FK_FRM_id" = "f"."FRM_id" left join "establecimientos" as "e" on "e"."EST_id" = "f"."FK_EST_id" where "rbf"."FK_BCP_id" in ('.rtrim($bcpIds, ",").') and "f"."FRM_id" in ('.$formularios.') group by "e"."EST_nombre", "rbf"."FK_FRM_id"';
+        /* 3RA parte (FINAL) se insertan las $opciones en la consulta final */
+        if( $bcpIds != '' ){
+            $consultaAfirmaciones = 'select "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" = \'Si\')::int) as "si",
+            SUM( ("r"."RES_respuesta" = \'No\')::int) as "no", SUM( ("r"."RES_respuesta" IS NULL)::int) as "nulo" from "banco_preguntas" as "bp" left join "r_bpreguntas_formularios" as "rbf" on "rbf"."FK_BCP_id" = "bp"."BCP_id"
+            left join "respuestas" as "r" on "r"."FK_RBF_id" = "rbf"."RBF_id"
+            left join "formularios" as "f" on "f"."FRM_id" = "rbf"."FK_FRM_id" where "bp"."BCP_id" in ('.rtrim($bcpIds, ",").') and "f"."FRM_id" in ('.$formularios.') and "f"."estado" = 1 group by "bp"."BCP_pregunta"';
 
-            //$consultaAfirmaciones = 'select "r"."RES_respuesta", '.rtrim($opciones, ",").' from "respuestas" as "r" right join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id" left join "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "formularios" as "f" on "rbf"."FK_FRM_id" = "f"."FRM_id" left join "establecimientos" as "e" on "e"."EST_id" = "f"."FK_EST_id" where "rbf"."FK_BCP_id" in ('.rtrim($bcpIds, ",").') and "f"."FRM_id" in ('.$formularios.') group by "r"."RES_respuesta"';
             $afirmaciones = DB::select($consultaAfirmaciones);
         } else {
             $afirmaciones = null;
         }
-        // dump($consultaAfirmaciones);
-
+        //echo($consultaAfirmaciones); //exit;
 
         $listaCasillas = 'select "bp"."BCP_id", "bp"."BCP_pregunta", "bp"."BCP_tipoRespuesta" from "banco_preguntas" as "bp" left join "r_bpreguntas_formularios" as "rbf" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "formularios" as "f" on "rbf"."FK_FRM_id" = "f"."FRM_id" left join "establecimientos" as "e" on "f"."FK_EST_id" = "e"."EST_id" where "bp"."BCP_tipoRespuesta" in ('."'Casilla verificación', 'Lista desplegable'".') and "bp"."FK_CAT_id" = '.$request->categoria.' and "rbf"."FK_FRM_id" in ('.$formularios.') group by "bp"."BCP_id", "bp"."BCP_pregunta", "bp"."BCP_tipoRespuesta" order by "bp"."BCP_id"';
 
         $preguntas = DB::select($listaCasillas);
 
-        //dump( $afirmaciones, $preguntas );
+        // dump($preguntas); //exit;
         return view( 'index.index-responses', compact( 'afirmaciones', 'preguntas', 'formularios', 'titulo' ) );
     }
+
     public function buscarListasCasillas( Request $request ){
         // dump( $request->except('_tocken') );
         // exit;

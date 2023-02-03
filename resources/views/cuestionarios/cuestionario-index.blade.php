@@ -126,7 +126,7 @@
         // console.log(  );
         // $("#c_"+id+" div.card-body").append();
 
-        $('#card_body_'+id).append('<div class="input-group mb-3 " id="div_etiqueta_'+e+'"><i class="bi bi-tag-fill input-group-text"></i><input class="form-control" type="text" name="RBF_etiqueta.'+e+'" spellcheck="value"><i class="bi bi-x-lg input-group-text btn-danger btn-remover-etiqueta text-light" id="remover_etiqueta_'+e+'"></i></div>');
+        $('#card_body_'+id).append('<div class="input-group mb-3 " id="div_etiqueta_'+e+'"><i class="bi bi-tag-fill input-group-text"></i><input class="form-control" type="text" name="RBF_etiqueta.'+e+'" spellcheck="value"><i class="bi bi-x-lg input-group-text btn-danger btn-remover-etiqueta text-dark" id="remover_etiqueta_'+e+'"></i></div>');
     });
 
     // Desplegar, replegar el contenido de la categoria

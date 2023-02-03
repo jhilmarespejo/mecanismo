@@ -10,7 +10,7 @@
             @endforeach
         </select>
 
-        <div class="input-group-text btn-danger btn-remover-subcategoria text-light" id="remover_subcategoria-{{$id}}_{{$index}}"><i class="bi bi-trash"></i></div>
+        <div class="input-group-text btn-danger btn-remover-subcategoria text-dark" id="remover_subcategoria-{{$id}}_{{$index}}"><i class="bi bi-trash"></i></div>
 
         <input type="hidden" name="RBF_subcategoria.{{$index}}" id="txt_subcategoria_{{$id}}_{{$index}}">
     </div>
@@ -44,7 +44,7 @@
 
                         <input type="hidden" name="RBF_preguntaId.{{ $pregunta->BCP_id }}{{$key}}" value="{{ $pregunta->BCP_id }}">
 
-                        <span class=" input-group-text btn-danger btn-remover-pregunta text-light" id="remover_pregunta_{{$pregunta->BCP_id}}"><i class="bi bi-x-lg"></i></span>
+                        <span class=" input-group-text btn-danger btn-remover-pregunta text-dark" id="remover_pregunta_{{$pregunta->BCP_id}}"><i class="bi bi-x-lg"></i></span>
 
                         {{-- <span class="input-group-text btn-success ver-pregunta text-light" id="ver_pregunta_{{$key+1}}"><i class="bi bi-eye"></i></span> --}}
                     </div>

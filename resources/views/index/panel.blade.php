@@ -4,14 +4,14 @@
 
 
 @section('content')
-<link rel="stylesheet" href="/tinycarousel/tinycarousel.css" type="text/css" media="screen"/>
-<script type="text/javascript" src="/tinycarousel/jquery.tinycarousel.min.js"></script>
+{{-- <link rel="stylesheet" href="/tinycarousel/tinycarousel.css" type="text/css" media="screen"/> --}}
+{{-- <script type="text/javascript" src="/tinycarousel/jquery.tinycarousel.min.js"></script> --}}
 
 <script src="charts/highcharts.js"></script>
 <script src="charts/exporting.js"></script>
 <script src="charts/export-data.js"></script>
 {{-- <script src="charts/variable-pie.js"></script> --}}
-{{-- <script src="charts/accessibility.js"></script> --}}
+<script src="charts/accessibility.js"></script>
 
 {{-- <div class="py-12 container"> --}}
 {{-- <div class="mx-0 text-center p-3 container-fluid"> --}}
@@ -54,9 +54,9 @@
 
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        $('.slider').tinycarousel();
-    });
+    // $(document).ready(function(){
+    //     $('.slider').tinycarousel();
+    // });
 </script>
 
 @endsection
