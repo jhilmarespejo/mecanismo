@@ -19,11 +19,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <x-jet-label value="{{ __('Email') }}" />
-
+                    {{-- <x-jet-label value="{{ __('Email') }}" />
                     <x-jet-input class="{{ $errors->has('email') ? 'is-invalid' : '' }}" type="email" name="email"
                                  :value="old('email')" required />
-                    <x-jet-input-error for="email"></x-jet-input-error>
+                    <x-jet-input-error for="email"></x-jet-input-error> --}}
+
+                    <x-jet-label for="username" value="{{ __('Nombre de Usuario') }}" />
+                    <x-jet-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required />
+
                 </div>
 
                 <div class="mb-3">
