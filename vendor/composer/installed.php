@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'be7cfdb8461c76f00333894bbde5e7ee11d3d5a2',
+        'reference' => 'f1ccc7d7448a2b5cf65a6c06f22ea512993ad0c6',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -439,7 +439,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'be7cfdb8461c76f00333894bbde5e7ee11d3d5a2',
+            'reference' => 'f1ccc7d7448a2b5cf65a6c06f22ea512993ad0c6',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -904,6 +904,15 @@
             'replaced' => array(
                 0 => '4.3.1',
             ),
+        ),
+        'riverskies/laravel-mobile-detect' => array(
+            'pretty_version' => '1.3',
+            'version' => '1.3.0.0',
+            'reference' => '0ddb27d31a4a1148875424426b9feda6598f2f14',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../riverskies/laravel-mobile-detect',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'sebastian/cli-parser' => array(
             'pretty_version' => '1.0.1',

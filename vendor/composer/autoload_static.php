@@ -88,6 +88,7 @@ class ComposerStaticInit80bd64798c2f80b20ce45358f206f1d2
         ),
         'R' => 
         array (
+            'Riverskies\\Laravel\\MobileDetect\\' => 32,
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
         ),
@@ -328,6 +329,10 @@ class ComposerStaticInit80bd64798c2f80b20ce45358f206f1d2
         'Spatie\\Backtrace\\' => 
         array (
             0 => __DIR__ . '/..' . '/spatie/backtrace/src',
+        ),
+        'Riverskies\\Laravel\\MobileDetect\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src',
         ),
         'Ramsey\\Uuid\\' => 
         array (
@@ -4999,6 +5004,17 @@ class ComposerStaticInit80bd64798c2f80b20ce45358f206f1d2
         'Ramsey\\Uuid\\Validator\\GenericValidator' => __DIR__ . '/..' . '/ramsey/uuid/src/Validator/GenericValidator.php',
         'Ramsey\\Uuid\\Validator\\ValidatorInterface' => __DIR__ . '/..' . '/ramsey/uuid/src/Validator/ValidatorInterface.php',
         'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
+        'Riverskies\\Laravel\\MobileDetect\\Contracts\\BladeDirectiveInterface' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Contracts/BladeDirectiveInterface.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\AndroidBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/AndroidBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\DesktopBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/DesktopBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\HandheldBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/HandheldBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\MobileBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/MobileBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\NotMobileBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/NotMobileBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\NotTabletBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/NotTabletBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\TabletBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/TabletBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Directives\\iOSBladeDirective' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Directives/iOSBladeDirective.php',
+        'Riverskies\\Laravel\\MobileDetect\\Facades\\MobileDetect' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/Facades/MobileDetect.php',
+        'Riverskies\\Laravel\\MobileDetect\\MobileDetectServiceProvider' => __DIR__ . '/..' . '/riverskies/laravel-mobile-detect/src/MobileDetectServiceProvider.php',
         'SebastianBergmann\\CliParser\\AmbiguousOptionException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/AmbiguousOptionException.php',
         'SebastianBergmann\\CliParser\\Exception' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/Exception.php',
         'SebastianBergmann\\CliParser\\OptionDoesNotAllowArgumentException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/OptionDoesNotAllowArgumentException.php',
