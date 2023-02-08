@@ -28,6 +28,14 @@
                     <x-jet-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required />
 
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Rol</label>
+                    <select name="rol" class="form-select">
+                        <option value='' selected>Seleccione</option>
+                        <option value="Operador">Operador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
 
                 <div class="mb-3">
                     <x-jet-label value="{{ __('Password') }}" />

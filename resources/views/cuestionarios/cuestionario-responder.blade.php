@@ -61,16 +61,18 @@
         $i = $elemento->RBF_id;
     } // END FOREACH
     // $auxCategoriasArray = array_unique($auxCategoriasArray);
-    dump( $auxCategoriasArray );
+    // foreach ($auxCategoriasArray as $key => $value) {
+    //     dump($value);
+    // }
 @endphp
 
 <div class="container-fluid p-sm-3 p-0 mx-0" id="cuestionario" >
 
     @if ( count($elementos) > 0 )
         <div class="text-center head">
-            <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" > {{ $elemento->FRM_titulo }} </p>
-            <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $elemento->EST_nombre }}</p>
-            <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" >Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
+            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }} </p>
+            <p class=" m-0 p-0 fs-3" id="establecimiento">Establecimiento: {{ $elemento->EST_nombre }}</p>
+            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
         </div>
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -109,14 +111,13 @@
         {{-- Cuestionario --}}
         <div class="row border m-sm-2 p-2 d-flex">
             {{-- boton para el plegar/desplegar el cuestionario --}}
-            <div class="form-switch fs-4">
-                <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('frm_cuestionario')">
-            </div>
 
-            <legend class="text-primary fs-4 text-center" > Cuestionario</legend>
-
+            <legend class="text-primary fs-3 text-center" > Cuestionario</legend>
 
             @desktop
+                <div class="form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('frm_cuestionario')">
+                </div>
                 @include('includes.cuestionario')
             @enddesktop
             @mobile
@@ -128,17 +129,17 @@
         <div class="row border m-sm-2 p-2 d-flex">
             {{-- boton para el plegar/desplegar las observaciones --}}
             <div class="form-switch fs-4">
-                <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('accordion_observaciones')">
+                <input class="form-check-input chek-observaciones" type="checkbox" onclick="plegar_desplegar('accordion_observaciones')">
             </div>
             <legend class="text-primary fs-4 text-center" > Oservaciones identificadas</legend>
             @include('includes.recomendaciones')
         </div>
 
-        {{-- INCLUDE para Adjunyos --}}
+        {{-- INCLUDE para Adjuntos --}}
         <div class="row border m-sm-2 p-2 d-flex">
-            {{-- boton para el plegar/desplegar las observaciones --}}
+            {{-- boton para el plegar/desplegar los adjuntos --}}
             <div class="form-switch fs-4">
-                <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('div_adjuntos')">
+                <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">
             </div>
             <legend class="text-primary fs-4 text-center" > Archivos adjuntos</legend>
             @include('includes.adjuntos')
@@ -224,7 +225,8 @@
       }
 
     $(document).ready(function() {
-        /*Carrusel estatico*/
+        $('#accordion_observaciones').toggle("slow");
+        $('#div_adjuntos').toggle("slow");
 
 
         // Evita enviar formulario al presionar Enter

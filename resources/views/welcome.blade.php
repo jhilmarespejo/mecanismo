@@ -42,12 +42,9 @@
     </div>
 
     <div class="container-fluid my-5 pt-5 px-5">
-        <div class="row justify-content-center px-4">
-            <img class="img-fluid" src="img/logo1.jpg" alt="Defensor del Pueblo" style="width:35%">
-        </div>
-        <div class="row justify-content-center px-4 py-2">
-            <img class="img-fluid" src="img/logomnp.png" alt="MNP" style="width:18%">
-        </div>
+        <p class=" text-center px-4 ">
+            <img class="img-fluid"  src="img/logoinicio.png" alt="Defensor del Pueblo" >
+        </p>
     </div>
 </body>
 </html>

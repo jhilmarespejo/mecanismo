@@ -18,18 +18,24 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/establecimientos">Establecimientos</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/bancoDePreguntas">Banco de Preguntas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
-                    </li>
+
+                    @if( Auth::user()->rol == 'Administrador' )
+                        <li class="nav-item">
+                            <a class="nav-link" href="/bancoDePreguntas">Banco de Preguntas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " aria-current="page" href="/formularios">&nbsp;</a>
+                        </li>
+                        {{-- @else --}}
+                    @endif
                     {{-- <li class="nav-item">
                         <a class="nav-link " aria-current="page" href="/reportes">Reportes</a>
                     </li> --}}
-                    <li class="nav-item">
-                        <a class="nav-link " aria-current="page" href="/formularios">&nbsp;</a>
-                    </li>
+
+
 
 
                     {{-- <li>

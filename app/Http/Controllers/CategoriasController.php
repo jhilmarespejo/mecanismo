@@ -6,6 +6,7 @@ use App\Models\{ModCategoria, ModBancoPregunta};
 use Illuminate\Http\Request;
 use DB;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class CategoriasController extends Controller
 {
@@ -15,24 +16,29 @@ class CategoriasController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index() {
-        DB::enableQueryLog();
 
-        $categorias = ModCategoria::from( 'categorias as c' )
-        ->select('c.CAT_id', 'c.CAT_categoria','c.FK_CAT_id', 'c2.CAT_categoria as subcategoria', 'c2.FK_CAT_id as FK_CAT_id2')
-        ->leftJoin('categorias as c2', 'c.CAT_id', 'c2.FK_CAT_id')
-        ->whereNull('c.FK_CAT_id')
-        ->orderBy ('c.CAT_categoria')
-        ->orderBy ('subcategoria')
-        ->get();
+        if(Auth::user()->rol == 'Administrador' ){
+            DB::enableQueryLog();
 
-        $quries = DB::getQueryLog();
-        // dump( $quries );
+            $categorias = ModCategoria::from( 'categorias as c' )
+            ->select('c.CAT_id', 'c.CAT_categoria','c.FK_CAT_id', 'c2.CAT_categoria as subcategoria', 'c2.FK_CAT_id as FK_CAT_id2')
+            ->leftJoin('categorias as c2', 'c.CAT_id', 'c2.FK_CAT_id')
+            ->whereNull('c.FK_CAT_id')
+            ->orderBy ('c.CAT_categoria')
+            ->orderBy ('subcategoria')
+            ->get();
 
+            $quries = DB::getQueryLog();
+            // dump( $quries );
         return view( 'categorias.index', compact('categorias') );
+        }else{
+            return redirect('panel');
+        }
     }
 
     public function guardaNuevaCategoria(Request $request){
-        // dump($request->except('_token', 'tipo_elemento'));//exit;
+        if(Auth::user()->rol == 'Administrador' ){
+            // dump($request->except('_token', 'tipo_elemento'));//exit;
         $validator = Validator::make( $request->all(), [
             'tipo_elemento' => 'required',
             'CAT_categoria' => 'required',
@@ -57,59 +63,77 @@ class CategoriasController extends Controller
                 exit ($e->getMessage());
             }
         }
+        }else{
+            return redirect('panel');
+        }
+
+
     }
 
     public function buscarElementos(Request $request) {
-        $id = $request->FK_CAT_id;
-        $index = $request->index;
-        // dump( $index, $id );
-        //exit;
-
-        $subCategorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
-        ->where('FK_CAT_id', $id)->orderby('CAT_id')->get();
-
-        if( $subCategorias->count() ){
-            return view( 'categorias.catategorias-responses', compact('subCategorias', 'id', 'index') );
-        }
-
-        if( !$subCategorias->count() || $request->elementos == 'subCategoria' ) {
-            DB::enableQueryLog();
+        if(Auth::user()->rol == 'Administrador' ){
+            $id = $request->FK_CAT_id;
             $index = $request->index;
+            // dump( $index, $id );
+            //exit;
 
-            $listaPreguntas = ModBancoPregunta::select('BCP_id', 'BCP_pregunta', 'BCP_tipoRespuesta', 'BCP_opciones', 'BCP_complemento', 'BCP_aclaracion', 'FK_CAT_id')
-            ->where( 'FK_CAT_id', $id )
-            ->orderby('BCP_id')
-            ->get();
+            $subCategorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
+            ->where('FK_CAT_id', $id)->orderby('CAT_id')->get();
 
-            $quries = DB::getQueryLog();
-            return view('categorias.catategorias-responses', compact('listaPreguntas', 'index'));
+            if( $subCategorias->count() ){
+                return view( 'categorias.catategorias-responses', compact('subCategorias', 'id', 'index') );
+            }
+
+            if( !$subCategorias->count() || $request->elementos == 'subCategoria' ) {
+                DB::enableQueryLog();
+                $index = $request->index;
+
+                $listaPreguntas = ModBancoPregunta::select('BCP_id', 'BCP_pregunta', 'BCP_tipoRespuesta', 'BCP_opciones', 'BCP_complemento', 'BCP_aclaracion', 'FK_CAT_id')
+                ->where( 'FK_CAT_id', $id )
+                ->orderby('BCP_id')
+                ->get();
+
+                $quries = DB::getQueryLog();
+                return view('categorias.catategorias-responses', compact('listaPreguntas', 'index'));
+            }
+        }else{
+            return redirect('panel');
         }
+
 
     }
 
     public function buscarSubcategoria(Request $request){
-        $id = $request->CAT_id;
-        $index = $request->index;
-        $subCategorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
-        ->where('FK_CAT_id', $id)
-        ->orderBy('CAT_id', 'asc')
-        ->get();
-        if(count($subCategorias)){
-            return view('categorias.catategorias-responses', compact('subCategorias', 'id', 'index'));
+        if(Auth::user()->rol == 'Administrador' ){
+            $id = $request->CAT_id;
+            $index = $request->index;
+            $subCategorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
+            ->where('FK_CAT_id', $id)
+            ->orderBy('CAT_id', 'asc')
+            ->get();
+            if(count($subCategorias)){
+                return view('categorias.catategorias-responses', compact('subCategorias', 'id', 'index'));
+            }
+        }else{
+            return redirect('panel');
         }
     }
 
     public function buscarPregunta(Request $request){
-        //dump($request->except('_token'));
-        // exit;
+        if(Auth::user()->rol == 'Administrador' ){
+            //dump($request->except('_token'));
+            // exit;
 
-        $index = $request->index;
-        $preguntas = ModBancoPregunta::select('BCP_id', 'BCP_pregunta', 'BCP_tipoRespuesta', 'BCP_opciones', 'BCP_complemento', 'BCP_aclaracion', 'FK_CAT_id')
-        ->where('FK_CAT_id', $request->FK_CAT_id)
-        ->orderby('BCP_id')
-        ->get();
-        if(count($preguntas)){
-            return view('categorias.catategorias-responses', compact('preguntas', 'index'));
+            $index = $request->index;
+            $preguntas = ModBancoPregunta::select('BCP_id', 'BCP_pregunta', 'BCP_tipoRespuesta', 'BCP_opciones', 'BCP_complemento', 'BCP_aclaracion', 'FK_CAT_id')
+            ->where('FK_CAT_id', $request->FK_CAT_id)
+            ->orderby('BCP_id')
+            ->get();
+            if(count($preguntas)){
+                return view('categorias.catategorias-responses', compact('preguntas', 'index'));
+            }
+        }else{
+            return redirect('panel');
         }
     }
 

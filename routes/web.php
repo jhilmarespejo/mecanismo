@@ -31,72 +31,75 @@ Route::middleware([
     Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
 });
 
+// FORMULARIO
+Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
 
-Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos');
+Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo')->middleware('auth');
 
-Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo');
+Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
+
+// INDEX
+Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
+
+Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica')->middleware('auth');
+
+Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas')->middleware('auth');
 
 
-Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm');
-
-Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica');
-
-Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas');
-
-Route::get('formularios', Formularios::class);
+// LIVEWIRE
+Route::get('formularios', Formularios::class)->middleware('auth');
 Route::get('cuestionario', CuestionarioIndex::class);
 // Route::get('establecimientos', Establecimientos::class);
-Route::get('bancoDePreguntas', BancoPreguntasIndex::class);
-Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class);
+Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
+Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
+
+// CUESTIONARIO
+Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
+
+Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimir'])->name('cuestionario.imprimir')->middleware('auth');
+
+Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
+
+Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario')->middleware('auth');
+
+Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store')->middleware('auth');
+
+Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones')->middleware('auth');
+
+
+// RECOMENDACIONES
+Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento')->middleware('auth');
+
+Route::get('recomendaciones/{est_id}/{frm_id?}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones')->middleware('auth');
+
+Route::post('recomendaciones/nuevaRecomendacion', [RecomendacionesController::class, 'nuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
 
 
 
-Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store');
-
-Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index');
-
-Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimir'])->name('cuestionario.imprimir');
-
-Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder');
-
-Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario');
-
-Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store');
-
-Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones');
-
-
-// Route::get('cuestionario/adjuntos/{est_id}/{frm_id?}', [CuestionarioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos');
-
-// Route::post('cuestionario/adjuntosNuevo', [CuestionarioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo');
-
-
-
-Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento');
-
-Route::get('recomendaciones/{est_id}/{frm_id?}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones');
-Route::post('recomendaciones/nuevaRecomendacion', [RecomendacionesController::class, 'nuevaRecomendacion'])->name('recomendaciones.nueva');
+// CATEGORIAS
+Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
+Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta')->middleware('auth');
+Route::post('categorias/buscarElementos', [CategoriasController::class, 'buscarElementos'])->name('categorias.buscarElementos')->middleware('auth');
+Route::get('categorias', [CategoriasController::class, 'index'])->name('categorias')->middleware('auth');
+Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'guardaNuevaCategoria'])->name('categorias.guardaNuevaCategoria')->middleware('auth');
 
 
 
 
-Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria');
-Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta');
-Route::post('categorias/buscarElementos', [CategoriasController::class, 'buscarElementos'])->name('categorias.buscarElementos');
-Route::get('categorias', [CategoriasController::class, 'index'])->name('categorias');
-Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'guardaNuevaCategoria'])->name('categorias.guardaNuevaCategoria');
+// ESTABLECIMIENTOS
+Route::get('establecimientos', [EstablecimientosController::class, 'index'])->name('establecimientos')->middleware('auth');
+Route::get('establecimientos/historial/{id}', [EstablecimientosController::class, 'historial'])->name('establecimientos.historial')->middleware('auth');
+Route::post('establecimientos/listar', [EstablecimientosController::class, 'listar'])->name('establecimientos.listar')->middleware('auth');
+Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.guardarNuevoEstablecimiento')->middleware('auth');
 
-
-
-Route::get('establecimientos', [EstablecimientosController::class, 'index'])->name('establecimientos');
-Route::get('establecimientos/historial/{id}', [EstablecimientosController::class, 'historial'])->name('establecimientos.historial');
-Route::post('establecimientos/listar', [EstablecimientosController::class, 'listar'])->name('establecimientos.listar');
-Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.guardarNuevoEstablecimiento');
-
+// REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
-Route::get('/offline', function () {
-    return view('modules/laravelpwa/offline');
-});
+
+
+
+// Route::get('/offline', function () {
+//     return view('modules/laravelpwa/offline');
+// });
 
 

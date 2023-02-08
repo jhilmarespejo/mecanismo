@@ -16,7 +16,6 @@
                                     <div class="col-sm-5 col-preguntas-sc" >
                                         {{ $pregunta->BCP_pregunta }}
                                         @if ($pregunta->BCP_tipoRespuesta == 'Afirmación' || $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
-                                        {{-- <p class="m-0"><small>* Sólo marque una opción de respuesta</small></p> --}}
                                         @endif
                                     </div>
 
@@ -24,7 +23,6 @@
                                         {{-- <div class="row "> --}}
                                             <form method="POST" enctype="multipart/form-data" id="frm_{{$pregunta->RBF_id}}" class="frm-respuesta"> @csrf
                                                 @php
-                                                //*** copiar de aqui
                                                 $opcionesSC = json_decode( $pregunta->BCP_opciones, true);
                                                 $respuestasSC = json_decode( $pregunta->RES_respuesta, true);
                                                 if ($respuestasSC === null) { $respuestasSC = []; }

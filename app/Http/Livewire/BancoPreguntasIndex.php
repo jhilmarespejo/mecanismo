@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 use Livewire\{Component, WithPagination};
 use App\Models\ModBancoPregunta;
+use Illuminate\Support\Facades\Auth;
 use DB;
 
 class BancoPreguntasIndex extends Component
@@ -76,29 +77,35 @@ class BancoPreguntasIndex extends Component
         $this->FK_CAT_id = $FK_CAT_id;
     }
 
+    function mount(){
+        if( Auth::user()->rol != 'Administrador' ){
+           return redirect()->to('panel');
+        }
+      }
     /*
     public function render. Renderiza a la vista banco-preguntas con los datos de la consulta
     $bancoPreguntas. variable que viaja hasta la vista banco-preguntas para mostrar la tabla con la informacion toda la informacion del banco de preguntas
     */
-    public function render()
-    {
-        //$users = DB::table('users')->get();
-        //DB::enableQueryLog();
-        $bancoPreguntas = DB::table('banco_preguntas as bcp')->select('bcp.BCP_id', 'bcp.BCP_pregunta', 'bcp.FK_CAT_id', 'bcp.BCP_tipoRespuesta','bcp.BCP_opciones','bcp.BCP_complemento','bcp.BCP_aclaracion'
-        , 'categorias.CAT_id', 'categorias.CAT_categoria'
-        ,'sc.CAT_categoria as subCategoria')
-        ->join ('categorias as sc', 'sc.CAT_id', 'bcp.FK_CAT_id')
-        ->leftJoin ('categorias', 'categorias.CAT_id', 'sc.FK_CAT_id')
-        ->where('bcp.BCP_pregunta',  'ilike', '%' . $this->buscarPregunta . '%')
-        ->where('bcp.estado', '1')
-        ->orderby($this->ordenColumna, $this->ordenDireccion)
-        ->orderby('sc.CAT_id', 'desc')
-        //->get();
-        ->paginate($this->resultadosPorPagina);
+    public function render() {
 
-        //$quries = DB::getQueryLog();
-        //dump($quries);exit;
-        return view('livewire.banco-preguntas-index', compact('bancoPreguntas'));
+            //$users = DB::table('users')->get();
+            //DB::enableQueryLog();
+            $bancoPreguntas = DB::table('banco_preguntas as bcp')->select('bcp.BCP_id', 'bcp.BCP_pregunta', 'bcp.FK_CAT_id', 'bcp.BCP_tipoRespuesta','bcp.BCP_opciones','bcp.BCP_complemento','bcp.BCP_aclaracion'
+            , 'categorias.CAT_id', 'categorias.CAT_categoria'
+            ,'sc.CAT_categoria as subCategoria')
+            ->join ('categorias as sc', 'sc.CAT_id', 'bcp.FK_CAT_id')
+            ->leftJoin ('categorias', 'categorias.CAT_id', 'sc.FK_CAT_id')
+            ->where('bcp.BCP_pregunta',  'ilike', '%' . $this->buscarPregunta . '%')
+            ->where('bcp.estado', '1')
+            ->orderby($this->ordenColumna, $this->ordenDireccion)
+            ->orderby('sc.CAT_id', 'desc')
+            //->get();
+            ->paginate($this->resultadosPorPagina);
+
+            //$quries = DB::getQueryLog();
+            //dump($quries);exit;
+
+            return view('livewire.banco-preguntas-index', compact('bancoPreguntas'));
     }
 
     /*

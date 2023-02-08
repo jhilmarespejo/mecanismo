@@ -97,7 +97,7 @@
 
         </div> --}}
         <div class="row">
-            <div class="col mt-1">
+            <div class="col-sm mt-1">
                 <div class="card text-white bg-danger ">
                     <a href="/recomendaciones/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
                         <div class="card-body">
@@ -115,7 +115,7 @@
                     </a>
                 </div>
             </div>
-            <div class="col mt-1">
+            <div class="col-sm mt-1">
                 <div class="card text-white bg-warning mb-3">
                     <a href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
                         <div class="card-body text-center">

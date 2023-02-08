@@ -26,7 +26,6 @@
                                 <label class="form-label">Fecha:</label>
                                 <input type="date" class="form-control" name="REC_fechaRecomendacion" value="{{date('d/m/Y')}}">
                                 <small class="error text-danger" id="REC_fechaRecomendacion_err" ></small>
-
                             </div>
 
                             <div class="mb-3 col-sm">
@@ -54,11 +53,9 @@
                 </div>
             </div>
         </div>
-        @else
-            <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
-                Aún no se asignaron recomendaciones a este establecimiento
-            </div>
-        @endif
+    @else
+
+    @endif
 
 
     @if (count($a)>0)
@@ -124,7 +121,9 @@
             </div>
         @endforeach
     @else
-
+        <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
+            Aún no se asignaron recomendaciones a este establecimiento
+        </div>
     @endif
 
 
