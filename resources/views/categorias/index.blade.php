@@ -86,8 +86,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-            <span class="btn btn-warning text-light text-shadow" data-bs-dismiss="modal">Cancelar</span>
-            <span class="btn btn-success text-light text-shadow" id="btn_guarda_categoria">Guardar</span>
+                <span class="btn btn-warning text-light text-shadow" data-bs-dismiss="modal">Cancelar</span>
+                <span class="btn btn-success text-light text-shadow" id="btn_guarda_categoria">Guardar</span>
             </div>
         </div>
         </div>

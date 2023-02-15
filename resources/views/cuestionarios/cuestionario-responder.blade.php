@@ -69,44 +69,47 @@
 <div class="container-fluid p-sm-3 p-0 mx-0" id="cuestionario" >
 
     @if ( count($elementos) > 0 )
-        <div class="text-center head">
-            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }} </p>
-            <p class=" m-0 p-0 fs-3" id="establecimiento">Establecimiento: {{ $elemento->EST_nombre }}</p>
-            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
-        </div>
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="bi bi-gear"></i></a>
-            <button class="navbar-toggler bg-secondary " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-three-dots"></i>
-            </button>
-            <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
-                <ul class="navbar-nav" id="nav_2">
-                <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                        <i class="bi bi-arrow-90deg-left"></i> Historial
-                    </a>
-                </li>
-                <li class="nav-item p-1 px-3" id="btn_imprimir">
-                    <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
-                        <i class="bi bi-printer"></i> Vista para imprimir formulario</span>
-                    </a>
-                </li>
-                {{-- <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/formulario/adjuntos/{{$elemento->FK_EST_id}}/{{$elemento->FRM_id}}" >
-                        <i class="bi bi-folder-symlink"></i> Archivos adjuntos
-                    </a>
-                </li>
-                <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/recomendaciones/{{$elemento->FK_EST_id}}/{{$elemento->FRM_id}}" >
-                        <i class="bi bi-chat-right-dots"></i></i> Recomendaciones
-                    </a>
-                </li> --}}
-                </ul>
+        {{-- minimenu --}}
+        @mobile
+        <div class="container-fluid row border-top border-bottom p-3">
+            <div class="col ">
+                <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> Historial </a>
             </div>
+            <div class="col ">
+                <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                    <i class="bi bi-printer"></i> Imprimir</span>
+                </a>
+            </div>
+        </div>
+        @endmobile
+
+        @desktop
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav2">
+            <div class="container-fluid">
+              <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
+                <ul class="navbar-nav" id="nav_2">
+                    <li class="nav-item p-1 px-3">
+                        <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                            <i class="bi bi-arrow-90deg-left"></i> Historial </a>
+                    </li>
+                    <li class="nav-item p-1 px-3" id="btn_imprimir">
+                        <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                            <i class="bi bi-printer"></i> Imprimir</span>
+                        </a>
+                    </li>
+                </ul>
+              </div>
             </div>
         </nav>
+        @endmobile
+
+        {{-- Encabezado --}}
+        <div class="text-center head">
+            <p class=" m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
+            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }} </p>
+            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
+        </div>
 
         {{-- Cuestionario --}}
         <div class="row border m-sm-2 p-2 d-flex">
@@ -150,9 +153,15 @@
             <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p>
             {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" >Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p> --}}
         </div>
-        <div class="alert alert-warning p-3">
-            <a class="btn btn-danger bt-lg text-decoration-none" href="/cuestionario/{{$FRM_id}}">Debe organizar preguntas para éste cuestionario </a>
-        </div>
+        @if(Auth::user()->rol == 'Administrador' )
+            <div class="alert alert-warning p-3">
+                <a class="btn btn-danger bt-lg text-decoration-none" href="/cuestionario/{{$FRM_id}}">Debe organizar preguntas para éste cuestionario </a>
+            </div>
+        @else
+            <div class="alert alert-warning p-3 btn btn-danger bt-lg text-decoration-none">
+                El cuestionario aún no está disponible
+            </div>
+        @endif
     @endif
 
     <!-- Modal para agregar cumpliento a la recomendacion -->
@@ -238,6 +247,9 @@
     });
     /*Boton para confirmar los datos del formulario*/
     $("#btn_confirmacion").click( function(e){
+        validar();
+    });
+    function validar(){
         let marcas = [];
         $('.frm-respuesta').removeClass('bg-warning bg-gradient rounded');
 
@@ -280,14 +292,9 @@
                 scrollTop: ($('#'+$("#q").find('form.frm-respuesta.bg-warning').attr('id')).offset().top)-150
             }, 'slow');
         }
+        // console.log($("#q").find('form.frm-respuesta.bg-warning').attr('id'));
 
-        // $("#q").find('form.frm-respuesta.bg-warning').each(function(key,value){
-        //     console.log($(this).attr('id'));
-        // });
-
-        console.log($("#q").find('form.frm-respuesta.bg-warning').attr('id'));
-
-    });
+    }
 
    /* Guarda cada respuesta del formulario cuando se el mouse se mueve a la siguiente pregunta*/
     $(".frm-respuesta").focusout(function(e){

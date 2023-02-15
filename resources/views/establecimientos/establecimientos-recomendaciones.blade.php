@@ -28,13 +28,23 @@
         // exit
     @endphp
 
-        {{-- SUBMENU  --}}
+    @mobile
+    <div class="container-fluid row border-top border-bottom p-3">
+        <div class="col">
+            <a class="text-decoration-none" href="/establecimientos/historial/{{$est_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> Historial
+            </a>
+        </div>
+        <div class="col">
+            <a class="text-decoration-none" href="/formulario/adjuntos/{{$est_id}}" >
+                <i class="bi bi-folder-symlink"></i> Archivos adjuntos
+            </a>
+        </div>
+    </div>
+    @endmobile
+    @desktop
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="bi bi-gear"></i></a>
-            <button class="navbar-toggler bg-secondary " type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-three-dots"></i>
-            </button>
             <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                 <li class="nav-item p-1 px-3">
@@ -61,6 +71,9 @@
             </div>
         </div>
     </nav>
+    @enddesktop
+        {{-- SUBMENU  --}}
+
     <h2 class="text-center py-2 text-primary">Historial de Observaciones</h2>
     <h3 class="text-center py-2 text-primary">{{ $establecimiento->EST_nombre; }}</h3>
 

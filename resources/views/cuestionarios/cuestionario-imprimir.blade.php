@@ -82,7 +82,21 @@
     @endphp
 
     <div class="container-fluid" id="cuestionario" >
-
+        @mobile
+        <div class="container-fluid row border-top border-bottom p-3">
+            <div class="col ">
+                <a class="text-decoration-none" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
+                    <i class="bi bi-arrow-90deg-left"></i> Historial
+                </a>
+            </div>
+            <div class="col ">
+                <a class="text-decoration-none" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
+                    <i class="bi bi-ui-checks-grid"></i> Responder cuestionario
+                </a>
+            </div>
+        </div>
+        @endmobile
+        @desktop
         <nav class="navbar navbar-expand-lg navbar-light bg-light" id="nav2">
             <div class="container-fluid">
               <a class="navbar-brand" href="#"><i class="bi bi-gear"></i></a>
@@ -118,6 +132,7 @@
               </div>
             </div>
         </nav>
+        @enddesktop
         <div class="d-flex bd-highlight mb-0 encabezado d-none">
             <div class="p-2 bd-highlight"><img src="/img/logodp.png" style="height: 50px"></div>
             <div class="ms-auto p-2 bd-highlight"><img src="/img/logomnp.png" style="height: 50px"></div>

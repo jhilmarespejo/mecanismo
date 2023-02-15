@@ -195,15 +195,28 @@ class CuestionarioController extends Controller {
             }
             DB::commit();
             return response()->json([ "message" => $msg ]);
-
-
         }
         catch (\Exception $e) {
             DB::rollback();
             exit ($e->getMessage());
         }
         exit;
+    }
 
+    public function confirmaCuestionario( Request $request ){
+        // dump( $request->except('_token') ); exit;
+
+        DB::beginTransaction();
+        try {
+            ModFormulario::where('FRM_id', $request->FRM_id)
+            ->update(['estado' => $request->estado]);
+            DB::commit();
+            return response()->json( [ 'message'=>'Correcto!' ] );
+        }
+        catch (\Exception $e) {
+            DB::rollback();
+            exit ($e->getMessage());
+        }
     }
 
     /**

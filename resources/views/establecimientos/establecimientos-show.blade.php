@@ -48,10 +48,12 @@
     @endphp
     <h3 class="text-center">{{ ( $establecimientos[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $establecimientos[0]->EST_nombre : $establecimientos[0]->EST_nombre }}</h3>
 
-    <div class="text-center ">
-        {{-- @livewire('formularios-nuevo') --}}
-        @include('formulario.formulario-nuevo', ['EST_id' => $establecimientos[0]->EST_id, 'EST_nombre' => $establecimientos[0]->EST_nombre])
-    </div>
+    @if(Auth::user()->rol == 'Administrador' )
+        <div class="text-center ">
+            {{-- @livewire('formularios-nuevo') --}}
+            @include('formulario.formulario-nuevo', ['EST_id' => $establecimientos[0]->EST_id, 'EST_nombre' => $establecimientos[0]->EST_nombre])
+        </div>
+    @endif
     @if( isset( $establecimientos[0]->FRM_id ) )
     {{-- @if($avance > 0) --}}
         {{-- CARDS para mostrar los avances de las recomendaciones --}}
@@ -166,7 +168,7 @@
                                     <ul class="list-group">
                                         <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/imprimir/{{$establecimiento->FRM_id}}"><i class="bi bi-printer"></i> Imprimir cuestionario</a></li>
 
-                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Responder/llenar cuestionario</a></li>
+                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Responder/llenar cuestionario</a></li>
 
                                         {{-- <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>

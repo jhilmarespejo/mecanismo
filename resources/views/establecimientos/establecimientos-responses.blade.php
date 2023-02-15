@@ -53,55 +53,60 @@
         @endforeach
     </select>
 </div>
-<div id='nuevo_establecimiento' class='col-sm pt-2-sm text-center' data-bs-toggle='modal' data-bs-target='#modal_nuevo_establecimiento' >
-    <span class='btn btn-sm btn-primary text-light text-shadow'>Nuevo establecimiento</span>
-</div>
+        @if(Auth::user()->rol == 'Administrador' )
+            <div id='nuevo_establecimiento' class='col-sm pt-2-sm text-center' data-bs-toggle='modal' data-bs-target='#modal_nuevo_establecimiento' >
+                <span class='btn btn-sm btn-primary text-light text-shadow'>Nuevo establecimiento</span>
+            </div>
 
-{{-- MODAL PARA NUEVO ESTABLECIMIENTO --}}
-<div class="modal fade" id="modal_nuevo_establecimiento" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Nuevo establecimiento</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <form id="form_nuevo_establecimiento">
-                @csrf
-                <div class="mb-3">
-                  <label class="form-label">Nombre del establecimiento</label>
-                  <input type="text" class="form-control" name="EST_nombre">
-                  <small class="error text-danger" id="EST_nombre_err" ></small>
+            {{-- MODAL PARA NUEVO ESTABLECIMIENTO --}}
+            <div class="modal fade" id="modal_nuevo_establecimiento" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Nuevo establecimiento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form_nuevo_establecimiento">
+                            @csrf
+                            <div class="mb-3">
+                            <label class="form-label">Nombre del establecimiento</label>
+                            <input type="text" class="form-control" name="EST_nombre">
+                            <small class="error text-danger" id="EST_nombre_err" ></small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Dirección del establecimiento</label>
+                                <input type="text" class="form-control" name="EST_direccion">
+                                <small class="error text-danger" id="EST_direccion_err" ></small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono de contacto</label>
+                                <input type="number" min="20000000" max="79999999" class="form-control" name="EST_telefonoContacto">
+                                <small class="error text-danger" id="EST_telefonoContacto_err" ></small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de establecimiento</label>
+                                <select class="form-select" name="FK_TES_id" >
+                                    <option value="" selected>Seleccione ...</option>
+                                    @foreach ($tiposEstablecimientos as $estab)
+                                        <option value="{{ $estab->TES_id }}">{{ $estab->TES_tipo }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="error text-danger" id="FK_TES_id_err" ></small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                    <span class="btn btn-danger text-shadow text-light" data-bs-dismiss="modal">Cerrar</span>
+                    <span class="btn btn-success text-shadow text-light" id="btn_guardar">Guardar datos</span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Dirección del establecimiento</label>
-                    <input type="text" class="form-control" name="EST_direccion">
-                    <small class="error text-danger" id="EST_direccion_err" ></small>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Teléfono de contacto</label>
-                    <input type="number" min="20000000" max="79999999" class="form-control" name="EST_telefonoContacto">
-                    <small class="error text-danger" id="EST_telefonoContacto_err" ></small>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tipo de establecimiento</label>
-                    <select class="form-select" name="FK_TES_id" >
-                        <option value="" selected>Seleccione ...</option>
-                        @foreach ($tiposEstablecimientos as $estab)
-                            <option value="{{ $estab->TES_id }}">{{ $estab->TES_tipo }}</option>
-                        @endforeach
-                      </select>
-                    <small class="error text-danger" id="FK_TES_id_err" ></small>
-                </div>
-              </form>
-        </div>
-        <div class="modal-footer">
-          <span class="btn btn-danger text-shadow text-light" data-bs-dismiss="modal">Cerrar</span>
-          <span class="btn btn-success text-shadow text-light" id="btn_guardar">Guardar datos</span>
-        </div>
-      </div>
-    </div>
-  </div>
+            </div>
+        @endif
+
+
+
 
 <script>
     $(document).on('click', '#btn_guardar', function(e){

@@ -120,11 +120,13 @@
                 </div>
             </form>
         </div>
-    @else
+    @endif
+    @if( count($elemento) == 0 )
         <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
             Aún no se asignaron archivos adjuntos a este establecimiento
         </div>
     @endif
+
     {{-- ---Archivos adjuntos --------------- --}}
     @php
     $colores=array('primary', 'info', 'warning', 'danger' );

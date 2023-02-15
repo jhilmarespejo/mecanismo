@@ -88,6 +88,9 @@ class FormularioController extends Controller
         // $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
         // ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
         // ->where('FRM_id', $FRM_id)->first();
+        // $establecimiento = ModEstablecimiento::select('EST_nombre')->where('EST_id', $EST_id)->get();
+
+        // dump($establecimiento->toArray);exit;
 
         $adj = ModAdjunto::from( 'adjuntos as ad' )
         ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id', 'f.FRM_titulo', 'e.EST_nombre')

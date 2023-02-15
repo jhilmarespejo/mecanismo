@@ -71,9 +71,12 @@
             @endforeach
           </select>
         </div>
-        <div class="col-3 ">
-            @livewire('establecimientos-nuevo')
-        </div>
+        @if(Auth::user()->rol == 'Administrador' )
+            <div class="col-3 ">
+                @livewire('establecimientos-nuevo')
+            </div>
+        @endif
+            
     </div>
 
     @if (count($establecimientos))
