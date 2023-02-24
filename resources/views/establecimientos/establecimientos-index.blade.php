@@ -12,13 +12,13 @@
     $( '#establecimientos' ).ready(function() {
         listar();
     });
-    function listar( id ){
+    function listar( id = null, tipo = null ){
         $.ajax({
             async: true,
             headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
             url: "/establecimientos/listar",
             type: 'post',
-            data: {accion: 'cargar_lista', FK_TES_id: id},
+            data: {accion: 'cargar_lista', FK_TES_id: id, tipo_establecimiento: tipo},
             // data: data,
             beforeSend: function () { },
             success: function (data, response) {

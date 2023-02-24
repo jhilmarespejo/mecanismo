@@ -11,11 +11,11 @@
                     <th scope="col">#</th>
                     <th scope="col">Nombre </th>
                     {{-- <th scope="col">Municipio</th>
-                    <th scope="col">Provincia</th>
-                    <th scope="col">Departamento</th> --}}
+                    <th scope="col">Provincia</th>--}}
+                    <th scope="col">Departamento</th>
                     {{-- <th scope="col">Dirección</th>
                     <th scope="col">Tipo</th> --}}
-                    <th scope="col">Teléfono</th>
+                    {{-- <th scope="col">Teléfono</th> --}}
                     {{-- <th scope="col"> Opciones</th> --}}
                 </tr>
             </thead>
@@ -25,11 +25,11 @@
                         <th>{{ $key+1 }}</th>
                         <td> <a class="text-decoration-none" href="/establecimientos/historial/{{$establecimiento->EST_id}}">{{ $establecimiento->EST_nombre }}</a></td>
                         {{-- <td>{{ $establecimiento->Municipio }}</td>
-                        <td>{{ $establecimiento->Provincia }}</td>
-                        <td>{{ $establecimiento->Departamento }}</td> --}}
+                        <td>{{ $establecimiento->Provincia }}</td>--}}
+                        <td>{{ $establecimiento->Departamento }}</td>
                         {{-- <td>{{ $establecimiento->EST_direccion }}</td>
                         <td>{{ $establecimiento->TES_tipo }}</td> --}}
-                        <td>{{ $establecimiento->EST_telefonoContacto }}</td>
+                        {{-- <td>{{ $establecimiento->EST_telefonoContacto }}</td> --}}
                         {{-- <td class=" col-2 text-center">
                             <a href="/establecimientos/historial/{{$establecimiento->EST_id}}" class="btn btn-success text-light" ><i class="bi bi-clock-history"></i> Historial</a>
                         </td> --}}
@@ -47,12 +47,14 @@
 {{-- Controles adicionales --}}
 <div class="col-sm pt-2-sm" id="tipos_establecimientos">
     <select class="form-select form-select-sm" id="cbo_tipos">
-        <option value="*" >Tipo de establecimiento</option>
+        <option value=""  >Todos los establecimientos</option>
+
         @foreach ($tiposEstablecimientos as $establecimiento)
-            <option value="{{$establecimiento->TES_id}}" >{{ $establecimiento->TES_tipo }}</option>
+            <option value="{{$establecimiento->TES_id}}" {{ ($FK_TES_id == $establecimiento->TES_id)? 'selected' : ''}}>{{ $establecimiento->TES_tipo }}</option>
         @endforeach
     </select>
 </div>
+
         @if(Auth::user()->rol == 'Administrador' )
             <div id='nuevo_establecimiento' class='col-sm pt-2-sm text-center' data-bs-toggle='modal' data-bs-target='#modal_nuevo_establecimiento' >
                 <span class='btn btn-sm btn-primary text-light text-shadow'>Nuevo establecimiento</span>
@@ -136,7 +138,9 @@
         });
     });
     $(document).ready( function () {
-        $('#tabla_establecimientos').DataTable();
+        $('#tabla_establecimientos').DataTable({
+            //"columnDefs": [ {"sortable": false, "targets": [0]} ],
+        });
 
         $('div#tabla_establecimientos_wrapper div').first().append($('#tipos_establecimientos, #nuevo_establecimiento'));
 

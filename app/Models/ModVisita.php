@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ModOpcion extends Model
+class ModVisita extends Model
 {
-    protected $table = 'opciones';
+    protected $table = 'visitas';
     use HasFactory;
 
-    protected $primaryKey = 'OPC_id';
+    protected $primaryKey = 'VIS_id';
     public $incrementing = true;
     const CREATED_AT = 'createdAt';
     const UPDATED_AT = 'updatedAt';
+    protected $guarded = [];
 
-    protected $fillable = ['OPC_id', 'OPC_opciones', 'estado', 'createdAt', 'updatedBy', 'updatedAt', 'updatedBy', 'deletedBy', 'deletedAt'];
+
 }

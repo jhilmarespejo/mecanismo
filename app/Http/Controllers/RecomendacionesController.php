@@ -20,7 +20,7 @@ class RecomendacionesController extends Controller{
     /* SE DEBEN PREPARAR ARRAY DE CADA ELEMENTO Y GUARDARLOS CON OPCION DE ROLLBACK */
     public function nuevaRecomendacion( Request $request ){
         $ids = [];
-        // dump($request->except('_token'));exit;
+        // dump($request->except('_token'));//exit;
 
         $validator = Validator::make( $request->all(), [
             'REC_fechaRecomendacion' => 'required',
@@ -29,7 +29,6 @@ class RecomendacionesController extends Controller{
             'ARC_descripcion.*' => 'required|min:5',
             // 'ARC_archivo' => 'sometimes|required_with:ARC_descripcion.*',
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
-
         ], [
             'required' => '¡El dato es requerido!',
             'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
@@ -58,13 +57,15 @@ class RecomendacionesController extends Controller{
                             $image->resize(null, 600, function ($const) {
                                 $const->aspectRatio();
                             })->save( public_path('/uploads/imagenes/').$archivo->store('') );
-
+                            echo 'imagen';
                         } else {
                             $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/documentos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'recomemdacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
                             array_push( $ids, $idArchivo->ARC_id );
                             $archivo->move(public_path('/uploads/documentos/'), $archivo->store(''));
+                            echo 'archivo';
                         }
+                        dump($archivo);
                     }
                 }
                 /* Guarda la recomendacion enviada */
@@ -74,6 +75,9 @@ class RecomendacionesController extends Controller{
                 foreach ($ids as $key => $value) {
                     ModRecomendacionArchivo::create(['FK_ARC_id' => $value, 'FK_REC_id' => $rec->REC_id]);
                 }
+                dump($ids);
+                echo 'commit';
+                exit;
                 DB::commit();
                 return response()->json([ "message" => "correcto" ]);
             }

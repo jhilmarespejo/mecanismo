@@ -1,5 +1,3 @@
-
-
 <div class="accordion" id="accordion_observaciones">
 
     {{-- Controles para nueva recomendacion --}}
@@ -46,7 +44,9 @@
                             <span class="my-2 btn btn-danger nuevo-adjunto text-light text-shadow" id="nuevo_archivo_1"><i class="bi bi-file-earmark-plus adicionar-archivo"></i> Adicionar imagen o documento
                             </span>
                             <span class="my-2 btn btn-primary d-none cargando text-light text-shadow" id="cargando_1" disabled="">
-                                <span class="spinner-border spinner-border-sm "></span> Guardando... </span>   <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Recomendación
+                                <span class="spinner-border spinner-border-sm ">
+                                </span> Guardando... </span>
+                                <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Recomendación
                             </span>
                         </div>
                     </form>

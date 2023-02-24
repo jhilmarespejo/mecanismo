@@ -67,6 +67,9 @@ class CuestionarioController extends Controller {
         $quries = DB::getQueryLog();
         // dump( $quries );
         // exit;
+
+        /* Enviar una ruta con un solo parametros para que vaaya a responder y otra con 2 parametros para solo observar las respuestas, HACER TAMBIEN una TABLA VERTICAL PARA VER (Y COMPARAR) LAS RESPUESTAS DEL MISMO TIPO DE FORMULARIO */
+
         return view('cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'recomendaciones', 'adjuntos'));
     }
     /* Guarda las recomendaciones uno a uno */

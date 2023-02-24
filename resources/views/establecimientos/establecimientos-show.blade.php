@@ -9,13 +9,17 @@
     .d-xss-none {
             display: none;
         }
+    .bg-red{
+        /* color: #c9412f !important; */
+        background-color: #fd4d36  !important;
+    }
     @media screen and (max-width: 320px) {
         .d-xss-none {
             display:unset;
         }
     }
 </style>
-{{-- {{ $establecimientos[0] }} --}}
+{{-- {{ $formularios[0] }} --}}
     @if(Session::has('success'))
         <div class="col-3 alert alert-success alert-dismissible notification" role="alert" id="alert">
             <strong>{{Session::get('success') }}</strong>
@@ -46,62 +50,20 @@
         }
         // dump($avance); //exit;
     @endphp
-    <h3 class="text-center">{{ ( $establecimientos[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $establecimientos[0]->EST_nombre : $establecimientos[0]->EST_nombre }}</h3>
+    <h3 class="text-center">{{ ( $formularios[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $formularios[0]->EST_nombre : $formularios[0]->EST_nombre }}</h3>
 
     @if(Auth::user()->rol == 'Administrador' )
         <div class="text-center ">
             {{-- @livewire('formularios-nuevo') --}}
-            @include('formulario.formulario-nuevo', ['EST_id' => $establecimientos[0]->EST_id, 'EST_nombre' => $establecimientos[0]->EST_nombre])
+            @include('formulario.formulario-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
         </div>
     @endif
-    @if( isset( $establecimientos[0]->FRM_id ) )
-    {{-- @if($avance > 0) --}}
-        {{-- CARDS para mostrar los avances de las recomendaciones --}}
-        {{-- @if ($avance != 0)
-            <div class="row mt-4 px-3">
-                <div class="btn col-sm card text-white bg-primary bg-gradient mb-3 mx-1 text-shadow" style="max-width: 18rem;">
-                    <div class="card-body row">
-                        <div class="col-sm text-center p-0 me-2">
-                            Total de recomendaciones
-                        </div>
-                        <span class="col-sm text-center p-0 rounded-pill box-shadow bg-light text-primary fs-1">{{$total}}</span>
-                    </div>
-                </div>
-                <div class="btn col-sm card text-white bg-success bg-gradient mb-3 mx-1 text-shadow" style="max-width: 18rem;">
-                    <div class="card-body row">
-                        <div class="col-sm text-center p-0 me-2">
-                            Recomendaciones cumplidas
-                        </div>
-                        <span class="col-sm text-center p-0 rounded-pill box-shadow bg-light text-success fs-1">{{$cumplido}}</span>
-                    </div>
-                </div>
-                <div class="btn col-sm card text-white bg-warning bg-gradient mb-3 mx-1 text-shadow" style="max-width: 18rem;">
-                    <div class="card-body row">
-                        <div class="col-sm text-center p-0 me-2">
-                            Cumplimiento parcial
-                        </div>
-                        <span class="col-sm text-center p-0 rounded-pill box-shadow bg-light text-warning fs-1">{{$parcial}}</span>
-                    </div>
-                </div>
-                <div class="btn col-sm card text-white bg-danger bg-gradient mb-3 mx-1 text-shadow" style="max-width: 18rem;">
-                    <div class="card-body row">
-                        <div class="col-sm text-center p-0 me-2">
-                            Recomendaciones no cumplidas
-                        </div>
-                        <span class="col-sm text-center p-0 rounded-pill box-shadow bg-light text-danger fs-1">{{$incumplido}}</span>
-                    </div>
-                </div>
-            </div>
-        @endif --}}
+    @if( count($visitas) )
 
-        {{-- BARRA para mostrar el % de avance --}}
-        {{-- <div class="row mt-1">
-
-        </div> --}}
         <div class="row">
             <div class="col-sm mt-1">
                 <div class="card text-white bg-danger ">
-                    <a href="/recomendaciones/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
+                    <a href="/recomendaciones/{{$formularios[0]->EST_id}}" class="text-decoration-none text-light">
                         <div class="card-body">
                             <h5 class="card-title text-center">Recomendaciones </h5>
                             <div class="progress " style="height: 20px;">
@@ -117,24 +79,24 @@
                     </a>
                 </div>
             </div>
-            <div class="col-sm mt-1">
+            {{-- <div class="col-sm mt-1">
                 <div class="card text-white bg-warning mb-3">
-                    <a href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}" class="text-decoration-none text-light">
+                    <a href="/formulario/adjuntos/{{$formularios[0]->EST_id}}" class="text-decoration-none text-light">
                         <div class="card-body text-center">
                             <h5 class="card-title">Archivos adjuntos</h5>
                             <img src="/img/adjuntos.png" class="img-fluid rounded" alt="Archivos adjuntos">
                         </div>
                     </a>
                 </div>
-            </div>
+            </div> --}}
         </div>
 
+        {{-- @dump($visitas->toArray()) --}}
 
-
-        <div class="container py-2 mt-4 mb-4">
-            @foreach ($establecimientos as $key=>$establecimiento)
+        <div class="d-none container py-2 mt-4 mb-4">
+            @foreach ($formularios as $key=>$establecimiento)
             <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
-                <div class="row no-gutters">
+                <div class="row no-gutters ">
                     <div class="col align-self-center text-end">
                         <!--spacer-->
                         <span class="text-end alert alert-primary">
@@ -149,7 +111,7 @@
                         </div>
 
                         <h2 class="m-2">
-                            <span class="badge rounded-circle border border-4 border-primary text-primary text-shadow" >{{ count($establecimientos)-$key }}</span>
+                            <span class="badge rounded-circle border border-4 border-primary text-primary text-shadow" >{{ count($formularios)-$key }}</span>
                         </h2>
                         <div class="row h-50">
                             <div class="col border-end border-4 border-primary">&nbsp;</div>
@@ -161,17 +123,21 @@
                             <div class="card-body">
                                 {{-- <div class="float-end text-muted small">{{$establecimiento->FRM_fecha }}</div> --}}
                                 <h4 class="card-title">
-                                    <b class="d-xss-none">{{ count($establecimientos)-$key }}. </b>
+                                    <b class="d-xss-none">{{ count($formularios)-$key }}. </b>
                                     {{$establecimiento->FRM_titulo}}
                                 </h4>
                                 <p class="card-text">
                                     <ul class="list-group">
                                         <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/imprimir/{{$establecimiento->FRM_id}}"><i class="bi bi-printer"></i> Imprimir cuestionario</a></li>
+                                        <li class="list-group-item border-0">
+
+
+                                        </li>
 
                                         <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Responder/llenar cuestionario</a></li>
 
                                         {{-- <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$establecimientos[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
+                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$formularios[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
                                         </li> --}}
 
                                         <li class="list-group-item border-0">
@@ -187,9 +153,98 @@
             <!-- END timeline item 1 -->
             @endforeach
         </div>
+
+        <div class="container py-0 mt-4">
+            @foreach ( $visitas as $key=>$visita )
+            @php
+                if($visita->VIS_tipo == 'Visita en profundidad'){
+                    $color = 'text-white bg-success';
+                }elseif($visita->VIS_tipo == 'Visita Temática') {
+                    $color = 'text-white bg-danger';
+                }elseif($visita->VIS_tipo == 'Visita de seguimiento'){
+                    $color = 'text-white bg-primary';
+                }elseif($visita->VIS_tipo == 'Visita reactiva'){
+                    $color = 'text-white bg-red';
+                }elseif($visita->VIS_tipo == 'Visita Ad hoc'){
+                    $color = 'text-white bg-warning';
+                }
+            @endphp
+            <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
+                <div class="row no-gutters mb-4">
+                    @mobile
+                    <div class="col align-self-center text-end">
+                        <span class="text-shadow text-center alert {{$color}}">
+                            Visita: <span class="fs-4">{{ count($visitas)-$key }}</span>
+                        </span>
+                    </div>
+                    <div class="col-5 align-self-center text-end">
+                        <span class="text-shadow text-center alert {{$color}}">
+                            {{ \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') }}
+                        </span>
+                    </div>
+                    @endmobile
+                    @desktop
+                    <div class="col align-self-center text-end">
+                        <span class="text-end alert {{$color}}">
+                            {{ \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') }}
+                        </span>
+                    </div>
+                    <!-- timeline item 1 center dot -->
+                    <div class="col-sm-2 text-center flex-column d-sm-flex bar" >
+                        <div class="row h-50">
+                            <div class="col border-end border-4 border-primary">&nbsp;</div>
+                            <div class="col">&nbsp;</div>
+                        </div>
+                        <h2 class="m-2">
+                            <span class="badge rounded-circle border border-4 border-primary text-primary text-shadow" >{{ count($visitas)-$key }}</span>
+                        </h2>
+                        <div class="row h-50">
+                            <div class="col border-end border-4 border-primary">&nbsp;</div>
+                            <div class="col">&nbsp;</div>
+                        </div>
+                    </div>
+                    @enddesktop
+                    <div class="col-sm-7 py-2 box-shadow rounded {{$color}}">
+                        <div class="card ">
+                            <div class="card-body  {{$color}}">
+                                {{-- <div class="float-end text-muted small">{{$establecimiento->FRM_fecha }}</div> --}}
+                                <h4 class="card-title text-center text-shadow">
+                                    <b class="d-xss-none">{{ count($visitas)-$key }}. </b>
+                                    {{$visita->VIS_tipo}}
+                                </h4>
+                                <p class="card-text">
+                                    <ul class="list-group">
+                                        {{-- <li class="list-group-item border-0"><a class="text-decoration-none" href="/formulario/buscaFormularios/{{$id}}"></li> --}}
+
+                                        <li class="list-group-item border-0">
+                                            {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                Launch demo modal
+                                            </button> --}}
+                                            @include('formulario.formularios-lista')
+                                        </li>
+
+                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Recomendaciones</a></li>
+
+                                        {{-- <li class="list-group-item border-0">
+                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$formularios[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
+                                        </li> --}}
+
+                                        {{-- <li class="list-group-item border-0">
+                                            <a class="text-decoration-none" id="{{$establecimiento->FRM_id}}"><i class="bi bi-journal-bookmark-fill"></i> {{ $visita->VIS_tipo }}</a>
+                                        </li> --}}
+
+                                    </ul>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- END timeline item 1 -->
+            @endforeach
+        </div>
     @endif
 
-    @if( !isset($establecimiento->FRM_id) )
+    @if( count($visitas) < 1 )
         <div class="alert alert-warning mx-5 mt-2 text-center" role="alert" data-bs-toggle="modal" data-bs-target="#nuevoFormulario">
             Aún no se aplicaron formularios a este establecimiento
         </div>

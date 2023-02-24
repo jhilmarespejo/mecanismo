@@ -366,25 +366,6 @@
 </div>
 
 
-
-{{--
-1 = Recomendacion Cumplida
-2 = Recomendacion Parcialmente Cumplida
-0 = No Cumplida
-
-Las recomendaciones deben estar relacionadas con un formulario?
-o se pueden dejar recomendaciones con un avisita y un acta
-
-que tipos de recomendaciones existen?
-
-Visitas en profundidad (establecimientos psiquiatricos)
-Visitas temáticas
-Visitas de seguimiento
-Visitas Ad hoc
-Visitas reactivas
---}}
-
-
 @endsection
 
 

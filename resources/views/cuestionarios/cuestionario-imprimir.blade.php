@@ -85,13 +85,16 @@
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
-                    <i class="bi bi-arrow-90deg-left"></i> Historial
+                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
+                    <i class="bi bi-arrow-90deg-left"></i>
                 </a>
             </div>
+            <div class="col">
+                <a class="text-decoration-none fs-4" id="imprimir_formulario"><i class="bi bi-printer-fill"></i></a>
+            </div>
             <div class="col ">
-                <a class="text-decoration-none" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
-                    <i class="bi bi-ui-checks-grid"></i> Responder cuestionario
+                <a class="text-decoration-none fs-4" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
+                    <i class="bi bi-pencil-square"></i>
                 </a>
             </div>
         </div>
@@ -111,11 +114,11 @@
                     </a>
                   </li>
                   <li class="nav-item p-1 px-3" id="btn_imprimir">
-                    <a class="text-decoration-none" id="imprimir_formulario"><i class="bi bi-printer"></i> Imprimir formulario</a>
+                    <a class="text-decoration-none" id="imprimir_formulario"><i class="bi bi-printer"></i> Imprimir</a>
                   </li>
                   <li class="nav-item p-1 px-3">
                     <a class="text-decoration-none" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
-                        <i class="bi bi-ui-checks-grid"></i> Responder cuestionario
+                        <i class="bi bi-pencil-square"></i> Responder
                     </a>
                   </li>
                   {{-- <li class="nav-item p-1 px-3">

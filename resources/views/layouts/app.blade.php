@@ -12,7 +12,7 @@
         <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
 
         <!-- Styles -->
-        <link rel=StyleSheet href="/bootstrap5/css/custom.css" type="text/css">
+        {{-- <link rel=StyleSheet href="/bootstrap5/css/custom.css" type="text/css"> --}}
         <link rel=StyleSheet href="/bootstrap5/css/bootstap_personalized.css" type="text/css">
         {{-- <link rel=StyleSheet href="/bootstrap5/css/custom2.css" type="text/css"> --}}
         {{-- <script
@@ -26,7 +26,8 @@
 
         <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
+        {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css"> --}}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
         <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <link rel=StyleSheet href="/DataTables/datatables.min.css" type="text/css">

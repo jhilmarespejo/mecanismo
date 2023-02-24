@@ -73,12 +73,12 @@
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                <i class="bi bi-arrow-90deg-left"></i> </a>
+                <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> Historial </a>
             </div>
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
-                    <i class="bi bi-printer-fill"></i></span>
+                <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                    <i class="bi bi-printer"></i> Imprimir</span>
                 </a>
             </div>
         </div>

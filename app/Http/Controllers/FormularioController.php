@@ -45,6 +45,36 @@ class FormularioController extends Controller
         }
     }
 
+    public function buscaFormularios( $id ){
+
+        DB::enableQueryLog();
+        /* Consulta para obtener los formularios */
+        $formularios = ModFormulario::from('formularios as f')
+        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_EST_id', 'f.FRM_tipoVisita', 'e.EST_id', 'e.EST_nombre', 'v.VIS_numero', 'v.VIS_tipo')
+        ->leftjoin ('visitas as v', 'f.FK_VIS_id', 'v.VIS_id')
+        ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
+        ->where ('e.EST_id', $id)
+        ->where ('e.estado', '1')
+        ->orderby('f.createdAt', 'desc')->get();
+
+        /*Consulta para obtener las recomendaciones */
+        $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
+        ->select( 'e.EST_nombre','e.EST_id',
+            DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
+            DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
+            DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" '),
+            DB::raw('COUNT( ("r"."REC_id")::int ) as "total" ') )
+        ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
+        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
+        ->where( 'e.EST_id', $id )
+        ->groupBy('e.EST_nombre','e.EST_id')->get();
+
+        $quries = DB::getQueryLog();
+        dump($quries);
+        exit;
+
+    }
+
     /**
      * Store a newly created resource in storage.
      *
