@@ -3,27 +3,11 @@
 
 @section('content')
 @php
-    $aux = null;
-    $a = [];
-    $archivosRec = [];
-    $archivosRecAcato = [];
+$aux = null;
+$a = [];
+$archivosRec = [];
+$archivosRecAcato = [];
 
-    foreach ($recomendaciones as $k=>$rec){
-        if ( $aux != $rec->REC_id ) {
-            array_push($a, ['REC_id' => $rec->REC_id, 'REC_recomendacion' => $rec->REC_recomendacion, 'FK_FRM_id' => $rec->FK_FRM_id, 'REC_cumplimiento' => $rec->REC_cumplimiento, 'REC_fechaCumplimiento' => $rec->REC_fechaCumplimiento, 'REC_detallesCumplimiento' => $rec->REC_detallesCumplimiento, 'REC_fechaRecomendacion' => $rec->REC_fechaRecomendacion, 'REC_tipo' => $rec->REC_tipo, 'ARC_id' => $rec->ARC_id ] );
-        } if( $rec->ARC_ruta != null ){
-            if ($rec->ARC_tipo == 'recomemdacion') {
-                array_push( $archivosRec, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-            }
-            if ($rec->ARC_tipo == 'acato-recomendacion') {
-                array_push( $archivosRecAcato, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-            }
-        }
-        $aux = $rec->REC_id;
-    }
-    //dump($a, $archivosRec, $archivosRecAcato, $aux);
-    // dump( $elementos->toArray() );
-    // exit
 @endphp
 <style>
     .hover:hover{
@@ -34,51 +18,61 @@
     }
 </style>
 @php
-    $auxContadorCategorias = 1;
-    $auxCategoriasArray = [];
-    $archivos = [];
-    $i='';
+$auxCategoriasArray = [];
+$archivos = [];
+$i='';
 
-    /* ORDENA en forma de array las categorias, subcategorias y preguntas */
-    foreach ($elementos as $key=>$elemento){
-        /*Si la respuesta actual tiene una imagen, se guardan las rutas y otros en $archivos  */
-        if( $elemento->ARC_ruta !='' ){
-            array_push($archivos, ['RBF_id' => $elemento->RBF_id, 'ARC_ruta' => $elemento->ARC_ruta, 'ARC_id' => $elemento->ARC_id, 'ARC_tipoArchivo' => $elemento->ARC_tipoArchivo, 'ARC_extension' => $elemento->ARC_extension, 'ARC_descripcion' => $elemento->ARC_descripcion, 'FK_RES_id' => $elemento->FK_RES_id]);
+/* ORDENA en forma de array las categorias, subcategorias y preguntas */
+foreach ($elementos as $key=>$elemento){
+    /*Si la respuesta actual tiene una imagen, se guardan las rutas y otros en $archivos  */
+    if( $elemento->ARC_ruta !='' ){
+        array_push($archivos, ['RBF_id' => $elemento->RBF_id, 'ARC_ruta' => $elemento->ARC_ruta, 'ARC_id' => $elemento->ARC_id, 'ARC_tipoArchivo' => $elemento->ARC_tipoArchivo, 'ARC_extension' => $elemento->ARC_extension, 'ARC_descripcion' => $elemento->ARC_descripcion, 'FK_RES_id' => $elemento->FK_RES_id]);
+    }
+    // Verifica que no se repitan los elementos en el array cuando la preguna tiene archivos adjuntos
+    if($i != $elemento->RBF_id){
+        // dump($elemento->RBF_id);
+        if ($elemento->categoria === null ) {
+            $categoria = $elemento->subcategoria;
+            $subcategoria = $elemento->categoria;
+            $auxCategoriasArray[$categoria][$key] = $elemento;
+        } else {
+            $categoria = $elemento->categoria;
+            $subcategoria = $elemento->subcategoria;
+            $auxCategoriasArray[$categoria][$subcategoria][$key] = $elemento;
         }
-        // Verifica que no se repitan los elementos en el array cuando la preguna tiene archivos adjuntos
-        if($i != $elemento->RBF_id){
-            // dump($elemento->RBF_id);
-            if ($elemento->categoria === null ) {
-                $categoria = $elemento->subcategoria;
-                $subcategoria = $elemento->categoria;
-                $auxCategoriasArray[$categoria][$key] = $elemento;
-            } else {
-                $categoria = $elemento->categoria;
-                $subcategoria = $elemento->subcategoria;
-                $auxCategoriasArray[$categoria][$subcategoria][$key] = $elemento;
-            }
-        }
-        $i = $elemento->RBF_id;
-    } // END FOREACH
-    // $auxCategoriasArray = array_unique($auxCategoriasArray);
-    // foreach ($auxCategoriasArray as $key => $value) {
-    //     dump($value);
+    }
+    $i = $elemento->RBF_id;
+    $a=0;
+} // END FOREACH
+
+// dump($auxCategoriasArray);
+
+    // foreach ($auxCategoriasArray as $key => $values) {
+    //     echo 'Categoria: '.$key.'<br/>';
+    //     foreach ($values as $keySC=>$subcategorias ){
+    //         if ( is_string($keySC) ){
+    //             echo '- SUB Categoria: '.$keySC.'<br/>';
+    //             foreach ($subcategorias as $k=>$pregunta){
+    //                 echo '--'.$pregunta->BCP_pregunta.'<br>';
+    //             }
+    //         } else {
+    //             echo '--'.$subcategorias->BCP_pregunta.'<br>';
+    //         }
+    //     }
     // }
 @endphp
 
-<div class="container-fluid p-sm-3 p-0 mx-0" id="cuestionario" >
-
-    @if ( count($elementos) > 0 )
+@if ( count($elementos) > 0 )
         {{-- minimenu --}}
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                <i class="bi bi-arrow-90deg-left"></i> Historial </a>
+                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> </a>
             </div>
             <div class="col ">
-                <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
-                    <i class="bi bi-printer"></i> Imprimir</span>
+                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                    <i class="bi bi-printer-fill"></i></span>
                 </a>
             </div>
         </div>
@@ -105,367 +99,84 @@
         @endmobile
 
         {{-- Encabezado --}}
-        <div class="text-center head">
-            <p class=" m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
-            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }} </p>
+        <div class="text-center head mb-4">
+            <p class="m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
+            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }}</p>
             <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
         </div>
 
-        {{-- Cuestionario --}}
-        <div class="row border m-sm-2 p-2 d-flex">
-            {{-- boton para el plegar/desplegar el cuestionario --}}
+        @foreach ($auxCategoriasArray as $key => $values)
+        <div class="accordion" id="respuestas">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="elemento_{{ $a }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#elemento-{{$a}}" aria-expanded="false" aria-controls="elemento-{{$a}}">
+                        {{ $key; }}
+                    </button>
+                </h2>
+                <div id="elemento-{{$a}}" class="accordion-collapse collapse" aria-labelledby="elemento_{{ $a }}" data-bs-parent="#respuestas">
+                    <div class="accordion-body">
+                        <ul class="list-group list-group-flush">
+                        @foreach ($values as $keySC=>$subcategorias )
+                            @if ( is_string($keySC) )
+                                <strong>{{ 'SUB Categoria: '.$keySC }}</strong>
+                                    @foreach ($subcategorias as $key=>$pregunta)
+                                    <li class="list-group-item hover">{{ $pregunta->BCP_pregunta }}:  <strong>
+                                        @php
+                                            $resp_array = json_decode($pregunta->RES_respuesta, true);
+                                        @endphp
+                                        @if ( is_array( $resp_array ) )
+                                            <ul class="ps-4">
+                                                @foreach ( $resp_array as $k=>$respuetaArray )
+                                                    <li>{{ $respuetaArray }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="ps-4">{{$pregunta->RES_respuesta}}</p>
+                                        @endif
+                                    </strong>
+                                    </li>
 
-            <legend class="text-primary fs-3 text-center" > Cuestionario</legend>
-
-            @desktop
-                <div class="form-switch fs-4">
-                    <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('frm_cuestionario')">
-                </div>
-                @include('includes.cuestionario')
-            @enddesktop
-            @mobile
-                @include('includes.cuestionario_mobile')
-            @endmobile
-        </div>
-
-        {{-- INCLUDE para Recomendaciones --}}
-        <div class="row border m-sm-2 p-2 d-flex">
-            {{-- boton para el plegar/desplegar las observaciones --}}
-            <div class="form-switch fs-4">
-                <input class="form-check-input chek-observaciones" type="checkbox" onclick="plegar_desplegar('accordion_observaciones')">
-            </div>
-            <legend class="text-primary fs-4 text-center" > Oservaciones identificadas</legend>
-            @include('includes.recomendaciones')
-        </div>
-
-        {{-- INCLUDE para Adjuntos --}}
-        <div class="row border m-sm-2 p-2 d-flex">
-            {{-- boton para el plegar/desplegar los adjuntos --}}
-            <div class="form-switch fs-4">
-                <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">
-            </div>
-            <legend class="text-primary fs-4 text-center" > Archivos adjuntos</legend>
-            @include('includes.adjuntos')
-        </div>
-
-    @else
-        <div class="text-center head">
-            <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p>
-            {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" >Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p> --}}
-        </div>
-        @if(Auth::user()->rol == 'Administrador' )
-            <div class="alert alert-warning p-3">
-                <a class="btn btn-danger bt-lg text-decoration-none" href="/cuestionario/{{$FRM_id}}">Debe organizar preguntas para éste cuestionario </a>
-            </div>
-        @else
-            <div class="alert alert-warning p-3 btn btn-danger bt-lg text-decoration-none">
-                El cuestionario aún no está disponible
-            </div>
-        @endif
-    @endif
-
-    <!-- Modal para agregar cumpliento a la recomendacion -->
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal_cumplimiento" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" >Datos de cumplimiento a la recomendación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="POST" id="recomendaciones_form" enctype="multipart/form-data" action="javascript:void(0)" >@csrf
-                    <div class="modal-body body-cumplimiento">
-                        <dl>
-                            <dt>Recomendación:</dt>
-                            <dd class="ps-2 val-recomendacion"></dd>
-                            <dt>Fecha de la recomendación:</dt>
-                            <dd class="ps-2 val-fecha-recomendacion"></dd>
-                        </dl>
-                    <hr>
-                        <input type="hidden" name="REC_id" class="rec-id" value="{{ (isset($item['REC_id']))? $item['REC_id']:'' }}">
-
-                        <label class="form-label">Cumplimiento: </label>
-                        <select class="form-select" name="REC_cumplimiento">
-                            <option value='' selected>Seleccione...</option>
-                            <option value="2">Recomendación Parcialmente Cumplida</option>
-                            <option value="1">Recomendación Cumplida</option>
-                            {{-- <option value="0">Recomendación No Cumplida</option> --}}
-                        </select>
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_cumplimiento_err"></small>
-
-                        <label class="form-label mt-4">Fecha de cumplimiento: </label>
-                        <input type="date"  id="fecha" class="form-control" name="REC_fechaCumplimiento" value="{{ date("Y-m-d"); }}">
-
-                        {{-- <input type="date" id="start" name="trip-start" value="2018-07-22" min="2018-01-01" max="2018-12-31"> --}}
-
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_fechaCumplimiento_err"></small>
-                        <br/>
-                        <label class="form-label mt-3">Detalles del cumplimiento: </label>
-                        <textarea name="REC_detallesCumplimiento" id="detalles" class="form-control" rows="3"></textarea>
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_detallesCumplimiento_err"></small>
-
-                        <div class="archivos mt-3 "></div>
-                        <span class="btn btn-success nuevo-archivo p-2 my-2" >Adjuntar archivos</span>
+                                    @endforeach
+                            @else
+                                <li class="list-group-item hover">{{ $subcategorias->BCP_pregunta }}:
+                                    <strong>
+                                        @php
+                                            $respArray = json_decode($subcategorias->RES_respuesta, true);
+                                        @endphp
+                                        @if ( is_array( $respArray ) )
+                                            <ul class="ps-4">
+                                                @foreach ( $respArray as $k=>$respuetaArray )
+                                                    <li>{{ $respuetaArray }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="ps-4">{{$subcategorias->RES_respuesta}}</p>
+                                        @endif
+                                    </strong>
+                                </li>
+                            @endif
+                        @endforeach
+                        </ul>
                     </div>
-                </form>
-                <div class="modal-footer">
-                    <span type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</span>
-                    <span type="button" class="btn btn-primary" id="guardar_cumplimiento">Guardar</span>
                 </div>
-
-                {{-- <div class="archivos mt-3 "></div> --}}
-
             </div>
+
         </div>
-    </div>
+        @php $a++; @endphp
 
+    @endforeach
+@endif
 
-
-</div> {{-- /container --}}
 
 
 
 <script>
 
-    function plegar_desplegar(totoggle) {
-        $('#'+totoggle).toggle("slow");
-      }
-
     $(document).ready(function() {
         $('#accordion_observaciones').toggle("slow");
         $('#div_adjuntos').toggle("slow");
-
-
-        // Evita enviar formulario al presionar Enter
-        $("form").keypress(function(e) {
-            if (e.which == 13) {
-                return false;
-            }
-        });
-    });
-    /*Boton para confirmar los datos del formulario*/
-    $("#btn_confirmacion").click( function(e){
-        validar();
-    });
-    function validar(){
-        let marcas = [];
-        $('.frm-respuesta').removeClass('bg-warning bg-gradient rounded');
-
-        /*Validacion para radiobuttons*/
-        $("#q div.group-radio").each(function(e){
-            if( !$(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
-                marcas.push($(this).parent().attr('id'));
-            }
-        });
-        /*Validación para checkbox*/
-        $("#q div.group-check").each(function(e){
-            $(this).each(function(e){
-                $(this).find('input').each(function(){
-                    if ($(this).prop('checked')) {
-                        return false;
-                    } else {
-                        marcas.push($(this).closest('form').attr('id'));
-                    }
-                });
-            })
-        });
-        /*Validacion para input text, number*/
-        $("#q").find('input.resp').each(function(e){
-            if( $(this).val() == '' ){
-                marcas.push($(this).closest('form').attr('id'));
-            }
-        })
-        /*Ordena los elementos del array*/
-        // marcas.sort(function(a, b){return a - b});
-        // console.log(marcas);
-        // marca el alerta para respuestas vacias
-
-        //console.log(marcas);
-        $.each(marcas, function(key, value){
-            $('#'+value).addClass('bg-warning bg-gradient rounded');
-        });
-        if(marcas.length > 0){
-            // $("html, body").animate( { scrollTop: "10" }, 3000);
-            $('html,body').animate({
-                scrollTop: ($('#'+$("#q").find('form.frm-respuesta.bg-warning').attr('id')).offset().top)-150
-            }, 'slow');
-        }
-        // console.log($("#q").find('form.frm-respuesta.bg-warning').attr('id'));
-
-    }
-
-   /* Guarda cada respuesta del formulario cuando se el mouse se mueve a la siguiente pregunta*/
-    $(".frm-respuesta").focusout(function(e){
-        e.preventDefault();
-        let id = $(this).attr('id').replace(/[^0-9]/g,'');
-        let formData = new FormData($('#frm_'+id)[0]);
-        $.ajax({
-            async: true,
-            // headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-            url: '/cuestionario/guardarRespuestasCuestionario',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            beforeSend: function () {
-                if( $('input.archivo-'+id).val() !== '' ){
-                    $('.archivo-correcto').addClass('d-none');
-                    $('input.archivo-'+id).addClass('d-none');
-                    $('.spiner-'+id).removeClass('d-none');
-                } else {
-                }
-            },
-            success: function (data, response) {
-                if( data.message === 'sin_respuesta' ){
-                    console.log('sin_respuesta');
-                    $('#frm_'+id).children('div').find('span.marca').html('<i class="bi bi-exclamation-triangle text-danger fs-5"></i>');
-                    $('#frm_'+id).children('div').find('input.resp').addClass('border border-2 border-danger');
-                } if( data.message === 'correcto' ){
-                    console.log('OK');
-                    $('#frm_'+id).children('div').find('input.resp').removeClass('border border-2 border-danger');
-                    $('#frm_'+id).children('div').find('span.marca').empty();
-                    $('#frm_'+id).children('div.complemento i').empty();
-                } if( data.message === 'archivos_correcto' ){
-                    console.log('archivos_correcto');
-                    $('.spiner-'+id).addClass('d-none');
-                    $('.archivo-correcto').removeClass('d-none');
-                }
-            },
-            //complete : function(data, response) {},
-            error: function(response){  }
-        });
     });
 
-    // $(".col-respuestas").focusout(function(e){
-        //     var data = [];
-        //     var x = [];
-        //     var RES_tipoRespuesta = null;
-        //     var RES_complementoRespuesta = null;
-        //     var FK_RBF_id = null;
-        //     var RES_respuesta = null;
-        //     var RES_complemento = null;
-        //     var RES_adjunto = null;
-
-        //     $(this).find(":input[type='hidden']").each(function(key, val){
-        //         if( $(this).attr('name') == 'RES_tipoRespuesta' ){
-        //             RES_tipoRespuesta = $(this).val()
-        //         }
-        //         if( $(this).attr('name') == 'RES_complementoRespuesta' ){
-        //             RES_complementoRespuesta = $(this).val()
-        //         }
-        //         if( $(this).attr('name') == 'FK_RBF_id' ){
-        //             FK_RBF_id = $(this).val()
-        //         }
-
-        //     });
-        //     if($(this).find(":input[type='checkbox']").length != 0 ){
-        //         $(this).find("input[type='checkbox']:checked").each(function(key, val){
-        //                 x.push($(this).val());
-        //             });
-        //             var x = JSON.stringify(Object.assign({}, x)).toString();
-        //             RES_respuesta = x;
-        //     }else if( $(this).find(":input[type='radio']").length != 0 ){
-        //         RES_respuesta= $(this).find("input[type='radio']:checked").val();
-        //     }
-
-        //     // else if( $(this).find("input[type='text']").length != 0 ){
-        //     //     RES_respuesta= $(this).find("input[type='text']").val();
-        //     // }else if( $(this).find("input[type='number']").length != 0){
-        //     //     RES_respuesta= $(this).find("input[type='number']").val();
-        //     // }
-
-        //     else if( $(this).find("input[name='RES_respuesta']").length != 0 ){
-        //         RES_respuesta= $(this).find("input[name='RES_respuesta']").val();
-        //     }
-
-        //     if( $(this).find("input[name='RES_complemento']").length != 0 ){
-        //         RES_complemento = $(this).find("input[name='RES_complemento']").val();
-        //     }
-        //     if( $(this).find("input[name='RES_adjunto']").length != 0 ){
-        //         RES_adjunto = $(this).find("input[name='RES_adjunto']").val();
-        //         // var RES_adjunto = $(this).find("input[name='RES_adjunto']").files[0];
-        //         // console.log(RES_adjunto);
-        //     }
-
-
-        //     // efecto rojo en el input cuanto esta vacío
-        //     if(RES_respuesta == null || RES_respuesta == ''){
-        //         console.log('VACIO');
-        //         $(this).children('div').find('span.marca').html('<i class="bi bi-exclamation-triang text-danger"></i>');
-        //         $(this).children('div').find('input.resp').addClass('border border-2 border-danger');
-        //         // $(this).children('div').find('input').removeClass('border border-2 border-danger')
-        //     } else {
-        //         console.log('OK');
-        //         // $(this).children('div').find('span.marca').html('<i class="bi bi-check-square text-success"></i>');
-        //         $(this).children('div').find('input.resp').removeClass('border border-2 border-danger');
-        //         $(this).children('div').find('span.marca').empty();
-        //         // $(this).children('div').find('input').addClass('border border-1 border-success')
-        //     }
-        //     $.ajax({
-        //         async: true,
-        //         headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-        //         url: '/cuestionario/guardarRespuestasCuestionario',
-        //         type: 'POST',
-        //         data: {RES_respuesta: RES_respuesta, FK_RBF_id: FK_RBF_id, RES_tipoRespuesta: RES_tipoRespuesta, RES_complementoRespuesta: RES_complementoRespuesta, RES_complemento: RES_complemento, RES_adjunto: RES_adjunto},
-        //         // enctype: 'multipart/form-data',
-        //         // processData: false,
-        //         // contentType: 'application/octet-stream',
-        //         dataType: "json",
-
-        //         beforeSend: function () {},
-        //         success: function (data, response) {},
-        //         error: function(response){ console.log(response) }
-        //     });
-        //     e.preventDefault();
-        // });
-
-    // var i = 0;
-    // var j = 0;
-    /* Adiciona controles para una nueva recomendacion */
-        // $(document).on('click', '#btn_adicionar_recomendacion', function () {
-        //     ++i;
-        //     $("#recomendaciones").append('<form id="form_recomendaciones_'+i+'" method="POST" enctype="multipart/form-data" action="javascript:void(0)" ><div class="form-floating border-bottom row" id="recomendacion_'+i+'"><textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea><label>Recomendación - 1</label></div><div class="row my-1 " id="archivos_'+i+'" >  </div><input type="hidden" name="FK_FRM_id" value="{{ $FRM_id }}">     <div id="botones_'+i+'"><span class="btn btn-danger nuevo-archivo" id="nuevo_archivo_'+i+'" ><i class="bi bi-file-earmark-plus adicionar-archivo"></i> Adicionar imagen o documento</span>   <span class="btn btn-primary d-none cargando" id="cargando_'+i+'" disabled>     <span class="spinner-border spinner-border-sm " ></span> Guardando... </span>   <span  class="btn btn-success guardar-recomendacion" id="guardar_recomendacion_'+i+'"><i class="bi bi-save2"></i> Guardar Recomendación</span></div>    </form> <hr/> ')
-        // });
-
-        /* Adiciona un input file + una descripcion para nuevo archivo o documento */
-        // $(document).on('click', '.nuevo-archivo', function(){
-        //     ++j;
-        //     let id = $(this).attr('id').replace(/[^0-9]/g,'');
-
-        //     $("#archivos_"+id).append('<div class="input-group input-group-sm"><input type="file" accept=".jpg, .jpeg, .png, .pdf" class="form-control" name="REC_archivo[]"><span class="input-group-text">Descripción:</span><input type="text" class="form-control" name="ARC_descripcion[]"></div>');
-        // });
-
-        // Guarda la recomendacion
-        // $(document).on('click', '.guardar-recomendacion', function(e){
-        //     let id = $(this).attr('id').replace(/[^0-9]/g,'');
-        //     e.preventDefault();
-        //     var formData = new FormData( $('#form_recomendaciones_'+id)[0] );
-        //     // console.log(formData);
-        //     $.ajax({
-        //         async: true,
-        //         headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-        //         url: "{{ route('recomendaciones.nueva') }}",
-        //         type: 'post',
-        //         data: formData, //$(".form-recomendaciones").serialize(),
-        //         beforeSend: function () {
-        //             $('#cargando_'+id).removeClass('d-none');
-        //             $('#guardar_recomendacion_'+id).addClass('d-none');
-        //         },
-        //         processData: false,
-        //         contentType: false,
-        //         success: function (data, response) {
-        //             $('#cargando_'+id).addClass('d-none');
-        //             $('#guardar_recomendacion_'+id).removeClass('d-none');
-
-        //             $('#recomendacion_'+id+' textarea, #archivos_'+id+' input'+', #botones_'+id+' span').prop('disabled', true);
-        //             $('#nuevo_archivo_'+id).addClass('bg-secondary');
-        //             $('#guardar_recomendacion_'+id).text('Guardado');
-        //         },
-        //         error: function(response){ console.log(response) }
-        //     });
-        // });
 </script>
 
 @endsection

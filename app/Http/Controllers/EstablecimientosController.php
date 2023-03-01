@@ -55,22 +55,23 @@ class EstablecimientosController extends Controller
      */
     // public function show($id){
     public function historial($id){
-        DB::enableQueryLog();
 
         /* Consulta para obtener todas las visitas realizadas al establecimiento */
-        $visitas = ModVisita::select('VIS_numero', 'VIS_tipo', 'VIS_fechas')
+        $visitas = ModVisita::select('VIS_id', 'VIS_numero', 'VIS_fechas', 'VIS_tipo')
         ->where('FK_EST_id', $id)
         ->get();
-        // dump($visitas->toArray());exit;
 
-        /* Consulta para obtener los formularios */
+        /* Consulta para obtener los formularios aplicados en la visita*/
+        // DB::enableQueryLog();
             $formularios = ModVisita::from('visitas as v')
-            ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_EST_id', 'f.FRM_tipoVisita', 'e.EST_id', 'e.EST_nombre', 'v.VIS_numero', 'v.VIS_tipo')
+            ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FRM_tipoVisita', 'f.FK_VIS_id', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
             ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
             ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
             ->where ('e.EST_id', $id)
             ->where ('e.estado', '1')
             ->orderby('f.createdAt', 'desc')->get();
+        $quries = DB::getQueryLog();
+        // dump( $quries );
 
 
         /*Consulta para obtener las recomendaciones */
@@ -85,13 +86,36 @@ class EstablecimientosController extends Controller
             ->where( 'e.EST_id', $id )
             ->groupBy('e.EST_nombre','e.EST_id')->get();
 
-        // $quries = DB::getQueryLog();
-        // dump($quries);
-        // exit;
+        // dump($formularios->toArray());
+        // $a=0;
+        // $aux=[];
+        // $visitasformularios = [];
+        // foreach($formularios as $k=>$formulario){
+        //     if($formulario->FK_VIS_id != $a){
+        //         array_push($aux, $formulario->FK_VIS_id);
+        //     }
+        //     $a = $formulario->FK_VIS_id;
+        // }
 
-        return view('establecimientos.establecimientos-show', compact('visitas','formularios', 'id', 'recomendaciones'));
+        // foreach($aux as $key=>$a){
+        //     foreach( $formularios as $k=>$formulario ){
+        //         if($a == $formulario->FK_VIS_id){
+
+        //             $visitasformularios[$key] = ['VIS_fechas' => $formulario->VIS_fechas, 'VIS_numero' => $formulario->VIS_numero, 'VIS_tipo' => $formulario->VIS_tipo];
+
+        //             // array_push($visitasformularios[$key][$k], $formulario );
+        //             $visitasformularios[$key][$k]= ['datos' => $formulario->toArray()];
+        //         }
+        //     }
+        // }
+
+        // dump($visitas->toArray());
+
+        return view('establecimientos.establecimientos-historial', compact('visitas','formularios', 'id', 'recomendaciones'));
         // return view('establecimientos.establecimientos-visitas', compact('visitas', 'formularios', 'id', 'recomendaciones'));
     }
+
+
 
     public function guardarNuevoEstablecimiento(Request $request)  {
         //dump($request->except('_token'));//exit;
@@ -126,3 +150,4 @@ class EstablecimientosController extends Controller
     }
 
 }
+

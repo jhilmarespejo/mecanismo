@@ -26,7 +26,7 @@
                                 <small class="error text-danger" id="REC_fechaRecomendacion_err" ></small>
                             </div>
 
-                            <div class="mb-3 col-sm">
+                            {{-- <div class="mb-3 col-sm">
                                 <label class="form-label">Tipo de recomendación:</label>
                                 <select class="form-select" name="REC_tipo">
                                     <option selected value=''>Seleccione...</option>
@@ -35,7 +35,7 @@
                                     <option value="Específica">Específica</option>
                                 </select>
                                 <small class="error text-danger" id="REC_tipo_err" ></small>
-                            </div>
+                            </div> --}}
 
                         </div>
                         <div class="row my-1 " id="archivos">  </div>
@@ -128,6 +128,8 @@
 
 
 </div>
+
+
 
     <!-- Modal para agregar cumpliento a la recomendacion -->
 <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal_cumplimiento" tabindex="-1" aria-hidden="true">

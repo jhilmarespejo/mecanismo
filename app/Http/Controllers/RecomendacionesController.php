@@ -75,9 +75,9 @@ class RecomendacionesController extends Controller{
                 foreach ($ids as $key => $value) {
                     ModRecomendacionArchivo::create(['FK_ARC_id' => $value, 'FK_REC_id' => $rec->REC_id]);
                 }
-                dump($ids);
-                echo 'commit';
-                exit;
+                // dump($ids);
+                // echo 'commit';
+                // exit;
                 DB::commit();
                 return response()->json([ "message" => "correcto" ]);
             }

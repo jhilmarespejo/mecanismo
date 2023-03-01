@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -58,9 +58,13 @@ Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('a
 // CUESTIONARIO
 Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
 
-Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimir'])->name('cuestionario.imprimir')->middleware('auth');
+Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
+
+Route::get('cuestionario/duplicar/{id}/{VIS_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
 
 Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
+
+Route::get('cuestionario/ver/{id}', [CuestionarioController::class, 'verCuestionario'])->name('cuestionario.ver')->middleware('auth');
 
 Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario')->middleware('auth');
 
@@ -99,6 +103,10 @@ Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosCon
 // REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
+//VISITAS
+Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
+
+Route::get('visita/buscaFormularios/{id}', [VisitaController::class, 'buscaFormularios'])->name('visita.buscaFormularios')->middleware('auth');
 
 
 

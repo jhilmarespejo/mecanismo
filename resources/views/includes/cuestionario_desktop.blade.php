@@ -3,11 +3,12 @@
         @foreach ($auxCategoriasArray as $keyCat=>$categorias)
         <li>
             <strong id="categorias">{{ $keyCat }}</strong>
-            {{-- cuando la categoria TIENE subcategoria (SC)--}}
+            {{-- cuando la categoria TIENE subcategoria (SC) --}}
             <ol>
                 @foreach ($categorias as $keySC=>$subcategorias )
                 @if ( is_string($keySC) )
                 <li class="mt-1" id="con_subcategorias">
+                    {{-- Nombre de la Subcategoría --}}
                     <strong >{{ $keySC }}</strong>
                     <ol>
                         @foreach ($subcategorias as $key=>$pregunta)
@@ -98,8 +99,8 @@
                             <div class="row border-bottom py-3 hover elementos">
                                 <div class="col-sm-5 col-preguntas" >
                                     {{ $preg->BCP_pregunta }}
-                                    @if ($preg->BCP_tipoRespuesta == 'Afirmación' || $preg->BCP_tipoRespuesta == 'Lista desplegable')
-                                    @endif
+                                    {{-- @if ($preg->BCP_tipoRespuesta == 'Afirmación' || $preg->BCP_tipoRespuesta == 'Lista desplegable')
+                                    @endif --}}
                                 </div>
                                 <div class="col-sm-7 col-respuestas">
                                     <form method="POST" enctype="multipart/form-data" id="frm_{{$preg->RBF_id}}" class="frm-respuesta">@csrf
@@ -181,3 +182,190 @@
                 <small class="alert alert-danger d-none" id="msg_vacios">¡Existen campos vacíos!</small>
             </div>
         </div>
+
+<script>
+    /*Boton para confirmar los datos del formulario*/
+    $("#btn_confirmacion").click( function(e){
+        validar();
+        confirmaCuestionario( {{$elemento->FRM_id}} )
+    });
+    function validar(){
+        let marcas = [];
+        $('.frm-respuesta').removeClass('bg-warning bg-gradient rounded');
+
+        /*Validacion para radiobuttons*/
+        $("#q div.group-radio").each(function(e){
+            if( !$(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
+                marcas.push($(this).parent().attr('id'));
+            }
+        });
+        /*Validación para checkbox*/
+        $("#q div.group-check").each(function(e){
+            var checks = [];
+            // $(this).each(function(e){
+                $(this).find('input').each(function(){
+                    if ($(this).prop('checked')) {
+                        checks.push(1)
+                    } else {
+                        checks.push(0)
+                    }
+
+                });
+            // })
+            if( !checks.includes(1) ){
+                marcas.push($(this).closest('form').attr('id'));
+            }
+        });
+
+
+        /*Validacion para input text, number*/
+        $("#q").find('input.resp').each(function(e){
+            if( $(this).val() == '' ){
+                marcas.push($(this).closest('form').attr('id'));
+            }
+        })
+
+        $.each(marcas, function(key, value){
+            $('#'+value).addClass('bg-warning bg-gradient rounded');
+        });
+        if(marcas.length > 0){
+            // $("html, body").animate( { scrollTop: "10" }, 3000);
+            $('html,body').animate({
+                scrollTop: ($('#'+$("#q").find('form.frm-respuesta.bg-warning').attr('id')).offset().top)-150
+            }, 'slow');
+        }
+    }
+
+
+
+    // $(".col-respuestas").focusout(function(e){
+        //     var data = [];
+        //     var x = [];
+        //     var RES_tipoRespuesta = null;
+        //     var RES_complementoRespuesta = null;
+        //     var FK_RBF_id = null;
+        //     var RES_respuesta = null;
+        //     var RES_complemento = null;
+        //     var RES_adjunto = null;
+
+        //     $(this).find(":input[type='hidden']").each(function(key, val){
+        //         if( $(this).attr('name') == 'RES_tipoRespuesta' ){
+        //             RES_tipoRespuesta = $(this).val()
+        //         }
+        //         if( $(this).attr('name') == 'RES_complementoRespuesta' ){
+        //             RES_complementoRespuesta = $(this).val()
+        //         }
+        //         if( $(this).attr('name') == 'FK_RBF_id' ){
+        //             FK_RBF_id = $(this).val()
+        //         }
+
+        //     });
+        //     if($(this).find(":input[type='checkbox']").length != 0 ){
+        //         $(this).find("input[type='checkbox']:checked").each(function(key, val){
+        //                 x.push($(this).val());
+        //             });
+        //             var x = JSON.stringify(Object.assign({}, x)).toString();
+        //             RES_respuesta = x;
+        //     }else if( $(this).find(":input[type='radio']").length != 0 ){
+        //         RES_respuesta= $(this).find("input[type='radio']:checked").val();
+        //     }
+
+        //     // else if( $(this).find("input[type='text']").length != 0 ){
+        //     //     RES_respuesta= $(this).find("input[type='text']").val();
+        //     // }else if( $(this).find("input[type='number']").length != 0){
+        //     //     RES_respuesta= $(this).find("input[type='number']").val();
+        //     // }
+
+        //     else if( $(this).find("input[name='RES_respuesta']").length != 0 ){
+        //         RES_respuesta= $(this).find("input[name='RES_respuesta']").val();
+        //     }
+
+        //     if( $(this).find("input[name='RES_complemento']").length != 0 ){
+        //         RES_complemento = $(this).find("input[name='RES_complemento']").val();
+        //     }
+        //     if( $(this).find("input[name='RES_adjunto']").length != 0 ){
+        //         RES_adjunto = $(this).find("input[name='RES_adjunto']").val();
+        //         // var RES_adjunto = $(this).find("input[name='RES_adjunto']").files[0];
+        //         // console.log(RES_adjunto);
+        //     }
+
+
+        //     // efecto rojo en el input cuanto esta vacío
+        //     if(RES_respuesta == null || RES_respuesta == ''){
+        //         console.log('VACIO');
+        //         $(this).children('div').find('span.marca').html('<i class="bi bi-exclamation-triang text-danger"></i>');
+        //         $(this).children('div').find('input.resp').addClass('border border-2 border-danger');
+        //         // $(this).children('div').find('input').removeClass('border border-2 border-danger')
+        //     } else {
+        //         console.log('OK');
+        //         // $(this).children('div').find('span.marca').html('<i class="bi bi-check-square text-success"></i>');
+        //         $(this).children('div').find('input.resp').removeClass('border border-2 border-danger');
+        //         $(this).children('div').find('span.marca').empty();
+        //         // $(this).children('div').find('input').addClass('border border-1 border-success')
+        //     }
+        //     $.ajax({
+        //         async: true,
+        //         headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+        //         url: '/cuestionario/guardarRespuestasCuestionario',
+        //         type: 'POST',
+        //         data: {RES_respuesta: RES_respuesta, FK_RBF_id: FK_RBF_id, RES_tipoRespuesta: RES_tipoRespuesta, RES_complementoRespuesta: RES_complementoRespuesta, RES_complemento: RES_complemento, RES_adjunto: RES_adjunto},
+        //         // enctype: 'multipart/form-data',
+        //         // processData: false,
+        //         // contentType: 'application/octet-stream',
+        //         dataType: "json",
+
+        //         beforeSend: function () {},
+        //         success: function (data, response) {},
+        //         error: function(response){ console.log(response) }
+        //     });
+        //     e.preventDefault();
+        // });
+
+    // var i = 0;
+    // var j = 0;
+    /* Adiciona controles para una nueva recomendacion */
+        // $(document).on('click', '#btn_adicionar_recomendacion', function () {
+        //     ++i;
+        //     $("#recomendaciones").append('<form id="form_recomendaciones_'+i+'" method="POST" enctype="multipart/form-data" action="javascript:void(0)" ><div class="form-floating border-bottom row" id="recomendacion_'+i+'"><textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea><label>Recomendación - 1</label></div><div class="row my-1 " id="archivos_'+i+'" >  </div><input type="hidden" name="FK_FRM_id" value="{{ $FRM_id }}">     <div id="botones_'+i+'"><span class="btn btn-danger nuevo-archivo" id="nuevo_archivo_'+i+'" ><i class="bi bi-file-earmark-plus adicionar-archivo"></i> Adicionar imagen o documento</span>   <span class="btn btn-primary d-none cargando" id="cargando_'+i+'" disabled>     <span class="spinner-border spinner-border-sm " ></span> Guardando... </span>   <span  class="btn btn-success guardar-recomendacion" id="guardar_recomendacion_'+i+'"><i class="bi bi-save2"></i> Guardar Recomendación</span></div>    </form> <hr/> ')
+        // });
+
+        /* Adiciona un input file + una descripcion para nuevo archivo o documento */
+        // $(document).on('click', '.nuevo-archivo', function(){
+        //     ++j;
+        //     let id = $(this).attr('id').replace(/[^0-9]/g,'');
+
+        //     $("#archivos_"+id).append('<div class="input-group input-group-sm"><input type="file" accept=".jpg, .jpeg, .png, .pdf" class="form-control" name="REC_archivo[]"><span class="input-group-text">Descripción:</span><input type="text" class="form-control" name="ARC_descripcion[]"></div>');
+        // });
+
+        // Guarda la recomendacion
+        // $(document).on('click', '.guardar-recomendacion', function(e){
+        //     let id = $(this).attr('id').replace(/[^0-9]/g,'');
+        //     e.preventDefault();
+        //     var formData = new FormData( $('#form_recomendaciones_'+id)[0] );
+        //     // console.log(formData);
+        //     $.ajax({
+        //         async: true,
+        //         headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+        //         url: "{{ route('recomendaciones.nueva') }}",
+        //         type: 'post',
+        //         data: formData, //$(".form-recomendaciones").serialize(),
+        //         beforeSend: function () {
+        //             $('#cargando_'+id).removeClass('d-none');
+        //             $('#guardar_recomendacion_'+id).addClass('d-none');
+        //         },
+        //         processData: false,
+        //         contentType: false,
+        //         success: function (data, response) {
+        //             $('#cargando_'+id).addClass('d-none');
+        //             $('#guardar_recomendacion_'+id).removeClass('d-none');
+
+        //             $('#recomendacion_'+id+' textarea, #archivos_'+id+' input'+', #botones_'+id+' span').prop('disabled', true);
+        //             $('#nuevo_archivo_'+id).addClass('bg-secondary');
+        //             $('#guardar_recomendacion_'+id).text('Guardado');
+        //         },
+        //         error: function(response){ console.log(response) }
+        //     });
+        // });
+</script>
+
+{{-- hotel viena --}}

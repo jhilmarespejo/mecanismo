@@ -1,7 +1,14 @@
-{{-- @dump($elementos->toArray()) --}}
+{{-- @dump($auxCategoriasArray ) --}}
+@php
+
+@endphp
+
 <div id="carousel_preguntas" class="carousel slide" data-bs-interval="false">
     <div class="carousel-inner">
+        @php $aux = 0; @endphp
         @foreach ($elementos as $k=>$elemento)
+
+            {{-- @if ( $aux != $elemento->FK_RES_id || $elemento->ARC_ruta == null ) --}}
             <div class="carousel-item {{ ($k==0)? 'active': '' }}" id="card_{{$k+1}}">
                 <div class="card border mb-3" >
                     <div class="card-header" >
@@ -88,6 +95,11 @@
                     </div>
                 </div>
             </div>
+            {{-- @endif
+
+            @php
+                $aux = $elemento->FK_RES_id
+            @endphp --}}
         @endforeach
             {{-- ultimo elemento del carrusel --}}
             <div class="carousel-item" id="card_{{ count($elementos)+1 }}">
@@ -104,8 +116,15 @@
             </div>
     </div>
 
-    <div class="progress">
-        <small id="text_progresoXXX"></small><div class="progress-bar progress-bar-striped progress-bar-animated" id="pb_preguntas" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    <div class="row">
+        {{-- <div class="col-2">
+            8/{{ count($elementos->toArray()) }}
+        </div> --}}
+        <div class="col">
+            <div class="progress">
+                <small id="text_progresoXXX"></small><div class="progress-bar progress-bar-striped progress-bar-animated" id="pb_preguntas" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+            </div>
+        </div>
     </div>
 
 
@@ -179,10 +198,10 @@
             Swal.fire({
                 title: 'No se respondió a ésta pregunta!',
                 showDenyButton: true,
-                confirmButtonText: 'Continuar sin responder',
-                denyButtonText: 'Responder',
+                denyButtonText: 'Continuar sin responder',
+                confirmButtonText: 'Responder',
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isDenied) {
                     avance(item);
                     barra(actual, anterior, total);
                 } else if (result.isDenied) {
@@ -242,24 +261,9 @@
             }
         }
 
-        /*Evento para validar datos en la ultima pantalla*/
+        /*Evento para confirmar datos en la ultima pantalla*/
         $("#btn_fin").click( function(e){
-            $.ajax({
-                async: true,
-                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                url: '/cuestionario/confirmaCuestionario',
-                type: 'POST',
-                data: {estado: 'completado', FRM_id: "{{$elemento->FRM_id}}" },
-                // contentType: false,
-                // processData: false,
-                beforeSend: function () { },
-                success: function (data, response) {
-                    // console.log(data.message);
-                    Swal.fire(data.message);
-                },
-                //complete : function(data, response) {},
-                error: function(response){  }
-            });
+            confirmaCuestionario( {{$elemento->FRM_id}} );
         });
     });
 

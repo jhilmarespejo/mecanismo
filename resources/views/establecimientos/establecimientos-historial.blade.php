@@ -52,14 +52,22 @@
     @endphp
     <h3 class="text-center">{{ ( $formularios[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $formularios[0]->EST_nombre : $formularios[0]->EST_nombre }}</h3>
 
+    {{-- para nuevo formulario --}}
     @if(Auth::user()->rol == 'Administrador' )
         <div class="text-center ">
-            {{-- @livewire('formularios-nuevo') --}}
             @include('formulario.formulario-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
         </div>
     @endif
-    @if( count($visitas) )
 
+    {{-- para nueva visita --}}
+    @if(Auth::user()->rol == 'Administrador' )
+        <div class="text-center ">
+            @include('visita.visita-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
+        </div>
+    @endif
+
+    @if( count($visitas) )
+        {{-- Bloque para mostrar conteo de recomendaciones --}}
         <div class="row">
             <div class="col-sm mt-1">
                 <div class="card text-white bg-danger ">
@@ -91,20 +99,20 @@
             </div> --}}
         </div>
 
-        {{-- @dump($visitas->toArray()) --}}
+        {{-- @dump($formularios->toArray()) --}}
 
-        <div class="d-none container py-2 mt-4 mb-4">
-            @foreach ($formularios as $key=>$establecimiento)
+        {{-- <div class="d-none container py-2 mt-4 mb-4">
+            @foreach ( $formularios as $key=>$establecimiento ) --}}
             <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
-                <div class="row no-gutters ">
+                {{-- <div class="row no-gutters ">
                     <div class="col align-self-center text-end">
                         <!--spacer-->
                         <span class="text-end alert alert-primary">
                             {{ $establecimiento->FRM_fecha }}
                         </span>
-                    </div>
+                    </div> --}}
                     <!-- timeline item 1 center dot -->
-                    <div class="col-sm-1 text-center flex-column d-none d-sm-flex bar" >
+                    {{-- <div class="col-sm-1 text-center flex-column d-none d-sm-flex bar" >
                         <div class="row h-50">
                             <div class="col border-end border-4 border-primary">&nbsp;</div>
                             <div class="col">&nbsp;</div>
@@ -120,11 +128,11 @@
                     </div>
                     <div class="col-sm-7 py-2">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body"> --}}
                                 {{-- <div class="float-end text-muted small">{{$establecimiento->FRM_fecha }}</div> --}}
-                                <h4 class="card-title">
+                                {{-- <h4 class="card-title">sssssssss
                                     <b class="d-xss-none">{{ count($formularios)-$key }}. </b>
-                                    {{$establecimiento->FRM_titulo}}
+                                    {{ $establecimiento->FRM_titulo }}
                                 </h4>
                                 <p class="card-text">
                                     <ul class="list-group">
@@ -134,13 +142,13 @@
 
                                         </li>
 
-                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Responder/llenar cuestionario</a></li>
+                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Responder/llenar cuestionario</a></li> --}}
 
                                         {{-- <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/formulario/adjuntos/{{$formularios[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
                                         </li> --}}
 
-                                        <li class="list-group-item border-0">
+                                        {{-- <li class="list-group-item border-0">
                                             <a class="text-decoration-none" id="{{$establecimiento->FRM_id}}"><i class="bi bi-journal-bookmark-fill"></i> {{ $establecimiento->FRM_tipoVisita }}</a>
                                         </li>
 
@@ -149,27 +157,30 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             <!-- END timeline item 1 -->
-            @endforeach
-        </div>
+            {{-- @endforeach
+        </div> --}}
 
         <div class="container py-0 mt-4">
             @foreach ( $visitas as $key=>$visita )
-            @php
-                if($visita->VIS_tipo == 'Visita en profundidad'){
-                    $color = 'text-white bg-success';
-                }elseif($visita->VIS_tipo == 'Visita Temática') {
-                    $color = 'text-white bg-danger';
-                }elseif($visita->VIS_tipo == 'Visita de seguimiento'){
-                    $color = 'text-white bg-primary';
-                }elseif($visita->VIS_tipo == 'Visita reactiva'){
-                    $color = 'text-white bg-red';
-                }elseif($visita->VIS_tipo == 'Visita Ad hoc'){
-                    $color = 'text-white bg-warning';
-                }
-            @endphp
-            <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
+                @php $VIS_id = $visita->VIS_id; @endphp
+
+                {{-- Bloque para definir los colores por tipo de visita --}}
+                @php
+                    if($visita->VIS_tipo == 'Visita en profundidad'){
+                        $color = 'text-white bg-success';
+                    }elseif($visita->VIS_tipo == 'Visita Temática') {
+                        $color = 'text-white bg-danger';
+                    }elseif($visita->VIS_tipo == 'Visita de seguimiento'){
+                        $color = 'text-white bg-primary';
+                    }elseif($visita->VIS_tipo == 'Visita reactiva'){
+                        $color = 'text-white bg-red';
+                    }elseif($visita->VIS_tipo == 'Visita Ad hoc'){
+                        $color = 'text-white bg-warning';
+                    }
+                @endphp
+                <!-- START timeline item 1 TARJETAS PARA MOSTRAR LOS FORMULARIOS APLICADOS-->
                 <div class="row no-gutters mb-4">
                     @mobile
                     <div class="col align-self-center text-end">
@@ -207,39 +218,34 @@
                     <div class="col-sm-7 py-2 box-shadow rounded {{$color}}">
                         <div class="card ">
                             <div class="card-body  {{$color}}">
-                                {{-- <div class="float-end text-muted small">{{$establecimiento->FRM_fecha }}</div> --}}
                                 <h4 class="card-title text-center text-shadow">
                                     <b class="d-xss-none">{{ count($visitas)-$key }}. </b>
                                     {{$visita->VIS_tipo}}
                                 </h4>
                                 <p class="card-text">
                                     <ul class="list-group">
-                                        {{-- <li class="list-group-item border-0"><a class="text-decoration-none" href="/formulario/buscaFormularios/{{$id}}"></li> --}}
-
                                         <li class="list-group-item border-0">
-                                            {{-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                Launch demo modal
-                                            </button> --}}
-                                            @include('formulario.formularios-lista')
+                                            {{-- Información recolectada --}}
+                                            {{-- <a class="text-decoration-none visita" role="button" data-bs-toggle="modal" data-bs-target="#modalListaFormularios" id="visita_{{$VIS_id}}">
+                                                 Información recolectada
+                                            </a>
+                                            @include('formulario.formularios-lista') --}}
+                                            <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Información recolectada</a>
+
                                         </li>
-
-                                        <li class="list-group-item border-0"><a class="text-decoration-none" href="/cuestionario/responder/{{$establecimiento->FRM_id}}"><i class="bi bi-file-ruled"></i> Recomendaciones</a></li>
-
-                                        {{-- <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" href="/formulario/adjuntos/{{$formularios[0]->EST_id}}/{{$establecimiento->FRM_id}}" id="{{$establecimiento->FRM_id}}"><i class="bi bi-clipboard-check"></i> Archivos adjuntos</a>
-                                        </li> --}}
-
-                                        {{-- <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" id="{{$establecimiento->FRM_id}}"><i class="bi bi-journal-bookmark-fill"></i> {{ $visita->VIS_tipo }}</a>
-                                        </li> --}}
-
+                                        <li class="list-group-item border-0">
+                                            <a class="text-decoration-none"
+                                            {{-- href="/cuestionario/responder/{{$establecimiento->FRM_id}}" --}}
+                                            >   <i class="bi bi-file-ruled"></i> Recomendaciones</a>
+                                        </li>
                                     </ul>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-            <!-- END timeline item 1 -->
+                <!-- END timeline item 1 -->
+                @php $VIS_id = 'x'; @endphp
             @endforeach
         </div>
     @endif
@@ -265,5 +271,34 @@
 
 <script type="text/javascript">
     $("#alert").fadeOut(4500);
+
+    // $(".visita").click(function (e) {
+    //     var id = parseInt((this.id).replace(/[^0-9.]/g, ""));
+    //     console.log(id);
+    //     $.ajax({
+    //             async: true,
+    //             headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+    //             url: "/visita/buscaFormularios",
+    //             type: 'post',
+    //             data: {id: id},
+    //             beforeSend: function () { },
+    //             success: function (data, response) {
+    //                 $('small.error').empty();
+    //                 jQuery.each(data.errors, function( key, value ){
+    //                     $('#'+key+'_err').append( value );
+    //                 });
+    //                 if(!data.errors){
+    //                     Swal.fire({
+    //                         icon: 'success',
+    //                         title: data.message,
+    //                         showConfirmButton: false,
+    //                     });
+    //                     setTimeout(function(){ location.reload() }, 2000);
+    //                 }
+    //             },
+    //             error: function(response){ console.log(response) }
+    //         });
+
+    // });
 </script>
 @endsection

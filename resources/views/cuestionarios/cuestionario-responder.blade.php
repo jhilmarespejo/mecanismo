@@ -41,7 +41,7 @@
 
     /* ORDENA en forma de array las categorias, subcategorias y preguntas */
     foreach ($elementos as $key=>$elemento){
-        /*Si la respuesta actual tiene una imagen, se guardan las rutas y otros en $archivos  */
+        /* Si la respuesta actual tiene una imagen, se guardan las rutas y otros en $archivos  */
         if( $elemento->ARC_ruta !='' ){
             array_push($archivos, ['RBF_id' => $elemento->RBF_id, 'ARC_ruta' => $elemento->ARC_ruta, 'ARC_id' => $elemento->ARC_id, 'ARC_tipoArchivo' => $elemento->ARC_tipoArchivo, 'ARC_extension' => $elemento->ARC_extension, 'ARC_descripcion' => $elemento->ARC_descripcion, 'FK_RES_id' => $elemento->FK_RES_id]);
         }
@@ -60,6 +60,7 @@
         }
         $i = $elemento->RBF_id;
     } // END FOREACH
+    // dump( $elementos->toArray(), $auxCategoriasArray );
     // $auxCategoriasArray = array_unique($auxCategoriasArray);
     // foreach ($auxCategoriasArray as $key => $value) {
     //     dump($value);
@@ -106,22 +107,21 @@
 
         {{-- Encabezado --}}
         <div class="text-center head">
-            <p class=" m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
-            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }} </p>
+            <p class="m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
+            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }}</p>
             <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
         </div>
 
         {{-- Cuestionario --}}
         <div class="row border m-sm-2 p-2 d-flex">
             {{-- boton para el plegar/desplegar el cuestionario --}}
-
             <legend class="text-primary fs-3 text-center" > Cuestionario</legend>
 
             @desktop
                 <div class="form-switch fs-4">
                     <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('frm_cuestionario')">
                 </div>
-                @include('includes.cuestionario')
+                @include('includes.cuestionario_desktop')
             @enddesktop
             @mobile
                 @include('includes.cuestionario_mobile')
@@ -150,7 +150,11 @@
 
     @else
         <div class="text-center head">
-            <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p>
+            
+            {{-- ARREGLAR AQUI --}}
+            {{-- <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p> --}}
+
+
             {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" >Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p> --}}
         </div>
         @if(Auth::user()->rol == 'Administrador' )
@@ -164,80 +168,18 @@
         @endif
     @endif
 
-    <!-- Modal para agregar cumpliento a la recomendacion -->
-    <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="modal_cumplimiento" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" >Datos de cumplimiento a la recomendación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="POST" id="recomendaciones_form" enctype="multipart/form-data" action="javascript:void(0)" >@csrf
-                    <div class="modal-body body-cumplimiento">
-                        <dl>
-                            <dt>Recomendación:</dt>
-                            <dd class="ps-2 val-recomendacion"></dd>
-                            <dt>Fecha de la recomendación:</dt>
-                            <dd class="ps-2 val-fecha-recomendacion"></dd>
-                        </dl>
-                    <hr>
-                        <input type="hidden" name="REC_id" class="rec-id" value="{{ (isset($item['REC_id']))? $item['REC_id']:'' }}">
-
-                        <label class="form-label">Cumplimiento: </label>
-                        <select class="form-select" name="REC_cumplimiento">
-                            <option value='' selected>Seleccione...</option>
-                            <option value="2">Recomendación Parcialmente Cumplida</option>
-                            <option value="1">Recomendación Cumplida</option>
-                            {{-- <option value="0">Recomendación No Cumplida</option> --}}
-                        </select>
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_cumplimiento_err"></small>
-
-                        <label class="form-label mt-4">Fecha de cumplimiento: </label>
-                        <input type="date"  id="fecha" class="form-control" name="REC_fechaCumplimiento" value="{{ date("Y-m-d"); }}">
-
-                        {{-- <input type="date" id="start" name="trip-start" value="2018-07-22" min="2018-01-01" max="2018-12-31"> --}}
-
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_fechaCumplimiento_err"></small>
-                        <br/>
-                        <label class="form-label mt-3">Detalles del cumplimiento: </label>
-                        <textarea name="REC_detallesCumplimiento" id="detalles" class="form-control" rows="3"></textarea>
-                        {{-- mensaje de error: --}}
-                        <small class="text-danger error" id="REC_detallesCumplimiento_err"></small>
-
-                        <div class="archivos mt-3 "></div>
-                        <span class="btn btn-success nuevo-archivo p-2 my-2" >Adjuntar archivos</span>
-                    </div>
-                </form>
-                <div class="modal-footer">
-                    <span type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</span>
-                    <span type="button" class="btn btn-primary" id="guardar_cumplimiento">Guardar</span>
-                </div>
-
-                {{-- <div class="archivos mt-3 "></div> --}}
-
-            </div>
-        </div>
-    </div>
-
-
-
 </div> {{-- /container --}}
-
 
 
 <script>
 
     function plegar_desplegar(totoggle) {
         $('#'+totoggle).toggle("slow");
-      }
+    }
 
     $(document).ready(function() {
         $('#accordion_observaciones').toggle("slow");
         $('#div_adjuntos').toggle("slow");
-
-
         // Evita enviar formulario al presionar Enter
         $("form").keypress(function(e) {
             if (e.which == 13) {
@@ -245,62 +187,37 @@
             }
         });
     });
-    /*Boton para confirmar los datos del formulario*/
-    $("#btn_confirmacion").click( function(e){
-        validar();
-    });
-    function validar(){
-        let marcas = [];
-        $('.frm-respuesta').removeClass('bg-warning bg-gradient rounded');
 
-        /*Validacion para radiobuttons*/
-        $("#q div.group-radio").each(function(e){
-            if( !$(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
-                marcas.push($(this).parent().attr('id'));
-            }
-        });
-        /*Validación para checkbox*/
-        $("#q div.group-check").each(function(e){
-            $(this).each(function(e){
-                $(this).find('input').each(function(){
-                    if ($(this).prop('checked')) {
-                        return false;
-                    } else {
-                        marcas.push($(this).closest('form').attr('id'));
-                    }
-                });
-            })
-        });
-        /*Validacion para input text, number*/
-        $("#q").find('input.resp').each(function(e){
-            if( $(this).val() == '' ){
-                marcas.push($(this).closest('form').attr('id'));
-            }
-        })
-        /*Ordena los elementos del array*/
-        // marcas.sort(function(a, b){return a - b});
-        // console.log(marcas);
-        // marca el alerta para respuestas vacias
 
-        //console.log(marcas);
-        $.each(marcas, function(key, value){
-            $('#'+value).addClass('bg-warning bg-gradient rounded');
-        });
-        if(marcas.length > 0){
-            // $("html, body").animate( { scrollTop: "10" }, 3000);
-            $('html,body').animate({
-                scrollTop: ($('#'+$("#q").find('form.frm-respuesta.bg-warning').attr('id')).offset().top)-150
-            }, 'slow');
-        }
-        // console.log($("#q").find('form.frm-respuesta.bg-warning').attr('id'));
 
+    function confirmaCuestionario( FRM_id ){
+        $.ajax({
+                async: true,
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                url: '/cuestionario/confirmaCuestionario',
+                type: 'POST',
+                data: {estado: 'completado', FRM_id: FRM_id },
+                // contentType: false,
+                // processData: false,
+                beforeSend: function () { },
+                success: function (data, response) {
+                    // console.log(data.message);
+                    Swal.fire(data.message);
+                },
+                //complete : function(data, response) {},
+                error: function(response){  }
+            });
     }
 
+    /*Boton para confirmar los datos del formulario*/
+
+
    /* Guarda cada respuesta del formulario cuando se el mouse se mueve a la siguiente pregunta*/
-    $(".frm-respuesta").focusout(function(e){
+   $(".frm-respuesta").focusout(function(e){
         e.preventDefault();
         let id = $(this).attr('id').replace(/[^0-9]/g,'');
         let formData = new FormData($('#frm_'+id)[0]);
+        console.log(formData);
         $.ajax({
             async: true,
             // headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
@@ -337,6 +254,7 @@
             error: function(response){  }
         });
     });
+
 
     // $(".col-respuestas").focusout(function(e){
         //     var data = [];
