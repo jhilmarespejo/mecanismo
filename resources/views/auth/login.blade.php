@@ -47,11 +47,11 @@
 
                 <div class="mb-0">
                     <div class="d-flex justify-content-end align-items-baseline">
-                        {{-- @if (Route::has('register'))
+                        @if (Route::has('register'))
                             <a class="text-muted me-3" href="{{ route('register') }}">
                                 {{ __('Aún no está registrado?') }}
                             </a>
-                        @endif --}}
+                        @endif
 
                         <x-jet-button>
                             {{ __('Ingresar') }}

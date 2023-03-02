@@ -51,27 +51,27 @@
 
         series: [{
             name: 'Visitas en profundidad',
-            data: [95]
+            data: [0]
 
         }, {
             name: 'Visitas de seguimiento',
-            data: [80]
+            data: [0]
 
         }, {
             name: 'Visitas reactivas',
-            data: [15]
+            data: [0]
 
         }, {
             name: 'Visitas temáticas',
-            data: [11]
-
-        }, {
-            name: 'Visitas Ad hoc',
             data: [10]
 
         }, {
+            name: 'Visitas Ad hoc',
+            data: [0]
+
+        }, {
             name: 'TOTAL',
-            data: [211]
+            data: [10]
 
         },
     ],

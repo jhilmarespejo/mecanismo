@@ -60,11 +60,11 @@
     @endif --}}
 
     {{-- para nueva visita --}}
-    {{-- @if(Auth::user()->rol == 'Administrador' )
+    @if(Auth::user()->rol == 'Administrador' )
         <div class="text-center ">
             @include('visita.visita-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
         </div>
-    @endif --}}
+    @endif
 
     @if( count($visitas) )
         {{-- Bloque para mostrar conteo de recomendaciones --}}

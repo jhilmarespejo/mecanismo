@@ -29,7 +29,7 @@
             plotShadow: false
         },
         title: {
-            text: 'Cantidad total <br> entrevistados <br>por sexo <br>2022<br>TOTAL:403 ',
+            text: 'Cantidad total <br> entrevistados <br>por sexo <br>2023<br>TOTAL:0 ',
             align: 'center',
             verticalAlign: 'middle',
             y: 60
@@ -76,8 +76,8 @@
             name: 'Cantidad:',
             innerSize: '50%',
             data: [
-                ['Mujeres', 184],
-                ['Hombres', 219],
+                ['Mujeres', 0],
+                ['Hombres', 0],
                 // ['TOTAL', 403]
             ],
             // ['Safari', 2.98],

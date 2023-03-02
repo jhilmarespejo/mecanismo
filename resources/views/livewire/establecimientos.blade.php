@@ -76,7 +76,7 @@
                 @livewire('establecimientos-nuevo')
             </div>
         @endif
-            
+
     </div>
 
     @if (count($establecimientos))

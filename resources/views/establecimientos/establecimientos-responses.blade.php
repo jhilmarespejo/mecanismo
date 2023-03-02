@@ -26,9 +26,9 @@
                         <td> <a class="text-decoration-none" href="/establecimientos/historial/{{$establecimiento->EST_id}}">{{ $establecimiento->EST_nombre }}</a></td>
                         {{-- <td>{{ $establecimiento->Municipio }}</td>
                         <td>{{ $establecimiento->Provincia }}</td>--}}
-                        <td>{{ $establecimiento->Departamento }}</td>
-                        {{-- <td>{{ $establecimiento->EST_direccion }}</td>
-                        <td>{{ $establecimiento->TES_tipo }}</td> --}}
+                        {{-- <td>{{ $establecimiento->Departamento }}</td> --}}
+                        <td>{{ $establecimiento->EST_direccion }}</td>
+                        {{-- <td>{{ $establecimiento->TES_tipo }}</td> --}}
                         {{-- <td>{{ $establecimiento->EST_telefonoContacto }}</td> --}}
                         {{-- <td class=" col-2 text-center">
                             <a href="/establecimientos/historial/{{$establecimiento->EST_id}}" class="btn btn-success text-light" ><i class="bi bi-clock-history"></i> Historial</a>

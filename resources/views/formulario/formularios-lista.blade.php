@@ -64,23 +64,24 @@
 
                 @endif
                 @foreach ( $fs as $k=>$f)
-
                     @if (strstr($f['FRM_titulo'], 'Salud'))
                         <div class="alert alert-success row p-0" role="alert">
                             <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
                                 <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
                             </a>
                         </div>
-                    @else
-                    <hr>
-                    <div class="alert alert-danger row p-0" role="alert">
-                        <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
-                            <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
-                        </a>
-                    </div>
                     @endif
 
-
+                @endforeach
+                <hr>
+                @foreach ( $fs as $k=>$f)
+                    @if (strstr($f['FRM_titulo'], 'Violencia'))
+                        <div class="alert alert-danger row p-0" role="alert">
+                            <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
+                                <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
+                            </a>
+                        </div>
+                    @endif
                 @endforeach
             </dl>
         </div>
