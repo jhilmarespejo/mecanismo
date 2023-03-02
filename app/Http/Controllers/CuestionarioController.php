@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\{ModFormulario, ModCategoria, ModCuestionario, ModRespuesta, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario};
 use DB;
 use Image;
+use Illuminate\Support\Facades\Auth;
 // use Psy\Command\WhereamiCommand;
 
 class CuestionarioController extends Controller {
@@ -61,6 +62,7 @@ class CuestionarioController extends Controller {
 
     public function duplicarCuestionario( $FRM_id, $VIS_id ){
         /* Busca datos del formulario actual */
+
         $nuevoFormulario = ModFormulario::select('FRM_titulo', 'FK_VIS_id', 'FK_EST_id')
         ->where('FRM_id', $FRM_id)
         ->get()->toArray();
@@ -72,14 +74,20 @@ class CuestionarioController extends Controller {
         /* Se completa el array $nuevoFormulario */
         $nuevoFormulario[0]['FRM_version'] = $max_FRM_version+1;
         $nuevoFormulario[0]['FRM_fecha'] = date('Y-m-d');
+        $nuevoFormulario[0]['FK_USER_id'] = Auth::user()->id;
+
+
+
 
         // dump( $nuevoFormulario );
+        // dump($FRM_id);
+        // dump( $preguntas->toArray() );
+        // exit;
 
         DB::beginTransaction();
         try {
             ModFormulario::insert( $nuevoFormulario );
             $ultimoFRMid = DB::getPdo()->lastInsertId();
-
             $preguntas = ModPreguntasFormulario::select('FK_BCP_id')
             ->where('FK_FRM_id', $FRM_id)
             ->get();
@@ -89,6 +97,7 @@ class CuestionarioController extends Controller {
                 $listaPreguntas[$k]['FK_BCP_id'] = $pregunta->FK_BCP_id;
                 $listaPreguntas[$k]['FK_FRM_id'] = $ultimoFRMid;
             }
+
             ModPreguntasFormulario::insert( $listaPreguntas );
             DB::commit();
 
@@ -388,60 +397,60 @@ class CuestionarioController extends Controller {
     }
 
     /* Adiciona nuevos archivos adjuntos por formulario (es diferente de las recomendaciones) */
-    public function adjuntosNuevo(Request $request){
-        // dump( $request->except('_token'));exit;
+    // public function adjuntosNuevo(Request $request){
+    //     dump( $request->except('_token'));exit;
 
-        $ADJ_responsables = json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT);
-        $ADJ_entrevistados = json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT);
-        $request->validate([
-            'ADJ_titulo' => 'required',
-            'ADJ_fecha' => 'required|max:200|min:5',
-            'ADJ_responsables.*' => 'required|max:200|min:5',
-            'ADJ_entrevistados.*' => 'required|max:200|min:5',
-            'ADJ_resumen' => 'required|min:5',
-            'ARC_archivo' => 'required',
-            'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
-            'ARC_descripcion.*' => 'required',
-        ], [
-            'required' => '¡El dato es requerido!',
-            'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
-            'ARC_archivo.*.mimes' => 'El archivos debe ser: imagen, documento, audio o video',
-            'max' => '¡Dato muy extenso!',
-            'min' => '¡Dato muy corto!',
-        ]);
+    //     $ADJ_responsables = json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT);
+    //     $ADJ_entrevistados = json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT);
+    //     $request->validate([
+    //         'ADJ_titulo' => 'required',
+    //         'ADJ_fecha' => 'required|max:200|min:5',
+    //         'ADJ_responsables.*' => 'required|max:200|min:5',
+    //         'ADJ_entrevistados.*' => 'required|max:200|min:5',
+    //         'ADJ_resumen' => 'required|min:5',
+    //         'ARC_archivo' => 'required',
+    //         'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
+    //         'ARC_descripcion.*' => 'nullable',
+    //     ], [
+    //         'required' => '¡El dato es requerido!',
+    //         'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
+    //         'ARC_archivo.*.mimes' => 'El archivos debe ser: imagen, documento, audio o video',
+    //         'max' => '¡Dato muy extenso!',
+    //         'min' => '¡Dato muy corto!',
+    //     ]);
 
-        DB::beginTransaction();
-        try {
-            /* Guarda los archivos subidos */
-            if ( $request->file('ARC_archivo') ){
-                $ARC_ids = [];
-                foreach($request->file('ARC_archivo') as $key => $archivo){
-                    $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
-                    //     dump( $tipoArchivo, $tipoArchivo[0] );
-                    // exit;
-                    $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/adjuntos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'adjunto', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
+    //     DB::beginTransaction();
+    //     try {
+    //         /* Guarda los archivos subidos */
+    //         if ( $request->file('ARC_archivo') ){
+    //             $ARC_ids = [];
+    //             foreach($request->file('ARC_archivo') as $key => $archivo){
+    //                 $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
+    //                 //     dump( $tipoArchivo, $tipoArchivo[0] );
+    //                 // exit;
+    //                 $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/adjuntos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'adjunto', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
-                    array_push( $ARC_ids, $idArchivo->ARC_id );
-                    $archivo->move(public_path('/uploads/adjuntos/'), $archivo->store(''));
-                }
-            }
+    //                 array_push( $ARC_ids, $idArchivo->ARC_id );
+    //                 $archivo->move(public_path('/uploads/adjuntos/'), $archivo->store(''));
+    //             }
+    //         }
 
-            /* Guarda datos en la tabla adjuntos */
-            $adjunto = ModAdjunto::create(['FK_FRM_id' => $request->FK_FRM_id, 'ADJ_titulo' => $request->ADJ_titulo, 'ADJ_fecha' => $request->ADJ_fecha, 'ADJ_responsables' => json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT), 'ADJ_entrevistados' => json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT), 'ADJ_resumen' => $request->ADJ_resumen]);
+    //         /* Guarda datos en la tabla adjuntos */
+    //         $adjunto = ModAdjunto::create(['FK_FRM_id' => $request->FK_FRM_id, 'ADJ_titulo' => $request->ADJ_titulo, 'ADJ_fecha' => $request->ADJ_fecha, 'ADJ_responsables' => json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT), 'ADJ_entrevistados' => json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT), 'ADJ_resumen' => $request->ADJ_resumen]);
 
-            $adjuntos_archivos = [];
-            foreach ($ARC_ids as $key => $value) {
-                array_push($adjuntos_archivos, [ 'FK_ARC_id' => $value, 'FK_ADJ_id' => $adjunto->ADJ_id ]);
-            }
-            ModAdjuntoArchivo::insert($adjuntos_archivos);
-            DB::commit();
-            return redirect('formulario/adjuntos/'.$request->FK_FRM_id)->with('status', '¡Datos almacenados con exito!');
-        }
-        catch (\Exception $e) {
-            DB::rollback();
-            exit ($e->getMessage());
-        }
-    }
+    //         $adjuntos_archivos = [];
+    //         foreach ($ARC_ids as $key => $value) {
+    //             array_push($adjuntos_archivos, [ 'FK_ARC_id' => $value, 'FK_ADJ_id' => $adjunto->ADJ_id ]);
+    //         }
+    //         ModAdjuntoArchivo::insert($adjuntos_archivos);
+    //         DB::commit();
+    //         return redirect('formulario/adjuntos/'.$request->FK_FRM_id)->with('status', '¡Datos almacenados con exito!');
+    //     }
+    //     catch (\Exception $e) {
+    //         DB::rollback();
+    //         exit ($e->getMessage());
+    //     }
+    // }
 
 
 }

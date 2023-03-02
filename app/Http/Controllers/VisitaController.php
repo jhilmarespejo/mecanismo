@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita};
+use App\Models\{ModVisita, ModFormulario};
 use Illuminate\Http\Request;
 use DB;
 use Validator;
+use Illuminate\Support\Facades\Auth;
 
 class VisitaController extends Controller
 {
@@ -18,7 +19,7 @@ class VisitaController extends Controller
 
         $validator = Validator::make($request->all(), [
             'VIS_tipo' => 'required',
-            // 'VIS_fechas' => 'required',
+            'VIS_titulo' => 'required',
         ], [
             'required' => 'El dato es requerido!',
         ]);
@@ -27,7 +28,7 @@ class VisitaController extends Controller
             return response()->json( [ 'errors' => $validator->errors() ] );
         } else {
             $datos = [];
-            array_push($datos, ['FK_EST_id' => $request->FK_EST_id, 'VIS_tipo' => $request->VIS_tipo, 'VIS_fechas' => $request->VIS_fechas, 'VIS_numero' => ($numeroVisita+1)]);
+            array_push($datos, ['FK_EST_id' => $request->FK_EST_id, 'VIS_tipo' => $request->VIS_tipo, 'VIS_fechas' => $request->VIS_fechas, 'VIS_numero' => ($numeroVisita+1), 'VIS_titulo' => $request->VIS_titulo]);
             DB::beginTransaction();
             try {
                 ModVisita::insert( $datos );
@@ -41,21 +42,33 @@ class VisitaController extends Controller
     }
 
 
-    /* Consulta para obtener los formularios aplicados en la visita*/
+    /* Consulta para obtener los formularios aplicados en la visita
+        $id = Visita ID
+    */
     public function buscaFormularios( $id ){
-        // DB::enableQueryLog();
+        DB::enableQueryLog();
+
+        $fs = DB::select('select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
+        from formularios f where "f"."FK_VIS_id" ='.$id.' order by "f"."FRM_titulo", "f"."FRM_id"');
+        $fs = json_decode(json_encode($fs), true);
+        // dump($fs);exit;
+
         $formularios = ModVisita::from('visitas as v')
-        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FRM_tipoVisita', 'f.FK_VIS_id', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
+        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
         ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
         ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
         ->where ('f.FK_VIS_id', $id)
         ->where ('e.estado', '1')
-        ->orderby('f.createdAt', 'desc')->get();
+        ->where('f.FK_USER_id', Auth::user()->id)
+        //->orWhere('f.FK_USER_id', 0)
+        ->orderby('f.createdAt', 'desc')
+        ->orderby('f.FRM_titulo', 'asc')->get();
         // $quries = DB::getQueryLog();
         // dump( $quries );
 
-        return view('formulario.formularios-lista', compact('formularios'));
-        dump( $formularios->toArray() );
+        // dump( $formularios->toArray() );
+        // exit;
+        return view('formulario.formularios-lista', compact('formularios', 'fs'));
 
     }
 

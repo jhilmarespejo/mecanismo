@@ -34,9 +34,13 @@
                 <div class="card-body" id="card_body_1" style="padding: 2% 5%; {{ (count($errors->all()) != 0)? '' : 'display:none' }}">
                     <div class="row">
                         <h3>
-                            <div class="form-floating col-9" id="input_titulo">
-                                <input type="text" id="titulo_nuevo" class="form-control" placeholder="Título" style="font-size: 30px;" name="ADJ_titulo" value="{{ old('ADJ_titulo')}}">
+                            {{-- <div class="form-floating col-9" id="input_titulo">
                                 <label for="floatingInput fs-6">Título:</label>
+                                <input type="text" id="titulo_nuevo" class="form-control" placeholder="Título" style="font-size: 30px;" name="ADJ_titulo" value="{{ old('ADJ_titulo')}}">
+                            </div> --}}
+                            <div class="form col-9" id="input_titulo">
+                                <label for="form-label fs-6">Título:</label>
+                                <input type="text" id="titulo_nuevo" class="form-control" name="ADJ_titulo" value="{{ old('ADJ_titulo')}}">
                             </div>
                         </h3>
 
@@ -91,7 +95,7 @@
                                 <label ><b>Archivo</b></label>
                                 <div class="input-group">
                                     <input type="file" name="ARC_archivo[]" class="form-control" placeholder="Archivo" accept="image/*, video/*,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx" capture>
-                                    <div class="input-group-text bg-success text-light btn" id="btn_nuevos_controles"><i class="bi bi-plus-circle"></i></div>
+
                                 </div>
                                 @error('ARC_archivo.*')
                                 <small class="text-danger"><i class="bi bi-info-circle"></i> {{ $message }}</small>
@@ -108,8 +112,11 @@
                                 </div>
                             </div>
                             <div class="border-bottom px-3" id="nuevo_elemento"></div>
+
+                            <div class="m-2 text-center text-shadow box-shadow input-group-text bg-success text-light btn" id="btn_nuevos_controles"><i class="bi bi-plus-circle"></i>Nuevo Archivo</div>
                         </div>
                     </div>
+
                     <div class="row text-center px-5">
                         <button type="submit" class="shadow btn btn-success text-light" id="btn_guarda_adjuntos" style="text-shadow: 0px 0px 3px #000;">Guardar datos</button>
                         <button class="btn btn-primary d-none text-light" id="btn_guarda_spiner" type="button" disabled>

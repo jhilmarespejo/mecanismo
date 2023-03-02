@@ -56,7 +56,7 @@
                             @endif
 
                             @if ($elemento->BCP_tipoRespuesta == 'Numeral')
-                            <div class="row p-2"><input class="ms-2 col resp" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento->RES_respuesta}}"><span class="col-1 marca"></span> </div>
+                            <div class="row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento->RES_respuesta}}"><span class="col-1 marca"></span> </div>
                             @endif
                             @if ($elemento->BCP_tipoRespuesta == 'Respuesta corta')
                             <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento->RES_respuesta}}"> <span class="col-1 marca"></span> </div>
@@ -117,9 +117,8 @@
     </div>
 
     <div class="row">
-        {{-- <div class="col-2">
-            8/{{ count($elementos->toArray()) }}
-        </div> --}}
+        {{-- <div class="col-2" > </div> --}}
+        <span class="badge rounded-pill bg-success col-2 " id="conteo"></span>
         <div class="col">
             <div class="progress">
                 <small id="text_progresoXXX"></small><div class="progress-bar progress-bar-striped progress-bar-animated" id="pb_preguntas" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
@@ -193,6 +192,8 @@
                 $("#btn_siguiente").removeClass('d-none');
                 $("#btn_fin").addClass('d-none')
             }
+            $('#conteo').empty();
+            $('#conteo').text(actual+'/'+total);
         }
         function mensaje(item, actual=null, anterior=null, total=null){
             Swal.fire({

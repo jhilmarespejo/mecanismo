@@ -69,6 +69,7 @@ class AuthenticatedSessionController extends Controller
      */
     protected function loginPipeline(LoginRequest $request)
     {
+       
         if (Fortify::$authenticateThroughCallback) {
             return (new Pipeline(app()))->send($request)->through(array_filter(
                 call_user_func(Fortify::$authenticateThroughCallback, $request)

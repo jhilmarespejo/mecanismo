@@ -67,8 +67,9 @@ foreach ($elementos as $key=>$elemento){
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                <i class="bi bi-arrow-90deg-left"></i> </a>
+                {{-- <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> </a> --}}
+                <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> </a>
             </div>
             <div class="col ">
                 <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
@@ -84,8 +85,9 @@ foreach ($elementos as $key=>$elemento){
               <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                     <li class="nav-item p-1 px-3">
-                        <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                            <i class="bi bi-arrow-90deg-left"></i> Historial </a>
+                        {{-- <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                            <i class="bi bi-arrow-90deg-left"></i> Historial </a> --}}
+                            <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Volver atrás</a>
                     </li>
                     <li class="nav-item p-1 px-3" id="btn_imprimir">
                         <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >

@@ -24,9 +24,8 @@
                         <input class="form-control" type="text" name="FRM_titulo" max="100" min="0">
                         <small class="text-danger" id="FRM_titulo_err"></small>
                     </div>
-                    <div class="mb-4">
+                    {{-- <div class="mb-4">
                         <label class="form-label">Tipo de visita</label>
-                        {{-- <input class="form-control" type="text" name="FRM_titulo" max="100" min="0"> --}}
                         <select class="form-select" name="FRM_tipoVisita">
                             <option value="" selected>Seleccione</option>
                             <option value="Visita en profundidad">Visita en profundidad</option>
@@ -37,7 +36,7 @@
                             <option value="Entrevista a usuarios o PPLs">Entrevista a usuarios o PPLs</option>
                         </select>
                         <small class="text-danger" id="FRM_tipoVisita_err"></small>
-                    </div>
+                    </div> --}}
 
                     <div class="mb-4">
                         <label class="form-label">Número de formulario</label>

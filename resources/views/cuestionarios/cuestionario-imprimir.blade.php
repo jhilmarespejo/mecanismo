@@ -31,7 +31,7 @@
         #establecimiento, #version {
             font-size: 10px !important;
         }
-         .formulario{
+        .formulario{
             border: 1px !important;
             padding: 20px;
         }
@@ -85,9 +85,10 @@
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
+                {{-- <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
                     <i class="bi bi-arrow-90deg-left"></i>
-                </a>
+                </a> --}}
+                <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i></a>
             </div>
             <div class="col">
                 <a class="text-decoration-none fs-4" id="imprimir_formulario"><i class="bi bi-printer-fill"></i></a>
@@ -109,9 +110,10 @@
               <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                   <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
+                    {{-- <a class="text-decoration-none" href="/establecimientos/historial/{{$formulario->FK_EST_id}}" >
                         <i class="bi bi-arrow-90deg-left"></i> Historial
-                    </a>
+                    </a> --}}
+                    <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Volver atrás</a>
                   </li>
                   <li class="nav-item p-1 px-3" id="btn_imprimir">
                     <a class="text-decoration-none" id="imprimir_formulario"><i class="bi bi-printer"></i> Imprimir</a>
@@ -136,9 +138,9 @@
             </div>
         </nav>
         @enddesktop
-        <div class="d-flex bd-highlight mb-0 encabezado d-none">
-            <div class="p-2 bd-highlight"><img src="/img/logodp.png" style="height: 50px"></div>
-            <div class="ms-auto p-2 bd-highlight"><img src="/img/logomnp.png" style="height: 50px"></div>
+        <div class="d-flexx text-center bd-highlight mb-0 encabezado d-none">
+            <div class="p-2 bd-highlight text-center"><img src="/img/logodp.png" style="height: 50px"></div>
+            {{-- <div class="ms-auto p-2 bd-highlight"><img src="/img/logomnp.png" style="height: 50px"></div> --}}
         </div>
         <div class="text-center head">
             {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" > Visita temática </p> --}}

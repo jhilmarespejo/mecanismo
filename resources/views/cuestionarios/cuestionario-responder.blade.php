@@ -68,14 +68,14 @@
 @endphp
 
 <div class="container-fluid p-sm-3 p-0 mx-0" id="cuestionario" >
-
     @if ( count($elementos) > 0 )
         {{-- minimenu --}}
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                <i class="bi bi-arrow-90deg-left"></i> </a>
+                {{-- ARREGLAR  <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
+                <i class="bi bi-arrow-90deg-left"></i> </a> --}}
+                <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i></a>
             </div>
             <div class="col ">
                 <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
@@ -91,8 +91,7 @@
               <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                     <li class="nav-item p-1 px-3">
-                        <a class="text-decoration-none" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                            <i class="bi bi-arrow-90deg-left"></i> Historial </a>
+                        <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Volver atrás</a>
                     </li>
                     <li class="nav-item p-1 px-3" id="btn_imprimir">
                         <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
@@ -131,11 +130,11 @@
         {{-- INCLUDE para Recomendaciones --}}
         <div class="row border m-sm-2 p-2 d-flex">
             {{-- boton para el plegar/desplegar las observaciones --}}
-            <div class="form-switch fs-4">
+            {{-- <div class="form-switch fs-4">
                 <input class="form-check-input chek-observaciones" type="checkbox" onclick="plegar_desplegar('accordion_observaciones')">
             </div>
             <legend class="text-primary fs-4 text-center" > Oservaciones identificadas</legend>
-            @include('includes.recomendaciones')
+            @include('includes.recomendaciones') --}}
         </div>
 
         {{-- INCLUDE para Adjuntos --}}
@@ -150,7 +149,7 @@
 
     @else
         <div class="text-center head">
-            
+
             {{-- ARREGLAR AQUI --}}
             {{-- <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p> --}}
 

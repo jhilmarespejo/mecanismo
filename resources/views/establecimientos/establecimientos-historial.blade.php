@@ -53,22 +53,22 @@
     <h3 class="text-center">{{ ( $formularios[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $formularios[0]->EST_nombre : $formularios[0]->EST_nombre }}</h3>
 
     {{-- para nuevo formulario --}}
-    @if(Auth::user()->rol == 'Administrador' )
+    {{-- @if(Auth::user()->rol == 'Administrador' )
         <div class="text-center ">
             @include('formulario.formulario-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
         </div>
-    @endif
+    @endif --}}
 
     {{-- para nueva visita --}}
-    @if(Auth::user()->rol == 'Administrador' )
+    {{-- @if(Auth::user()->rol == 'Administrador' )
         <div class="text-center ">
             @include('visita.visita-nuevo', ['EST_id' => $formularios[0]->EST_id, 'EST_nombre' => $formularios[0]->EST_nombre])
         </div>
-    @endif
+    @endif --}}
 
     @if( count($visitas) )
         {{-- Bloque para mostrar conteo de recomendaciones --}}
-        <div class="row">
+        {{-- <div class="row">
             <div class="col-sm mt-1">
                 <div class="card text-white bg-danger ">
                     <a href="/recomendaciones/{{$formularios[0]->EST_id}}" class="text-decoration-none text-light">
@@ -86,7 +86,7 @@
                         </div>
                     </a>
                 </div>
-            </div>
+            </div> --}}
             {{-- <div class="col-sm mt-1">
                 <div class="card text-white bg-warning mb-3">
                     <a href="/formulario/adjuntos/{{$formularios[0]->EST_id}}" class="text-decoration-none text-light">
@@ -220,7 +220,7 @@
                             <div class="card-body  {{$color}}">
                                 <h4 class="card-title text-center text-shadow">
                                     <b class="d-xss-none">{{ count($visitas)-$key }}. </b>
-                                    {{$visita->VIS_tipo}}
+                                    {{$visita->VIS_tipo}}: {{ $visita->VIS_titulo}}
                                 </h4>
                                 <p class="card-text">
                                     <ul class="list-group">
@@ -230,13 +230,16 @@
                                                  Información recolectada
                                             </a>
                                             @include('formulario.formularios-lista') --}}
-                                            <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Información recolectada</a>
+                                            <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
 
                                         </li>
                                         <li class="list-group-item border-0">
-                                            <a class="text-decoration-none"
-                                            {{-- href="/cuestionario/responder/{{$establecimiento->FRM_id}}" --}}
-                                            >   <i class="bi bi-file-ruled"></i> Recomendaciones</a>
+                                            {{-- <a class="text-decoration-none"
+                                            href="/img/informe.png"
+                                            >   <i class="bi bi-file-ruled"></i> Infome</a> --}}
+                                            {{-- <button type="button" class="" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                informe
+                                              </button> --}}
                                         </li>
                                     </ul>
                                 </p>
@@ -257,9 +260,9 @@
     @endif
 
     @if( count($recomendaciones) == 0 )
-        <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
+        {{-- <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
             Aún no se asignaron recomendaciones a este establecimiento
-        </div>
+        </div> --}}
     @endif
 
     {{-- <div class="text-center py-2">
@@ -268,6 +271,25 @@
     {{-- @endif --}}
 
 <div class="container"></div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script type="text/javascript">
     $("#alert").fadeOut(4500);

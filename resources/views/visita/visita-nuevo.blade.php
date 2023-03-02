@@ -1,6 +1,6 @@
 @if(Auth::user()->rol == 'Administrador' )
     <button type="button" class="my-2 btn btn-primary text-light text-shadow box-shadow" data-bs-toggle="modal" data-bs-target="#nuevaVisita">
-        <i class="bi bi-clipboard-plus"></i> Agregar Visita
+        <i class="bi bi-clipboard-plus"></i> Nueva Visita
     </button>
 
     <!-- Modal -->
@@ -31,6 +31,11 @@
                             <option value="Visita Ad hoc">Visita Ad hoc</option>
                         </select>
                         <small class="text-danger" id="VIS_tipo_err"></small>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Título</label>
+                        <input class="form-control" type="text" name="VIS_titulo">
+                        <small class="text-danger" id="VIS_titulo_err"></small>
                     </div>
 
                     <div class="mb-4">

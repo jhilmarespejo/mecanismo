@@ -150,13 +150,13 @@ class FormularioController extends Controller
         $ADJ_entrevistados = json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT);
         $request->validate([
             'ADJ_titulo' => 'required',
-            'ADJ_fecha' => 'required|max:200|min:5',
-            'ADJ_responsables.*' => 'required|max:200|min:5',
-            'ADJ_entrevistados.*' => 'required|max:200|min:5',
+            // 'ADJ_fecha' => 'required|max:200|min:5',
+            // 'ADJ_responsables.*' => 'required|max:200|min:5',
+            // 'ADJ_entrevistados.*' => 'required|max:200|min:5',
             'ADJ_resumen' => 'required|min:5',
             'ARC_archivo' => 'required',
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
-            'ARC_descripcion.*' => 'required',
+            'ARC_descripcion.*' => 'nullable',
         ], [
             'required' => '¡El dato es requerido!',
             'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
