@@ -31,9 +31,11 @@
                         @else
                             <a href="{{ route('login') }}" class="text-muted">Ingresar</a>
 
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="ms-4 text-muted">Registro</a>
-                            @endif
+                            {{-- @if(Auth::user()->rol == 'Administrador' )
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="ms-4 text-muted">Registro</a>
+                                @endif
+                            @endif --}}
                         @endif
                     </div>
                 @endif
