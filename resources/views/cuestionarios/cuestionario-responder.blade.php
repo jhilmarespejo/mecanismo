@@ -138,14 +138,15 @@
         </div>
 
         {{-- INCLUDE para Adjuntos --}}
-        <div class="row border m-sm-2 p-2 d-flex">
-            {{-- boton para el plegar/desplegar los adjuntos --}}
+        {{-- boton para el plegar/desplegar los adjuntos --}}
+        
+        {{-- <div class="row border m-sm-2 p-2 d-flex">
             <div class="form-switch fs-4">
                 <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">
             </div>
             <legend class="text-primary fs-4 text-center" > Archivos adjuntos</legend>
             @include('includes.adjuntos')
-        </div>
+        </div> --}}
 
     @else
         <div class="text-center head">

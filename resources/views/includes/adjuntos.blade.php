@@ -114,6 +114,7 @@
                             <div class="border-bottom px-3" id="nuevo_elemento"></div>
 
                             <div class="m-2 text-center text-shadow box-shadow input-group-text bg-success text-light btn" id="btn_nuevos_controles"><i class="bi bi-plus-circle"></i>Nuevo Archivo</div>
+                            <span class>El archivo no debe pesar mas de 10MB</span>
                         </div>
                     </div>
 
