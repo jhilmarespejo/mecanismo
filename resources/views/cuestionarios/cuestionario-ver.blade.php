@@ -122,21 +122,28 @@ foreach ($elementos as $key=>$elemento){
                             @if ( is_string($keySC) )
                                 <strong>{{ 'SUB Categoria: '.$keySC }}</strong>
                                     @foreach ($subcategorias as $key=>$pregunta)
-                                    <li class="list-group-item hover">{{ $pregunta->BCP_pregunta }}:  <strong>
-                                        @php
-                                            $resp_array = json_decode($pregunta->RES_respuesta, true);
-                                        @endphp
-                                        @if ( is_array( $resp_array ) )
-                                            <ul class="ps-4">
-                                                @foreach ( $resp_array as $k=>$respuetaArray )
-                                                    <li>{{ $respuetaArray }}</li>
-                                                @endforeach
-                                            </ul>
-                                        @else
-                                            <p class="ps-4">{{$pregunta->RES_respuesta}}</p>
-                                        @endif
-                                    </strong>
+                                    <li class="list-group-item hover">{{ $pregunta->BCP_pregunta }}:
+                                        <strong>
+                                            @php
+                                                $resp_array = json_decode($pregunta->RES_respuesta, true);
+                                            @endphp
+                                            @if ( is_array( $resp_array ) )
+                                                <ul class="ps-4">
+                                                    @foreach ( $resp_array as $k=>$respuetaArray )
+                                                        <li>{{ $respuetaArray }}</li>
+                                                    @endforeach
+                                                </ul>
+
+                                            @else
+                                                <p class="ps-4">{{$pregunta->RES_respuesta}}</p>
+                                            @endif
+                                            @if ($pregunta->BCP_complemento)
+                                                <p>( {{$pregunta->RES_complemento}} )</p>
+                                            @endif
+
+                                        </strong>
                                     </li>
+
 
                                     @endforeach
                             @else
@@ -153,6 +160,9 @@ foreach ($elementos as $key=>$elemento){
                                             </ul>
                                         @else
                                             <p class="ps-4">{{$subcategorias->RES_respuesta}}</p>
+                                            @if ($pregunta->BCP_complemento)
+                                                <p>( {{$pregunta->RES_complemento}} )</p>
+                                            @endif
                                         @endif
                                     </strong>
                                 </li>

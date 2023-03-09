@@ -51,14 +51,18 @@
 
                                 <a href="/cuestionario/responder/{{$formulario->FRM_id}}"><i class="bi bi-pen-fill px-2 text-success fs-5"></i></a>
 
-                                {{-- <a href="/cuestionario/duplicar/{{$formulario->FRM_id}}/{{$formulario->FK_VIS_id}}"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i></a> --}}
+                                <a href=""><i class="bi bi-trash px-2 text-success fs-5"></i></a>
+
+
+
+                                <i class=""></i>
                             </dt>
                             <dd class="ps-3 border-bottom mb-1 table-hover row">
                                 <div class="col-1">
                                     @if ( $formulario->estado == 'completado' )
                                         <i class="bi bi-check-circle-fill text-success fs-2"></i>
                                     @else
-                                    <i class="bi bi-x-circle-fill text-danger fs-2"></i>
+                                    <i class="bi bi-info-square text-warning fs-2"></i>
                                     @endif
 
                                 </div>
