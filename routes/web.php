@@ -108,6 +108,9 @@ Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNueva
 
 Route::get('visita/buscaFormularios/{id}', [VisitaController::class, 'buscaFormularios'])->name('visita.buscaFormularios')->middleware('auth');
 
+Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
+
+Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 
 
 // Route::get('/offline', function () {
