@@ -39,7 +39,7 @@
             <dl class="">
                 @if ( count($formularios) > 0 )
                     @foreach ($formularios as $key=>$formulario)
-                        @if ( Auth::user()->id == $formulario->FK_USER_id )
+                        {{-- @if ( Auth::user()->id == $formulario->FK_USER_id ) --}}
                             <dt class="mt-3 ">
                                 <span class="badge bg-primary rounded-pill text-shadow p-1">
                                     {{ \Carbon\Carbon::parse($formulario->FRM_fecha)->format('d-m-Y') }}
@@ -53,10 +53,18 @@
 
                                 {{-- <a href="/cuestionario/duplicar/{{$formulario->FRM_id}}/{{$formulario->FK_VIS_id}}"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i></a> --}}
                             </dt>
-                            <dd class="ps-3 border-bottom mb-1 table-hover">
-                                {{$formulario->FRM_titulo}} ({{ count($formularios)-($key) }})
+                            <dd class="ps-3 border-bottom mb-1 table-hover row">
+                                <div class="col-1">
+                                    @if ( $formulario->estado == 'completado' )
+                                        <i class="bi bi-check-circle-fill text-success fs-2"></i>
+                                    @else
+                                    <i class="bi bi-x-circle-fill text-danger fs-2"></i>
+                                    @endif
+
+                                </div>
+                                <div class="col ms-2">{{$formulario->FRM_titulo}} ({{ count($formularios)-($key) }})</div>
                             </dd>
-                        @endif
+                        {{-- @endif --}}
                     @endforeach
                     <hr>
 

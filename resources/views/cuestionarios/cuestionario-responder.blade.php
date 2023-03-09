@@ -103,7 +103,6 @@
             </div>
         </nav>
         @endmobile
-
         {{-- Encabezado --}}
         <div class="text-center head">
             <p class="m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
@@ -139,7 +138,7 @@
 
         {{-- INCLUDE para Adjuntos --}}
         {{-- boton para el plegar/desplegar los adjuntos --}}
-        
+
         {{-- <div class="row border m-sm-2 p-2 d-flex">
             <div class="form-switch fs-4">
                 <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">

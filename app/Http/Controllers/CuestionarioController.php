@@ -51,7 +51,7 @@ class CuestionarioController extends Controller {
         // dump( $quries );
         // exit;
 
-        return view('cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'recomendaciones', 'adjuntos' ));
+        return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'recomendaciones', 'adjuntos' ) );
     }
 
     /* Muestra en forma de tabla vertical solo las respuetas del formulario seleccionado */
@@ -114,6 +114,7 @@ class CuestionarioController extends Controller {
 
     public function preguntasRespuestas( $FRM_id){
         /* Se consultan las preguntas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
+        DB::enableQueryLog();
             $elementos = ModEstablecimiento:: select('rbf.RBF_id'
             ,'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto'
             , 'bp.BCP_aclaracion', 'bp.FK_CAT_id'
@@ -121,7 +122,9 @@ class CuestionarioController extends Controller {
             , 'c.FK_CAT_id as categoriaID'
             , 'formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id'
             , 'establecimientos.EST_nombre', 'establecimientos.EST_id', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id','rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension','a.ARC_descripcion')
-            ->rightJoin ('formularios', 'establecimientos.EST_id', 'formularios.FK_EST_id')
+
+            ->leftjoin ('visitas as v', 'establecimientos.EST_id', 'v.FK_EST_id')
+            ->leftjoin ('formularios', 'v.VIS_id', 'formularios.FK_VIS_id')
             ->leftJoin ('r_bpreguntas_formularios as rbf', 'formularios.FRM_id', 'rbf.FK_FRM_id')
             ->leftJoin ('banco_preguntas as bp', 'rbf.FK_BCP_id', 'bp.BCP_id')
             ->leftJoin ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
@@ -395,63 +398,6 @@ class CuestionarioController extends Controller {
         exit;
         return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
     }
-
-    /* Adiciona nuevos archivos adjuntos por formulario (es diferente de las recomendaciones) */
-    // public function adjuntosNuevo(Request $request){
-    //     dump( $request->except('_token'));exit;
-
-    //     $ADJ_responsables = json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT);
-    //     $ADJ_entrevistados = json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT);
-    //     $request->validate([
-    //         'ADJ_titulo' => 'required',
-    //         'ADJ_fecha' => 'required|max:200|min:5',
-    //         'ADJ_responsables.*' => 'required|max:200|min:5',
-    //         'ADJ_entrevistados.*' => 'required|max:200|min:5',
-    //         'ADJ_resumen' => 'required|min:5',
-    //         'ARC_archivo' => 'required',
-    //         'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
-    //         'ARC_descripcion.*' => 'nullable',
-    //     ], [
-    //         'required' => '¡El dato es requerido!',
-    //         'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 300MB!',
-    //         'ARC_archivo.*.mimes' => 'El archivos debe ser: imagen, documento, audio o video',
-    //         'max' => '¡Dato muy extenso!',
-    //         'min' => '¡Dato muy corto!',
-    //     ]);
-
-    //     DB::beginTransaction();
-    //     try {
-    //         /* Guarda los archivos subidos */
-    //         if ( $request->file('ARC_archivo') ){
-    //             $ARC_ids = [];
-    //             foreach($request->file('ARC_archivo') as $key => $archivo){
-    //                 $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
-    //                 //     dump( $tipoArchivo, $tipoArchivo[0] );
-    //                 // exit;
-    //                 $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/adjuntos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'adjunto', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
-
-    //                 array_push( $ARC_ids, $idArchivo->ARC_id );
-    //                 $archivo->move(public_path('/uploads/adjuntos/'), $archivo->store(''));
-    //             }
-    //         }
-
-    //         /* Guarda datos en la tabla adjuntos */
-    //         $adjunto = ModAdjunto::create(['FK_FRM_id' => $request->FK_FRM_id, 'ADJ_titulo' => $request->ADJ_titulo, 'ADJ_fecha' => $request->ADJ_fecha, 'ADJ_responsables' => json_encode($request->ADJ_responsables, JSON_FORCE_OBJECT), 'ADJ_entrevistados' => json_encode($request->ADJ_entrevistados, JSON_FORCE_OBJECT), 'ADJ_resumen' => $request->ADJ_resumen]);
-
-    //         $adjuntos_archivos = [];
-    //         foreach ($ARC_ids as $key => $value) {
-    //             array_push($adjuntos_archivos, [ 'FK_ARC_id' => $value, 'FK_ADJ_id' => $adjunto->ADJ_id ]);
-    //         }
-    //         ModAdjuntoArchivo::insert($adjuntos_archivos);
-    //         DB::commit();
-    //         return redirect('formulario/adjuntos/'.$request->FK_FRM_id)->with('status', '¡Datos almacenados con exito!');
-    //     }
-    //     catch (\Exception $e) {
-    //         DB::rollback();
-    //         exit ($e->getMessage());
-    //     }
-    // }
-
 
 }
 

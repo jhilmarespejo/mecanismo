@@ -1,5 +1,6 @@
 <div id="frm_cuestionario">
     <ol id="q" >
+        @php $c = 1; @endphp
         @foreach ($auxCategoriasArray as $keyCat=>$categorias)
         <li>
             <strong id="categorias">{{ $keyCat }}</strong>
@@ -10,12 +11,12 @@
                 <li class="mt-1" id="con_subcategorias">
                     {{-- Nombre de la Subcategoría --}}
                     <strong >{{ $keySC }}</strong>
-                    <ol>
+                    <ul class="list-unstyled">
                         @foreach ($subcategorias as $key=>$pregunta)
                             <li>
                                 <div class=" row border-bottom py-3 hover p-2 elementos">
                                     <div class="col-sm-5 col-preguntas-sc" >
-                                        {{ $pregunta->BCP_pregunta }}
+                                        {{ $c. '. ' .$pregunta->BCP_pregunta }}
                                         @if ($pregunta->BCP_tipoRespuesta == 'Afirmación' || $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
                                         @endif
                                     </div>
@@ -85,20 +86,21 @@
                                     </div>
                                 </div>
                             </li>
+                        @php $c++; @endphp
                         @endforeach
-                    </ol>
+                    </ul>
                 </li>
                 @endif
                 @endforeach
             </ol>
                 {{-- cuando la categoria NO tiene subcategoria --}}
-            <ol>
+            <ul class="list-unstyled">
                 @foreach ($categorias as $keyP=>$preg )
                     @if ( !is_string($keyP) )
                         <li class="mt-1" id="sin_preguntas">
                             <div class="row border-bottom py-3 hover elementos">
                                 <div class="col-sm-5 col-preguntas" >
-                                    {{ $preg->BCP_pregunta }}
+                                    {{ $c. '. ' .$preg->BCP_pregunta }}
                                     {{-- @if ($preg->BCP_tipoRespuesta == 'Afirmación' || $preg->BCP_tipoRespuesta == 'Lista desplegable')
                                     @endif --}}
                                 </div>
@@ -172,8 +174,9 @@
                             </div>
                         </li>
                     @endif
+                    @php $c++; @endphp
                 @endforeach
-            </ol>
+            </ul>
                 {{-- </li> --}}
                 @endforeach
             {{-- </ol> --}}
