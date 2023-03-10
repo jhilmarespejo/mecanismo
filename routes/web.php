@@ -66,6 +66,8 @@ Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'respo
 
 Route::get('cuestionario/ver/{id}', [CuestionarioController::class, 'verCuestionario'])->name('cuestionario.ver')->middleware('auth');
 
+Route::post('cuestionario/eliminar', [CuestionarioController::class, 'eliminarCuestionario'])->name('cuestionario.eliminar')->middleware('auth');
+
 Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario')->middleware('auth');
 
 Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store')->middleware('auth');
@@ -73,6 +75,7 @@ Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->nam
 Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones')->middleware('auth');
 
 Route::post('cuestionario/confirmaCuestionario', [CuestionarioController::class, 'confirmaCuestionario'])->name('cuestionario.confirmaCuestionario')->middleware('auth');
+
 
 
 // RECOMENDACIONES

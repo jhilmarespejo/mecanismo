@@ -81,10 +81,13 @@
             </div>
         </main>
 
+        @yield('js')
         @stack('modals')
         @livewireScripts
+
         @stack('js')
         <script>
+            $("#alert").fadeOut(3500);
             Livewire.on('success',(message)=>{
                 Swal.fire(
                  '¡Correcto!',
@@ -92,7 +95,6 @@
                  'success'
                 )
             });
-
             Livewire.on('danger',(message)=>{
                 Swal.fire(
                  '¡Error',

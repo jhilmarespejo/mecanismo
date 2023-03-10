@@ -4,6 +4,9 @@
 @extends('layouts.app')
 @section('title', 'Cuestionario')
 
+    {{-- @if(Session::has('success')) --}}
+
+
 @section('content')
 {{-- minimenu --}}
     @mobile
@@ -34,41 +37,47 @@
 
 <div class="container p-2">
     <div class="card text-dark bg-light " >
-        {{-- <div class="card-header fs-5">Formularios aplicados en esta visita</div> --}}
         <div class="card-body">
             <dl class="">
                 @if ( count($formularios) > 0 )
                     @foreach ($formularios as $key=>$formulario)
-                        {{-- @if ( Auth::user()->id == $formulario->FK_USER_id ) --}}
-                            <dt class="mt-3 ">
-                                <span class="badge bg-primary rounded-pill text-shadow p-1">
-                                    {{ \Carbon\Carbon::parse($formulario->FRM_fecha)->format('d-m-Y') }}
-                                </span>
+                            <dt class="mt-3">
+                                <ul class="list-group list-group-horizontal list-unstyled ">
 
-                                <a href="/cuestionario/ver/{{$formulario->FRM_id}}"><i class="bi bi-eye-fill px-2 text-success fs-5"></i></a>
+                                    <li class=" p-0 m-0">
+                                        <span class="badge bg-primary rounded-pill text-shadow p-1">
+                                        {{ \Carbon\Carbon::parse($formulario->FRM_fecha)->format('d-m-Y') }}
+                                        </span>
+                                    </li>
 
-                                <a href="/cuestionario/imprimir/{{$formulario->FRM_id}}"><i class="bi bi-printer-fill px-2 text-success fs-5"></i></a>
-
-                                <a href="/cuestionario/responder/{{$formulario->FRM_id}}"><i class="bi bi-pen-fill px-2 text-success fs-5"></i></a>
-
-                                <a href=""><i class="bi bi-trash px-2 text-success fs-5"></i></a>
-
-
-
-                                <i class=""></i>
+                                    <li class="p-0 m-0">
+                                        <a href="/cuestionario/ver/{{$formulario->FRM_id}}"><i class="bi bi-eye-fill px-2 text-primary fs-5"></i></a>
+                                    </li>
+                                    <li class="p-0 m-0">
+                                        <a href="/cuestionario/imprimir/{{$formulario->FRM_id}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
+                                    </li>
+                                    <li class="p-0 m-0">
+                                        <a href="/cuestionario/responder/{{$formulario->FRM_id}}"><i class="bi bi-pen-fill px-2 text-primary fs-5"></i></a>
+                                    </li>
+                                    <li class="p-0 m-0">
+                                        <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario">
+                                            @csrf
+                                            <input type="hidden" name="FRM_id" value="{{$formulario->FRM_id}}">
+                                            <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-primary fs-5"></i></button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </dt>
-                            <dd class="ps-3 border-bottom mb-1 table-hover row">
-                                <div class="col-1">
+                            <dd class="border-bottom mb-1 ms-3 p-3 table-hover position-relative">
+                                {{$formulario->FRM_titulo}} ({{ count($formularios)-($key) }})
+                                <span class="position-absolute top-50 start-0 translate-middle badge rounded-pill">
                                     @if ( $formulario->estado == 'completado' )
-                                        <i class="bi bi-check-circle-fill text-success fs-2"></i>
+                                        <i class="bi bi-check-circle-fill text-success fs-4"></i>
                                     @else
-                                    <i class="bi bi-info-square text-warning fs-2"></i>
+                                        <i class="bi bi-exclamation-diamond-fill text-warning fs-4"></i>
                                     @endif
-
-                                </div>
-                                <div class="col ms-2">{{$formulario->FRM_titulo}} ({{ count($formularios)-($key) }})</div>
+                                </span>
                             </dd>
-                        {{-- @endif --}}
                     @endforeach
                     <hr>
 
@@ -99,6 +108,46 @@
         </div>
     </div>
 </div>
+
+
+@endsection
+
+@section('js')
+    @if (Session::has('success'))
+        <script>
+            Swal.fire(
+                '{{Session::get('success') }}',
+            )
+        </script>
+    @endif
+    @if(Session::has('warning'))
+        <script>
+            Swal.fire(
+                '{{Session::get('warning') }}',
+            )
+        </script>
+
+    @endif
+
+    <script>
+    $('.frm-eliminar-cuestionario').submit( function(e){
+        e.preventDefault();
+        // var form = $(this).parents('form');
+        Swal.fire({
+            title: '¿Está seguro de eliminar?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Eliminar'
+        }).then((result) => {
+            if (result.value) {
+                this.submit();
+                // Swal.fire('Eliminado', 'Elimando correctamente!', 'success');
+            }
+        });
+    });
+    </script>
 
 @endsection
 

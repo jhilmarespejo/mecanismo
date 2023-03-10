@@ -292,7 +292,7 @@
   </div>
 
 <script type="text/javascript">
-    $("#alert").fadeOut(4500);
+   
 
     // $(".visita").click(function (e) {
     //     var id = parseInt((this.id).replace(/[^0-9.]/g, ""));

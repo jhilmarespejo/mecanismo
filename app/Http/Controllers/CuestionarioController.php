@@ -17,9 +17,8 @@ class CuestionarioController extends Controller {
      * Muestra un el cuestionario con preguntas listas para ser respondidas
      * $id Formulario dado
      */
+
     public function responderCuestionario( $FRM_id ){
-
-
         /*Consulta para obtener las RECOMENDACIONES de formulario correspondiente */
             $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'e.EST_nombre', 'FK_ARC_id')
             ->leftJoin( 'r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
@@ -108,6 +107,32 @@ class CuestionarioController extends Controller {
             DB::rollback();
             exit ($e->getMessage());
         }
+
+
+    }
+
+    /* Elimina el cuestionario duplicado */
+    public function eliminarCuestionario( Request $request ){
+        // dump(  $request->except('_token') );exit;
+
+        if(Auth::user()->rol == 'Administrador' ){
+
+            DB::beginTransaction();
+            try {
+
+                ModFormulario::where('FRM_id', $request->FRM_id)->delete();
+                ModPreguntasFormulario::where('FK_FRM_id', $request->FRM_id)->delete();
+
+                DB::commit();
+                return redirect()->back()->with('success', 'Eliminado correctamente');
+            }
+            catch (\Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('warning', 'No se pudo eliminar el formulario');
+                exit ($e->getMessage());
+            }
+        }
+
 
 
     }
