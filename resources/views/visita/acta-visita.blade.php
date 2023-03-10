@@ -2,6 +2,33 @@
 @section('title', 'Cuestionario')
 
 @section('content')
+
+<div class="container p-4">
+    <div class="card  mb-3" >
+        <div class="card-header bg-transparent ">Acta de visita no anunciada</div>
+        <form method="Post" action="/visita/guardarActaVisita" id="form_guarda_acta" enctype="multipart/form-data">
+            @csrf
+            <div class="card-body">
+                <div class="mb-3">
+                    {{-- {{$VIS_id}} --}}
+                    <label for="formFile" class="form-label">Seleccione un archivo:</label>
+                    <input class="form-control" type="file" id="acta_visita" name="VIS_acta">
+                    <small class="text-danger error" id="VIS_acta_err"></small>
+                    {{-- <input type="hidden" name="EST_id" value="{{ $formularios[0]->EST_id }}">--}}
+                    <input type="hidden" name="VIS_id" value="{{$VIS_id}}">
+                    @error('VIS_acta')
+                        <small class="text-danger error">*{{$message}}</small>
+                    @enderror
+                </div>
+            </div>
+            <div class="card-footer bg-transparent ">
+                <button type="submit" class="btn btn-success box-shadow text-shadow text-white"> Guardar archivo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 {{-- <div class="modal fade" id="modal_acta" tabindex="-1" aria-labelledby="actaLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -16,17 +43,7 @@
                 width='100%'
                 height='400px'>
             @else
-                <form method="post" id="form_guarda_acta">
-                    <div class="mb-3">
-                        {{$VIS_id}}
-                        <label for="formFile" class="form-label">Acta de visita:</label>
-                        <input class="form-control" type="file" id="acta_visita" name="VIS_acta">
-                        <small class="text-danger error" id="VIS_acta_err"></small>
-                        <input type="hidden" name="EST_id" value="{{ $formularios[0]->EST_id }}">
-                        <input type="hidden" name="VIS_id" value="{{$VIS_id}}">
 
-                    </div>
-                </form>
             @endif
 
         </div>
@@ -50,7 +67,7 @@
     @endphp
 
 
-    <div class="container p-4">
+    {{-- <div class="container p-4">
         <div class="card">
             <h5 class="card-header">Acta de visita no anunciada</h5>
             @if ( $urlActa )
@@ -87,7 +104,7 @@
             @endif
 
         </div>
-    </div>
+    </div> --}}
 
     <script>
         $(document).on('click', '#btn_guarda_acta', function(e){

@@ -7,12 +7,14 @@ use Illuminate\Http\Request;
 use DB;
 use Validator;
 use Illuminate\Support\Facades\Auth;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class VisitaController extends Controller
 {
 
     // Guardar datos de nueva visita
-    public function guardarNuevaVisita(Request $request) {
+    public function guardarNuevaVisita( Request $request ) {
         $numeroVisita = ModVisita::select('FK_EST_id')
         ->where('FK_EST_id', $request->FK_EST_id)
         ->get()->count();
@@ -75,6 +77,50 @@ class VisitaController extends Controller
         return view('formulario.formularios-lista', compact('formularios', 'fs'));
 
     }
+
+    /*Vista para guardar nueva acta de Visita */
+    public function actaVisita( $VIS_id ){
+        // dump( $id); exit;
+        return view('visita.acta-visita', compact('VIS_id'));
+    }
+
+    public function guardarActaVisita( Request $request ){
+        $request->validate([
+            'VIS_acta' => 'required|mimes:pdf,jpg,jpeg,png,xls,xlsx,ppt,pptx,doc,docx|max:20048',
+            // 'VIS_acta' => 'max:20000'
+        ], [
+            'VIS_acta.required' => 'El archivo es necesario!!!!',
+            'VIS_acta.max' => 'El archivo no debe ser mayor a 20Mb',
+            'VIS_acta.mimes' => 'Puede subir archivos de imagen o PDF'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $ruta = public_path('uploads/actas/');
+            $nombre = $request->VIS_acta->store('');
+
+            $tipoArchivo =  explode( "/", $request->VIS_acta->getClientMimeType() );
+            // ModVisita::where('VIS_id', $request->VIS_id)
+            // ->update(['VIS_urlActa' => $request->VIS_acta->store('/uploads/actas')]);
+            // DB::commit();
+
+            if( $tipoArchivo[0] == 'image'){
+                // dump( $tipoArchivo[0] );exit;
+                Image::make($request->VIS_acta)
+                ->resize(null, 550, function ($constraint) {
+                    $constraint->aspectRatio();
+                })->save($ruta.$nombre);
+            } else {
+                $request->VIS_acta->move( $ruta, $nombre );
+            }
+        }
+        catch (\Exception $e) {
+            DB::rollback();
+            //d( $e );
+            exit ($e->getMessage());
+        }
+    }
+
 
 
 

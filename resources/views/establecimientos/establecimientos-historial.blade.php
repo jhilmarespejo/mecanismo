@@ -225,13 +225,7 @@
                                 <p class="card-text">
                                     <ul class="list-group">
                                         <li class="list-group-item border-0">
-                                            {{-- Información recolectada --}}
-                                            {{-- <a class="text-decoration-none visita" role="button" data-bs-toggle="modal" data-bs-target="#modalListaFormularios" id="visita_{{$VIS_id}}">
-                                                 Información recolectada
-                                            </a>
-                                            @include('formulario.formularios-lista') --}}
                                             <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
-
                                         </li>
                                         <li class="list-group-item border-0">
                                             {{-- <a class="text-decoration-none"
@@ -240,6 +234,10 @@
                                             {{-- <button type="button" class="" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                                 informe
                                               </button> --}}
+                                            <a class="text-decoration-none" href="/visita/actaVisita/{{$VIS_id}}">
+                                                <i class="bi bi-file-earmark-medical-fill"></i> Acata de visita
+                                            </a>
+
                                         </li>
                                     </ul>
                                 </p>
@@ -292,7 +290,7 @@
   </div>
 
 <script type="text/javascript">
-   
+
 
     // $(".visita").click(function (e) {
     //     var id = parseInt((this.id).replace(/[^0-9.]/g, ""));
