@@ -228,12 +228,6 @@
                                             <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
                                         </li>
                                         <li class="list-group-item border-0">
-                                            {{-- <a class="text-decoration-none"
-                                            href="/img/informe.png"
-                                            >   <i class="bi bi-file-ruled"></i> Infome</a> --}}
-                                            {{-- <button type="button" class="" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                informe
-                                              </button> --}}
                                             <a class="text-decoration-none" href="/visita/actaVisita/{{$VIS_id}}">
                                                 <i class="bi bi-file-earmark-medical-fill"></i> Acata de visita
                                             </a>

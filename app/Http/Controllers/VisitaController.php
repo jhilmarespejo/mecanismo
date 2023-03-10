@@ -81,7 +81,11 @@ class VisitaController extends Controller
     /*Vista para guardar nueva acta de Visita */
     public function actaVisita( $VIS_id ){
         // dump( $id); exit;
-        return view('visita.acta-visita', compact('VIS_id'));
+        $visita = ModVisita::select('VIS_urlActa', 'FK_EST_id')
+        ->where('VIS_id', $VIS_id)
+        ->get()->toArray();
+
+        return view('visita.acta-visita', compact('VIS_id','visita'));
     }
 
     public function guardarActaVisita( Request $request ){
@@ -100,9 +104,8 @@ class VisitaController extends Controller
             $nombre = $request->VIS_acta->store('');
 
             $tipoArchivo =  explode( "/", $request->VIS_acta->getClientMimeType() );
-            // ModVisita::where('VIS_id', $request->VIS_id)
-            // ->update(['VIS_urlActa' => $request->VIS_acta->store('/uploads/actas')]);
-            // DB::commit();
+            ModVisita::where('VIS_id', $request->VIS_id)
+            ->update(['VIS_urlActa' => $request->VIS_acta->store('/uploads/actas')]);
 
             if( $tipoArchivo[0] == 'image'){
                 // dump( $tipoArchivo[0] );exit;
@@ -113,6 +116,8 @@ class VisitaController extends Controller
             } else {
                 $request->VIS_acta->move( $ruta, $nombre );
             }
+            DB::commit();
+            return redirect()->back()->with('success', 'Correcto');
         }
         catch (\Exception $e) {
             DB::rollback();

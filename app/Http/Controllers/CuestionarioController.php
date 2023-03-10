@@ -113,13 +113,10 @@ class CuestionarioController extends Controller {
 
     /* Elimina el cuestionario duplicado */
     public function eliminarCuestionario( Request $request ){
-        // dump(  $request->except('_token') );exit;
-
         if(Auth::user()->rol == 'Administrador' ){
 
             DB::beginTransaction();
             try {
-
                 ModFormulario::where('FRM_id', $request->FRM_id)->delete();
                 ModPreguntasFormulario::where('FK_FRM_id', $request->FRM_id)->delete();
 
@@ -132,9 +129,6 @@ class CuestionarioController extends Controller {
                 exit ($e->getMessage());
             }
         }
-
-
-
     }
 
     public function preguntasRespuestas( $FRM_id){
