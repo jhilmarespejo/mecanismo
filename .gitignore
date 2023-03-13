@@ -2,7 +2,7 @@
 /public/uploads
 /public/storage
 storage/*.key
-/.env
+.env
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
