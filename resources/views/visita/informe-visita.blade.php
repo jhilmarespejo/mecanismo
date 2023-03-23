@@ -98,15 +98,16 @@
                             </p>
                     @endfor
 
-
-                    <h6 style="font-family: Arial; font-size:0.9em">Imágenes de respaldo:</h6>
-                        @foreach ( $imagenes as $imagen  )
-                           <p style="padding: 2px">
-                                <img src="/{{ $imagen->ARC_ruta }}" style="border: 1px solid #000; height:200px" class="img-fluid" alt="{{ $imagen->ARC_descripcion }}">
-                                <br>
-                                <span class="text-center" >{{ $imagen->ARC_descripcion }}</span>
-                            </p>
-                        @endforeach
+                    @if ( count($imagenes) > 0 )
+                        <h6 style="font-family: Arial; font-size:0.9em">Imágenes de respaldo:</h6>
+                            @foreach ( $imagenes as $imagen  )
+                            <p style="padding: 2px">
+                                    <img src="/{{ $imagen->ARC_ruta }}" style="border: 1px solid #000; height:200px" class="img-fluid" alt="{{ $imagen->ARC_descripcion }}">
+                                    <br>
+                                    <span class="text-center" >{{ $imagen->ARC_descripcion }}</span>
+                                </p>
+                            @endforeach
+                    @endif
 
                 </li>
 
