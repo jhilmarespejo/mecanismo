@@ -16,6 +16,5 @@ class ModFormularioArchivo extends Model
     public $timestamps = false;
     // const CREATED_AT = 'createdAt';
     // const UPDATED_AT = 'updatedAt';
-
-    protected $fillable = [ 'FK_FRM_id', 'FK_ARC_id' ];
+    protected $guarded = [];
 }

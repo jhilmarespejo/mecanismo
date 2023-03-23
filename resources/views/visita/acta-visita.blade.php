@@ -3,6 +3,7 @@
 
 @section('content')
 
+
 <div class="container p-4">
 
 
@@ -34,7 +35,12 @@
                         </div>
                     </div>
                     <div class="card-footer bg-transparent ">
-                        <button type="submit" class="btn btn-success box-shadow text-shadow text-white"> Guardar archivo</button>
+                        <button type="submit" id="btn_guarda_archivo" class="btn btn-success box-shadow text-shadow text-white"> Guardar archivo</button>
+
+                        <span class="d-none btn btn-primary box-shadow text-shadow text-white" role="button" id="btn_cargando" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            Cargando...
+                        </span>
                     </div>
                 </form>
             @endif
@@ -46,6 +52,12 @@
 @endsection
 
 @section('js')
+    <script>
+        $('#btn_guarda_archivo').click(function (e) {
+            $(this).addClass('d-none');
+            $('#btn_cargando').removeClass('d-none');
+        });
+    </script>
     @if (Session::has('success'))
         <script>
             Swal.fire(

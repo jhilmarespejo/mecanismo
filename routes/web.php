@@ -115,6 +115,8 @@ Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita']
 
 Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
 
+Route::get('visita/informeVisita/{VIS_id}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
+
 // Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 
 

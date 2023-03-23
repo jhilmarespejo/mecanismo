@@ -31,15 +31,15 @@ class CuestionarioController extends Controller {
         ->get();
 
         /*Consulta para obtener las DOCUMENTOS ADJUNTOS de formulario correspondiente */
-            $adjuntos = ModAdjunto::from( 'adjuntos as ad' )
-            ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id', 'f.FRM_titulo', 'e.EST_nombre')
-            ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
-            ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-            ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-            ->leftjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
-            ->where ('ad.FK_FRM_id', $FRM_id)
-            ->orderBy('ad.ADJ_id', 'desc')
-        ->get();
+            $adjuntos = ModAdjunto::from( 'archivos as a' )
+            ->select('a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'fa.FK_ARC_id', 'fa.FK_FRM_id')
+            ->leftjoin ('r_formularios_archivos as fa', 'fa.FK_ARC_id', 'a.ARC_id')
+            ->leftjoin ('formularios as f', 'f.FRM_id','fa.FK_FRM_id')
+            // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
+            // ->leftjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
+            ->where ('fa.FK_FRM_id', $FRM_id)
+            ->orderBy('a.ARC_id', 'desc')
+            ->get();
 
 
         DB::enableQueryLog();
@@ -399,12 +399,12 @@ class CuestionarioController extends Controller {
 
         DB::enableQueryLog();
 
-        $adj = ModAdjunto::from( 'adjuntos as ad' )
-        ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
-        ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
-        ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-        ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-        ->where ('f.FK_EST_id', $est_id);
+        // $adj = ModAdjunto::from( 'adjuntos as ad' )
+        // ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
+        // ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
+        // ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
+        // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
+        // ->where ('f.FK_EST_id', $est_id);
 
         if( $frm_id ){
             $adjuntos = $adj->where ('ad.FK_FRM_id', $frm_id)->orderBy('ad.ADJ_id', 'desc')->get();

@@ -1,11 +1,13 @@
 @foreach ($archivos as $k=>$archivo)
 {{-- @dump($archivo) --}}
     @php
-        if ( isset($archivo['FK_ADJ_id']) ){
-            $archivoId = $archivo['FK_ADJ_id'];
+        if ( isset($archivo['FK_ARC_id']) ){
+            $archivoId = $archivo['FK_ARC_id'];
+
         } elseif ( isset($archivo['FK_REC_id']) ){
             $archivoId = $archivo['FK_REC_id'];
-        }elseif ( isset($archivo['FK_RES_id']) ){
+
+        } elseif ( isset($archivo['FK_RES_id']) ){
             $archivoId = $archivo['FK_RES_id'];
         }
     @endphp

@@ -127,25 +127,25 @@
         </div>
 
         {{-- INCLUDE para Recomendaciones --}}
-        <div class="row border m-sm-2 p-2 d-flex">
+        {{-- <div class="row border m-sm-2 p-2 d-flex"> --}}
             {{-- boton para el plegar/desplegar las observaciones --}}
             {{-- <div class="form-switch fs-4">
                 <input class="form-check-input chek-observaciones" type="checkbox" onclick="plegar_desplegar('accordion_observaciones')">
             </div>
             <legend class="text-primary fs-4 text-center" > Oservaciones identificadas</legend>
-            @include('includes.recomendaciones') --}}
-        </div>
+            @include('includes.recomendaciones')
+        </div> --}}
 
         {{-- INCLUDE para Adjuntos --}}
         {{-- boton para el plegar/desplegar los adjuntos --}}
 
-        {{-- <div class="row border m-sm-2 p-2 d-flex">
+        <div class="row border m-sm-2 p-2 d-flex">
             <div class="form-switch fs-4">
                 <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">
             </div>
             <legend class="text-primary fs-4 text-center" > Archivos adjuntos</legend>
-            @include('includes.adjuntos')
-        </div> --}}
+            @include('includes.adjuntos', ['FRM_id' => $elemento->FRM_id])
+        </div>
 
     @else
         <div class="text-center head">
@@ -187,8 +187,6 @@
         });
     });
 
-
-
     function confirmaCuestionario( FRM_id ){
         $.ajax({
                 async: true,
@@ -216,7 +214,7 @@
         e.preventDefault();
         let id = $(this).attr('id').replace(/[^0-9]/g,'');
         let formData = new FormData($('#frm_'+id)[0]);
-        console.log(formData);
+        // console.log(formData);
         $.ajax({
             async: true,
             // headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},

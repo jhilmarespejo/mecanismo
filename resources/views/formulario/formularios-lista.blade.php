@@ -59,13 +59,16 @@
                                     <li class="p-0 m-0">
                                         <a href="/cuestionario/responder/{{$formulario->FRM_id}}"><i class="bi bi-pen-fill px-2 text-primary fs-5"></i></a>
                                     </li>
+                                    @if ( $formulario->estado != 'completado' )
                                     <li class="p-0 m-0">
                                         <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario">
                                             @csrf
                                             <input type="hidden" name="FRM_id" value="{{$formulario->FRM_id}}">
-                                            <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-primary fs-5"></i></button>
+                                            <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-danger fs-5"></i></button>
                                         </form>
                                     </li>
+                                    @endif
+
                                 </ul>
                             </dt>
                             <dd class="border-bottom mb-1 ms-3 p-3 table-hover position-relative">
@@ -84,17 +87,7 @@
                 @else
 
                 @endif
-                @foreach ( $fs as $k=>$f)
-                    @if (strstr($f['FRM_titulo'], 'Salud'))
-                        <div class="alert alert-success row p-0" role="alert">
-                            <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
-                                <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
-                            </a>
-                        </div>
-                    @endif
 
-                @endforeach
-                <hr>
                 @foreach ( $fs as $k=>$f)
                     @if (strstr($f['FRM_titulo'], 'Violencia'))
                         <div class="alert alert-danger row p-0" role="alert">
@@ -104,6 +97,17 @@
                         </div>
                     @endif
                 @endforeach
+                <hr>
+                @foreach ( $fs as $k=>$f)
+                @if (strstr($f['FRM_titulo'], 'Salud'))
+                    <div class="alert alert-success row p-0" role="alert">
+                        <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
+                            <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
+                        </a>
+                    </div>
+                @endif
+
+            @endforeach
             </dl>
         </div>
     </div>
@@ -139,6 +143,7 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
+            cancelButtonText: 'Cancelar',
             confirmButtonText: 'Eliminar'
         }).then((result) => {
             if (result.value) {
