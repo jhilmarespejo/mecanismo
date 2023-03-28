@@ -25,25 +25,31 @@ class EstablecimientosController extends Controller
             ->select('TES_id', 'TES_tipo')
             ->get();
 
-        $FK_TES_id = $request->FK_TES_id;
+
+        if($request->FK_TES_id){
+            $FK_TES_id = $request->FK_TES_id;
+        } else {
+            $FK_TES_id = 1;
+        }
 
         DB::enableQueryLog();
-        $establecimientos = ModEstablecimiento::select('establecimientos.EST_id','establecimientos.EST_nombre','establecimientos.EST_direccion', 'establecimientos.EST_telefonoContacto', 'tes.TES_tipo', 'c.CID_nombre as Municipio', 'c2.CID_nombre as Provincia', 'c3.CID_nombre as Departamento')
-            ->join('tipo_establecimiento as tes', 'establecimientos.FK_TES_id', 'tes.TES_id')
-            ->leftJoin('ciudades as c', 'c.CID_id', 'establecimientos.FK_CID_id')
-            ->leftJoin('ciudades as c2', 'c2.CID_id', 'c.FK_CID_id')
-            ->leftJoin('ciudades as c3', 'c3.CID_id', 'c2.FK_CID_id')
-            ->orWhere('establecimientos.FK_TES_id', 'ilike', '%' . $request->FK_TES_id . '%')
-            //->where('establecimientos.EST_nombre',  'ilike', '%' . $this->buscarEstablecimiento . '%')
-            ->where('establecimientos.estado', 1)
-            ->orderBy('establecimientos.EST_id')
-            // ->orderBy('establecimientos.EST_nombre')
-            ->get();
+        $establecimientos = ModEstablecimiento::from('establecimientos as e')
+        ->select('e.EST_id','e.EST_nombre','e.EST_departamento','e.EST_provincia','e.EST_municipio', 'e.EST_telefonoContacto', 'tes.TES_tipo', 'c.CID_nombre as Municipio', 'c2.CID_nombre as Provincia', 'c3.CID_nombre as Departamento')
+        ->join('tipo_establecimiento as tes', 'e.FK_TES_id', 'tes.TES_id')
+        ->leftJoin('ciudades as c', 'c.CID_id', 'e.FK_CID_id')
+        ->leftJoin('ciudades as c2', 'c2.CID_id', 'c.FK_CID_id')
+        ->leftJoin('ciudades as c3', 'c3.CID_id', 'c2.FK_CID_id')
+        ->orWhere('e.FK_TES_id', 'ilike', '%' . $FK_TES_id . '%')
+        //->where('e.EST_nombre',  'ilike', '%' . $this->buscarEstablecimiento . '%')
+        ->where('e.estado', 1)
+        //->orderBy('tes.TES_id', 'asc' )
+        // ->orderBy('e.EST_nombre')
+        ->get();
             //->where('tes.TES_tipo','Centro Penitenciario' )
             //->orderby($this->ordenColumna, $this->ordenDireccion)
             //->paginate(5);
             $quries = DB::getQueryLog();
-            // dump($quries);
+            // dump($quries);exit;
             return view('establecimientos.establecimientos-responses', compact('establecimientos', 'tiposEstablecimientos', 'FK_TES_id'));
     }
 
@@ -114,7 +120,6 @@ class EstablecimientosController extends Controller
         return view('establecimientos.establecimientos-historial', compact('visitas','formularios', 'id', 'recomendaciones'));
         // return view('establecimientos.establecimientos-visitas', compact('visitas', 'formularios', 'id', 'recomendaciones'));
     }
-
 
 
     public function guardarNuevoEstablecimiento(Request $request)  {

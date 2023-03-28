@@ -10,9 +10,9 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Nombre </th>
-                    {{-- <th scope="col">Municipio</th>
-                    <th scope="col">Provincia</th>--}}
                     <th scope="col">Departamento</th>
+                    <th scope="col">Provincia</th>
+                    <th scope="col">Municipio</th>
                     {{-- <th scope="col">Dirección</th>
                     <th scope="col">Tipo</th> --}}
                     {{-- <th scope="col">Teléfono</th> --}}
@@ -22,12 +22,12 @@
             <tbody>
                 @foreach ($establecimientos as $key=>$establecimiento)
                     <tr>
-                        <th>{{ $key+1 }}</th>
+                        <th></th>
                         <td> <a class="text-decoration-none" href="/establecimientos/historial/{{$establecimiento->EST_id}}">{{ $establecimiento->EST_nombre }}</a></td>
-                        {{-- <td>{{ $establecimiento->Municipio }}</td>
-                        <td>{{ $establecimiento->Provincia }}</td>--}}
-                        {{-- <td>{{ $establecimiento->Departamento }}</td> --}}
-                        <td>{{ $establecimiento->EST_direccion }}</td>
+                        <td>{{ $establecimiento->EST_departamento }}</td>
+                        <td>{{ $establecimiento->EST_municipio }}</td>
+                        <td>{{ $establecimiento->EST_provincia }}</td>
+                        {{-- <td>{{ $establecimiento->EST_direccion }}</td> --}}
                         {{-- <td>{{ $establecimiento->TES_tipo }}</td> --}}
                         {{-- <td>{{ $establecimiento->EST_telefonoContacto }}</td> --}}
                         {{-- <td class=" col-2 text-center">
@@ -43,6 +43,7 @@
         </div>
     @endif
 @endif
+
 
 {{-- Controles adicionales --}}
 <div class="col-sm pt-2-sm" id="tipos_establecimientos">
@@ -77,9 +78,30 @@
                             <small class="error text-danger" id="EST_nombre_err" ></small>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Dirección del establecimiento</label>
-                                <input type="text" class="form-control" name="EST_direccion">
-                                <small class="error text-danger" id="EST_direccion_err" ></small>
+                                <label class="form-label">Departamento</label>
+                                <select class="form-select" name="EST_departamento" >
+                                    <option value="" selected>Seleccione ...</option>
+                                    <option value="La Paz">La Paz</option>
+                                    <option value="Oruro">Oruro</option>
+                                    <option value="Potosí">Potosí</option>
+                                    <option value="Cochabamba">Cochabamba</option>
+                                    <option value="Tarija">Tarija</option>
+                                    <option value="Chuquisaca">Chuquisaca</option>
+                                    <option value="Pando">Pando</option>
+                                    <option value="Beni">Beni</option>
+                                    <option value="">Santa Cruz</option>
+                                </select>
+                                <small class="error text-danger" id="EST_departamento_err" ></small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Provincia</label>
+                                <input type="text" class="form-control" name="EST_provincia">
+                                <small class="error text-danger" id="EST_provincia_err" ></small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Municipio</label>
+                                <input type="text" class="form-control" name="EST_municipio">
+                                <small class="error text-danger" id="EST_municipio_err" ></small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Teléfono de contacto</label>
@@ -137,14 +159,27 @@
             error: function(response){ console.log(response) }
         });
     });
+
+
     $(document).ready( function () {
-        $('#tabla_establecimientos').DataTable({
-            //"columnDefs": [ {"sortable": false, "targets": [0]} ],
+        var t = $('#tabla_establecimientos').DataTable({
+            columnDefs: [
+                {
+                    searchable: false,
+                    orderable: false,
+                    targets: 0,
+                },
+            ],
+            order: [[1, 'asc']],
         });
+        t.on('order.dt search.dt', function () {
+            let i = 1;
 
+            t.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+                this.data(i++);
+            });
+        }).draw();
         $('div#tabla_establecimientos_wrapper div').first().append($('#tipos_establecimientos, #nuevo_establecimiento'));
-
-
     } );
 
 </script>

@@ -4,9 +4,6 @@
 @extends('layouts.app')
 @section('title', 'Cuestionario')
 
-    {{-- @if(Session::has('success')) --}}
-
-
 @section('content')
 {{-- minimenu --}}
     @mobile
@@ -85,6 +82,7 @@
                     <hr>
 
                 @else
+                sin formularios
 
                 @endif
 

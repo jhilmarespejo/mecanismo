@@ -232,9 +232,10 @@
                                                 <i class="bi bi-file-earmark-medical-fill"></i> Acta de visita
                                             </a>
                                         </li>
+                                        
                                         <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" href="/visita/informeVisita/{{$VIS_id}}">
-                                                <i class="bi bi-file-earmark-text-fill"></i> Infome de visita
+                                            <a class="text-decoration-none" href="/recomendaciones/{{$VIS_id}}">
+                                                <i class="bi bi-file-earmark-text-fill"></i> Recomendaciones
                                             </a>
                                         </li>
                                     </ul>

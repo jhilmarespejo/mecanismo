@@ -43,13 +43,11 @@ class CuestionarioController extends Controller {
 
 
         DB::enableQueryLog();
-
         $elementos = $this->preguntasRespuestas($FRM_id);
 
         $quries = DB::getQueryLog();
         // dump( $quries );
         // exit;
-
         return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'recomendaciones', 'adjuntos' ) );
     }
 

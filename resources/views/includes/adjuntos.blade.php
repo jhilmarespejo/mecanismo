@@ -88,7 +88,6 @@
 
                 jQuery.each(data.errors, function( key, value ){
                     $('#'+key+'_err').append( value );
-
                     $(this).removeClass('d-none');
                     $('#btn_cargando_adjunto').addClass('d-none');
                 });

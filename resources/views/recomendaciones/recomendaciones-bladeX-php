@@ -1,0 +1,5 @@
+@extends('layouts.app')
+@section('title', 'Recomendaciones')
+recomendacions
+@section('content')
+@endsection

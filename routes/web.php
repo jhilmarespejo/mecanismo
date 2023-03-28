@@ -79,9 +79,10 @@ Route::post('cuestionario/confirmaCuestionario', [CuestionarioController::class,
 
 
 // RECOMENDACIONES
+Route::get('recomendaciones/{VIS_id}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones')->middleware('auth');
+
 Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento')->middleware('auth');
 
-Route::get('recomendaciones/{est_id}/{frm_id?}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones')->middleware('auth');
 
 Route::post('recomendaciones/nuevaRecomendacion', [RecomendacionesController::class, 'nuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
 
@@ -115,7 +116,9 @@ Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita']
 
 Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
 
-Route::get('visita/informeVisita/{VIS_id}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
+Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
+
+// Route::get('visita/recomendaciones/{VIS_id}', [VisitaController::class, 'recomendaciones'])->name('visita.recomendaciones')->middleware('auth');
 
 // Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 

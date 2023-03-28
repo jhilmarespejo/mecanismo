@@ -2,32 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModEstablecimiento, ModRecomendacion, ModArchivo, ModRecomendacionArchivo};
+use App\Models\{ModEstablecimiento, ModRecomendacion, ModArchivo, ModRecomendacionArchivo, ModVisita};
 use Illuminate\Http\Request;
 // use DB;
 use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 use Validator;
-use Image;
 
 class RecomendacionesController extends Controller{
     /**
      * Muesta una ventana donde se puede hacer seguimiento a las recomendaciones.
      * Se puede observas los detalles de cada recomendacion
      */
-
-
     /* Guarda las recomendaciones uno a uno */
-    /* SE DEBEN PREPARAR ARRAY DE CADA ELEMENTO Y GUARDARLOS CON OPCION DE ROLLBACK */
     public function nuevaRecomendacion( Request $request ){
         $ids = [];
         // dump($request->except('_token'));//exit;
 
         $validator = Validator::make( $request->all(), [
-            'REC_fechaRecomendacion' => 'required',
             'REC_recomendacion' => 'required|min:5',
-            // 'REC_tipo' => 'required',
             'ARC_descripcion.*' => 'required|min:5',
-            // 'ARC_archivo' => 'sometimes|required_with:ARC_descripcion.*',
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:300548',
         ], [
             'required' => '¡El dato es requerido!',
@@ -48,7 +42,7 @@ class RecomendacionesController extends Controller{
                     foreach($request->file('ARC_archivo') as $key => $archivo ){
                         $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
                         if( $tipoArchivo[0] == 'image'){
-                            $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/imagenes'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'recomemdacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
+                            $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'recomemdacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
                             array_push( $ids, $idArchivo->ARC_id );
 
@@ -56,20 +50,24 @@ class RecomendacionesController extends Controller{
                             $image = Image::make($archivo->path());
                             $image->resize(null, 600, function ($const) {
                                 $const->aspectRatio();
-                            })->save( public_path('/uploads/imagenes/').$archivo->store('') );
-                            echo 'imagen';
+                            })->save( public_path('/uploads/recomendaciones/').$archivo->store('') );
+                            // echo 'imagen';
+                        /* Guarda los docmentos que no son imagenes */
                         } else {
-                            $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/documentos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'recomemdacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
+                            $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'recomemdacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
+                            // $ruta = public_path('uploads/recomendaciones/');
+                            // $nombre = $archivo->store('');
                             array_push( $ids, $idArchivo->ARC_id );
-                            $archivo->move(public_path('/uploads/documentos/'), $archivo->store(''));
-                            echo 'archivo';
+                            // dump($ruta.$nombre);
+                            $archivo->move( public_path('uploads/recomendaciones/'),$archivo->store('') );
+                            // echo 'archivo';
                         }
-                        dump($archivo);
+                        // dump($archivo);
                     }
                 }
                 /* Guarda la recomendacion enviada */
-                $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_FRM_id' => $request->FRM_id, 'REC_fechaRecomendacion' => $request->REC_fechaRecomendacion] );
+                $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_VIS_id' => $request->VIS_id, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s")] );
 
                 /* Si existe mas de una imagen o archivo por recomendacion itera los id de los archivos para guardarlos en la tabla relacionada */
                 foreach ($ids as $key => $value) {
@@ -79,7 +77,7 @@ class RecomendacionesController extends Controller{
                 // echo 'commit';
                 // exit;
                 DB::commit();
-                return response()->json([ "message" => "correcto" ]);
+                return response()->json([ "success" => "Guardado correctamente" ]);
             }
             catch (\Exception $e) {
                 DB::rollback();
@@ -87,35 +85,49 @@ class RecomendacionesController extends Controller{
             }
             // exit;
         }
-
     }
 
 
-    public function recomendaciones( $est_id = null, $frm_id = null ){
+    public function recomendaciones( $VIS_id = null ){
         // dump($est_id, $frm_id);exit;
-        $establecimiento = ModEstablecimiento::select( 'EST_nombre' )
-        ->where( 'EST_id', $est_id )
-        ->first();
+        $establecimiento = ModVisita::from('visitas as v')
+        ->select( 'e.EST_nombre', 'e.EST_id' )
+        ->leftJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
+        ->where( 'v.VIS_id', $VIS_id )
+        ->first()->toArray();
         //$frm_id=null;
 
         DB::enableQueryLog();
-        $r = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'FK_ARC_id')
+        $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo')
         ->leftJoin( 'r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
         ->leftJoin( 'archivos as a', 'ra.FK_ARC_id', 'a.ARC_id')
-        ->leftJoin( 'formularios as f', 'f.FRM_id', 'recomendaciones.FK_FRM_id' )
-        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
-        ->where( 'e.EST_id', $est_id );
-        if( $frm_id ){
-            $recomendaciones = $r->where('f.FRM_id', $frm_id)->orderBy('recomendaciones.REC_id', 'desc')->get() ;
-        } else {
-            $recomendaciones = $r->orderBy('recomendaciones.REC_id', 'desc')->get();
+        ->leftJoin( 'visitas as v', 'v.VIS_id', 'recomendaciones.FK_VIS_id')
+        // ->leftJoin( 'establecimientos as e', 'e.EST_id', 'v.FK_EST_id' )
+        ->where( 'v.VIS_id', $VIS_id )
+        ->orderby('recomendaciones.REC_id', 'desc')
+        ->get() ;
+
+        /* Se ordenan los arrays de datos */
+        $aux = null;
+        $a = []; //array de recomendaciones
+        $archivosRec = []; //array de archivos de cada recomendacion
+        $archivosRecAcato = []; //archivos del acato a cada recomendacion
+
+        foreach ($recomendaciones as $k=>$rec){
+            if ( $aux != $rec->REC_id ) {
+                array_push($a, ['REC_id' => $rec->REC_id, 'REC_recomendacion' => $rec->REC_recomendacion, 'REC_cumplimiento' => $rec->REC_cumplimiento, 'REC_fechaCumplimiento' => $rec->REC_fechaCumplimiento, 'REC_detallesCumplimiento' => $rec->REC_detallesCumplimiento, 'REC_fechaRecomendacion' => $rec->REC_fechaRecomendacion, 'REC_tipo' => $rec->REC_tipo, 'ARC_id' => $rec->ARC_id ] );
+            } if( $rec->ARC_ruta != null ){
+                if ($rec->ARC_tipo == 'recomemdacion') {
+                    array_push( $archivosRec, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
+                }
+                if ($rec->ARC_tipo == 'acato-recomendacion') {
+                    array_push( $archivosRecAcato, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
+                }
+            }
+            $aux = $rec->REC_id;
         }
 
-        $quries = DB::getQueryLog();
-        // dump( $quries );
-        // exit;
-
-        return view('establecimientos.establecimientos-recomendaciones',compact('recomendaciones', 'establecimiento', 'est_id', 'frm_id') );
+        return view('recomendaciones.recomendaciones', compact('a', 'archivosRec', 'archivosRecAcato', 'establecimiento', 'VIS_id'));
 
 
     }
@@ -146,7 +158,7 @@ class RecomendacionesController extends Controller{
                     if( $tipoArchivo[0] == 'image'){
                         $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
 
-                        $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/imagenes'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'acato-recomendacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
+                        $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(), 'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'acato-recomendacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
                         array_push( $ids, $idArchivo->ARC_id );
                         $image = Image::make($archivo->path());
@@ -154,12 +166,12 @@ class RecomendacionesController extends Controller{
                         /* Para redimensionar imagenes a 600px */
                         $staus = $image->resize(null, 600, function ($const) {
                             $const->aspectRatio();
-                        })->save( public_path('/uploads/imagenes/').$archivo->store('') );
+                        })->save( public_path('/uploads/recomendaciones/').$archivo->store('') );
                     } else {
-                        $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/documentos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'acato-recomendacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
+                        $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipo' => 'acato-recomendacion', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
 
                         array_push( $ids, $idArchivo->ARC_id );
-                        $archivo->move(public_path('/uploads/documentos/'), $archivo->store(''));
+                        $archivo->move(public_path('/uploads/recomendaciones/'), $archivo->store(''));
                     }
                 }
                 foreach ($ids as $key => $value) {
@@ -176,7 +188,7 @@ class RecomendacionesController extends Controller{
             // ModRecomendacion::create( ['REC_cumplimiento' => $request->REC_cumplimiento, 'REC_fechaCumplimiento' => $request->REC_fechaCumplimiento , 'REC_detallesCumplimiento' =>$request->REC_detallesCumplimiento, 'FK_REC_id' => $request->REC_id] );
             // DB::commit();
             // return response()->json( [ 'errors'=>'correcto' ] );
-            return response()->json([ "message" => "correcto" ]);
+            return response()->json([ "success" => "Guardado correctamente" ]);
         }
         catch (\Exception $e) {
             DB::rollback();
