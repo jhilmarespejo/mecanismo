@@ -62,7 +62,12 @@
                             <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento->RES_respuesta}}"> <span class="col-1 marca"></span> </div>
                             @endif
                             @if ($elemento->BCP_tipoRespuesta == 'Respuesta larga')
-                            <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento->RES_respuesta}}"><span class="col-1 marca"></span> </div>
+                            <div  class='row p-2'>
+                                <input class="col resp" type='text' name="RES_respuesta" value="{{$elemento->RES_respuesta}}">
+                                {{-- <textarea name="RES_respuesta" class="col resp" rows="4">
+                                    {{$elemento->RES_respuesta}}
+                                </textarea> --}}
+                                <span class="col-1 marca"></span> </div>
                             @endif
                             {{-- </div> --}}
                             @if ( $elemento->BCP_complemento)
@@ -231,7 +236,6 @@
                     barra(actual, anterior, total);
                 }
             });
-
             /*Validación para checkbox*/
             var checks = [];
             $("#"+activo).find("div.group-check").each(function(e){

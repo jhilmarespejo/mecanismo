@@ -158,16 +158,17 @@
                             <strong id="categorias">{{ $keyCat }}</strong>
                                 {{-- cuando la categoria TIENE subcategoria y preguntas dentro de las subcategorias--}}
                                 <ol>
+                                    @php $c = 1; @endphp
                                     @foreach ($categorias as $keySC=>$subcategorias )
                                         @if ( is_string($keySC) )
                                             <li class="mt-1" id="subcategorias">
                                                 <strong >{{ $keySC }}</strong>
-                                                <ol>
+                                                <ul class="list-unstyled">
                                                     @foreach ($subcategorias as $key=>$pregunta)
                                                         <li>
                                                             <div class="row border-bottom mb-1">
                                                                 <div class="col-5 col-preguntas" id="preguntas" >
-                                                                    {{ $pregunta->BCP_pregunta }}
+                                                                    {{ $c. '. ' .$pregunta->BCP_pregunta }}
                                                                     @if ($pregunta->BCP_tipoRespuesta == 'Afirmación' || $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
                                                                     <br/><small class="text-danger">* Marque solo una opción</small>
                                                                     @elseif ($pregunta->BCP_tipoRespuesta == 'Numeral')
@@ -204,8 +205,9 @@
                                                                 </div>
                                                             </div>
                                                         </li>
+                                                        @php $c++; @endphp
                                                     @endforeach
-                                                </ol>
+                                                </ul>
                                             </li>
                                         @endif
                                     @endforeach
@@ -213,7 +215,7 @@
 
                                 {{-- cuando la categoria NO tiene subcategoria --}}
                                 <ol>
-                                    <ol>
+                                    <ul class="list-unstyled">
                                         @foreach ($categorias as $keyP=>$preg )
                                             {{-- @php
                                                 dump( $preg );
@@ -222,7 +224,7 @@
                                                 <li class="mt-1" id="preguntas">
                                                     <div class="row border-bottom">
                                                         <div class="col-5 col-preguntas" >
-                                                            {{ $preg->BCP_pregunta }}
+                                                            {{ $c. '. ' .$pregunta->BCP_pregunta }}
                                                             @if ($preg->BCP_tipoRespuesta == 'Afirmación' || $preg->BCP_tipoRespuesta == 'Lista desplegable')
                                                             <br/><small class="text-danger">* Marque solo una opción</small>
                                                             @elseif ($preg->BCP_tipoRespuesta == 'Numeral')
@@ -259,8 +261,9 @@
                                                     </div>
                                                 </li>
                                             @endif
+                                            @php $c++; @endphp
                                         @endforeach
-                                    </ol>
+                                    </ul>
                                 </ol>
                         </li>
                         @php $auxContadorCategorias++;   @endphp

@@ -34,7 +34,7 @@
         @include('index.formularios')
     </div> --}}
     <div class="row mt-4">
-        {{-- @include('index.dinamico') --}}
+        @include('index.dinamico')
     </div>
 </div>
 {{-- </div> --}}
