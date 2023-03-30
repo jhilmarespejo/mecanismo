@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -96,8 +96,6 @@ Route::get('categorias', [CategoriasController::class, 'index'])->name('categori
 Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'guardaNuevaCategoria'])->name('categorias.guardaNuevaCategoria')->middleware('auth');
 
 
-
-
 // ESTABLECIMIENTOS
 Route::get('establecimientos', [EstablecimientosController::class, 'index'])->name('establecimientos')->middleware('auth');
 Route::get('establecimientos/historial/{id}', [EstablecimientosController::class, 'historial'])->name('establecimientos.historial')->middleware('auth');
@@ -107,7 +105,7 @@ Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosCon
 // REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
-//VISITAS
+// VISITAS
 Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
 
 Route::get('visita/buscaFormularios/{id}', [VisitaController::class, 'buscaFormularios'])->name('visita.buscaFormularios')->middleware('auth');
@@ -118,11 +116,14 @@ Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVi
 
 Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
 
-// Route::get('visita/recomendaciones/{VIS_id}', [VisitaController::class, 'recomendaciones'])->name('visita.recomendaciones')->middleware('auth');
+// INDICADORES
+
+Route::get('indicadores/', [IndicadoresController::class, 'index'])->name('indicadores.index');
+
+Route::post('indicadores/actualizar/', [IndicadoresController::class, 'actualizar'])->name('indicadores.actualizar')->middleware('auth');
+
 
 // Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
-
-
 
 // Route::get('/offline', function () {
 //     return view('modules/laravelpwa/offline');

@@ -85,9 +85,9 @@ class IndexController extends Controller
         ->whereIn( 'rbf.FK_FRM_id', $idsForm )
         ->where( 'bp.BCP_tipoRespuesta', 'Afirmación' )
         ->get();
-        // $quries = DB::getQueryLog();
-        // dump( $quries );
-        // exit;
+        $quries = DB::getQueryLog();
+        dump( $quries, $idsForm );
+        exit;
 
         /* 2DO. con la lista anterior se ensambla la 2da parte de la consulta */
         $opciones=''; $bcpIds='';
@@ -106,7 +106,8 @@ class IndexController extends Controller
             left join "respuestas" as "r" on "r"."FK_RBF_id" = "rbf"."RBF_id"
             left join "formularios" as "f" on "f"."FRM_id" = "rbf"."FK_FRM_id" where "bp"."BCP_id" in ('.rtrim($bcpIds, ",").') and "f"."FRM_id" in ('.$formularios.') and "f"."estado" = 1 group by "bp"."BCP_pregunta"';
 
-            $afirmaciones = DB::select($consultaAfirmaciones);
+
+            $afirmaciones = DB::select( $consultaAfirmaciones );
         } else {
             $afirmaciones = null;
         }
