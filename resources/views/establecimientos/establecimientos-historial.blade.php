@@ -227,11 +227,11 @@
                                         <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/visita/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
                                         </li>
-                                        <li class="list-group-item border-0">
+                                        {{-- <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/visita/actaVisita/{{$VIS_id}}">
                                                 <i class="bi bi-file-earmark-medical-fill"></i> Acta de visita
                                             </a>
-                                        </li>
+                                        </li> --}}
                                         {{-- <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/visita/informeVisita/{{$VIS_id}}">
                                                 <i class="bi bi-file-earmark-medical-fill"></i> Informe de visita

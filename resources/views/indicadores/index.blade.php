@@ -11,7 +11,7 @@
                         <img class=" img-fluid p-4" src="/img/icono-cantidad.png" class="card-img-top" alt="...">
                     </div>
                     <div class="card-body ">
-                        <h5 style="height: 100px; "  class="card-title text-primary text-center">Número de casos de tortura reportados</h5>
+                        <h5 style="height: 100px; "  class="card-title text-primary text-center">Cantidad de casos de tortura denunciados</h5>
                         <p class="display-4 card-text text-success text-shadow text-center">12</p>
                         <small class="text-primary text-center" > Fuente: Base de Datos de la Defensoría del Pueblo. (MARZO de 2023).</small>
                     </div>
@@ -27,7 +27,7 @@
                         <h5 style="height: 100px; "  class="card-title text-primary text-center">Porcentaje de hacinamiento en recintos penitenciarios en Bolivia</h5>
 
                         <p class="display-4 card-text text-success text-shadow text-center">-165%</p>
-                        <small class="text-primary text-center" > Fuente: Base de Datos de Regimen Penitenciario de Bolivia. (MARZO de 2022)  </small>
+                        <small class="text-primary text-center" > Fuente: Base de Datos de Régimen Penitenciario de Bolivia. (MARZO de 2022)  </small>
                     </div>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                         <h5 style="height: 100px; "  class="card-title text-primary text-center">Porcentaje de detención preventiva</h5>
 
                         <p class="display-4 card-text text-success text-shadow text-center">65.67%</p>
-                        <small class="text-primary text-center" > Fuente: Base de Datos de Regimen Penitenciario de Bolivia. (MARZO de 2022)  </small>
+                        <small class="text-primary text-center" > Fuente: Base de Datos de Régimen Penitenciario de Bolivia. (MARZO de 2022)  </small>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                         <img class=" img-fluid p-4" src="/img/icono-cantidad.png" class="card-img-top" alt="...">
                     </div>
                     <div class="card-body ">
-                        <h5 style="height: 100px; "  class="card-title text-primary text-center">Número de casos de muertes en centros penitenciarios </h5>
+                        <h5 style="height: 100px; "  class="card-title text-primary text-center">Cantidad de casos de muertes en centros penitenciarios </h5>
                         <ul class="list-group">
                             <li class="list-group-item py-1">Enfermedad: <strong>9</strong></li>
                             <li class="list-group-item py-1">Accidentes: <strong>0</strong></li>
@@ -61,7 +61,7 @@
                             <li class="list-group-item py-1">Homicidio: <strong>1</strong></li>
                             <li class="list-group-item py-1">TOTAL: <strong>12</strong></li>
                         </ul>
-
+                        <small class="text-primary text-center" > Fuente: Base de Datos de Régimen Penitenciario de Bolivia. (MARZO de 2022)  </small>
                     </div>
                 </div>
             </div>

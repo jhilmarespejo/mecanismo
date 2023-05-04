@@ -128,6 +128,35 @@
                     @endif
                 @endforeach
 
+                <!-- PARA CENTROS DE FORMACION MILITAR POLICIAL -->
+                @foreach ( $fs as $k=>$f)
+                    @if (strstr($f['FRM_titulo'], 'F1 - VERIFICACION CENTROS DE FORMACION MILITAR - POLICIAL'))
+                        <div class="alert alert-success row p-0" role="alert">
+                            <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
+                                <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+                @foreach ( $fs as $k=>$f)
+                    @if (strstr($f['FRM_titulo'], 'F2 - ENTREVISTA A COMANDANTE. CENTROS DE FORMACIÓN MILITAR - POLICIAL'))
+                        <div class="alert alert-success row p-0" role="alert">
+                            <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
+                                <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+                @foreach ( $fs as $k=>$f)
+                    @if (strstr($f['FRM_titulo'], 'F3 - PREGUNTAS ABIERTAS - CENTROS DE FORMACIÓN MILITAR - POLICIAL'))
+                        <div class="alert alert-success row p-0" role="alert">
+                            <a href="/cuestionario/duplicar/{{$f['FRM_id']}}/{{$f['FK_VIS_id']}}" class="text-decoration-none"><i class="bi bi-clipboard-plus-fill px-2 text-success fs-5"></i>
+                                <strong>NUEVO</strong> {{ $f['FRM_titulo'] }}
+                            </a>
+                        </div>
+                    @endif
+                @endforeach
+
 
 
             </dl>

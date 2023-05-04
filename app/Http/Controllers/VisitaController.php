@@ -26,7 +26,7 @@ class VisitaController extends Controller
 
         $validator = Validator::make($request->all(), [
             'VIS_tipo' => 'required',
-            'VIS_titulo' => 'required',
+            //'VIS_titulo' => 'required',
         ], [
             'required' => 'El dato es requerido!',
         ]);

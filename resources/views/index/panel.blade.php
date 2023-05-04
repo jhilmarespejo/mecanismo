@@ -33,9 +33,11 @@
     {{-- <div class="row mt-4">
         @include('index.formularios')
     </div> --}}
-    <div class="row mt-4">
+
+    {{-- CONSULTA DINAMICA --}}
+    {{-- <div class="row mt-4">
         @include('index.dinamico')
-    </div>
+    </div> --}}
 </div>
 {{-- </div> --}}
 

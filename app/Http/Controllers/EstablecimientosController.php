@@ -126,8 +126,8 @@ class EstablecimientosController extends Controller
         //dump($request->except('_token'));//exit;
         $validator = Validator::make( $request->all(), [
             'EST_nombre' => 'required',
-            'EST_direccion' => 'required',
-            'EST_telefonoContacto' => 'required',
+            // 'EST_direccion' => 'required',
+            // 'EST_telefonoContacto' => 'required',
             'FK_TES_id' => 'required',
             // 'FK_NSG_id' => 'required',
             // 'FK_CID_id' => 'required',

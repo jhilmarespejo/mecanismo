@@ -24,11 +24,11 @@
                         <label class="form-label">Tipo de visita</label>
                         <select class="form-select" name="VIS_tipo">
                             <option value="" selected>Seleccione</option>
-                            <option value="Visita en profundidad" disabled>Visita en profundidad</option>
+                            <option value="Visita en profundidad">Visita en profundidad</option>
                             <option value="Visita Temática">Visita Temática</option>
-                            <option value="Visita de seguimiento" disabled>Visita de seguimiento</option>
-                            <option value="Visita reactiva" disabled>Visita reactiva</option>
-                            <option value="Visita Ad hoc" disabled>Visita Ad hoc</option>
+                            <option value="Visita de seguimiento">Visita de seguimiento</option>
+                            <option value="Visita reactiva">Visita reactiva</option>
+                            <option value="Visita Ad hoc">Visita Ad hoc</option>
                         </select>
                         <small class="text-danger" id="VIS_tipo_err"></small>
                     </div>
