@@ -167,9 +167,28 @@
                                                     @foreach ($subcategorias as $key=>$pregunta)
                                                         <li>
                                                             <div class="row border-bottom mb-1">
+                                                                @if ($pregunta->BCP_tipoRespuesta == 'Afirmación')
+                                                                    <div class="col-7 col-preguntas" id="preguntas" >
+                                                                        {{ $c. '. ' .$pregunta->BCP_pregunta }}
+                                                                            <small class="text-danger">* Marque solo una opción</small>
+                                                                    </div>
+                                                                    <div class="col-5 col-preguntas" id="preguntas" >
+                                                                        <div class="row ">
+                                                                            @php
+                                                                                $opciones = json_decode( $pregunta->BCP_opciones, true);
+                                                                                    if ( is_array($opciones) ) {
+                                                                                        foreach ($opciones as $key => $opcion) {
+                                                                                            echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
+                                                                                        }
+                                                                                    }
+                                                                            @endphp
+                                                                        </div>
+
+                                                                    </div>
+                                                                @else
                                                                 <div class="col-5 col-preguntas" id="preguntas" >
                                                                     {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                                    @if ($pregunta->BCP_tipoRespuesta == 'Afirmación' || $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
+                                                                    @if ( $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
                                                                     <br/><small class="text-danger">* Marque solo una opción</small>
                                                                     @elseif ($pregunta->BCP_tipoRespuesta == 'Numeral')
                                                                     <br/><small class="text-danger">* Registre un número</small>
@@ -197,12 +216,14 @@
                                                                                     echo "<input type='text' class='resp-lar'>";
                                                                                 }
                                                                         @endphp
-
                                                                     </div>
                                                                     @if ( $pregunta->BCP_complemento )
                                                                         <div class="row complemento"> {{ $pregunta->BCP_complemento }} <input type="text" ></div>
                                                                     @endif
                                                                 </div>
+                                                                @endif
+
+
                                                             </div>
                                                         </li>
                                                         @php $c++; @endphp
@@ -223,41 +244,67 @@
                                             @if ( !is_string($keyP) )
                                                 <li class="mt-1" id="preguntas">
                                                     <div class="row border-bottom">
-                                                        <div class="col-5 col-preguntas" >
-                                                            {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                            @if ($preg->BCP_tipoRespuesta == 'Afirmación' || $preg->BCP_tipoRespuesta == 'Lista desplegable')
-                                                            <br/><small class="text-danger">* Marque solo una opción</small>
-                                                            @elseif ($preg->BCP_tipoRespuesta == 'Numeral')
-                                                            <br/><small class="text-danger">* Registre un número</small>
-                                                            @elseif ($preg->BCP_tipoRespuesta == 'Casilla verificación')
-                                                            <br/><small class="text-danger">* Puede marcar más de una opción</small>
-                                                            @endif
-                                                        </div>
-
-                                                        <div class="col-7 col-respuestas">
-                                                            <div class="row">
-                                                                @php
-                                                                    $opciones = json_decode( $preg->BCP_opciones, true);
-                                                                    if ( is_array($opciones) ) {
-                                                                        foreach ($opciones as $key => $opcion) {
-                                                                            echo "<div  class='col-auto d-flex'><i class='bi bi-app'></i>$opcion </div>";
-                                                                        }
-                                                                    }
-                                                                    if ($preg->BCP_tipoRespuesta == 'Numeral') {
-                                                                        echo "<div><input type='text' size='8'> </div>";
-                                                                    }
-                                                                    if ($preg->BCP_tipoRespuesta == 'Respuesta corta') {
-                                                                        echo "<input type='text'>";
-                                                                    }
-                                                                    if ($preg->BCP_tipoRespuesta == 'Respuesta larga') {
-                                                                        echo "<input type='text' class='resp-lar'>";
-                                                                    }
-                                                                    @endphp
+                                                        @if ($preg->BCP_tipoRespuesta == 'Afirmación')
+                                                            <div class="col-7 col-preguntas" >
+                                                                {{ $c. '. ' .$pregunta->BCP_pregunta }}
+                                                                <small class="text-danger">* Marque solo una opción</small>
                                                             </div>
-                                                            @if ( $preg->BCP_complemento )
-                                                                <div class="row complemento"> {{ $preg->BCP_complemento }} <input type="text" ></div>
-                                                            @endif
-                                                        </div>
+
+                                                            <div class="col-5 col-respuestas">
+                                                                <div class="row">
+                                                                    @php
+                                                                        $opciones = json_decode( $preg->BCP_opciones, true);
+                                                                        if ( is_array($opciones) ) {
+                                                                            foreach ($opciones as $key => $opcion) {
+                                                                                echo "<div  class='col-auto d-flex'><i class='bi bi-app'></i>$opcion </div>";
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                </div>
+                                                                @if ( $preg->BCP_complemento )
+                                                                    <div class="row complemento"> {{ $preg->BCP_complemento }} <input type="text" ></div>
+                                                                @endif
+                                                            </div>
+                                                        @else
+                                                            <div class="col-5 col-preguntas" >
+                                                                {{ $c. '. ' .$pregunta->BCP_pregunta }}
+                                                                @if ( $preg->BCP_tipoRespuesta == 'Lista desplegable')
+                                                                <br/><small class="text-danger">* Marque solo una opción</small>
+                                                                @elseif ($preg->BCP_tipoRespuesta == 'Numeral')
+                                                                <br/><small class="text-danger">* Registre un número</small>
+                                                                @elseif ($preg->BCP_tipoRespuesta == 'Casilla verificación')
+                                                                <br/><small class="text-danger">* Puede marcar más de una opción</small>
+                                                                @endif
+                                                            </div>
+
+                                                            <div class="col-7 col-respuestas">
+                                                                <div class="row">
+                                                                    @php
+                                                                        $opciones = json_decode( $preg->BCP_opciones, true);
+                                                                        if ( is_array($opciones) ) {
+                                                                            foreach ($opciones as $key => $opcion) {
+                                                                                echo "<div  class='col-auto d-flex'><i class='bi bi-app'></i>$opcion </div>";
+                                                                            }
+                                                                        }
+                                                                        if ($preg->BCP_tipoRespuesta == 'Numeral') {
+                                                                            echo "<div><input type='text' size='8'> </div>";
+                                                                        }
+                                                                        if ($preg->BCP_tipoRespuesta == 'Respuesta corta') {
+                                                                            echo "<input type='text'>";
+                                                                        }
+                                                                        if ($preg->BCP_tipoRespuesta == 'Respuesta larga') {
+                                                                            echo "<input type='text' class='resp-lar'>";
+                                                                        }
+                                                                        @endphp
+                                                                </div>
+                                                                @if ( $preg->BCP_complemento )
+                                                                    <div class="row complemento"> {{ $preg->BCP_complemento }} <input type="text" ></div>
+                                                                @endif
+                                                            </div>
+
+                                                        @endif
+
+
                                                     </div>
                                                 </li>
                                             @endif
