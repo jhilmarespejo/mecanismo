@@ -70,12 +70,11 @@ class VisitaController extends Controller
     public function buscaFormularios( $id ){
         DB::enableQueryLog();
         $z = 0;
-        $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
-        from formularios f where "f"."FK_VIS_id" ='.$id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
+        $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id" from formularios f where "f"."FK_VIS_id" ='.$id.' and "f"."FK_USER_id" = \''.$z.'\' and "f"."estado" <> \''.$z.'\'   order by "f"."FRM_titulo", "f"."FRM_id"';
 
         $fs = DB::select( $r );
         $fs = json_decode(json_encode($fs), true);
-        // dump($r);exit;
+        //dump($r);exit;
 
         $formularios = ModVisita::from('visitas as v')
         ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
