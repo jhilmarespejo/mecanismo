@@ -1,4 +1,4 @@
-<nav id="nav1" class="navbar navbar-expand-md navbar-light bg-white border-bottom sticky-top">
+<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-warning">
     <div class="container">
         <!-- Logo -->
         <span class="navbar-brandx col" href="/">
