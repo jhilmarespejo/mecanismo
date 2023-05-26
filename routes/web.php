@@ -38,8 +38,6 @@ Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosN
 
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
 
-Route::get('formulario/buscaFormularios/{est_id}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
-
 // INDEX
 Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
 
