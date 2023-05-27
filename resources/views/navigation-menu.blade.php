@@ -12,12 +12,16 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto fs-5">
+                        <li class="nav-item bg-danger">
+                            <a class="nav-link active" href="/panel">MNP V2</a>
+                        </li>
+
                         <x-jet-nav-link href="{{ route('panel') }}" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
                             <li class="nav-item">
-                                <a class="nav-link active" href="/establecimientos">Establecimientos</a>
+                                <a class="nav-link" href="/establecimientos">Establecimientos</a>
                             </li>
 
                             @if( Auth::user()->rol == 'Administrador' )
