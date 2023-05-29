@@ -29,7 +29,7 @@ class EstablecimientosController extends Controller
         if($request->FK_TES_id){
             $FK_TES_id = $request->FK_TES_id;
         } else {
-            $FK_TES_id = 1;
+            $FK_TES_id = 7; // para centros de formacion militat/policial
         }
 
         DB::enableQueryLog();

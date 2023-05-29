@@ -163,6 +163,7 @@
 
     $(document).ready( function () {
         var t = $('#tabla_establecimientos').DataTable({
+            pageLength : 50,
             columnDefs: [
                 {
                     searchable: false,
