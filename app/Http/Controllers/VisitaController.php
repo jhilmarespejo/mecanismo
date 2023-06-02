@@ -77,7 +77,7 @@ class VisitaController extends Controller
         //dump($r);exit;
 
         $formularios = ModVisita::from('visitas as v')
-        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
+        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre','e.EST_departamento','e.EST_provincia','e.EST_municipio'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
         ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
         ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
         ->where ('f.FK_VIS_id', $id)
