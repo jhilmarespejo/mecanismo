@@ -58,10 +58,10 @@ class EstablecimientosController extends Controller
      *
      * @param  \App\Models\ModEstablecimiento  $modEstablecimiento
      * @return \Illuminate\Http\Response
+     * $id = id del establecimiento seleccionado
      */
     // public function show($id){
     public function historial($id){
-
         /* Consulta para obtener todas las visitas realizadas al establecimiento */
         $visitas = ModVisita::select('VIS_id', 'VIS_numero', 'VIS_fechas', 'VIS_tipo', 'VIS_titulo')
         ->where('FK_EST_id', $id)
@@ -87,33 +87,33 @@ class EstablecimientosController extends Controller
                 DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
                 DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" '),
                 DB::raw('COUNT( ("r"."REC_id")::int ) as "total" ') )
-            ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
-            ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
+            ->leftJoin( 'visitas as v', 'v.VIS_id', 'r.FK_VIS_id' )
+            ->leftJoin( 'establecimientos as e', 'e.EST_id', 'v.FK_EST_id' )
             ->where( 'e.EST_id', $id )
             ->groupBy('e.EST_nombre','e.EST_id')->get();
 
         // dump($formularios->toArray());
-        // $a=0;
-        // $aux=[];
-        // $visitasformularios = [];
-        // foreach($formularios as $k=>$formulario){
-        //     if($formulario->FK_VIS_id != $a){
-        //         array_push($aux, $formulario->FK_VIS_id);
-        //     }
-        //     $a = $formulario->FK_VIS_id;
-        // }
+            // $a=0;
+            // $aux=[];
+            // $visitasformularios = [];
+            // foreach($formularios as $k=>$formulario){
+            //     if($formulario->FK_VIS_id != $a){
+            //         array_push($aux, $formulario->FK_VIS_id);
+            //     }
+            //     $a = $formulario->FK_VIS_id;
+            // }
 
-        // foreach($aux as $key=>$a){
-        //     foreach( $formularios as $k=>$formulario ){
-        //         if($a == $formulario->FK_VIS_id){
+            // foreach($aux as $key=>$a){
+            //     foreach( $formularios as $k=>$formulario ){
+            //         if($a == $formulario->FK_VIS_id){
 
-        //             $visitasformularios[$key] = ['VIS_fechas' => $formulario->VIS_fechas, 'VIS_numero' => $formulario->VIS_numero, 'VIS_tipo' => $formulario->VIS_tipo];
+            //             $visitasformularios[$key] = ['VIS_fechas' => $formulario->VIS_fechas, 'VIS_numero' => $formulario->VIS_numero, 'VIS_tipo' => $formulario->VIS_tipo];
 
-        //             // array_push($visitasformularios[$key][$k], $formulario );
-        //             $visitasformularios[$key][$k]= ['datos' => $formulario->toArray()];
-        //         }
-        //     }
-        // }
+            //             // array_push($visitasformularios[$key][$k], $formulario );
+            //             $visitasformularios[$key][$k]= ['datos' => $formulario->toArray()];
+            //         }
+            //     }
+            // }
 
         // dump($visitas->toArray());
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModRecomendacion, ModRespuesta, ModBancoPregunta, ModFormulario, ModCategoria};
+use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria};
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Database\Console\DumpCommand;
@@ -18,13 +18,24 @@ class IndexController extends Controller
     public function dashboard(){
         DB::enableQueryLog();
         // Mostrar cantidad total de recomendaciones, cumplidas e incumplidas por establecomiento
+        // $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
+        // ->select( 'e.EST_nombre','e.EST_id',
+        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
+        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
+        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" ') )
+        // ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
+        // ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
+        // ->groupBy('e.EST_nombre','e.EST_id')->get();
+
         $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
         ->select( 'e.EST_nombre','e.EST_id',
             DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
             DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" ') )
-        ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
-        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
+            DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" '),
+            DB::raw('COUNT( ("r"."REC_id")::int ) as "total" ') )
+        ->leftJoin( 'visitas as v', 'v.VIS_id', 'r.FK_VIS_id' )
+        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'v.FK_EST_id' )
+        // ->where( 'e.EST_id', $id )
         ->groupBy('e.EST_nombre','e.EST_id')->get();
 
         $formularios = ModFormulario::select(DB::raw('DISTINCT("FRM_titulo")'))
