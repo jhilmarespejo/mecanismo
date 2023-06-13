@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModRespuesta};
+use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta};
 use Illuminate\Http\Request;
 use DB;
 use Validator;
@@ -76,21 +76,29 @@ class VisitaController extends Controller
         $fs = json_decode(json_encode($fs), true);
         //dump($r);exit;
 
-        $formularios = ModVisita::from('visitas as v')
-        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre','e.EST_departamento','e.EST_provincia','e.EST_municipio'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
-        ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
-        ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-        ->where ('f.FK_VIS_id', $id)
-        ->where ('e.estado', '1');
+        $formularios = ModVisita::from('formularios as f')
+        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado'/*, 'e.EST_id', 'e.EST_nombre','e.EST_departamento','e.EST_provincia','e.EST_municipio'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
+        // ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
+        ->leftjoin ('visitas as v', 'f.FK_VIS_id', 'v.VIS_id')
+        ->where ( 'f.FK_VIS_id', $id );
+        // ->where ( 'e.estado', '1' );
         if( Auth::user()->rol == 'Operador' ){
             $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
         }
         $formularios = $formularios->orderby('f.createdAt', 'desc')
         ->orderby('f.FRM_titulo', 'asc')
         ->get();
+
+
+        $establecimiento = ModEstablecimiento::from('establecimientos as e')
+        ->select('e.EST_id', 'e.EST_nombre', 'e.EST_departamento', 'e.EST_provincia', 'e.EST_municipio')
+        ->leftjoin ('visitas as v', 'v.FK_EST_id', 'e.EST_id')
+        ->where ( 'v.VIS_id', $id )->first()->toArray();
+
         // $quries = DB::getQueryLog();
+        // dump($quries);
         // exit;
-        return view('formulario.formularios-lista', compact('formularios', 'fs'));
+        return view('formulario.formularios-lista', compact('formularios', 'fs', 'establecimiento'));
     }
 
     /*Vista para guardar nueva acta de Visita */

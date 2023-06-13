@@ -31,17 +31,13 @@
     </nav>
     @endmobile
 
+    {{-- @dump($establecimiento) --}}
 
 <div class="container p-2">
     <div class="card text-dark bg-light " >
         <div class="card-header bg-primary text-white fs-5 text-center">
-            @php
-                $est_nombre = $formularios->toArray()[count($formularios)-1]["EST_nombre"];
-                $est_departamento = $formularios->toArray()[count($formularios)-1]["EST_departamento"];
-                $est_provincia = $formularios->toArray()[count($formularios)-1]["EST_provincia"];
-                $est_municipio = $formularios->toArray()[count($formularios)-1]["EST_municipio"];
-            @endphp
-            {{ $est_nombre ." - " . $est_departamento." - " . $est_municipio  }}
+
+            {{ $establecimiento['EST_nombre'] ." - " . $establecimiento['EST_departamento']." - " . $establecimiento['EST_municipio']  }}
         </div>
         <div class="card-body">
             <dl class="">
