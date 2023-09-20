@@ -19,6 +19,7 @@ use PhpOffice\PhpWord\Style\ListItem;
 
 class VisitaController extends Controller
 {  // Guardar datos de nueva visita
+
     public function guardarNuevaVisita( Request $request ) {
         $numeroVisita = ModVisita::select('FK_EST_id')
         ->where('FK_EST_id', $request->FK_EST_id)
@@ -63,25 +64,25 @@ class VisitaController extends Controller
         }
     }
 
-
     /* Consulta para obtener los formularios aplicados en la visita
         $id = Visita ID
     */
-    public function buscaFormularios( $id ){
+    public function buscaFormularios( $visita_id ){
         DB::enableQueryLog();
         $z = 0;
-        $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
-        from formularios f where "f"."FK_VIS_id" ='.$id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
+        /** Busca los formularios correspondientes a la visita, z=0 es el formulario generico  */
+        // $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
+        // from formularios f where "f"."FK_VIS_id" ='.$visita_id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
 
-        $fs = DB::select( $r );
-        $fs = json_decode(json_encode($fs), true);
+        // $fs = DB::select( $r );
+        // $fs = json_decode(json_encode($fs), true);
         // dump($r);exit;
 
         $formularios = ModVisita::from('visitas as v')
         ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
         ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
         ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-        ->where ('f.FK_VIS_id', $id)
+        ->where ('f.FK_VIS_id', $visita_id)
         ->where ('e.estado', '1');
         if( Auth::user()->rol == 'Operador' ){
             $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
@@ -90,8 +91,9 @@ class VisitaController extends Controller
         ->orderby('f.FRM_titulo', 'asc')
         ->get();
         // $quries = DB::getQueryLog();
+        // dump($quries);
         // exit;
-        return view('formulario.formularios-lista', compact('formularios', 'fs'));
+        return view('formulario.formularios-lista', compact('formularios'));
     }
 
     /*Vista para guardar nueva acta de Visita */

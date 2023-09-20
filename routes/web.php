@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController, AjustesController,InformeVisitasController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -60,7 +60,7 @@ Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprim
 
 Route::get('cuestionario/duplicar/{id}/{VIS_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
 
-Route::get('cuestionario/responder/{id}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
+Route::get('cuestionario/responder/{FRM_id}/{AGF_copia}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
 
 Route::get('cuestionario/ver/{id}', [CuestionarioController::class, 'verCuestionario'])->name('cuestionario.ver')->middleware('auth');
 
@@ -120,6 +120,11 @@ Route::get('indicadores/', [IndicadoresController::class, 'index'])->name('indic
 
 Route::post('indicadores/actualizar/', [IndicadoresController::class, 'actualizar'])->name('indicadores.actualizar')->middleware('auth');
 
+// AJUSTES
+Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
+
+// INFORME DE VISITAS
+Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
 
 // Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 

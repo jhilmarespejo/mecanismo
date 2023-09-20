@@ -13,8 +13,8 @@
                     <th scope="col">Departamento</th>
                     <th scope="col">Provincia</th>
                     <th scope="col">Municipio</th>
-                    {{-- <th scope="col">Dirección</th>
-                    <th scope="col">Tipo</th> --}}
+                    <th scope="col"></th>
+                    {{-- <th scope="col">Tipo</th> --}}
                     {{-- <th scope="col">Teléfono</th> --}}
                     {{-- <th scope="col"> Opciones</th> --}}
                 </tr>
@@ -27,7 +27,7 @@
                         <td>{{ $establecimiento->EST_departamento }}</td>
                         <td>{{ $establecimiento->EST_municipio }}</td>
                         <td>{{ $establecimiento->EST_provincia }}</td>
-                        {{-- <td>{{ $establecimiento->EST_direccion }}</td> --}}
+                        <td><a style="text-decoration: none" href="ajustes/{{$establecimiento->EST_id}}">Opciones</a></td>
                         {{-- <td>{{ $establecimiento->TES_tipo }}</td> --}}
                         {{-- <td>{{ $establecimiento->EST_telefonoContacto }}</td> --}}
                         {{-- <td class=" col-2 text-center">

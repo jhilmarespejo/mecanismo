@@ -31,8 +31,12 @@
                                 <li class="nav-item">
                                     <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/formularios">Formularios</a>
+                                    <a class="nav-link " aria-current="page" href="/informeVisitas">Informe de visitas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " aria-current="page" href="/formularios">. </a>
                                 </li>
                                 {{-- @else --}}
                             @endif

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 // use App\Http\Livewire\Cuestionario;
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario, ModCategoria, ModCuestionario, ModRespuesta, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario};
+use App\Models\{ModFormulario, ModCategoria, ModCuestionario, ModRespuesta, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario, ModAgrupadorFormulario};
 use DB;
 use Image;
 use Illuminate\Support\Facades\Auth;
@@ -18,13 +18,15 @@ class CuestionarioController extends Controller {
      * $id Formulario dado
      */
 
-    public function responderCuestionario( $FRM_id ){
+    public function responderCuestionario( $FRM_id, $AGF_copia){
+        /* NECESITO VER LAS PREGUNTAS RELACIONADAS CON $ultimoFRMid FORMULARIO */
+
         /*Consulta para obtener las RECOMENDACIONES de formulario correspondiente */
-            $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'e.EST_nombre', 'FK_ARC_id')
+        $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'e.EST_nombre', 'FK_ARC_id')
             ->leftJoin( 'r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
             ->leftJoin( 'archivos as a', 'ra.FK_ARC_id', 'a.ARC_id' )
             ->rightJoin( 'formularios as f', 'f.FRM_id', 'recomendaciones.FK_FRM_id' )
-            ->rightJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
+            //->rightJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
             //->where( 'e.EST_id', $est_id )
             ->where( 'f.FRM_id', $FRM_id )
             ->orderBy('recomendaciones.REC_id', 'desc')
@@ -43,9 +45,9 @@ class CuestionarioController extends Controller {
 
 
         DB::enableQueryLog();
-        $elementos = $this->preguntasRespuestas($FRM_id);
+        $elementos = $this->preguntasRespuestas($FRM_id, $AGF_copia);
 
-        $quries = DB::getQueryLog();
+       // $quries = DB::getQueryLog();
         // dump( $quries );
         // exit;
         return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'recomendaciones', 'adjuntos' ) );
@@ -53,52 +55,33 @@ class CuestionarioController extends Controller {
 
     /* Muestra en forma de tabla vertical solo las respuetas del formulario seleccionado */
     public function verCuestionario( $FRM_id ){
-        $elementos = $this->preguntasRespuestas($FRM_id);
-        return view('cuestionarios.cuestionario-ver', compact( 'elementos', 'FRM_id' ));
+        exit('this->preguntasRespuestas($FRM_id)');
+        // $elementos = $this->preguntasRespuestas($FRM_id);
+        // return view('cuestionarios.cuestionario-ver', compact( 'elementos', 'FRM_id' ));
     }
 
-    public function duplicarCuestionario( $FRM_id, $VIS_id ){
-        /* Busca datos del formulario actual */
+    public function duplicarCuestionario( $FRM_id ){
+        /* Saca la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
+        $max_FRM_version = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)
+        //->where('FRM_titulo', $nuevoFormulario[0]['FRM_titulo'])
+        ->max( 'AGF_copia' );
 
-        $nuevoFormulario = ModFormulario::select('FRM_titulo', 'FK_VIS_id', 'FK_EST_id')
-        ->where('FRM_id', $FRM_id)
-        ->get()->toArray();
-
-        /* Saca el maximo de FRM_version */
-        $max_FRM_version = ModFormulario::where('FK_VIS_id', $VIS_id)
-        ->where('FRM_titulo', $nuevoFormulario[0]['FRM_titulo'])
-        ->max( 'FRM_version' );
         /* Se completa el array $nuevoFormulario */
-        $nuevoFormulario[0]['FRM_version'] = $max_FRM_version+1;
-        $nuevoFormulario[0]['FRM_fecha'] = date('Y-m-d');
+        $nuevoFormulario[0]['AGF_copia'] = $max_FRM_version+1;
+        $nuevoFormulario[0]['FK_FRM_id'] = $FRM_id;
         $nuevoFormulario[0]['FK_USER_id'] = Auth::user()->id;
-
-
-
 
         // dump( $nuevoFormulario );
         // dump($FRM_id);
-        // dump( $preguntas->toArray() );
         // exit;
 
         DB::beginTransaction();
         try {
-            ModFormulario::insert( $nuevoFormulario );
+            ModAgrupadorFormulario::insert( $nuevoFormulario );
             $ultimoFRMid = DB::getPdo()->lastInsertId();
-            $preguntas = ModPreguntasFormulario::select('FK_BCP_id')
-            ->where('FK_FRM_id', $FRM_id)
-            ->get();
-
-            $listaPreguntas = [];
-            foreach($preguntas as $k=>$pregunta){
-                $listaPreguntas[$k]['FK_BCP_id'] = $pregunta->FK_BCP_id;
-                $listaPreguntas[$k]['FK_FRM_id'] = $ultimoFRMid;
-            }
-
-            ModPreguntasFormulario::insert( $listaPreguntas );
             DB::commit();
 
-            return redirect('/cuestionario/responder/'.$ultimoFRMid);
+            return redirect('/cuestionario/responder/'.$FRM_id.'/'.$max_FRM_version+1);
         }
 
         catch (\Exception $e) {
@@ -129,7 +112,7 @@ class CuestionarioController extends Controller {
         }
     }
 
-    public function preguntasRespuestas( $FRM_id){
+    public function preguntasRespuestas( $FRM_id, $AGF_copia){
         /* Se consultan las preguntas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
         DB::enableQueryLog();
             $elementos = ModEstablecimiento:: select('rbf.RBF_id'
@@ -137,9 +120,8 @@ class CuestionarioController extends Controller {
             , 'bp.BCP_aclaracion', 'bp.FK_CAT_id'
             , 'c2.CAT_categoria as categoria', 'c.CAT_categoria as subcategoria'
             , 'c.FK_CAT_id as categoriaID'
-            , 'formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id'
+            , 'formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha'
             , 'establecimientos.EST_nombre', 'establecimientos.EST_id', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id','rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension','a.ARC_descripcion')
-
             ->leftjoin ('visitas as v', 'establecimientos.EST_id', 'v.FK_EST_id')
             ->leftjoin ('formularios', 'v.VIS_id', 'formularios.FK_VIS_id')
             ->leftJoin ('r_bpreguntas_formularios as rbf', 'formularios.FRM_id', 'rbf.FK_FRM_id')
@@ -149,11 +131,16 @@ class CuestionarioController extends Controller {
             ->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id' )
             ->leftjoin ('r_respuestas_archivos as rra', 'r.RES_id', 'rra.FK_RES_id')
             ->leftjoin ('archivos as a', 'rra.FK_ARC_id','a.ARC_id')
+            ->leftjoin ('agrupador_formularios as af', 'af.AGF_id', 'r.FK_AGF_id')
             ->where ('rbf.FK_FRM_id', $FRM_id)
+            ->where ('af.AGF_id', $AGF_copia)
             ->where ('bp.estado', '1')
             ->orderBy('c.CAT_id')
             ->orderBy('bp.BCP_id')
         ->get();
+        // $quries = DB::getQueryLog();
+        // dump( $quries );
+        // exit;
         return $elementos;
     }
     /* Guarda las recomendaciones uno a uno */
