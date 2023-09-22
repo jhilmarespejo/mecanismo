@@ -3,24 +3,24 @@
 
 @section('content')
 @php
-    $aux = null;
-    $a = [];
-    $archivosRec = [];
-    $archivosRecAcato = [];
+    // $aux = null;
+    // $a = [];
+    // $archivosRec = [];
+    // $archivosRecAcato = [];
 
-    foreach ($recomendaciones as $k=>$rec){
-        if ( $aux != $rec->REC_id ) {
-            array_push($a, ['REC_id' => $rec->REC_id, 'REC_recomendacion' => $rec->REC_recomendacion, 'FK_FRM_id' => $rec->FK_FRM_id, 'REC_cumplimiento' => $rec->REC_cumplimiento, 'REC_fechaCumplimiento' => $rec->REC_fechaCumplimiento, 'REC_detallesCumplimiento' => $rec->REC_detallesCumplimiento, 'REC_fechaRecomendacion' => $rec->REC_fechaRecomendacion, 'REC_tipo' => $rec->REC_tipo, 'ARC_id' => $rec->ARC_id ] );
-        } if( $rec->ARC_ruta != null ){
-            if ($rec->ARC_tipo == 'recomemdacion') {
-                array_push( $archivosRec, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-            }
-            if ($rec->ARC_tipo == 'acato-recomendacion') {
-                array_push( $archivosRecAcato, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-            }
-        }
-        $aux = $rec->REC_id;
-    }
+    // foreach ($recomendaciones as $k=>$rec){
+    //     if ( $aux != $rec->REC_id ) {
+    //         array_push($a, ['REC_id' => $rec->REC_id, 'REC_recomendacion' => $rec->REC_recomendacion, 'FK_FRM_id' => $rec->FK_FRM_id, 'REC_cumplimiento' => $rec->REC_cumplimiento, 'REC_fechaCumplimiento' => $rec->REC_fechaCumplimiento, 'REC_detallesCumplimiento' => $rec->REC_detallesCumplimiento, 'REC_fechaRecomendacion' => $rec->REC_fechaRecomendacion, 'REC_tipo' => $rec->REC_tipo, 'ARC_id' => $rec->ARC_id ] );
+    //     } if( $rec->ARC_ruta != null ){
+    //         if ($rec->ARC_tipo == 'recomemdacion') {
+    //             array_push( $archivosRec, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
+    //         }
+    //         if ($rec->ARC_tipo == 'acato-recomendacion') {
+    //             array_push( $archivosRecAcato, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
+    //         }
+    //     }
+    //     $aux = $rec->REC_id;
+    // }
     //dump($a, $archivosRec, $archivosRecAcato, $aux);
     // dump( $elementos->toArray() );
     // exit

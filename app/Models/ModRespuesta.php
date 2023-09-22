@@ -12,6 +12,7 @@ class ModRespuesta extends Model
 
     protected $primaryKey = 'RES_id';
     public $incrementing = true;
+    // public $timestamps = false;
     const CREATED_AT = 'createdAt';
     const UPDATED_AT = 'updatedAt';
     protected $guarded = [];
