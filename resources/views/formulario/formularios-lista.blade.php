@@ -22,21 +22,6 @@
             {{$VIS_tipo}} <br>
             {{ $TES_tipo .' '. $EST_nombre }}
         </div>
-<<<<<<< HEAD
-        </div>
-    </nav>
-    @endmobile
-
-    {{-- @dump($establecimiento) --}}
-
-<div class="container p-2">
-    <div class="card text-dark bg-light " >
-        <div class="card-header bg-primary text-white fs-5 text-center">
-
-            {{ $establecimiento['EST_nombre'] ." - " . $establecimiento['EST_departamento']." - " . $establecimiento['EST_municipio']  }}
-        </div>
-=======
->>>>>>> v2mnp
         <div class="card-body">
 
 

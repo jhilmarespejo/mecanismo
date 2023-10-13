@@ -70,20 +70,6 @@ class VisitaController extends Controller
     public function buscaFormularios( $visita_id ){
         DB::enableQueryLog();
         $z = 0;
-<<<<<<< HEAD
-        $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id" from formularios f where "f"."FK_VIS_id" ='.$id.' and "f"."FK_USER_id" = \''.$z.'\' and "f"."estado" <> \''.$z.'\'   order by "f"."FRM_titulo", "f"."FRM_id"';
-
-        $fs = DB::select( $r );
-        $fs = json_decode(json_encode($fs), true);
-        //dump($r);exit;
-
-        $formularios = ModVisita::from('formularios as f')
-        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado'/*, 'e.EST_id', 'e.EST_nombre','e.EST_departamento','e.EST_provincia','e.EST_municipio'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
-        // ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
-        ->leftjoin ('visitas as v', 'f.FK_VIS_id', 'v.VIS_id')
-        ->where ( 'f.FK_VIS_id', $id );
-        // ->where ( 'e.estado', '1' );
-=======
         /** Busca los formularios correspondientes a la visita, z=0 es el formulario generico  */
         // $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
         // from formularios f where "f"."FK_VIS_id" ='.$visita_id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
@@ -98,7 +84,6 @@ class VisitaController extends Controller
         ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
         ->where ('f.FK_VIS_id', $visita_id)
         ->where ('e.estado', '1');
->>>>>>> v2mnp
         if( Auth::user()->rol == 'Operador' ){
             $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
         }
@@ -110,16 +95,12 @@ class VisitaController extends Controller
         $establecimiento = ModEstablecimiento::from('establecimientos as e')
         ->select('e.EST_id', 'e.EST_nombre', 'e.EST_departamento', 'e.EST_provincia', 'e.EST_municipio')
         ->leftjoin ('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-        ->where ( 'v.VIS_id', $id )->first()->toArray();
+        ->where ( 'v.VIS_id', $visita_id )->first()->toArray();
 
         // $quries = DB::getQueryLog();
         // dump($quries);
         // exit;
-<<<<<<< HEAD
-        return view('formulario.formularios-lista', compact('formularios', 'fs', 'establecimiento'));
-=======
         return view('formulario.formularios-lista', compact('formularios'));
->>>>>>> v2mnp
     }
 
     /*Vista para guardar nueva acta de Visita */
