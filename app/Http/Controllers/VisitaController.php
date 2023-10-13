@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta};
 use Illuminate\Http\Request;
-use DB;
-use Validator;
+use Illuminate\Support\Facades\DB;;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\URL;
@@ -19,6 +19,7 @@ use PhpOffice\PhpWord\Style\ListItem;
 
 class VisitaController extends Controller
 {  // Guardar datos de nueva visita
+
     public function guardarNuevaVisita( Request $request ) {
         $numeroVisita = ModVisita::select('FK_EST_id')
         ->where('FK_EST_id', $request->FK_EST_id)
@@ -63,13 +64,13 @@ class VisitaController extends Controller
         }
     }
 
-
     /* Consulta para obtener los formularios aplicados en la visita
         $id = Visita ID
     */
-    public function buscaFormularios( $id ){
+    public function buscaFormularios( $visita_id ){
         DB::enableQueryLog();
         $z = 0;
+<<<<<<< HEAD
         $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id" from formularios f where "f"."FK_VIS_id" ='.$id.' and "f"."FK_USER_id" = \''.$z.'\' and "f"."estado" <> \''.$z.'\'   order by "f"."FRM_titulo", "f"."FRM_id"';
 
         $fs = DB::select( $r );
@@ -82,6 +83,22 @@ class VisitaController extends Controller
         ->leftjoin ('visitas as v', 'f.FK_VIS_id', 'v.VIS_id')
         ->where ( 'f.FK_VIS_id', $id );
         // ->where ( 'e.estado', '1' );
+=======
+        /** Busca los formularios correspondientes a la visita, z=0 es el formulario generico  */
+        // $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
+        // from formularios f where "f"."FK_VIS_id" ='.$visita_id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
+
+        // $fs = DB::select( $r );
+        // $fs = json_decode(json_encode($fs), true);
+        // dump($r);exit;
+
+        $formularios = ModVisita::from('visitas as v')
+        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
+        ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
+        ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
+        ->where ('f.FK_VIS_id', $visita_id)
+        ->where ('e.estado', '1');
+>>>>>>> v2mnp
         if( Auth::user()->rol == 'Operador' ){
             $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
         }
@@ -98,7 +115,11 @@ class VisitaController extends Controller
         // $quries = DB::getQueryLog();
         // dump($quries);
         // exit;
+<<<<<<< HEAD
         return view('formulario.formularios-lista', compact('formularios', 'fs', 'establecimiento'));
+=======
+        return view('formulario.formularios-lista', compact('formularios'));
+>>>>>>> v2mnp
     }
 
     /*Vista para guardar nueva acta de Visita */
@@ -343,7 +364,8 @@ class VisitaController extends Controller
 
         $b = ModBancoPregunta::from ('banco_preguntas as bp')
         ->select( DB::raw('SUM( ("r"."RES_respuesta")::int ) as "muertes_naturales"'),)
-        ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
+        ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
+        ->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
         ->leftJoin ('formularios as f', 'f.FRM_id', 'rbf.FK_FRM_id')
         ->whereIn ( 'bp.BCP_id', [2006,2007,2008,2009,2010,2011,2012] )
         ->where ( 'f.estado', 'completado')
@@ -357,6 +379,21 @@ class VisitaController extends Controller
         return( $a );
     }
 
+    /* Esta función devuelve un color, el cual es asignado de acuerdo al tipo de visita  */
+    public static function colorTipoVisita( $tipoVisita ){
+        if($tipoVisita == 'Visita en profundidad'){
+            $colorVisita = 'text-white bg-success';
+        }elseif($tipoVisita == 'Visita Temática') {
+            $colorVisita = 'text-white bg-danger';
+        }elseif($tipoVisita == 'Visita de seguimiento'){
+            $colorVisita = 'text-white bg-primary';
+        }elseif($tipoVisita == 'Visita reactiva'){
+            $colorVisita = 'text-white bg-red';
+        }elseif($tipoVisita == 'Visita Ad hoc'){
+            $colorVisita = 'text-white bg-warning';
+        }
+        return $colorVisita;
+    }
 
 
 }

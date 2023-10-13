@@ -6,7 +6,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <title>.:MNP:.</title>
+        {{-- <title>.:MNP:.</title> --}}
+        <title>.:@yield('title'):.</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
@@ -110,6 +111,7 @@
         .box-shadow{
             box-shadow: 1px 1px 3px black;
         }
+        
     </style>
 
     </body>

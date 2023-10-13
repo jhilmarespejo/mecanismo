@@ -96,6 +96,7 @@
                             <input type="hidden" name="RES_tipoRespuesta" value="{{$elemento->BCP_tipoRespuesta}}">
                             <input type="hidden" name="RES_complementoRespuesta" value="{{$elemento->BCP_complemento}}">
                             <input type="hidden" name="FK_RBF_id" value="{{$elemento->RBF_id}}">
+                            <input type="hidden" name="FK_AGF_id" value="{{$elemento->AGF_id}}">
                         </form>
                     </div>
                 </div>

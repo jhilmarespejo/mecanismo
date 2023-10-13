@@ -1,4 +1,4 @@
-<nav id="nav1" class="navbar navbar-expand-md navbar-light bg-white border-bottom sticky-top">
+<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-warning">
     <div class="container">
         <!-- Logo -->
         <span class="navbar-brandx col" href="/">
@@ -12,12 +12,16 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto fs-5">
+                        <li class="nav-item bg-danger">
+                            <a class="nav-link active" href="/panel">MNP V2</a>
+                        </li>
+
                         <x-jet-nav-link href="{{ route('panel') }}" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
                             <li class="nav-item">
-                                <a class="nav-link active" href="/establecimientos">Establecimientos</a>
+                                <a class="nav-link" href="/establecimientos">Establecimientos</a>
                             </li>
 
                             @if( Auth::user()->rol == 'Administrador' )
@@ -27,8 +31,12 @@
                                 <li class="nav-item">
                                     <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/formularios">&nbsp;</a>
+                                    <a class="nav-link " aria-current="page" href="/informeVisitas">Informe de visitas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " aria-current="page" href="/formularios">. </a>
                                 </li>
                                 {{-- @else --}}
                             @endif

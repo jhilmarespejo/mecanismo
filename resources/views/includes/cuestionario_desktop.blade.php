@@ -47,17 +47,17 @@
                                                 @endif
 
                                                 @if ($pregunta->BCP_tipoRespuesta == 'Numeral')
-                                                <div class="row p-2"><input class="ms-2 col resp" type='number' size='10' min="0" name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"><span class="col-1 marca"></span> </div>
-                                                @endif
-                                                @if ($pregunta->BCP_tipoRespuesta == 'Respuesta corta')
-                                                <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"> <span class="col-1 marca"></span> </div>
-                                                @endif
-                                                @if ($pregunta->BCP_tipoRespuesta == 'Respuesta larga')
-                                                <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"><span class="col-1 marca"></span> </div>
+                                                    <div class="row p-2"><input class="ms-2 col resp" type='number' size='10' min="0" name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"><span class="col-1 marca"></span> </div>
+                                                    @endif
+                                                    @if ($pregunta->BCP_tipoRespuesta == 'Respuesta corta')
+                                                    <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"> <span class="col-1 marca"></span> </div>
+                                                    @endif
+                                                    @if ($pregunta->BCP_tipoRespuesta == 'Respuesta larga')
+                                                    <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$pregunta->RES_respuesta}}"><span class="col-1 marca"></span> </div>
                                                 @endif
                                                 {{-- </div> --}}
                                                 @if ( $pregunta->BCP_complemento)
-                                                <div class="row complemento px-3 py-1"> {{ $pregunta->BCP_complemento }} <input type="text" name='RES_complemento' value="{{$pregunta->RES_complemento}}"></div>
+                                                    <div class="row complemento px-3 py-1"> {{ $pregunta->BCP_complemento }} <input type="text" name='RES_complemento' value="{{$pregunta->RES_complemento}}"></div>
                                                 @endif
                                                 @if ( $pregunta->BCP_adjunto != null || $pregunta->BCP_adjunto != '' )
 
@@ -82,6 +82,7 @@
                                                 <input type="hidden" name="RES_tipoRespuesta" value="{{$pregunta->BCP_tipoRespuesta}}">
                                                 <input type="hidden" name="RES_complementoRespuesta" value="{{$pregunta->BCP_complemento}}">
                                                 <input type="hidden" name="FK_RBF_id" value="{{$pregunta->RBF_id}}">
+                                                <input type="hidden" name="FK_AGF_id" value="{{$pregunta->AGF_id}}">
                                             </form>
                                     </div>
                                 </div>
@@ -169,6 +170,7 @@
                                         <input type="hidden" name="RES_tipoRespuesta" value="{{$preg->BCP_tipoRespuesta}}">
                                         <input type="hidden" name="RES_complementoRespuesta" value="{{$preg->BCP_complemento}}">
                                         <input type="hidden" name="FK_RBF_id" value="{{$preg->RBF_id}}">
+                                        <input type="hidden" name="FK_AGF_id" value="{{$preg->AGF_id}}">
                                     </form>
                                 </div>
                             </div>
@@ -371,4 +373,3 @@
         // });
 </script>
 
-{{-- hotel viena --}}
