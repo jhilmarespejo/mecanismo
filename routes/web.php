@@ -38,6 +38,9 @@ Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosN
 
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
 
+/* Ruta para mostrar los formularios relacionados a la vista */
+Route::get('formulario/buscaFormularios/{id}/{resultado?}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
+
 // INDEX
 Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
 
@@ -58,7 +61,7 @@ Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name(
 
 Route::get('cuestionario/imprimir/{id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
 
-Route::get('cuestionario/duplicar/{id}/{VIS_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
+Route::get('cuestionario/duplicar/{FRM_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
 
 Route::get('cuestionario/responder/{FRM_id}/{AGF_copia}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
 
@@ -106,7 +109,6 @@ Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 // VISITAS
 Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
 
-Route::get('visita/buscaFormularios/{id}', [VisitaController::class, 'buscaFormularios'])->name('visita.buscaFormularios')->middleware('auth');
 
 Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita'])->name('visita.actaVisita')->middleware('auth');
 

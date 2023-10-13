@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModRespuesta};
 use Illuminate\Http\Request;
-use DB;
-use Validator;
+use Illuminate\Support\Facades\DB;;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\URL;
@@ -338,7 +338,8 @@ class VisitaController extends Controller
 
         $b = ModBancoPregunta::from ('banco_preguntas as bp')
         ->select( DB::raw('SUM( ("r"."RES_respuesta")::int ) as "muertes_naturales"'),)
-        ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
+        ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
+        ->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
         ->leftJoin ('formularios as f', 'f.FRM_id', 'rbf.FK_FRM_id')
         ->whereIn ( 'bp.BCP_id', [2006,2007,2008,2009,2010,2011,2012] )
         ->where ( 'f.estado', 'completado')
@@ -352,6 +353,21 @@ class VisitaController extends Controller
         return( $a );
     }
 
+    /* Esta función devuelve un color, el cual es asignado de acuerdo al tipo de visita  */
+    public static function colorTipoVisita( $tipoVisita ){
+        if($tipoVisita == 'Visita en profundidad'){
+            $colorVisita = 'text-white bg-success';
+        }elseif($tipoVisita == 'Visita Temática') {
+            $colorVisita = 'text-white bg-danger';
+        }elseif($tipoVisita == 'Visita de seguimiento'){
+            $colorVisita = 'text-white bg-primary';
+        }elseif($tipoVisita == 'Visita reactiva'){
+            $colorVisita = 'text-white bg-red';
+        }elseif($tipoVisita == 'Visita Ad hoc'){
+            $colorVisita = 'text-white bg-warning';
+        }
+        return $colorVisita;
+    }
 
 
 }
