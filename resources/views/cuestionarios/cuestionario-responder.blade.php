@@ -2,29 +2,7 @@
 @section('title', 'Cuestionario')
 
 @section('content')
-@php
-    // $aux = null;
-    // $a = [];
-    // $archivosRec = [];
-    // $archivosRecAcato = [];
 
-    // foreach ($recomendaciones as $k=>$rec){
-    //     if ( $aux != $rec->REC_id ) {
-    //         array_push($a, ['REC_id' => $rec->REC_id, 'REC_recomendacion' => $rec->REC_recomendacion, 'FK_FRM_id' => $rec->FK_FRM_id, 'REC_cumplimiento' => $rec->REC_cumplimiento, 'REC_fechaCumplimiento' => $rec->REC_fechaCumplimiento, 'REC_detallesCumplimiento' => $rec->REC_detallesCumplimiento, 'REC_fechaRecomendacion' => $rec->REC_fechaRecomendacion, 'REC_tipo' => $rec->REC_tipo, 'ARC_id' => $rec->ARC_id ] );
-    //     } if( $rec->ARC_ruta != null ){
-    //         if ($rec->ARC_tipo == 'recomemdacion') {
-    //             array_push( $archivosRec, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-    //         }
-    //         if ($rec->ARC_tipo == 'acato-recomendacion') {
-    //             array_push( $archivosRecAcato, ['REC_id' => $rec->REC_id, 'ARC_ruta' => $rec->ARC_ruta, 'ARC_id' => $rec->ARC_id, 'ARC_descripcion' => $rec->ARC_descripcion, 'ARC_extension' => $rec->ARC_extension, 'ARC_tipo' => $rec->ARC_tipo, 'ARC_tipoArchivo' =>  $rec->ARC_tipoArchivo, 'FK_REC_id' =>  $rec->FK_REC_id] );
-    //         }
-    //     }
-    //     $aux = $rec->REC_id;
-    // }
-    //dump($a, $archivosRec, $archivosRecAcato, $aux);
-    // dump( $elementos->toArray() );
-    // exit
-@endphp
 <style>
     .hover:hover{
         background-color:  #eaeaea;
@@ -33,39 +11,7 @@
         ol, ul{padding-left: 10px;}
     }
 </style>
-@php
-    $auxContadorCategorias = 1;
-    $auxCategoriasArray = [];
-    $archivos = [];
-    $i='';
 
-    /* ORDENA en forma de array las categorias, subcategorias y preguntas */
-    foreach ($elementos as $key=>$elemento){
-        /* Si la respuesta actual tiene una imagen, se guardan las rutas y otros en $archivos  */
-        if( $elemento->ARC_ruta !='' ){
-            array_push($archivos, ['RBF_id' => $elemento->RBF_id, 'ARC_ruta' => $elemento->ARC_ruta, 'ARC_id' => $elemento->ARC_id, 'ARC_tipoArchivo' => $elemento->ARC_tipoArchivo, 'ARC_extension' => $elemento->ARC_extension, 'ARC_descripcion' => $elemento->ARC_descripcion, 'FK_RES_id' => $elemento->FK_RES_id]);
-        }
-        // Verifica que no se repitan los elementos en el array cuando la preguna tiene archivos adjuntos
-        if($i != $elemento->RBF_id){
-            // dump($elemento->RBF_id);
-            if ($elemento->categoria === null ) {
-                $categoria = $elemento->subcategoria;
-                $subcategoria = $elemento->categoria;
-                $auxCategoriasArray[$categoria][$key] = $elemento;
-            } else {
-                $categoria = $elemento->categoria;
-                $subcategoria = $elemento->subcategoria;
-                $auxCategoriasArray[$categoria][$subcategoria][$key] = $elemento;
-            }
-        }
-        $i = $elemento->RBF_id;
-    } // END FOREACH
-    // dump( $elementos->toArray(), $auxCategoriasArray );
-    // $auxCategoriasArray = array_unique($auxCategoriasArray);
-    // foreach ($auxCategoriasArray as $key => $value) {
-    //     dump($value);
-    // }
-@endphp
 
 <div class="container-fluid p-sm-3 p-0 mx-0" id="cuestionario" >
     @if ( count($elementos) > 0 )
@@ -78,7 +24,7 @@
                 <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i></a>
             </div>
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$FRM_id}}" >
                     <i class="bi bi-printer-fill"></i></span>
                 </a>
             </div>
@@ -94,7 +40,7 @@
                         <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Volver atrás</a>
                     </li>
                     <li class="nav-item p-1 px-3" id="btn_imprimir">
-                        <a class="text-decoration-none" href="/cuestionario/imprimir/{{$elemento->FRM_id}}" >
+                        <a class="text-decoration-none" href="/cuestionario/imprimir/{{$FRM_id}}" >
                             <i class="bi bi-printer"></i> Imprimir</span>
                         </a>
                     </li>
@@ -105,9 +51,9 @@
         @endmobile
         {{-- Encabezado --}}
         <div class="text-center head">
-            <p class="m-0 p-0 fs-3" id="establecimiento">{{ $elemento->EST_nombre }}</p>
-            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $elemento->FRM_titulo }}</p>
-            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p>
+            <p class="m-0 p-0 fs-3" id="establecimiento">{{ $EST_nombre }}</p>
+            <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $FRM_titulo }}</p>
+            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $AGF_copia }}</p>
         </div>
 
         {{-- Cuestionario --}}
@@ -144,7 +90,7 @@
                 <input class="form-check-input chek-adjuntos" type="checkbox" onclick="plegar_desplegar('div_adjuntos')">
             </div>
             <legend class="text-primary fs-4 text-center" > Archivos adjuntos</legend>
-            @include('includes.adjuntos', ['FRM_id' => $elemento->FRM_id])
+            @include('includes.adjuntos', ['FRM_id' => $FRM_id])
         </div>
 
     @else

@@ -1,4 +1,5 @@
 
+
 @extends('layouts.app')
 @section('title', 'Cuestionario')
 
@@ -62,7 +63,7 @@
         }
 </style>
 
-    @php
+    {{-- @php
         // $auxCategoria = '';
         $auxContadorCategorias = 1;
         $auxCategoriasArray = [];
@@ -79,7 +80,7 @@
         } // END FOREACH
         // dump($auxCategoriasArray);
         // dump($formulario->FK_EST_id);
-    @endphp
+    @endphp --}}
 
     <div class="container-fluid" id="cuestionario" >
         @mobile
@@ -94,7 +95,7 @@
                 <a class="text-decoration-none fs-4" id="imprimir_formulario"><i class="bi bi-printer-fill"></i></a>
             </div>
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
+                <a class="text-decoration-none fs-4" href="/cuestionario/responder/{{$FRM_id}}" >
                     <i class="bi bi-pencil-square"></i>
                 </a>
             </div>
@@ -119,7 +120,7 @@
                     <a class="text-decoration-none" id="imprimir_formulario"><i class="bi bi-printer"></i> Imprimir</a>
                   </li>
                   <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/cuestionario/responder/{{$formulario->FRM_id}}" >
+                    <a class="text-decoration-none" href="/cuestionario/responder/{{$FRM_id}}" >
                         <i class="bi bi-pencil-square"></i> Responder
                     </a>
                   </li>
@@ -137,6 +138,15 @@
               </div>
             </div>
         </nav>
+    @php
+        // foreach ($elementos_categorias as $key => $elemento) {
+        //     dump( $key);
+        //     foreach($elemento as $k => $item){
+        //         dump($item);
+        //     }
+        // }
+        // exit;
+    @endphp
         @enddesktop
         <div class="d-flexx text-center bd-highlight mb-0 encabezado d-none">
             <div class="p-2 bd-highlight text-center"><img src="/img/logodp.png" style="height: 50px"></div>
@@ -144,178 +154,90 @@
         </div>
         <div class="text-center head">
             {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" > Visita temática </p> --}}
-            <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" > {{ $formulario->FRM_titulo }} </p>
-            <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $formulario->EST_nombre }}</p>
-            <p class=" m-0 p-0" id="version" style="font-size: 20px">Cuestionario: {{ $formulario->FRM_version }}</p>
+            <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" > {{ $FRM_titulo }} </p>
+            <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $EST_nombre }}</p>
+            {{-- <p class=" m-0 p-0" id="version" style="font-size: 20px">Cuestionario: {{ $formulario->FRM_version }}</p> --}}
         </div>
 
-
         <div class="row border m-2 p-2  d-flex formulario">
-            @if ( count($elementos) > 0 )
-                <ol >
-                    @foreach ($auxCategoriasArray as $keyCat=>$categorias)
-                        <li>
-                            <strong id="categorias">{{ $keyCat }}</strong>
-                                {{-- cuando la categoria TIENE subcategoria y preguntas dentro de las subcategorias--}}
-                                <ol>
-                                    @php $c = 1; @endphp
-                                    @foreach ($categorias as $keySC=>$subcategorias )
-                                        @if ( is_string($keySC) )
-                                            <li class="mt-1" id="subcategorias">
-                                                <strong >{{ $keySC }}</strong>
-                                                <ul class="list-unstyled">
-                                                    @foreach ($subcategorias as $key=>$pregunta)
-                                                        <li>
-                                                            <div class="row border-bottom mb-1">
-                                                                @if ($pregunta->BCP_tipoRespuesta == 'Afirmación')
-                                                                    <div class="col-7 col-preguntas" id="preguntas" >
-                                                                        {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                                            <small class="text-danger">* Marque solo una opción</small>
-                                                                    </div>
-                                                                    <div class="col-5 col-preguntas" id="preguntas" >
-                                                                        <div class="row ">
-                                                                            @php
-                                                                                $opciones = json_decode( $pregunta->BCP_opciones, true);
-                                                                                    if ( is_array($opciones) ) {
-                                                                                        foreach ($opciones as $key => $opcion) {
-                                                                                            echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
-                                                                                        }
-                                                                                    }
-                                                                            @endphp
-                                                                        </div>
+             @if ( count($elementos_categorias) > 0 )
+                <ol>
+                    @php $c = 1; @endphp
+                    @foreach ($elementos_categorias as $key => $elemento)
+                        <li> <strong id="categoria0">{{ $key }}</strong> </li>{{--subcategoria --}}
+                        <ul class="list-unstyled">
+                            @foreach($elemento as $k => $item)
+                                <li class="mt-1" id="subcategorias">
+                                    {{-- @php dump($item) @endphp --}}
+                                    <div class="row border-bottom mb-1">
+                                        @if ($item['BCP_tipoRespuesta'] == 'Afirmación')
+                                            <div class="col-7 col-preguntas" id="preguntas" >
+                                                {{ $c. '. ' .$item['BCP_pregunta'] }}
+                                                    <small class="text-danger">* Marque solo una opción</small>
+                                            </div>
+                                            <div class="col-5 col-preguntas" id="preguntas" >
+                                                <div class="row ">
+                                                    @php
+                                                        $opciones = json_decode( $item['BCP_opciones'], true);
+                                                            if ( is_array($opciones) ) {
+                                                                foreach ($opciones as $key => $opcion) {
+                                                                    echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
+                                                                }
+                                                            }
+                                                    @endphp
+                                                </div>
 
-                                                                    </div>
-                                                                @else
-                                                                <div class="col-5 col-preguntas" id="preguntas" >
-                                                                    {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                                    @if ( $pregunta->BCP_tipoRespuesta == 'Lista desplegable')
-                                                                    <br/><small class="text-danger">* Marque solo una opción</small>
-                                                                    @elseif ($pregunta->BCP_tipoRespuesta == 'Numeral')
-                                                                    <br/><small class="text-danger">* Registre un número</small>
-                                                                    @elseif ($pregunta->BCP_tipoRespuesta == 'Casilla verificación')
-                                                                    <br/><small class="text-danger">* Puede marcar más de una opción</small>
-                                                                    @endif
-                                                                </div>
-
-                                                                <div class="col-7 col-respuestas">
-                                                                    <div class="row ">
-                                                                        @php
-                                                                            $opciones = json_decode( $pregunta->BCP_opciones, true);
-                                                                                if ( is_array($opciones) ) {
-                                                                                    foreach ($opciones as $key => $opcion) {
-                                                                                        echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
-                                                                                    }
-                                                                                }
-                                                                                if ($pregunta->BCP_tipoRespuesta == 'Numeral') {
-                                                                                    echo "<div><input type='text' size='8'> </div>";
-                                                                                }
-                                                                                if ($pregunta->BCP_tipoRespuesta == 'Respuesta corta') {
-                                                                                    echo "<input type='text'> ";
-                                                                                }
-                                                                                if ($pregunta->BCP_tipoRespuesta == 'Respuesta larga') {
-                                                                                    echo "<input type='text' class='resp-lar'>";
-                                                                                }
-                                                                        @endphp
-                                                                    </div>
-                                                                    @if ( $pregunta->BCP_complemento )
-                                                                        <div class="row complemento"> {{ $pregunta->BCP_complemento }} <input type="text" ></div>
-                                                                    @endif
-                                                                </div>
-                                                                @endif
-
-
-                                                            </div>
-                                                        </li>
-                                                        @php $c++; @endphp
-                                                    @endforeach
-                                                </ul>
-                                            </li>
-                                        @endif
-                                    @endforeach
-                                </ol>
-
-                                {{-- cuando la categoria NO tiene subcategoria --}}
-                                <ol>
-                                    <ul class="list-unstyled">
-                                        @foreach ($categorias as $keyP=>$preg )
-                                            {{-- @php
-                                                dump( $preg );
-                                            @endphp --}}
-                                            @if ( !is_string($keyP) )
-                                                <li class="mt-1" id="preguntas">
-                                                    <div class="row border-bottom">
-                                                        @if ($preg->BCP_tipoRespuesta == 'Afirmación')
-                                                            <div class="col-7 col-preguntas" >
-                                                                {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                                <small class="text-danger">* Marque solo una opción</small>
-                                                            </div>
-
-                                                            <div class="col-5 col-respuestas">
-                                                                <div class="row">
-                                                                    @php
-                                                                        $opciones = json_decode( $preg->BCP_opciones, true);
-                                                                        if ( is_array($opciones) ) {
-                                                                            foreach ($opciones as $key => $opcion) {
-                                                                                echo "<div  class='col-auto d-flex'><i class='bi bi-app'></i>$opcion </div>";
-                                                                            }
-                                                                        }
-                                                                    @endphp
-                                                                </div>
-                                                                @if ( $preg->BCP_complemento )
-                                                                    <div class="row complemento"> {{ $preg->BCP_complemento }} <input type="text" ></div>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <div class="col-5 col-preguntas" >
-                                                                {{ $c. '. ' .$pregunta->BCP_pregunta }}
-                                                                @if ( $preg->BCP_tipoRespuesta == 'Lista desplegable')
-                                                                <br/><small class="text-danger">* Marque solo una opción</small>
-                                                                @elseif ($preg->BCP_tipoRespuesta == 'Numeral')
-                                                                <br/><small class="text-danger">* Registre un número</small>
-                                                                @elseif ($preg->BCP_tipoRespuesta == 'Casilla verificación')
-                                                                <br/><small class="text-danger">* Puede marcar más de una opción</small>
-                                                                @endif
-                                                            </div>
-
-                                                            <div class="col-7 col-respuestas">
-                                                                <div class="row">
-                                                                    @php
-                                                                        $opciones = json_decode( $preg->BCP_opciones, true);
-                                                                        if ( is_array($opciones) ) {
-                                                                            foreach ($opciones as $key => $opcion) {
-                                                                                echo "<div  class='col-auto d-flex'><i class='bi bi-app'></i>$opcion </div>";
-                                                                            }
-                                                                        }
-                                                                        if ($preg->BCP_tipoRespuesta == 'Numeral') {
-                                                                            echo "<div><input type='text' size='8'> </div>";
-                                                                        }
-                                                                        if ($preg->BCP_tipoRespuesta == 'Respuesta corta') {
-                                                                            echo "<input type='text'>";
-                                                                        }
-                                                                        if ($preg->BCP_tipoRespuesta == 'Respuesta larga') {
-                                                                            echo "<input type='text' class='resp-lar'>";
-                                                                        }
-                                                                        @endphp
-                                                                </div>
-                                                                @if ( $preg->BCP_complemento )
-                                                                    <div class="row complemento"> {{ $preg->BCP_complemento }} <input type="text" ></div>
-                                                                @endif
-                                                            </div>
-
-                                                        @endif
-
-
-                                                    </div>
-                                                </li>
+                                            </div>
+                                        @else
+                                        <div class="col-5 col-preguntas" id="preguntas" >
+                                            {{ $c. '. ' .$item['BCP_pregunta'] }}
+                                            @if ( $item['BCP_tipoRespuesta'] == 'Lista desplegable')
+                                            <br/><small class="text-danger">* Marque solo una opción</small>
+                                            @elseif ($item['BCP_tipoRespuesta'] == 'Numeral')
+                                            <br/><small class="text-danger">* Registre un número</small>
+                                            @elseif ($item['BCP_tipoRespuesta'] == 'Casilla verificación')
+                                            <br/><small class="text-danger">* Puede marcar más de una opción</small>
                                             @endif
-                                            @php $c++; @endphp
-                                        @endforeach
-                                    </ul>
-                                </ol>
-                        </li>
-                        @php $auxContadorCategorias++;   @endphp
+                                        </div>
+
+                                        <div class="col-7 col-respuestas">
+                                            <div class="row ">
+                                                @php
+                                                    $opciones = json_decode( $item['BCP_opciones'], true);
+                                                        if ( is_array($opciones) ) {
+                                                            foreach ($opciones as $key => $opcion) {
+                                                                echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
+                                                            }
+                                                        }
+                                                        if ($item['BCP_tipoRespuesta'] == 'Numeral') {
+                                                            echo "<div><input type='text' size='8'> </div>";
+                                                        }
+                                                        if ($item['BCP_tipoRespuesta'] == 'Respuesta corta') {
+                                                            echo "<input type='text'> ";
+                                                        }
+                                                        if ($item['BCP_tipoRespuesta'] == 'Respuesta larga') {
+                                                            echo "<input type='text' class='resp-lar'>";
+                                                        }
+                                                @endphp
+                                            </div>
+                                            @if ( $item['BCP_complemento'] )
+                                                <div class="row complemento"> {{ $item['BCP_complemento'] }} <input type="text" ></div>
+                                            @endif
+                                        </div>
+                                        @endif
+
+
+                                    </div>
+                                </li>
+                                @php $c++; @endphp
+                            @endforeach
+                        </ul>
                     @endforeach
                 </ol>
+                @php
+                    // exit;
+                @endphp
+
             @else
                 <div class="alert alert-warning p-3">
                     <a class="btn btn-danger bt-lg text-decoration-none" href="/cuestionario/{{$id}}">Organizar preguntas para éste cuestionario </a>
