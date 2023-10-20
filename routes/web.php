@@ -59,7 +59,7 @@ Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('a
 // CUESTIONARIO
 Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
 
-Route::get('cuestionario/imprimir/{FRM_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
+Route::get('cuestionario/imprimir/{FRM_id}/{AGF_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
 
 Route::get('cuestionario/duplicar/{FRM_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
 

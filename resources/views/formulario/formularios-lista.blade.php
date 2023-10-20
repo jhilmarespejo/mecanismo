@@ -100,7 +100,7 @@
                                                 <a href="/cuestionario/ver/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-eye-fill px-2 text-primary fs-5"></i></a>
                                             </li> --}}
                                             <li class="p-0 m-0">
-                                                <a href="/cuestionario/imprimir/{{$item["FRM_id"]}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
+                                                <a href="/cuestionario/imprimir/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
                                             </li>
                                             <li class="p-0 m-0">
                                                 <a href="/cuestionario/responder/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pen-fill px-2 fs-5 {{ $lapiz }}"></i></a>

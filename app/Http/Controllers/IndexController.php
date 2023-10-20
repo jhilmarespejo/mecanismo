@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria};
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Console\DumpCommand;
 use Redirect,Response;
 

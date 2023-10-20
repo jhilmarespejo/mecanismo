@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModEstablecimiento, ModRecomendacion, ModArchivo, ModRecomendacionArchivo, ModVisita};
 use Illuminate\Http\Request;
-// use DB;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
-use Validator;
 
 class RecomendacionesController extends Controller{
     /**

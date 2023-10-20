@@ -37,7 +37,7 @@
               <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                     <li class="nav-item p-1 px-3">
-                        <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Volver atrás</a>
+                        <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Atrás</a>
                     </li>
                     <li class="nav-item p-1 px-3" id="btn_imprimir">
                         <a class="text-decoration-none" href="/cuestionario/imprimir/{{$FRM_id}}" >
@@ -104,7 +104,10 @@
         </div>
         @if(Auth::user()->rol == 'Administrador' )
             <div class="alert alert-warning p-3">
-                <a class="btn btn-danger bt-lg text-decoration-none" href="/cuestionario/{{$FRM_id}}">Debe organizar preguntas para éste cuestionario </a>
+
+                <div class=" text-decoration-none" >Debe organizar preguntas para éste cuestionario </div>
+
+                <a class="btn btn-danger bt-lg text-decoration-none" href="javascript:history.back()">Aceptar</a>
             </div>
         @else
             <div class="alert alert-warning p-3 btn btn-danger bt-lg text-decoration-none">

@@ -48,7 +48,8 @@
 {{-- Controles adicionales --}}
 <div class="col-sm pt-2-sm" id="tipos_establecimientos">
     <select class="form-select form-select-sm" id="cbo_tipos">
-        <option value=""  >Todos los establecimientos</option>
+        <option disabled>Seleccione...</option>
+        <option value="todo"  >Todos los establecimientos</option>
 
         @foreach ($tiposEstablecimientos as $establecimiento)
             <option value="{{$establecimiento->TES_id}}" {{ ($FK_TES_id == $establecimiento->TES_id)? 'selected' : ''}}>{{ $establecimiento->TES_tipo }}</option>

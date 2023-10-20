@@ -58,7 +58,7 @@ class CuestionarioController extends Controller {
         'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id',
         'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id'
         , 'rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id',
-        'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id')
+        'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id','rbf.RBF_orden')
         ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
@@ -75,21 +75,29 @@ class CuestionarioController extends Controller {
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
         ->where('bp.estado', 1)
-        ->orderBy('c.CAT_id', 'asc')
-        ->orderBy('bp.BCP_id')
+        // ->orderBy('c.CAT_id', 'asc')
+        // ->orderBy('bp.BCP_id')
+        ->orderBy('rbf.RBF_orden', 'asc')
         ->get()->toArray();
 
-        // dump( $elementos );exit;
+        // $quries = DB::getQueryLog();
+        // dump($quries);
+        // exit;
         // DB::enableQueryLog();
+        if ( count($elementos) > 0 ){
+            $EST_nombre = $elementos[0]['EST_nombre'];
+            $FRM_titulo = $elementos[0]['FRM_titulo'];
+            $AGF_copia = $elementos[0]['AGF_copia'];
+            $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
+            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias' ) );
+        } else {
+            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos','FRM_id' ) );
+        }
 
-        $EST_nombre = $elementos[0]['EST_nombre'];
-        $FRM_titulo = $elementos[0]['FRM_titulo'];
-        $AGF_copia = $elementos[0]['AGF_copia'];
 
 
         $quries = DB::getQueryLog();
-        $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-        // dump( $elementos['Salud'] );exit;
+        // dump( $elementos_categorias );//exit;
 
         //exit;
         return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias' ) );
@@ -304,13 +312,13 @@ class CuestionarioController extends Controller {
         }
         exit;
     }
-
+    /* Confirma la finalizacion del cuestionario y muestra al usuario un mensaje de confirmación */
     public function confirmaCuestionario( Request $request ){
         // dump( $request->except('_token') ); exit;
 
         DB::beginTransaction();
         try {
-            ModFormulario::where('FRM_id', $request->FRM_id)
+            ModAgrupadorFormulario::where('FK_FRM_id', $request->FRM_id)
             ->update(['estado' => $request->estado]);
             DB::commit();
             return response()->json( [ 'message'=>'Correcto!' ] );
@@ -375,18 +383,17 @@ class CuestionarioController extends Controller {
      * @return \Illuminate\Http\Response
      * Muestra el formulario ya construido listo para imprimir
      */
-    public function imprimirCuestionario($FRM_id){
-
+    public function imprimirCuestionario($FRM_id, $AGF_id){
 
         $elementos = ModFormulario::from('formularios as f')
         ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
         'bp.BCP_aclaracion',
         'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria',
-        'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id')
+        'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id','af.FK_FRM_id', 'af.AGF_id')
         //'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id'
         //, 'rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id',
         //'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id')
-        //->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
+        ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
         ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
@@ -400,18 +407,22 @@ class CuestionarioController extends Controller {
         // ->leftjoin ('r_respuestas_archivos as rra', 'r.RES_id', 'rra.FK_RES_id')
         // ->leftjoin ('archivos as a', 'rra.FK_ARC_id', 'a.ARC_id')
         ->where ('rbf.FK_FRM_id', $FRM_id)
-        //->where('af.AGF_id', $AGF_id)
+        ->where('af.AGF_id', $AGF_id)
         ->where('bp.estado', 1)
         ->orderBy('c.CAT_id', 'asc')
         ->orderBy('bp.BCP_id')
         ->get()->toArray();
-        $FRM_titulo = $elementos[0]['FRM_titulo'];
-        $EST_nombre = $elementos[0]['EST_nombre'];
-        // dump($elementos );exit;
 
-        $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
+        if ( count($elementos) > 0 ){
+            $EST_nombre = $elementos[0]['EST_nombre'];
+            $FRM_titulo = $elementos[0]['FRM_titulo'];
+            $AGF_id = $elementos[0]['AGF_id'];
 
-        return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre'));
+            $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
+            return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id'));
+        } else {
+            return view('cuestionarios.cuestionario-imprimir', compact('elementos'));
+        }
     }
 
     /* Muestra los archivos adjuntos al cuestionario*/
@@ -436,9 +447,9 @@ class CuestionarioController extends Controller {
         //     $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
         // }
 
-        $quries = DB::getQueryLog();
-        dump($quries);
-        exit;
+        // $quries = DB::getQueryLog();
+        // dump($quries);
+        // exit;
         return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
     }
 

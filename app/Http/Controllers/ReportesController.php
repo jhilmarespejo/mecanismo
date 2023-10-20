@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModCategoria, ModBancoPregunta};
 use Illuminate\Http\Request;
-use DB;
-use Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ReportesController extends Controller
 {

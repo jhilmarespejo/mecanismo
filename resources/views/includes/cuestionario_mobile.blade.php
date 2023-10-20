@@ -8,8 +8,6 @@
     <div class="carousel-inner">
         @php $aux = 0; @endphp
         @foreach ($elementos as $k=>$elemento)
-        {{-- @for ($k = 0; $k <= count($elementos); $k++ ) --}}
-            {{-- @if ( $aux != $elemento->FK_RES_id || $elemento->ARC_ruta == null ) --}}
             <div class="carousel-item {{ ($k==0)? 'active': '' }}" id="card_{{$k+1}}">
                 <div class="card border mb-3" >
                     <div class="card-header" >
@@ -23,17 +21,25 @@
                                     $subcategoria = $elemento['subcategoria'];
                                 }
                             @endphp
-                            <dd> <b>Categoría: </b>{{ $categoria }}</dd>
+                            <dd class="categoria_{{$elemento['FK_CAT_id']}}"> <b>Categoría: </b>{{ $categoria }}</dd>
                             @if( $subcategoria != null)
-                            <dd> <b>Subcategoría: </b>{{$subcategoria}}</dd>
+                            <dd class="subcategoria_{{$elemento['categoriaID']}}" > <b>Subcategoría: </b>{{$subcategoria}}</dd>
                             @endif
-
-
                         </dl>
                     </div>
                     <div class="card-body">
-                        <p class="card-title fs-4"><b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}} </p>
+                        {{-- MUESTRA LAS PREGUNTAS --}}
+                        @if ($elemento['BCP_tipoRespuesta'] == 'Etiqueta')
+                            <p id="BCP_id_{{$elemento['BCP_id']}}" class="card-title fs-4 alert alert-danger" role="alert">
+                                <b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
+                            </p>
+                        @else
+                            <p id="BCP_id_{{$elemento['BCP_id']}}" class="card-title fs-4">
+                                <b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
+                            </p>
+                        @endif
 
+                        {{-- IMPUTS PARA REGISTRAR LAS PREGUNTAS --}}
                         <form method="POST" enctype="multipart/form-data" id="frm_{{$elemento['RBF_id']}}" class="frm-respuesta"> @csrf
                             @php
                             $opcionesSC = json_decode( $elemento['BCP_opciones'], true);
@@ -57,11 +63,20 @@
                             </div>
                             @endif
 
-                            @if ($elemento['BCP_tipoRespuesta'] == 'Numeral')
-                            <div class="row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento['RES_respuesta']}}"><span class="col-1 marca"></span> </div>
+                            @if ($elemento['BCP_tipoRespuesta'] == 'Etiqueta')
+                                <div class="visually-hidden row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" value="0">
+                                    <span class="col-1 marca"></span>
+                                </div>
                             @endif
+                            @if ($elemento['BCP_tipoRespuesta'] == 'Numeral')
+                            <div class="row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
+                                <span class="col-1 marca"></span>
+                            </div>
+                        @endif
                             @if ($elemento['BCP_tipoRespuesta'] == 'Respuesta corta')
-                            <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento['RES_respuesta']}}"> <span class="col-1 marca"></span> </div>
+                                <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
+                                    <span class="col-1 marca"></span>
+                                </div>
                             @endif
                             @if ($elemento['BCP_tipoRespuesta'] == 'Respuesta larga')
                             <div  class='row p-2'>
@@ -73,27 +88,27 @@
                             @endif
                             {{-- </div> --}}
                             @if ( $elemento['BCP_complemento'])
-                            <div class="row complemento px-3 py-1"> {{ $elemento['BCP_complemento'] }} <input type="text" name='RES_complemento' value="{{$elemento['RES_complemento']}}"></div>
+                                <div class="row complemento px-3 py-1"> {{ $elemento['BCP_complemento'] }} <input type="text" name='RES_complemento' value="{{$elemento['RES_complemento']}}"></div>
                             @endif
                             @if ( $elemento['BCP_adjunto'] != null || $elemento['BCP_adjunto'] != '' )
 
-                            <span>{{$elemento['BCP_adjunto']}}</span>
-                            <div class="row complemento px-3 py-1">
-                                <input type="file" accept="image/*, video/*,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx" class="archivo-{{$elemento['RBF_id']}}" capture name='RES_adjunto[]' multiple>
-                                <input type="hidden" name="ARC_descripcion" value="{{$elemento['BCP_elemento']}}">
+                                <span>{{$elemento['BCP_adjunto']}}</span>
+                                <div class="row complemento px-3 py-1">
+                                    <input type="file" accept="image/*, video/*,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx" class="archivo-{{$elemento['RBF_id']}}" capture name='RES_adjunto[]' multiple>
+                                    <input type="hidden" name="ARC_descripcion" value="{{$elemento['BCP_elemento']}}">
 
-                                {{-- Si existen archivos se hace una iteracion --}}
-                                <div class="col">
-                                    @include('includes.archivos', ['archivos' => $archivos, 'id' =>  $elemento['RES_id'] ])
+                                    {{-- Si existen archivos se hace una iteracion --}}
+                                    <div class="col">
+                                        @include('includes.archivos', ['archivos' => $archivos, 'id' =>  $elemento['RES_id'] ])
+                                    </div>
                                 </div>
-                            </div>
-                            <span class="btn btn-success btn-sm text-light d-none spiner-{{$elemento['RBF_id']}}" disabled>
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                Cargando archivo...
-                            </span>
-                            <span class="d-none text-success archivo-correcto" style="height: 20px;">
-                                <i class="bi bi-check-circle"></i> Archivo almacenado correctamente!
-                            </span>
+                                <span class="btn btn-success btn-sm text-light d-none spiner-{{$elemento['RBF_id']}}" disabled>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Cargando archivo...
+                                </span>
+                                <span class="d-none text-success archivo-correcto" style="height: 20px;">
+                                    <i class="bi bi-check-circle"></i> Archivo almacenado correctamente!
+                                </span>
                             @endif
                             <input type="hidden" name="RES_tipoRespuesta" value="{{$elemento['BCP_tipoRespuesta']}}">
                             <input type="hidden" name="RES_complementoRespuesta" value="{{$elemento['BCP_complemento']}}">
@@ -103,25 +118,20 @@
                     </div>
                 </div>
             </div>
-            {{-- @endif
-
-            @php
-                $aux = $elemento['FK_RES_id']
-            @endphp --}}
         @endforeach
-            {{-- ultimo elemento del carrusel --}}
-            <div class="carousel-item" id="card_{{ count($elementos)+1 }}">
-                <div class="card text-white bg-success mb-3" style="max-height: 18rem;">
-                    <div class="card-header fs-4">Fin del cuestionario</div>
-                    <div class="card-body">
-                      <h5 class="card-title">Por favor revise los siguientes datos</h5>
-                      <ol>
-                        <li>Aseguresé de que la información es correcta y confiable</li>
-                        <li>Verifique que todas las preguntas hayan sido respondidas</li>
-                      </ol>
-                    </div>
-                  </div>
-            </div>
+        {{-- ultimo elemento del carrusel --}}
+        <div class="carousel-item" id="card_{{ count($elementos)+1 }}">
+            <div class="card text-white bg-success mb-3" style="max-height: 18rem;">
+                <div class="card-header fs-4">Fin del cuestionario</div>
+                <div class="card-body">
+                    <h5 class="card-title">Por favor revise los siguientes datos</h5>
+                    <ol>
+                    <li>Aseguresé de que la información es correcta y confiable</li>
+                    <li>Verifique que todas las preguntas hayan sido respondidas</li>
+                    </ol>
+                </div>
+                </div>
+        </div>
     </div>
 
     <div class="row">
@@ -221,7 +231,10 @@
             });
         }
         function validaciones(item, activo, actual=null, anterior=null, total=null){
-            /*Validacion para input text, number*/
+
+
+
+            /*Validacion para input tipo text, number etiqueta*/
             $("#"+activo).find('input.resp').each(function(e){
                 if( $(this).val() == '' ){
                     mensaje(item, actual, anterior, total);
