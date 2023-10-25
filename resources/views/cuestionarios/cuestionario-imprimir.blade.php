@@ -39,7 +39,7 @@
         li{
             margin-left: -5px;
         }
-        /* .col-preguntas{
+        /* {
             width: 42%;
         }
         .col-respuestas{
@@ -143,41 +143,45 @@
                         @foreach($elemento as $k => $item)
                             <li class="mt-1" id="subcategorias">
                                 {{-- @php dump($item) @endphp --}}
-                                <div class="row border-bottom mb-1">
+                                <div class="row border-bottom">
                                     @if ($item['BCP_tipoRespuesta'] == 'Afirmación')
-                                        <div class="col-7 col-preguntas" id="preguntas" >
+                                        <div class="col-5" id="preguntas" >
                                             {{ $c. '. ' .$item['BCP_pregunta'] }}
-                                                <small class="text-danger">* Marque solo una opción</small>
+                                                {{-- <small class="text-danger" style="font-size: 11px">* Marque solo una opción</small> --}}
+                                                {{-- {{ var_dump($item['BCP_complemento']) }} --}}
                                         </div>
-                                        <div class="col-5 col-preguntas" id="preguntas" >
-                                            <div class="row ">
+                                        <div class="col-7" id="preguntas" >
+                                            <div class="row d-flex">
                                                 @php
                                                     $opciones = json_decode( $item['BCP_opciones'], true);
                                                         if ( is_array($opciones) ) {
                                                             foreach ($opciones as $key => $opcion) {
-                                                                echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
+                                                                echo "<div class='col-auto d-flex '><i class='bi bi-app'> </i>$opcion </div>";
                                                             }
                                                         }
                                                 @endphp
-                                            </div>
 
+                                                @if ( $item['BCP_complemento'] )
+                                                    <div class="col-auto d-flex">{{ $item['BCP_complemento'] }} <input type="text" ></div>
+                                                @endif
+                                            </div>
                                         </div>
                                     @else
-                                    <div class="col-5 col-preguntas" id="preguntas" >
-                                        {{ $c. '. ' .$item['BCP_pregunta'] }}
-                                        @if ( $item['BCP_tipoRespuesta'] == 'Lista desplegable')
-                                        <br/><small class="text-danger">* Marque solo una opción</small>
-                                        @elseif ($item['BCP_tipoRespuesta'] == 'Numeral')
-                                        <br/><small class="text-danger">* Registre un número</small>
-                                        @elseif ($item['BCP_tipoRespuesta'] == 'Casilla verificación')
-                                        <br/><small class="text-danger">* Puede marcar más de una opción</small>
-                                        @endif
-                                    </div>
+                                        <div class="col-5" id="preguntas" >
+                                            {{ $c. '. ' .$item['BCP_pregunta'] }}
+                                            @if ( $item['BCP_tipoRespuesta'] == 'Lista desplegable')
+                                                <small class="text-danger" style="font-size: 11px">(* Marque solo una opción)</small>
+                                            @elseif ($item['BCP_tipoRespuesta'] == 'Numeral')
+                                                <small class="text-danger" style="font-size: 11px">(* Registre un número)</small>
+                                            @elseif ($item['BCP_tipoRespuesta'] == 'Casilla verificación')
+                                                <small class="text-danger" style="font-size: 11px">(* Puede marcar más de una opción)</small>
+                                            @endif
+                                        </div>
 
-                                    <div class="col-7 col-respuestas">
-                                        <div class="row ">
-                                            @php
-                                                $opciones = json_decode( $item['BCP_opciones'], true);
+                                        <div class="col-7 col-respuestas">
+                                            <div class="row d-flex">
+                                                @php
+                                                    $opciones = json_decode( $item['BCP_opciones'], true);
                                                     if ( is_array($opciones) ) {
                                                         foreach ($opciones as $key => $opcion) {
                                                             echo "<div class='col-auto d-flex'><i class='bi bi-app'> </i>$opcion </div>";
@@ -192,15 +196,15 @@
                                                     if ($item['BCP_tipoRespuesta'] == 'Respuesta larga') {
                                                         echo "<input type='text' class='resp-lar'>";
                                                     }
-                                            @endphp
+                                                @endphp
+                                                 @if ( $item['BCP_complemento'] )
+                                                    <div class="col-auto d-flex">{{ $item['BCP_complemento'] }} <input type="text" ></div>
+                                                @endif
+                                            </div>
+                                            {{-- xxxx - {{ var_dump($item['BCP_complemento']) }} --}}
+
                                         </div>
-                                        @if ( $item['BCP_complemento'] )
-                                            <div class="row complemento"> {{ $item['BCP_complemento'] }} <input type="text" ></div>
-                                        @endif
-                                    </div>
                                     @endif
-
-
                                 </div>
                             </li>
                             @php $c++; @endphp

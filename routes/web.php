@@ -33,13 +33,14 @@ Route::middleware([
 
 // FORMULARIO
 Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
+Route::get('formulario/{VIS_id}', [FormularioController::class, 'index'])->name('formulario.index')->middleware('auth');
 
-Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo')->middleware('auth');
+// Route::post('formulario/adjuntosNuevo', [FormularioController::class, 'adjuntosNuevo'])->name('formulario.adjuntosNuevo')->middleware('auth');
 
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
 
 /* Ruta para mostrar los formularios relacionados a la vista */
-Route::get('formulario/buscaFormularios/{id}/{resultado?}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
+Route::get('formulario/buscaFormularios/{VIS_id}/{resultado?}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
 
 // INDEX
 Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');

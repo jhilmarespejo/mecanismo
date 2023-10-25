@@ -20,12 +20,9 @@
                             <li class="subCategoria_{{$item['categoriaID']}}" id="BCP_id_{{$item['BCP_id']}}">
                                 <div class=" row border-bottom py-3 hover p-2 elementos">
                                     <div class="col-sm-5 col-preguntas-sc">
-                                        {{-- <strong>{{ $item['BCP_id'] }} - {{ $item['RBF_orden'] }}</strong> --}}
-
+                                        <strong>{{ $item['BCP_id'] }} </strong>
 
                                         {{-- LISTA LAS PREGUNTAS --}}
-
-
                                         @if ($item['BCP_tipoRespuesta'] == 'Etiqueta')
                                             <div class="alert alert-danger" role="alert">
                                                 {{ $item['BCP_pregunta'] }}
@@ -33,16 +30,15 @@
                                         @else
                                             {{ $c. '. ' .$item['BCP_pregunta'] }}
                                         @endif
-
                                     </div>
                                     <div class="col-sm-7 col-respuestas-sc">
                                         {{-- <div class="row "> --}}
                                         <form method="POST" enctype="multipart/form-data" id="frm_{{$item['RBF_id']}}" class="frm-respuesta"> @csrf
                                             @php
-                                            $opcionesSC = json_decode( $item['BCP_opciones'], true);
-                                            $respuestasSC = json_decode( $item['RES_respuesta'], true);
-                                            if ($respuestasSC === null) { $respuestasSC = []; }
-                                            // dump($preg->RES_respuesta, $opciones)
+                                                $opcionesSC = json_decode( $item['BCP_opciones'], true);
+                                                $respuestasSC = json_decode( $item['RES_respuesta'], true);
+                                                if ($respuestasSC === null) { $respuestasSC = []; }
+                                                // dump($preg->RES_respuesta, $opciones)
                                             @endphp
                                             @if ( is_array($opcionesSC) )
                                             <div class="{{($item['BCP_tipoRespuesta'] == 'Casilla verificación')? 'group-check' : 'group-radio'}}" >
@@ -59,10 +55,6 @@
                                                 @endforeach
                                             </div>
                                             @endif
-
-                                            {{-- @if ($item['BCP_tipoRespuesta'] == 'Etiqueta')
-                                                <div class="row p-2"><input class="ms-2 col resp" type='number' size='10' min="0" name="RES_respuesta" value="{{$item['RES_respuesta']}}"><span class="col-1 marca"></span> </div>
-                                            @endif --}}
                                             @if ($item['BCP_tipoRespuesta'] == 'Numeral')
                                                 <div class="row p-2"><input class="ms-2 col resp" type='number' size='10' min="0" name="RES_respuesta" value="{{$item['RES_respuesta']}}"><span class="col-1 marca"></span> </div>
                                             @endif
@@ -77,27 +69,29 @@
                                             @endif
                                             {{-- </div> --}}
                                             @if ( $item['BCP_complemento'])
-                                                <div class="row complemento px-3 py-1"> {{ $item['BCP_complemento'] }} <input type="text" name='RES_complemento' value="{{$item['RES_complemento']}}"></div>
+                                                <div class="row complemento px-3 py-1">
+                                                    {{ $item['BCP_complemento'] }} <input type="text" name='RES_complemento' value="{{$item['RES_complemento']}}">
+                                                </div>
                                             @endif
                                             @if ( $item['BCP_adjunto'] != null || $item['BCP_adjunto'] != '' )
 
-                                            <span>{{$item['BCP_adjunto']}}</span>
-                                            <div class="row complemento px-3 py-1">
-                                                <input type="file" accept="image/*, video/*,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx" class="archivo-{{$item['RBF_id']}}" capture name='RES_adjunto[]' multiple>
-                                                <input type="hidden" name="ARC_descripcion" value="{{$item['BCP_pregunta']}}">
+                                                <span>{{$item['BCP_adjunto']}}</span>
+                                                <div class="row complemento px-3 py-1">
+                                                    <input type="file" accept="image/*, video/*,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx" class="archivo-{{$item['RBF_id']}}" capture name='RES_adjunto[]' multiple>
+                                                    <input type="hidden" name="ARC_descripcion" value="{{$item['BCP_pregunta']}}">
 
-                                                {{-- Si existen archivos se hace una iteracion --}}
-                                                <div class="col">
-                                                    @include('includes.archivos', ['archivos' => $archivos, 'id' =>  $item['RES_id'] ])
+                                                    {{-- Si existen archivos se hace una iteracion --}}
+                                                    <div class="col">
+                                                        @include('includes.archivos', ['archivos' => $archivos, 'id' =>  $item['RES_id'] ])
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <span class="btn btn-success btn-sm text-light d-none spiner-{{$item['RBF_id']}}" disabled>
-                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                Cargando archivo...
-                                            </span>
-                                            <span class="d-none text-success archivo-correcto" style="height: 20px;">
-                                                <i class="bi bi-check-circle"></i> Archivo almacenado correctamente!
-                                            </span>
+                                                <span class="btn btn-success btn-sm text-light d-none spiner-{{$item['RBF_id']}}" disabled>
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    Cargando archivo...
+                                                </span>
+                                                <span class="d-none text-success archivo-correcto" style="height: 20px;">
+                                                    <i class="bi bi-check-circle"></i> Archivo almacenado correctamente!
+                                                </span>
                                             @endif
                                             <input type="hidden" name="RES_tipoRespuesta" value="{{$item['BCP_tipoRespuesta']}}">
                                             <input type="hidden" name="RES_complementoRespuesta" value="{{$item['BCP_complemento']}}">

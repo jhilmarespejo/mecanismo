@@ -78,6 +78,7 @@ class CuestionarioController extends Controller {
         // ->orderBy('c.CAT_id', 'asc')
         // ->orderBy('bp.BCP_id')
         ->orderBy('rbf.RBF_orden', 'asc')
+        ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
 
         // $quries = DB::getQueryLog();
@@ -89,7 +90,7 @@ class CuestionarioController extends Controller {
             $FRM_titulo = $elementos[0]['FRM_titulo'];
             $AGF_copia = $elementos[0]['AGF_copia'];
             $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias' ) );
+            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias', 'AGF_id') );
         } else {
             return view( 'cuestionarios.cuestionario-responder', compact( 'elementos','FRM_id' ) );
         }
@@ -119,11 +120,11 @@ class CuestionarioController extends Controller {
         $nuevoFormulario['FK_FRM_id'] = $FRM_id;
         $nuevoFormulario['AGF_copia'] = $max_FRM_version+1;
         $nuevoFormulario['FK_USER_id'] = Auth::user()->id;
-        /* Sólo si el formulario es de tipo Entrevista usuario, puede duplicarse muchas veces  */
-        if( is_null($max_FRM_version) && ($FRM[0]["FRM_tipo"] == 'Entrevista autoridad' || $FRM[0]["FRM_tipo"] == 'Verificacion') ){
+        /* Sólo si el formulario es de TIPO 1, puede duplicarse muchas veces */
+        if( is_null($max_FRM_version) && ($FRM[0]["FRM_tipo"] == '1' ) ){
             // dump("Posible crear");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
-        }elseif( $FRM[0]["FRM_tipo"] == 'Entrevista usuario' ){
+        }elseif( $FRM[0]["FRM_tipo"] == 'N' ){
             // dump("Posible crear");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
         }else{
@@ -409,8 +410,7 @@ class CuestionarioController extends Controller {
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
         ->where('bp.estado', 1)
-        ->orderBy('c.CAT_id', 'asc')
-        ->orderBy('bp.BCP_id')
+        ->orderBy('rbf.RBF_orden', 'asc')
         ->get()->toArray();
 
         if ( count($elementos) > 0 ){
@@ -456,3 +456,6 @@ class CuestionarioController extends Controller {
 }
 
 
+/*
+hacer un evento ajax dependiendo de la respuesta
+*/

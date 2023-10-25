@@ -82,7 +82,6 @@ class EstablecimientosController extends Controller
         $quries = DB::getQueryLog();
         // dump( $quries );
 
-
         /*Consulta para obtener las recomendaciones */
             $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
             ->select( 'e.EST_nombre','e.EST_id',
