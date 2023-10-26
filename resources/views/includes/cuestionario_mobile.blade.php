@@ -9,7 +9,8 @@
         @php $aux = 0; @endphp
         @foreach ($elementos as $k=>$elemento)
             <div class="carousel-item {{ ($k==0)? 'active': '' }}" id="card_{{$k+1}}">
-                <div class="card border mb-3" >
+                <input type="hidden" class="salto" value="{{ $elemento['RBF_salto_FK_BCP_id'] }}">
+                <div class="card border mb-3" id="BCP_id_{{$elemento['BCP_id']}}"  >
                     <div class="card-header" >
                         <dl>
                             @php
@@ -30,37 +31,36 @@
                     <div class="card-body">
                         {{-- MUESTRA LAS PREGUNTAS --}}
                         @if ($elemento['BCP_tipoRespuesta'] == 'Etiqueta')
-                            <p id="BCP_id_{{$elemento['BCP_id']}}" class="card-title fs-4 alert alert-danger" role="alert">
+                            <p class="card-title fs-4 alert alert-danger" role="alert">
                                 <b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
                             </p>
                         @else
-                            <p id="BCP_id_{{$elemento['BCP_id']}}" class="card-title fs-4">
+                            <p class="card-title fs-4">
                                 <b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
                             </p>
                         @endif
-
                         {{-- IMPUTS PARA REGISTRAR LAS PREGUNTAS --}}
                         <form method="POST" enctype="multipart/form-data" id="frm_{{$elemento['RBF_id']}}" class="frm-respuesta"> @csrf
                             @php
-                            $opcionesSC = json_decode( $elemento['BCP_opciones'], true);
-                            $respuestasSC = json_decode( $elemento['RES_respuesta'], true);
-                            if ($respuestasSC === null) { $respuestasSC = []; }
-                            // dump($preg['RES_respuesta'], $opciones)
+                                $opcionesSC = json_decode( $elemento['BCP_opciones'], true);
+                                $respuestasSC = json_decode( $elemento['RES_respuesta'], true);
+                                if ($respuestasSC === null) { $respuestasSC = []; }
+                                // dump($preg['RES_respuesta'], $opciones)
                             @endphp
                             @if ( is_array($opcionesSC) )
-                            <div class="{{($elemento['BCP_tipoRespuesta'] == 'Casilla verificación')? 'group-check' : 'group-radio'}}" >
-                                @foreach ($opcionesSC as $opcion)
-                                @if ($elemento['BCP_tipoRespuesta'] == 'Casilla verificación')
-                                <div class="col-auto d-flex">
-                                    <input {{ in_array($opcion, $respuestasSC)? 'checked':'' }} type='checkbox' name="RES_respuesta[]" value="{{ $opcion }}"> &nbsp;{{ $opcion }}
+                                <div class="{{($elemento['BCP_tipoRespuesta'] == 'Casilla verificación')? 'group-check' : 'group-radio'}}" >
+                                    @foreach ($opcionesSC as $opcion)
+                                        @if ($elemento['BCP_tipoRespuesta'] == 'Casilla verificación')
+                                            <div class="col-auto d-flex">
+                                                <input {{ in_array($opcion, $respuestasSC)? 'checked':'' }} type='checkbox' name="RES_respuesta[]" value="{{ $opcion }}"> &nbsp;{{ $opcion }}
+                                            </div>
+                                        @elseif ( $elemento['BCP_tipoRespuesta'] == 'Afirmación' || $elemento['BCP_tipoRespuesta'] == 'Lista desplegable' )
+                                            <div class="col-auto d-flex">
+                                                <input {{ ($elemento['RES_respuesta'] == $opcion)? 'checked':'' }} type='radio' name="RES_respuesta" value="{{ $opcion }}"> &nbsp;{{ $opcion }}
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 </div>
-                                @elseif ( $elemento['BCP_tipoRespuesta'] == 'Afirmación' || $elemento['BCP_tipoRespuesta'] == 'Lista desplegable' )
-                                <div class="col-auto d-flex">
-                                    <input {{ ($elemento['RES_respuesta'] == $opcion)? 'checked':'' }} type='radio' name="RES_respuesta" value="{{ $opcion }}"> &nbsp;{{ $opcion }}
-                                </div>
-                                @endif
-                                @endforeach
-                            </div>
                             @endif
 
                             @if ($elemento['BCP_tipoRespuesta'] == 'Etiqueta')
@@ -69,26 +69,28 @@
                                 </div>
                             @endif
                             @if ($elemento['BCP_tipoRespuesta'] == 'Numeral')
-                            <div class="row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
-                                <span class="col-1 marca"></span>
-                            </div>
-                        @endif
+                                <div class="row p-2"><input class="ms-2 col-6 resp" size="4" type='number' size='10' min="0" name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
+                                    <span class="col-1 marca"></span>
+                                </div>
+                            @endif
                             @if ($elemento['BCP_tipoRespuesta'] == 'Respuesta corta')
                                 <div  class='row p-2'><input class="col resp" type='text' name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
                                     <span class="col-1 marca"></span>
                                 </div>
                             @endif
                             @if ($elemento['BCP_tipoRespuesta'] == 'Respuesta larga')
-                            <div  class='row p-2'>
-                                <input class="col resp" type='text' name="RES_respuesta" value="{{$elemento['RES_respuesta']}}">
-                                {{-- <textarea name="RES_respuesta" class="col resp" rows="4">
-                                    {{$elemento['RES_respuesta']}}
-                                </textarea> --}}
-                                <span class="col-1 marca"></span> </div>
+                                <div  class='row p-2'>
+                                    {{-- <input class="col resp" type='text' name="RES_respuesta" value="{{$elemento['RES_respuesta']}}"> --}}
+                                    <textarea name="RES_respuesta" class="col resp" rows="3" cols="30">
+                                        {{$elemento['RES_respuesta']}}
+                                    </textarea>
+                                    {{-- <span class="col-1 marca"></span> --}}
+                                </div>
                             @endif
                             {{-- </div> --}}
                             @if ( $elemento['BCP_complemento'])
                                 <div class="row complemento px-3 py-1"> {{ $elemento['BCP_complemento'] }} <input type="text" name='RES_complemento' value="{{$elemento['RES_complemento']}}"></div>
+
                             @endif
                             @if ( $elemento['BCP_adjunto'] != null || $elemento['BCP_adjunto'] != '' )
 
@@ -130,7 +132,7 @@
                     <li>Verifique que todas las preguntas hayan sido respondidas</li>
                     </ol>
                 </div>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -139,7 +141,7 @@
         <span class="badge rounded-pill bg-success col-2 " id="conteo"></span>
         <div class="col">
             <div class="progress">
-                <small id="text_progresoXXX"></small><div class="progress-bar progress-bar-striped progress-bar-animated" id="pb_preguntas" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                </small><div class="progress-bar progress-bar-striped progress-bar-animated" id="pb_preguntas" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
             </div>
         </div>
     </div>
@@ -152,7 +154,6 @@
         <span class="btn btn-primary text-light" id="btn_siguiente" >
             Siguiente
         </span>
-
         <span class="btn btn-success text-light d-none" id="btn_fin" data-bs-slide="next">
             Confirmar y finalizar
         </span>
@@ -174,13 +175,14 @@
             let activo = item.parent().parent().find('.active').attr('id');
             var total = {{ count($elementos) }};
             var anterior = parseInt((item.parent().parent().find('.active').attr('id')).replace(/[^0-9]/g,''));
+
             if( item.attr('id') == "btn_anterior"){
                 var actual = anterior-1;
                 if(anterior > actual){
                     var anterior = anterior-2;
                 }
                 avance(item.attr('id'));
-                barra(actual, anterior, total);
+                barra(actual, anterior);
             }
             if( item.attr('id') == "btn_siguiente"){
                 var actual = anterior+1;
@@ -195,8 +197,11 @@
             }
         }
 
-        function barra(actual=null, anterior=null, total=null){
-            // console.log('act>'+actual, 'ant>'+anterior, 'tot>'+total);
+        function barra(actual=null, anterior=null){
+            // console.log('act>'+actual, 'ant>'+anterior);
+            var total = {{ count($elementos) }}
+            // console.log(total);
+
             let progreso = Math.floor((anterior/total)*100);
             $("#pb_preguntas").css("width",progreso+"%");
             $("#pb_preguntas").text(progreso+"%");
@@ -211,9 +216,10 @@
                 $("#btn_fin").addClass('d-none')
             }
             $('#conteo').empty();
-            $('#conteo').text(actual+'/'+total);
+            $('#conteo').text(actual+'/'+(total+1));
         }
-        function mensaje(item, actual=null, anterior=null, total=null){
+
+        function mensaje(item, actual=null, anterior=null){
             Swal.fire({
                 title: 'No se respondió a ésta pregunta!',
                 showDenyButton: true,
@@ -222,7 +228,7 @@
             }).then((result) => {
                 if (result.isDenied) {
                     avance(item);
-                    barra(actual, anterior, total);
+                    barra(actual, anterior);
                 } else if (result.isDenied) {
                     if( $("#card_1").hasClass("active") ){
                         $("#btn_anterior").css("pointer-events", "none");
@@ -231,27 +237,45 @@
             });
         }
         function validaciones(item, activo, actual=null, anterior=null, total=null){
-
-
-
             /*Validacion para input tipo text, number etiqueta*/
             $("#"+activo).find('input.resp').each(function(e){
                 if( $(this).val() == '' ){
                     mensaje(item, actual, anterior, total);
                 } else {
                     avance(item);
-                    barra(actual, anterior, total);
+                    barra(actual, anterior);
                 }
             });
+
             /*Validacion para radiobuttons*/
             $("#"+activo).find("div.group-radio").each(function(e){
-                if( !$(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
-                    mensaje(item, actual, anterior, total);
+                if( $(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
+
+                    /* evalua si la respuesta tiene alguna condicion de salto y realiza el salto correspondiente*/
+                    var salto = $('#'+activo+' .salto').val();
+                    if( salto ){
+                        var salto = jQuery.parseJSON($('#'+activo+' .salto').val());
+                        var resultado = $(this).find("input[name='RES_respuesta']:checked").val();
+                        jQuery.each(salto, function(key, value) {
+                            // console.log(String(key), String(resultado));
+                            if( String(key) == String(resultado) ){
+                                // console.log(value);
+                                $('#BCP_id_'+value).parent().addClass('active');
+                                console.log( actual );
+                                $('#card_'+(actual-1) ).removeClass('active');
+                                barra(actual, anterior);
+                            }
+
+                        });
+                    } else {
+                        avance(item);
+                        barra(actual, anterior);
+                    }
                 } else {
-                    avance(item);
-                    barra(actual, anterior, total);
+                    mensaje(item, actual, anterior);
                 }
             });
+
             /*Validación para checkbox*/
             var checks = [];
             $("#"+activo).find("div.group-check").each(function(e){
