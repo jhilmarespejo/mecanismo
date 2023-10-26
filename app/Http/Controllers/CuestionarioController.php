@@ -74,7 +74,7 @@ class CuestionarioController extends Controller {
         ->leftjoin ('archivos as a', 'rra.FK_ARC_id', 'a.ARC_id')
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
-        ->where('bp.estado', 1)
+        ->where('rbf.estado', 1)
         // ->orderBy('c.CAT_id', 'asc')
         // ->orderBy('bp.BCP_id')
         ->orderBy('rbf.RBF_orden', 'asc')
