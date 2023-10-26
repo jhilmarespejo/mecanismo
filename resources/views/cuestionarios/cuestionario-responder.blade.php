@@ -186,7 +186,7 @@
                     $('#frm_'+id).children('div').find('span.marca').html('<i class="bi bi-exclamation-triangle text-danger fs-5"></i>');
                     $('#frm_'+id).children('div').find('input.resp').addClass('border border-2 border-danger');
                 } if( data.message === 'correcto' ){
-                    console.log('OK');
+                    // console.log('OK');
                     $('#frm_'+id).children('div').find('input.resp').removeClass('border border-2 border-danger');
                     $('#frm_'+id).children('div').find('span.marca').empty();
                     $('#frm_'+id).children('div.complemento i').empty();

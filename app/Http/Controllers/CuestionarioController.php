@@ -58,7 +58,7 @@ class CuestionarioController extends Controller {
         'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id',
         'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id'
         , 'rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id',
-        'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id','rbf.RBF_orden')
+        'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id','rbf.RBF_orden','rbf.RBF_salto_FK_BCP_id' )
         ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
@@ -456,6 +456,4 @@ class CuestionarioController extends Controller {
 }
 
 
-/*
-hacer un evento ajax dependiendo de la respuesta
-*/
+
