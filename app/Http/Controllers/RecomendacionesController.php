@@ -16,7 +16,7 @@ class RecomendacionesController extends Controller{
     /* Guarda las recomendaciones uno a uno */
     public function nuevaRecomendacion( Request $request ){
         $ids = [];
-        // dump($request->except('_token'));//exit;
+        // dump($request->except('_token'));exit;
 
         $validator = Validator::make( $request->all(), [
             'REC_recomendacion' => 'required|min:5',

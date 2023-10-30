@@ -247,6 +247,16 @@
                 }
             });
 
+            /*Validacion para input TEXAREA*/
+            $("#"+activo).find('textarea.resp').each(function(e){
+                if( $(this).text() == '' ){
+                    mensaje(item, actual, anterior, total);
+                } else {
+                    avance(item);
+                    barra(actual, anterior);
+                }
+            });
+
             /*Validacion para radiobuttons*/
             $("#"+activo).find("div.group-radio").each(function(e){
                 if( $(this).find("input[name='RES_respuesta']:radio").is(':checked')) {
@@ -259,12 +269,20 @@
                         jQuery.each(salto, function(key, value) {
                             // console.log(String(key), String(resultado));
                             if( String(key) == String(resultado) ){
-                                // console.log(value);
                                 $('#BCP_id_'+value).parent().addClass('active');
-                                console.log( actual );
+                                // console.log( actual );
                                 $('#card_'+(actual-1) ).removeClass('active');
                                 barra(actual, anterior);
+
+                                if( String(resultado) == 'Finalizar cuestionario' ){
+                                    $('#card_'+value).addClass('active');
+                                    console.log(resultado, 'valor '+value, actual, anterior );
+                                    $('#card_'+(actual-1) ).removeClass('active');
+                                    barra(value, value);
+                                }
                             }
+                            // id="card_{{ count($elementos)+1 }}"
+
 
                         });
                     } else {
