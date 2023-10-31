@@ -22,7 +22,7 @@
                                     <div class="col-sm-5 col-preguntas-sc">
                                         {{-- <strong>{{ $item['BCP_id'] }} </strong> --}}
 
-                                        {{-- LISTA LAS PREGUNTAS --}}
+                                        {{-- PREGUNTAS --}}
                                         @if ($item['BCP_tipoRespuesta'] == 'Etiqueta')
                                             <div class="alert alert-danger" role="alert">
                                                 {{ $item['BCP_pregunta'] }}
@@ -31,8 +31,9 @@
                                             {{ $c. '. ' .$item['BCP_pregunta'] }}
                                         @endif
                                     </div>
+                                    {{-- RESPUESTAS --}}
                                     <div class="col-sm-7 col-respuestas-sc">
-                                        {{-- <div class="row "> --}}
+
                                         <form method="POST" enctype="multipart/form-data" id="frm_{{$item['RBF_id']}}" class="frm-respuesta"> @csrf
                                             @php
                                                 $opcionesSC = json_decode( $item['BCP_opciones'], true);
@@ -41,6 +42,7 @@
                                                 // dump($preg->RES_respuesta, $opciones)
                                             @endphp
                                             @if ( is_array($opcionesSC) )
+                                            <input type="hidden" class="salto" value="{{$item['RBF_salto_FK_BCP_id']}}">
                                             <div class="{{($item['BCP_tipoRespuesta'] == 'Casilla verificación')? 'group-check' : 'group-radio'}}" >
                                                 @foreach ($opcionesSC as $opcion)
                                                     @if ($item['BCP_tipoRespuesta'] == 'Casilla verificación')
@@ -117,6 +119,28 @@
         </div>
 
 <script>
+    $("#q div.group-radio").change(function (e) {
+        var salto =  jQuery.parseJSON($(this).siblings('.salto').val());
+        var resultado = $(this).find("input[name='RES_respuesta']:checked").val();
+        jQuery.each(salto, function(key, value) {
+            if( String(key) == String(resultado) && String(resultado) != 'Finalizar cuestionario'){
+                console.log(String(key), String(value));
+
+                $('html,body').animate({
+                    scrollTop: ($("#BCP_id_"+value).offset().top)-150
+                }, 'slow');
+            } if( String(resultado) == 'Finalizar cuestionario' ){
+                console.log('fin');
+                $('html,body').animate({
+                    scrollTop: ($("#btn_confirmacion").offset().top)
+                }, 'slow');
+            }
+        });
+
+    //     // console.log( $(this).find("input[name='RES_respuesta']:checked").val() );
+    });
+
+
     /*Boton para confirmar los datos del formulario*/
     $("#btn_confirmacion").click( function(e){
         validar();
