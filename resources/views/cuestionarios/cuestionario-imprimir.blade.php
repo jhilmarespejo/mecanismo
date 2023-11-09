@@ -63,8 +63,6 @@
         }
 </style>
 
-
-
 <div class="container-fluid" id="cuestionario" >
     @if ( count($elementos) > 0 )
         @mobile

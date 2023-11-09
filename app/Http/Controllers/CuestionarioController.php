@@ -76,10 +76,17 @@ class CuestionarioController extends Controller {
         ->where('af.AGF_id', $AGF_id)
         ->where('rbf.estado', 1)
         // ->orderBy('c.CAT_id', 'asc')
-        // ->orderBy('bp.BCP_id')
+        // ->orderBy('bp.BCP_id', 'asc')
         ->orderBy('rbf.RBF_orden', 'asc')
         ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
+
+
+        // ->where ('rbf.FK_FRM_id', $FRM_id)
+        // ->where('af.AGF_id', $AGF_id)
+        // ->where('bp.estado', 1)
+        // ->orderBy('rbf.RBF_orden', 'asc')
+        // ->get()->toArray();
 
         // $quries = DB::getQueryLog();
         // dump($quries);
@@ -94,7 +101,6 @@ class CuestionarioController extends Controller {
         } else {
             return view( 'cuestionarios.cuestionario-responder', compact( 'elementos','FRM_id' ) );
         }
-
 
 
         $quries = DB::getQueryLog();
@@ -409,8 +415,9 @@ class CuestionarioController extends Controller {
         // ->leftjoin ('archivos as a', 'rra.FK_ARC_id', 'a.ARC_id')
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
-        ->where('bp.estado', 1)
+        ->where('rbf.estado', 1)
         ->orderBy('rbf.RBF_orden', 'asc')
+        ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
 
         if ( count($elementos) > 0 ){

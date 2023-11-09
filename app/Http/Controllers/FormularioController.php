@@ -197,13 +197,13 @@ class FormularioController extends Controller
         if( Auth::user()->rol == 'Operador' ){
             $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
         }
-        $where = ' WHERE "v"."VIS_id" = '.$VIS_id.' ORDER BY "f"."FRM_id" ASC, "f"."FRM_titulo" ASC, "af"."AGF_id" DESC;';
+        $where = ' WHERE "v"."VIS_id" = '.$VIS_id.' ORDER BY  "f"."FRM_orden" ASC;';
         $sql = $sql.$operador.$where;
 
 
         $formularios = collect( DB::select($sql) )->map(function($x){ return (array)$x; })->toArray();
         $quries = DB::getQueryLog();
-        // dump($formularios);exit;
+        // dump($sql);//exit;
 
         $formulario = CustomController::array_group( $formularios, 'FRM_id' );
 

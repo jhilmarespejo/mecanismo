@@ -1,7 +1,7 @@
 @php
-    foreach ($elementos as $k=>$elemento){
-    }
-    // dump($elementos[0]);
+    // foreach ($elementos as $k=>$elemento){
+    //     dump(($k+1).'-'.$elemento["BCP_pregunta"]);
+    // }
     // exit;
 @endphp
 <div id="carousel_preguntas" class="carousel slide" data-bs-interval="false">
@@ -36,7 +36,8 @@
                             </p>
                         @else
                             <p class="card-title fs-4">
-                                <b><small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
+                                {{-- <b> {{$elemento['BCP_id']}}--<small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}} --}}
+                                <b> <small>{{$k+1}}</small></b>. {{$elemento['BCP_pregunta']}}
                             </p>
                         @endif
                         {{-- IMPUTS PARA REGISTRAR LAS PREGUNTAS --}}
