@@ -132,6 +132,9 @@
                                                             document.getElementById('logout-form').submit();">
                                     {{ __('Salir') }}
                                 </x-jet-dropdown-link>
+                                {{-- <x-jet-dropdown-link href="{{ route('acceso.finalizar') }}" >
+                                    {{ __('Salir') }}
+                                </x-jet-dropdown-link> --}}
                                 <form method="POST" id="logout-form" action="{{ route('logout') }}">
                                     @csrf
                                 </form>
