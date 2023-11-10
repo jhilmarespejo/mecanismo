@@ -76,8 +76,8 @@
             name: 'Cantidad:',
             innerSize: '50%',
             data: [
-                ['Mujeres', 21],
-                ['Hombres', 129],
+                ['Mujeres', 263],
+                ['Hombres', 1033],
                 // ['TOTAL', 403]
             ],
             // ['Safari', 2.98],
