@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>:: MNP ::</title>
-
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -30,12 +29,7 @@
                             <a href="{{ url('/panel') }}" class="text-muted">Panel</a>
                         @else
                             <a href="{{ route('login') }}" class="text-muted">Ingresar</a>
-
-                            {{-- @if(Auth::user()->rol == 'Administrador' )
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="ms-4 text-muted">Registro</a>
-                                @endif
-                            @endif --}}
+                            {{-- <a href="{{ route('acceso') }}" class="text-muted">Ingresar</a> --}}
                         @endif
                     </div>
                 @endif

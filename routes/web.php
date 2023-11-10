@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController, AjustesController,InformeVisitasController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController, AjustesController,InformeVisitasController, AccesoController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,7 +17,16 @@ use App\Http\Controllers\{CuestionarioController, CategoriasController, Establec
 | contains the "web" middleware group. Now create something great!
 |
 */
+/* -----------login personalizado ----------- */
 
+Route::view('/acceso', 'acceso')->name('acceso');
+Route::view('/resgistro', 'resgistro')->name('resgistro');
+
+Route::get('acceso', [AccesoController::class, 'acceso'])->name('acceso');
+Route::post('iniciar', [AccesoController::class, 'iniciar'])->name('acceso.iniciar');
+Route::get('finalizar', [AccesoController::class, 'finalizar'])->name('acceso.finalizar');
+
+/*------------------------------------------ */
 Route::get('/', function () {
     return view('welcome');
 });
