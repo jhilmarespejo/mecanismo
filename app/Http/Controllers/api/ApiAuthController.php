@@ -19,7 +19,7 @@ class ApiAuthController extends Controller
             $token = $user->createToken('token')->plainTextToken;
             $cookie = cookie('cookie_token', $token, 60*24);
             return response(['token' => $token])->withCookie($cookie);
-        }else{
+        } else {
             return response()->json([
                 'mensaje'=> 'ERROR '
             ]);
