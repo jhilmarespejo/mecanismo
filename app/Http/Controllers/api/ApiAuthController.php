@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
@@ -13,24 +13,27 @@ class ApiAuthController extends Controller
             'username' => ['required'],
             'password' => ['required'],
         ]);
-
         if( Auth::attempt( $credenciales) ){
             $user = Auth::user();
             $token = $user->createToken('token')->plainTextToken;
-            $cookie = cookie('cookie_token', $token, 60*24);
-            return response(['token' => $token])->withCookie($cookie);
+            $cookie = cookie('mnp_token', $token, 60*8);
+            // response()->setStatusCode()->json;
+            return response(['token' => $token], 200)->withCookie($cookie);
         }else{
             return response()->json([
-                'mensaje'=> 'ERROR '
+                'mensaje'=> 'ERROR'
             ]);
         }
-
     }
 
     public function apiSalir(Request $request){
-        return response()->json([
-            'mensaje'=> 'SALIDA'
-        ]);
+        $cookie = \Cookie::forget('mnp_token');
+        return response()->json(["message"=>"Cierre sesión correcto"])->withCookie($cookie);
+    }
+
+    /* see uso para la verificacion del token */
+    public function apiVer( Request $request ){
+         var_dump (\Cookie::get( 'mnp_token' ));
     }
 
 
