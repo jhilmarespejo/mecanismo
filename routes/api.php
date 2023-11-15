@@ -9,9 +9,7 @@ Route::post('apiIniciar', [ApiAuthController::class, 'apiIniciar'] );
 
 Route::get('apiVer', [ApiAuthController::class, 'apiVer']);
 
-Route::resource('api_establecimientos', ApiEstablecimientosController::class);
 Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
     Route::post('apiSalir', [ApiAuthController::class, 'apiSalir']);
-    // Route::resource('api_establecimientos', 'ApiEstablecimientosController');
 
 });
