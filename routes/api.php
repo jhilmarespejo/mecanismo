@@ -11,5 +11,5 @@ Route::get('apiVer', [ApiAuthController::class, 'apiVer']);
 
 Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
     Route::post('apiSalir', [ApiAuthController::class, 'apiSalir']);
-
+    
 });
