@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body>
+<body style="background-color: rgb(144, 191, 253)">
     <div class="container-fluid fixed-top p-4">
         <div class="col-12">
             <div class="d-flex justify-content-end">
@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="container-fluid my-5 pt-5 px-5">
+    <div class="container-fluid my-5 pt-5 px-5" >
         <p class=" text-center px-4 ">
             <img class="img-fluid"  src="img/logoinicio.png" alt="Defensor del Pueblo" >
         </p>
