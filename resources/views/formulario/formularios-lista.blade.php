@@ -5,6 +5,11 @@
 
 @section('content')
 
+@php
+    $TES_tipo = session('TES_tipo');
+    $EST_nombre = session('EST_nombre');
+    $VIS_tipo = session('VIS_tipo');
+@endphp
 {{-- SUB MENU --}}
     <div class="btn-toolbar " role="toolbar" aria-label="Toolbar with button groups">
         <div class="btn-group me-2 mt-4" role="group" aria-label="First group">
@@ -27,8 +32,13 @@
 
             @if ( array_key_exists('nokey', $formulario) )
                 <div class="alert alert-warning" role="alert">
-                    Aún no se asignaron formulario para esta visita
+                    Aún no se asignaron formularios para esta visita <br>
+                    @if( Auth::user()->rol == 'Administrador' )
+                        <a href="/formulario/{{$VIS_id}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Crear formulario </a>
+                    @endif
+
                 </div>
+
             @else
 
           <h5 class="card-title">Formularios:</h5>
@@ -96,9 +106,9 @@
                                     </div>
                                     <div class="card-footer p-0">
                                         <ul class="list-group list-group-horizontal list-unstyled ">
-                                            <li class="p-0 m-0">
+                                            {{-- <li class="p-0 m-0">
                                                 <a href="/cuestionario/ver/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-eye-fill px-2 text-primary fs-5"></i></a>
-                                            </li>
+                                            </li> --}}
                                             <li class="p-0 m-0">
                                                 <a href="/cuestionario/imprimir/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
                                             </li>

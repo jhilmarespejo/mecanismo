@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModEstablecimiento, ModFormulario, ModRecomendacion, ModVisita};
 use Illuminate\Http\Request;
-use DB;
-use Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class EstablecimientosController extends Controller
 {
@@ -29,7 +29,7 @@ class EstablecimientosController extends Controller
         if($request->FK_TES_id){
             $FK_TES_id = $request->FK_TES_id;
         } else {
-            $FK_TES_id = 1;
+            $FK_TES_id = 1; // para centros penitenciarios predeterminado
         }
 
         DB::enableQueryLog();
@@ -39,17 +39,20 @@ class EstablecimientosController extends Controller
         ->leftJoin('ciudades as c', 'c.CID_id', 'e.FK_CID_id')
         ->leftJoin('ciudades as c2', 'c2.CID_id', 'c.FK_CID_id')
         ->leftJoin('ciudades as c3', 'c3.CID_id', 'c2.FK_CID_id')
-        ->orWhere('e.FK_TES_id', 'ilike', '%' . $FK_TES_id . '%')
+        ->where('e.estado', 1);
         //->where('e.EST_nombre',  'ilike', '%' . $this->buscarEstablecimiento . '%')
-        ->where('e.estado', 1)
+        if( $FK_TES_id != 'todo' ){
+            $establecimientos = $establecimientos->orWhere('e.FK_TES_id', $FK_TES_id);
+        }
+
         //->orderBy('tes.TES_id', 'asc' )
         // ->orderBy('e.EST_nombre')
-        ->get();
+        $establecimientos = $establecimientos->get();
             //->where('tes.TES_tipo','Centro Penitenciario' )
             //->orderby($this->ordenColumna, $this->ordenDireccion)
             //->paginate(5);
             $quries = DB::getQueryLog();
-            // dump($quries);exit;
+            // dump($quries);//exit;
             return view('establecimientos.establecimientos-responses', compact('establecimientos', 'tiposEstablecimientos', 'FK_TES_id'));
     }
 
@@ -78,7 +81,6 @@ class EstablecimientosController extends Controller
             ->orderby('f.createdAt', 'desc')->get();
         $quries = DB::getQueryLog();
         // dump( $quries );
-
 
         /*Consulta para obtener las recomendaciones */
             $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )

@@ -8,7 +8,7 @@
         <figure class="highcharts-figure">
             <div id="container1"></div>
             <p class="highcharts-description">
-                Se realizó un total de <strong>10 vistas 3 de marzo de 2023</strong>
+                Se realizó un total de <strong>22 vistas 30 de marzo de 2023</strong>
             </p>
         </figure>
       </div>
@@ -70,7 +70,7 @@ Highcharts.chart('container1', {
             { name: 'Centros de acogida', y: 0 },
             { name: 'Centros penitenciarios', y: 10 },
             { name: 'Centros de reintegración p/adolescentes', y: 0 },
-            { name: 'Centros de formación militar y policial', y: 0 },
+            { name: 'Centros de formación militar y policial', y: 12 },
             { name: 'Hospitales psiquiatricos', y: 0 }
             // { name: 'Centros de acogida (niños, adultos mayores y drogodependientes)', y: 17 },
             // { name: 'Centros de reintegración para adolescentes con responsabilidad penal', y: 14 },

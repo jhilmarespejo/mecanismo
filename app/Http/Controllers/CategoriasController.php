@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModCategoria, ModBancoPregunta};
 use Illuminate\Http\Request;
-use DB;
-use Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class CategoriasController extends Controller
 {
@@ -24,8 +24,8 @@ class CategoriasController extends Controller
             ->select('c.CAT_id', 'c.CAT_categoria','c.FK_CAT_id', 'c2.CAT_categoria as subcategoria', 'c2.FK_CAT_id as FK_CAT_id2')
             ->leftJoin('categorias as c2', 'c.CAT_id', 'c2.FK_CAT_id')
             ->whereNull('c.FK_CAT_id')
-            ->orderBy ('c.CAT_categoria')
-            ->orderBy ('subcategoria')
+            ->orderBy ('c.CAT_id', 'desc')
+            ->orderBy ('FK_CAT_id2', 'desc')
             ->get();
 
             $quries = DB::getQueryLog();

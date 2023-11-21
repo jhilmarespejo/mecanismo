@@ -23,22 +23,36 @@ class FormularioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($rend = null){
-        // DB::enableQueryLog();
+    public function index($VIS_id){
 
-        $formularios = ModFormulario::select('FRM_id', 'FRM_titulo', 'FRM_version', 'FRM_fecha')
-            ->orderBy('FRM_id', 'Desc')->get();
+        // $TES_tipo = session('TES_tipo');
+        // $EST_nombre = session('EST_nombre');
+        // $VIS_tipo = session('VIS_tipo');
+        // dump($EST_nombre);exit;
+        DB::enableQueryLog();
+        if( Auth::user()->rol == 'Administrador' ){
+            // $quries = DB::getQueryLog();
+            // dump($quries);
+            $q = 'select "f"."FRM_titulo" , "f"."FRM_id", "f"."FRM_tipo"
+            from "formularios" as "f" left join "visitas"as "v" on "v"."VIS_id" = "f"."FK_VIS_id" where "v"."VIS_tipo" in (select ("VIS_tipo") from "visitas" where "VIS_id" ='.$VIS_id.')';
 
-        // $quries = DB::getQueryLog();
-        //dump($quries);
-        $response = 'index';
-        if ($rend){
-            $success = true;
-            return view('formulario.formularios-responses', compact('formularios', 'response', 'success'));
+            $formularios = json_decode(json_encode(DB::select($q)), true);;
+
+            // dump( $formularios );exit;
+            return view('formulario.formularios-index', compact('formularios','VIS_id'));
         } else {
-            return view('formulario.formularios-index', compact('formularios', 'response'));
+            return redirect('panel');
         }
 
+        // $formularios = ModFormulario::select('FRM_id', 'FRM_titulo', 'FRM_version', 'FRM_fecha')
+        //     ->orderBy('FRM_id', 'Desc')->get();
+        // $response = 'index';
+        // if ($rend){
+        //     $success = true;
+        //     return view('formulario.formularios-responses', compact('formularios', 'response', 'success'));
+        // } else {
+        //     return view('formulario.formularios-index', compact('formularios', 'response'));
+        // }
     }
 
     /**
@@ -102,7 +116,7 @@ class FormularioController extends Controller
             $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
         }
 
-        $quries = DB::getQueryLog();
+        // $quries = DB::getQueryLog();
         // dump($quries);
         // exit;
         return view('formulario.formularios-adjuntos', compact('adjuntos', 'EST_id', 'FRM_id'));
@@ -157,7 +171,7 @@ class FormularioController extends Controller
         $id = Visita ID
 
     */
-    public function buscaFormularios( $visita_id = 0 , $resultado = 0){
+    public function buscaFormularios( $VIS_id = 0 , $resultado = 0){
         DB::enableQueryLog();
         $z = 0;
         // $formularios = ModVisita::from('visitas as v')
@@ -170,7 +184,7 @@ class FormularioController extends Controller
             //     $join->on('af.FK_FRM_id', 'f.FRM_id')
             //     ->on('af.FK_USER_id','=', 'r.FK_RBF_id');
             // })
-            // ->where ('v.VIS_id', $visita_id);
+            // ->where ('v.VIS_id', $VIS_id);
             // // ->where ('e.estado', '1');
             // if( Auth::user()->rol == 'Operador' ){
             //     $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
@@ -183,26 +197,24 @@ class FormularioController extends Controller
         if( Auth::user()->rol == 'Operador' ){
             $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
         }
-        $where = ' WHERE "v"."VIS_id" = '.$visita_id.' ORDER BY "f"."createdAt" DESC, "f"."FRM_titulo" ASC, "af"."AGF_id" DESC;';
+        $where = ' WHERE "v"."VIS_id" = '.$VIS_id.' ORDER BY  "f"."FRM_orden" ASC;';
         $sql = $sql.$operador.$where;
 
 
         $formularios = collect( DB::select($sql) )->map(function($x){ return (array)$x; })->toArray();
         $quries = DB::getQueryLog();
-        // dump($formularios);exit;
+        // dump($sql);//exit;
 
         $formulario = CustomController::array_group( $formularios, 'FRM_id' );
 
-        // dump($formulario);//exit;
+        // $VIS_id = $formularios[0]['VIS_id'];
 
-         /* Se procesan algunas variables*/
-        $TES_tipo = $formularios[0]['TES_tipo'];
-        $EST_nombre = $formularios[0]['EST_nombre'];
-        $VIS_tipo = $formularios[0]['VIS_tipo'];
+        // SETEAR VARIABLES DE ENTORNO
+        session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo']]);
 
         $colorVisita = VisitaController::colorTipoVisita( $formularios[0]['VIS_tipo'] );
 
-        return view('formulario.formularios-lista', compact('formulario', 'TES_tipo', 'EST_nombre', 'colorVisita', 'VIS_tipo', 'resultado'));
+        return view('formulario.formularios-lista', compact('formulario', 'colorVisita', 'resultado', 'VIS_id'));
     }
 
 }

@@ -1,4 +1,4 @@
-<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-warning">
+<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-light">
     <div class="container">
         <!-- Logo -->
         <span class="navbar-brandx col" href="/">
@@ -12,9 +12,9 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto fs-5">
-                        <li class="nav-item bg-danger">
+                        {{-- <li class="nav-item bg-danger">
                             <a class="nav-link active" href="/panel">MNP V2</a>
-                        </li>
+                        </li> --}}
 
                         <x-jet-nav-link href="{{ route('panel') }}" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}

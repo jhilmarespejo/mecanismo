@@ -51,7 +51,7 @@
 
         series: [{
             name: 'Visitas en profundidad',
-            data: [0]
+            data: [12]
 
         }, {
             name: 'Visitas de seguimiento',

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModRespuesta};
+use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;;
 use Illuminate\Support\Facades\Validator;
@@ -90,6 +90,13 @@ class VisitaController extends Controller
         $formularios = $formularios->orderby('f.createdAt', 'desc')
         ->orderby('f.FRM_titulo', 'asc')
         ->get();
+
+
+        $establecimiento = ModEstablecimiento::from('establecimientos as e')
+        ->select('e.EST_id', 'e.EST_nombre', 'e.EST_departamento', 'e.EST_provincia', 'e.EST_municipio')
+        ->leftjoin ('visitas as v', 'v.FK_EST_id', 'e.EST_id')
+        ->where ( 'v.VIS_id', $visita_id )->first()->toArray();
+
         // $quries = DB::getQueryLog();
         // dump($quries);
         // exit;

@@ -8,7 +8,9 @@
 
 
         <div class="card  mb-3" >
-            <div class="card-header bg-transparent ">Acta de visita no anunciada</div>
+            <div class="card-header bg-transparent ">Acta de visita
+                <p><strong>Adicione la imagen o pdf del Acta de Visita</strong></p>
+            </div>
 
             @if ( $visita[0]['VIS_urlActa']  )
                 <div class="card-body">

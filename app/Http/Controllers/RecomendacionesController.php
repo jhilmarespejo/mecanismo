@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\{ModEstablecimiento, ModRecomendacion, ModArchivo, ModRecomendacionArchivo, ModVisita};
 use Illuminate\Http\Request;
-// use DB;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
-use Validator;
 
 class RecomendacionesController extends Controller{
     /**
@@ -17,7 +16,7 @@ class RecomendacionesController extends Controller{
     /* Guarda las recomendaciones uno a uno */
     public function nuevaRecomendacion( Request $request ){
         $ids = [];
-        // dump($request->except('_token'));//exit;
+        // dump($request->except('_token'));exit;
 
         $validator = Validator::make( $request->all(), [
             'REC_recomendacion' => 'required|min:5',
