@@ -1,27 +1,29 @@
 <?php
 
-use App\Http\Controllers\api\{ApiAuthController, ApiEstablecimientosController, ApiVisitasController};
+use App\Http\Controllers\api\{ApiAuthController, ApiMultiplesController};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
 Route::post('api_iniciar', [ApiAuthController::class, 'apiIniciar'] );
+Route::get('api_ver', [ApiAuthController::class, 'apiVer']);
 
-Route::get('apiVer', [ApiAuthController::class, 'apiVer']);
+Route::post('api_salir', [ApiAuthController::class, 'apiSalir'])->middleware('auth');
 
-// https://test-mnp.defensoria.gob.bo/api/api_lista_tipos_establecimientos
-Route::get('api_lista_tipos_establecimientos', [ApiEstablecimientosController::class, 'ApiListarTiposEstablecimientos']);
+//----------------------------------------------------------------------------
+// https://mnp-bolivia.defensoria.gob.bo/api/api_lista_tipos_establecimientos
+Route::get('api_lista_tipos_establecimientos', [ApiMultiplesController::class, 'ApiListarTiposEstablecimientos'])->middleware('auth');
+
+// https://mnp-bolivia.defensoria.gob.bo/api/api_lista_establecimientos
+Route::get('api_lista_establecimientos', [ApiMultiplesController::class, 'ApiListarEstablecimientos'])->middleware('auth');
+
+// https://mnp-bolivia.defensoria.gob.bo/api/api_historial_visitas
+Route::get('api_historial_visitas', [ApiMultiplesController::class, 'ApiHistorialVisitas'])->middleware('auth');
+
+// https://mnp-bolivia.defensoria.gob.bo/api/api_historial_formularios
+Route::get('api_historial_formularios', [ApiMultiplesController::class, 'ApiHistorialformularios'])->middleware('auth');
 
 
-Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
-    Route::post('apiSalir', [ApiAuthController::class, 'apiSalir']);
 
-
-
-    // https://test-mnp.defensoria.gob.bo/api/api_lista_establecimientos?FK_EST_id=1
-    Route::post('api_lista_establecimientos', [ApiEstablecimientosController::class, 'ApiLlistarEstablecimientos']);
-
-    Route::post('api_listar_visitas', [ApiVisitasController::class, 'apiListarVisitas']);
-
-
-});
+// Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
+// });
