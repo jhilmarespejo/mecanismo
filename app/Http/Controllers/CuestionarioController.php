@@ -426,6 +426,7 @@ class CuestionarioController extends Controller {
             $AGF_id = $elementos[0]['AGF_id'];
 
             $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
+            
             return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id'));
         } else {
             return view('cuestionarios.cuestionario-imprimir', compact('elementos'));
