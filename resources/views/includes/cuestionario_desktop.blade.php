@@ -17,7 +17,7 @@
                 <li class="mt-1" id="con_subcategorias">
                     <ul class="list-unstyled">
                         @foreach($elemento as $k => $item)
-                            <li class="subCategoria_{{$item['categoriaID']}}" id="BCP_id_{{$item['BCP_id']}}">
+                            <li class="subCategoria_{{$item['categoriaID']}} RBF_id_{{$item['RBF_id']}}" id="BCP_id_{{$item['BCP_id']}}">
                                 <div class=" row border-bottom py-3 hover p-2 elementos">
                                     <div class="col-sm-5 col-preguntas-sc">
                                         {{-- <strong>{{ $item['BCP_id'] }} </strong> --}}

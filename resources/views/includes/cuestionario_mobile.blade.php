@@ -10,7 +10,7 @@
         @foreach ($elementos as $k=>$elemento)
             <div class="carousel-item {{ ($k==0)? 'active': '' }}" id="card_{{$k+1}}">
                 <input type="hidden" class="salto" value="{{ $elemento['RBF_salto_FK_BCP_id'] }}">
-                <div class="card border mb-3" id="BCP_id_{{$elemento['BCP_id']}}"  >
+                <div class="card border mb-3 RBF_id_{{$elemento['RBF_id']}} " id="BCP_id_{{$elemento['BCP_id']}}">
                     <div class="card-header" >
                         <dl>
                             @php
