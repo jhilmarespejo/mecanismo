@@ -192,7 +192,6 @@
                 barra(actual, anterior);
             }
             if( item.attr('id') == "btn_siguiente") {
-                $("#btn_siguiente").addClass("d-none");
                 var actual = anterior+1;
                 validaciones(item.attr('id'), activo, actual, anterior);
             }
