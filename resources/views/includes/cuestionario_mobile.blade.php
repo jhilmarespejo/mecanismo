@@ -172,12 +172,14 @@
             div_activo( $(this) );
         });
 
+        // Determina el div activo y ejecuta el avance o retroceso de del slide
         function div_activo( item ){
             let activo = item.parent().parent().find('.active').attr('id');
-            var total = {{ count($elementos) }};
             var anterior = parseInt((item.parent().parent().find('.active').attr('id')).replace(/[^0-9]/g,''));
 
-            if( item.attr('id') == "btn_anterior"){
+            console.log( activo, anterior );
+
+            if( item.attr('id') == "btn_anterior" ){
                 var actual = anterior-1;
                 if(anterior > actual){
                     var anterior = anterior-2;
@@ -185,9 +187,9 @@
                 avance(item.attr('id'));
                 barra(actual, anterior);
             }
-            if( item.attr('id') == "btn_siguiente"){
+            if( item.attr('id') == "btn_siguiente") {
                 var actual = anterior+1;
-                validaciones(item.attr('id'), activo, actual, anterior, total);
+                validaciones(item.attr('id'), activo, actual, anterior);
             }
 
             // desabilita boton anterior en la primera pantalla
@@ -195,6 +197,15 @@
                 $("#btn_anterior").css("pointer-events", "none");
             } else {
                 $("#btn_anterior").css("pointer-events", "auto");
+            }
+        }
+
+        function avance(item){
+            if( item == "btn_anterior" ){
+                $("#carousel_preguntas").carousel("prev");
+            }
+            if( item == "btn_siguiente"){
+                $("#carousel_preguntas").carousel("next");
             }
         }
 
@@ -227,34 +238,37 @@
                 denyButtonText: 'Continuar sin responder',
                 confirmButtonText: 'Responder',
             }).then((result) => {
-                if (result.isDenied) {
+                if (result.isDenied) { //avanza
                     avance(item);
                     barra(actual, anterior);
-                } else if (result.isDenied) {
+                } else if (result.isConfirmed) { //no avanza
                     if( $("#card_1").hasClass("active") ){
                         $("#btn_anterior").css("pointer-events", "none");
                     }
                 }
             });
         }
-        function validaciones(item, activo, actual=null, anterior=null, total=null){
+        function validaciones(item, activo, actual=null, anterior=null){
+            $ok=false;
             /*Validacion para input tipo text, number etiqueta*/
             $("#"+activo).find('input.resp').each(function(e){
                 if( $(this).val() == '' ){
-                    mensaje(item, actual, anterior, total);
+                    mensaje(item, actual, anterior);
                 } else {
-                    avance(item);
-                    barra(actual, anterior);
+                    $ok=true;
+                    // avance(item);
+                    // barra(actual, anterior);
                 }
             });
 
             /*Validacion para input TEXAREA*/
             $("#"+activo).find('textarea.resp').each(function(e){
                 if( $(this).text() == '' ){
-                    mensaje(item, actual, anterior, total);
+                    mensaje(item, actual, anterior);
                 } else {
-                    avance(item);
-                    barra(actual, anterior);
+                    $ok=true;
+                    // avance(item);
+                    // barra(actual, anterior);
                 }
             });
 
@@ -287,8 +301,9 @@
 
                         });
                     } else {
-                        avance(item);
-                        barra(actual, anterior);
+                        $ok=true;
+                        // avance(item);
+                        // barra(actual, anterior);
                     }
                 } else {
                     mensaje(item, actual, anterior);
@@ -308,22 +323,21 @@
                     });
                 // })
                 if( checks.includes(1) ){
-                    avance(item);
-                    barra(actual, anterior, total);
+                    $ok=true;
+                    // avance(item);
+                    // barra(actual, anterior);
                 } else {
-                    mensaje(item, actual, anterior, total);
+                    mensaje(item, actual, anterior);
                 }
             });
+
+            if( $ok == true ){
+                avance(item);
+                barra(actual, anterior);
+            }
         }
 
-        function avance(item){
-            if( item == "btn_anterior" ){
-                $("#carousel_preguntas").carousel("prev");
-            }
-            if( item == "btn_siguiente"){
-                $("#carousel_preguntas").carousel("next");
-            }
-        }
+
 
         /*Evento para confirmar datos en la ultima pantalla*/
         $("#btn_fin").click( function(e){

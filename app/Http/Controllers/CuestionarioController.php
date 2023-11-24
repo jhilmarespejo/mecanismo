@@ -251,7 +251,8 @@ class CuestionarioController extends Controller {
      * Guarda las respuestas del cuestionario
      */
     public function guardarRespuestasCuestionario(Request $request){
-        // dump( $request->FK_RBF_id, $request->FK_AGF_id);//exit;
+        // dump( $request->FK_RBF_id, $request->FK_AGF_id);
+        // exit;
         if( $request->RES_tipoRespuesta == 'Casilla verificación' ){
             $rpta = json_encode($request->RES_respuesta, JSON_UNESCAPED_UNICODE);
             unset($request['RES_respuesta']);
@@ -310,14 +311,16 @@ class CuestionarioController extends Controller {
                 }
                 $msg= 'archivos_correcto';
             }
+            // sleep(4);
             DB::commit();
-            return response()->json([ "message" => $msg ]);
+            return response()->json( $msg );
+
         }
         catch (\Exception $e) {
             DB::rollback();
-            exit ($e->getMessage());
+            // exit ($e->getMessage());
         }
-        exit;
+        // exit;
     }
     /* Confirma la finalizacion del cuestionario y muestra al usuario un mensaje de confirmación */
     public function confirmaCuestionario( Request $request ){
@@ -426,7 +429,7 @@ class CuestionarioController extends Controller {
             $AGF_id = $elementos[0]['AGF_id'];
 
             $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-            
+
             return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id'));
         } else {
             return view('cuestionarios.cuestionario-imprimir', compact('elementos'));

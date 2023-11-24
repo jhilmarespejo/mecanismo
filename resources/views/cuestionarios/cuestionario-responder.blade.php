@@ -160,6 +160,10 @@
 
    /* Guarda cada respuesta del formulario cuando se el mouse se mueve a la siguiente pregunta*/
    $(".frm-respuesta").focusout(function(e){
+        guardar_respuesta();
+    });
+
+    function guardar_respuesta(){
         e.preventDefault();
         let id = $(this).attr('id').replace(/[^0-9]/g,'');
         let formData = new FormData($('#frm_'+id)[0]);
@@ -172,34 +176,34 @@
             data: formData,
             contentType: false,
             processData: false,
+            // dataType: 'json',
             beforeSend: function () {
                 if( $('input.archivo-'+id).val() !== '' ){
                     $('.archivo-correcto').addClass('d-none');
                     $('input.archivo-'+id).addClass('d-none');
                     $('.spiner-'+id).removeClass('d-none');
                 } else {
+
                 }
             },
-            success: function (data, response) {
-                if( data.message === 'sin_respuesta' ){
-                    console.log('sin_respuesta');
-                    $('#frm_'+id).children('div').find('span.marca').html('<i class="bi bi-exclamation-triangle text-danger fs-5"></i>');
-                    $('#frm_'+id).children('div').find('input.resp').addClass('border border-2 border-danger');
-                } if( data.message === 'correcto' ){
-                    // console.log('OK');
-                    $('#frm_'+id).children('div').find('input.resp').removeClass('border border-2 border-danger');
-                    $('#frm_'+id).children('div').find('span.marca').empty();
-                    $('#frm_'+id).children('div.complemento i').empty();
-                } if( data.message === 'archivos_correcto' ){
+            success: function ( response ) {
+            },
+            complete : function( response ) {
+                // console.log(response.responseJSON, response.status);
+                if( response.responseJSON === 'correcto' ) {
+                    console.log( response.responseJSON, response.status );
+                    // $('#frm_'+id).children('div').find('input.resp').removeClass('border border-2 border-danger');
+                    // $('#frm_'+id).children('div').find('span.marca').empty();
+                    // $('#frm_'+id).children('div.complemento i').empty();
+                } if( response.message === 'archivos_correcto' ) {
                     console.log('archivos_correcto');
-                    $('.spiner-'+id).addClass('d-none');
-                    $('.archivo-correcto').removeClass('d-none');
+                    // $('.spiner-'+id).addClass('d-none');
+                    // $('.archivo-correcto').removeClass('d-none');
                 }
             },
-            //complete : function(data, response) {},
             error: function(response){  }
         });
-    });
+    }
 
 
 

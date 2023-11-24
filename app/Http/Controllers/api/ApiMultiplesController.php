@@ -69,10 +69,10 @@ class ApiMultiplesController extends Controller
     */
     public function ApiHistorialformularios() {
         // DB::enableQueryLog();
-         $historial = ModEstablecimiento::select( 'f.FRM_titulo','v.VIS_titulo', 'establecimientos.EST_nombre', 'f.FRM_tipo', 'f.FRM_fecha', 'f.FK_VIS_id','establecimientos.EST_id', 'v.VIS_tipo',   'f.FK_USER_id', 'f.FRM_orden' )
+         $historial = ModEstablecimiento::select( 'f.FRM_titulo','v.VIS_titulo', 'establecimientos.EST_nombre', 'f.FRM_tipo', 'f.FK_VIS_id','establecimientos.EST_id', 'v.VIS_tipo',   'f.FK_USER_id', 'f.FRM_orden' )
         ->join ('visitas as v', 'v.FK_EST_id', 'establecimientos.EST_id')
         ->join ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-         ->get()->toArray();
+         ->get();
         // $historial = CustomController::array_group( $historial, 'EST_nombre' );
         //  $quries = DB::getQueryLog();
         // print_r( $quries );
