@@ -148,12 +148,16 @@
     </div>
 
 
-    <div class="container mt-2">
+    <div class="container mt-2 px-0">
         <span class="btn btn-primary text-light" id="btn_anterior" >
             Anterior
         </span>
         <span class="btn btn-primary text-light" id="btn_siguiente" >
             Siguiente
+        </span>
+        <span class="btn btn-secondary text-light d-none" id="btn_cargando">
+            <span class="spinner-border spinner-border-sm " ></span>
+            ...Cargando
         </span>
         <span class="btn btn-success text-light d-none" id="btn_fin" data-bs-slide="next">
             Confirmar y finalizar
@@ -177,17 +181,18 @@
             let activo = item.parent().parent().find('.active').attr('id');
             var anterior = parseInt((item.parent().parent().find('.active').attr('id')).replace(/[^0-9]/g,''));
 
-            console.log( activo, anterior );
+            // console.log( activo, anterior );
 
             if( item.attr('id') == "btn_anterior" ){
                 var actual = anterior-1;
                 if(anterior > actual){
                     var anterior = anterior-2;
                 }
-                avance(item.attr('id'));
+                avance( item.attr('id') );
                 barra(actual, anterior);
             }
             if( item.attr('id') == "btn_siguiente") {
+                $("#btn_siguiente").addClass("d-none");
                 var actual = anterior+1;
                 validaciones(item.attr('id'), activo, actual, anterior);
             }
@@ -205,9 +210,51 @@
                 $("#carousel_preguntas").carousel("prev");
             }
             if( item == "btn_siguiente"){
-                $("#carousel_preguntas").carousel("next");
+
+                // Encontrar el formulario dentro del div activo
+                var idForm = $('body').find('div.active form').attr('id');
+
+
+                // let id = $(".frm-respuesta").attr('id').replace(/[^0-9]/g,'');
+                // console.log(item);
+                let formData = new FormData($('#'+idForm)[0]);
+
+                $.ajax({
+                    async: true,
+                    // headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                    url: '/cuestionario/guardarRespuestasCuestionario',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () {
+                        $("#btn_siguiente").hide();
+                        $("#btn_cargando").removeClass("d-none");
+                    },
+                    success : function( response ) {
+                        // console.log( response );
+                        if( response === "correcto" ) {
+                            // console.log( response, response.status );
+                            $("#btn_cargando").addClass("d-none");
+                            $("#btn_siguiente").show();
+                            $("#carousel_preguntas").carousel("next");
+                        } if( response === "archivos_correcto" ) {
+                            console.log("archivos_correcto");
+                        }
+                    },
+                    error: function(response){
+                        $("#btn_cargando").addClass("d-none");
+                        $("#btn_siguiente").show();
+                    },
+                    complete: function(response){
+                        $("#btn_cargando").addClass("d-none");
+                        $("#btn_siguiente").show();
+                    }
+
+                });
             }
         }
+
 
         function barra(actual=null, anterior=null){
             // console.log('act>'+actual, 'ant>'+anterior);
@@ -249,6 +296,7 @@
             });
         }
         function validaciones(item, activo, actual=null, anterior=null){
+            // console.log(item, activo, actual);
             $ok=false;
             /*Validacion para input tipo text, number etiqueta*/
             $("#"+activo).find('input.resp').each(function(e){
@@ -256,8 +304,6 @@
                     mensaje(item, actual, anterior);
                 } else {
                     $ok=true;
-                    // avance(item);
-                    // barra(actual, anterior);
                 }
             });
 
@@ -267,8 +313,6 @@
                     mensaje(item, actual, anterior);
                 } else {
                     $ok=true;
-                    // avance(item);
-                    // barra(actual, anterior);
                 }
             });
 
@@ -291,19 +335,14 @@
 
                                 if( String(resultado) == 'Finalizar cuestionario' ){
                                     $('#card_'+value).addClass('active');
-                                    console.log(resultado, 'valor '+value, actual, anterior );
+                                    // console.log(resultado, 'valor '+value, actual, anterior );
                                     $('#card_'+(actual-1) ).removeClass('active');
                                     barra(value, value);
                                 }
                             }
-                            // id="card_{{ count($elementos)+1 }}"
-
-
                         });
                     } else {
                         $ok=true;
-                        // avance(item);
-                        // barra(actual, anterior);
                     }
                 } else {
                     mensaje(item, actual, anterior);
@@ -324,19 +363,18 @@
                 // })
                 if( checks.includes(1) ){
                     $ok=true;
-                    // avance(item);
-                    // barra(actual, anterior);
                 } else {
                     mensaje(item, actual, anterior);
                 }
             });
 
             if( $ok == true ){
+                //ejecuta el avance a nuevo slide
                 avance(item);
+                //marca avance en la barra de estado en %
                 barra(actual, anterior);
             }
         }
-
 
 
         /*Evento para confirmar datos en la ultima pantalla*/

@@ -192,5 +192,67 @@
         }
     }
 
+    // guarda cada respuesta 
+    $(".frm-respuesta").focusout(function(e){
+    e.preventDefault();
+        let id = $(this).attr('id').replace(/[^0-9]/g,'');
+        let formData = new FormData($('#frm_'+id)[0]);
+        // console.log(formData);
+        $.ajax({
+            async: true,
+            // headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+            url: '/cuestionario/guardarRespuestasCuestionario',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            // dataType: 'json',
+            beforeSend: function () {
+                if( $('input.archivo-'+id).val() !== '' ){
+                    $('.archivo-correcto').addClass('d-none');
+                    $('input.archivo-'+id).addClass('d-none');
+                    $('.spiner-'+id).removeClass('d-none');
+                } else {
+
+                }
+            },
+            success: function ( response ) {
+            },
+            complete : function( response ) {
+                // console.log(response.responseJSON, response.status);
+                if( response.responseJSON === 'correcto' ) {
+                    console.log( response.responseJSON, response.status );
+                    // $('#frm_'+id).children('div').find('input.resp').removeClass('border border-2 border-danger');
+                    // $('#frm_'+id).children('div').find('span.marca').empty();
+                    // $('#frm_'+id).children('div.complemento i').empty();
+                } if( response.message === 'archivos_correcto' ) {
+                    console.log('archivos_correcto');
+                    // $('.spiner-'+id).addClass('d-none');
+                    // $('.archivo-correcto').removeClass('d-none');
+                }
+            },
+            error: function(response){  }
+        });
+    });
+
+    function confirmaCuestionario( FRM_id ){
+        $.ajax({
+                async: true,
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                url: '/cuestionario/confirmaCuestionario',
+                type: 'POST',
+                data: {estado: 'completado', FRM_id: FRM_id },
+                // contentType: false,
+                // processData: false,
+                beforeSend: function () { },
+                success: function (data, response) {
+                    // console.log(data.message);
+                    Swal.fire(data.message);
+                },
+                //complete : function(data, response) {},
+                error: function(response){  }
+            });
+    }
+
 </script>
 

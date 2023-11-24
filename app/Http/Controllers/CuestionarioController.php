@@ -251,8 +251,7 @@ class CuestionarioController extends Controller {
      * Guarda las respuestas del cuestionario
      */
     public function guardarRespuestasCuestionario(Request $request){
-        // dump( $request->FK_RBF_id, $request->FK_AGF_id);
-        // exit;
+        //dump( $request);  // exit;
         if( $request->RES_tipoRespuesta == 'Casilla verificación' ){
             $rpta = json_encode($request->RES_respuesta, JSON_UNESCAPED_UNICODE);
             unset($request['RES_respuesta']);
@@ -311,14 +310,14 @@ class CuestionarioController extends Controller {
                 }
                 $msg= 'archivos_correcto';
             }
-            // sleep(4);
+            // sleep(2);
             DB::commit();
             return response()->json( $msg );
 
         }
         catch (\Exception $e) {
             DB::rollback();
-            // exit ($e->getMessage());
+            return response()->json( $e );
         }
         // exit;
     }
