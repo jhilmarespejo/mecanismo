@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\api;
-use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario};
+use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario,ModPreguntasFormulario};
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomController;
 use Illuminate\Http\Request;
@@ -12,8 +12,7 @@ class ApiMultiplesController extends Controller
 
     /**
      */
-    public function ApiListarTiposEstablecimientos()
-    {
+    public function ApiListarTiposEstablecimientos() {
         return ModTipoEstablecimiento::select('TES_id','TES_tipo' )->orderBy('TES_id')->get();
     }
 
@@ -33,6 +32,20 @@ class ApiMultiplesController extends Controller
         // $establecimientos = CustomController::array_group( $establecimientos, 'TES_tipo' );
 
         return $establecimientos;
+    }
+
+    /*
+    type: GET
+    retorna todos los formularios incluyendo sus preguntas y opciones
+    */
+    public function ApiFormulariosCuestionarios() {
+        $results = ModEstablecimiento::from('r_bpreguntas_formularios as rbf')
+        ->select('rbf.FK_FRM_id',  'rbf.FK_BCP_id', 'rbf.estado', 'rbf.RBF_orden','rbf.RBF_etiqueta',
+        'bp.BCP_pregunta', 'bp.BCP_opciones', 'bp.BCP_tipoRespuesta', 'bp.BCP_complemento')
+        ->join('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+        ->get()->toArray();
+
+        return $results;
     }
 
 
