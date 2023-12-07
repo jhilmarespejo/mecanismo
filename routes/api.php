@@ -17,8 +17,8 @@ Route::get('api_lista_tipos_establecimientos', [ApiMultiplesController::class, '
 // https://test-mnp.defensoria.gob.bo/api/api_lista_establecimientos
 Route::get('api_lista_establecimientos', [ApiMultiplesController::class, 'ApiListarEstablecimientos']);//->middleware('auth');
 
-// https://test-mnp.defensoria.gob.bo/api/api_historial_visitas
-Route::get('api_historial_visitas', [ApiMultiplesController::class, 'ApiHistorialVisitas']);//->middleware('auth');
+// https://test-mnp.defensoria.gob.bo/api/api_historial_visitas_formularios
+Route::get('api_historial_visitas_formularios', [ApiMultiplesController::class, 'ApiHistorialVisitasFormularios']);//->middleware('auth');
 
 // https://test-mnp.defensoria.gob.bo/api/api_historial_formularios
 Route::get('api_historial_formularios', [ApiMultiplesController::class, 'ApiHistorialformularios']);//->middleware('auth');
