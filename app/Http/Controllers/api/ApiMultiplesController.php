@@ -22,7 +22,7 @@ class ApiMultiplesController extends Controller
     */
     public function ApiListarEstablecimientos() {
 
-        $establecimientos = ModEstablecimiento::select('EST_nombre', 'tes.TES_tipo','EST_id',  'EST_direccion', 'EST_departamento', 'EST_provincia', 'EST_municipio' )
+        $establecimientos = ModEstablecimiento::select('EST_nombre', 'tes.TES_tipo','tes.TES_id','EST_id',  'EST_direccion', 'EST_departamento', 'EST_provincia', 'EST_municipio' )
         //->from('establecimientos as e')
         ->leftjoin('tipo_establecimiento as tes', 'establecimientos.FK_TES_id','tes.TES_id' )
         ->orderBy('TES_id' )
