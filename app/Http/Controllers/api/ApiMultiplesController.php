@@ -53,46 +53,33 @@ class ApiMultiplesController extends Controller
     type: GET
     retorna todos los establecimientos incluyendo las visitas y formularios relacionados
     */
-    public function ApiHistorialVisitasFormularios() {
-        /* Consulta para obtener todas las visitas realizadas al establecimiento */
-        //  $visitas = ModEstablecimiento::select('v.VIS_tipo', 'v.VIS_titulo','EST_nombre', 'EST_id',
-        //  'v.VIS_id', 'v.VIS_numero', 'v.VIS_fechas')
-        //  ->join('visitas as v', 'v.FK_EST_id','EST_id')
-        //  ->get()->toArray();
-        //  $quries = DB::getQueryLog();
-        // $visitas = CustomController::array_group( $visitas, 'EST_nombre' );
-
-
+    public function ApiVisitasFormularios() {
         DB::enableQueryLog();
         /* Consulta para obtener los formularios aplicados en la visita*/
         $visitas = ModFormulario::from('formularios as f')
         ->select('f.FRM_id', 'v.VIS_id', 'e.EST_id', 'f.FRM_titulo' , 'f.FRM_fecha','v.VIS_titulo','v.VIS_fechas', 'v.VIS_numero','v.VIS_titulo', 'v.VIS_tipo', 'e.EST_nombre')
         ->leftjoin ('visitas as v', 'v.VIS_id', 'f.FK_VIS_id')
         ->leftjoin ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-        ->get();
+        ->get()->toArray();
+
+        $visitas_formularios = CustomController::array_group( $visitas, 'VIS_tipo' );
         // $quries = DB::getQueryLog();
         // print_r( $quries );
 
-        return $visitas;
+        return $visitas_formularios;
         //  $quries = DB::getQueryLog();
     }
 
     /*
     type: GET
-    retorna la lista de formularios relacionadas con el establecimiento y la visita
-    */
+    retorna la lista de formularios relacionadas con el establecimiento y la visita   */
     public function ApiHistorialformularios() {
         // DB::enableQueryLog();
          $historial = ModEstablecimiento::select( 'f.FRM_titulo','v.VIS_titulo', 'establecimientos.EST_nombre', 'f.FRM_tipo', 'f.FK_VIS_id','establecimientos.EST_id', 'v.VIS_tipo',   'f.FK_USER_id', 'f.FRM_orden' )
         ->join ('visitas as v', 'v.FK_EST_id', 'establecimientos.EST_id')
         ->join ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
          ->get();
-        // $historial = CustomController::array_group( $historial, 'EST_nombre' );
-        //  $quries = DB::getQueryLog();
-        // print_r( $quries );
-
         return $historial;
-
     }
 
     /**
@@ -136,7 +123,6 @@ class ApiMultiplesController extends Controller
     // {
     //     //
     // }
-
 
 
     // /**
