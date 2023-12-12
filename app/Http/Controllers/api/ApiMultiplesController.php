@@ -25,8 +25,8 @@ class ApiMultiplesController extends Controller
         $establecimientos = ModEstablecimiento::select('EST_nombre', 'tes.TES_tipo','tes.TES_id','EST_id',  'EST_direccion', 'EST_departamento', 'EST_provincia', 'EST_municipio' )
         //->from('establecimientos as e')
         ->leftjoin('tipo_establecimiento as tes', 'establecimientos.FK_TES_id','tes.TES_id' )
-        ->orderBy('TES_id' )
         // ->orderBy('TES_id' )
+        ->orderBy('EST_nombre' )
         //->where( 'FK_TES_id', $request->FK_EST_id )
         ->get()->toArray();
         // $establecimientos = CustomController::array_group( $establecimientos, 'TES_tipo' );
@@ -62,11 +62,11 @@ class ApiMultiplesController extends Controller
         ->leftjoin ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
         ->get()->toArray();
 
-        $visitas_formularios = CustomController::array_group( $visitas, 'VIS_tipo' );
+        //$visitas_formularios = CustomController::array_group( $visitas, 'VIS_tipo' );
         // $quries = DB::getQueryLog();
         // print_r( $quries );
 
-        return $visitas_formularios;
+        return $visitas;
         //  $quries = DB::getQueryLog();
     }
 

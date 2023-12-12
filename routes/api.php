@@ -18,7 +18,6 @@ Route::get('api_lista_tipos_establecimientos', [ApiMultiplesController::class, '
 Route::get('api_lista_establecimientos', [ApiMultiplesController::class, 'ApiListarEstablecimientos']);//->middleware('auth');
 
 //  https://test-mnp.defensoria.gob.bo/api/api_visitas_formularios
-// **** solo para pruebas locales http://mnp.local/api/api_visitas_formularios
 Route::get('api_visitas_formularios', [ApiMultiplesController::class, 'ApiVisitasFormularios']);//->middleware('auth');
 
 // https://test-mnp.defensoria.gob.bo/api/api_formularios_cuestionarios
