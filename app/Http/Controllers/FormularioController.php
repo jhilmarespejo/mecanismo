@@ -193,7 +193,7 @@ class FormularioController extends Controller
             // ->orderby('f.FRM_titulo', 'asc')
         // ->get()->toArray();
         $operador=' ';
-        $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
+        $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."AGF_copia","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
         if( Auth::user()->rol == 'Operador' ){
             $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
         }

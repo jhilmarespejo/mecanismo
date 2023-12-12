@@ -82,12 +82,20 @@
                             @if ($item['AGF_id'] )
                                 <div class="col-auto d-flex card m-1 border-bottom m-0 p-0 {{ $sombra }}" id="{{$item["AGF_id"]}}"  >
                                     <div class="card-header p-0 ">
+                                        {{-- <span class="bg-danger text-white" >{{$item["AGF_id"]}}</span> --}}
                                         <ul class="list-group list-group-horizontal list-unstyled text-center">
                                             <li class="p-0 m-0">
-                                                <span class="badge bg-primary rounded-pill text-shadow p-1 ">
+                                                {{-- <span class="badge bg-primary rounded-pill text-shadow p-1 ">
                                                     {{ \Carbon\Carbon::parse($item['createdAt'])->format('d-m-Y') }}
-                                                </span>
+                                                </span> --}}
+                                                {{-- <span class="badge bg-primary rounded-pill text-shadow p-1 ">
+                                                    Código-<span class="fs-5">{{$item["AGF_id"]}}</span>
+                                                </span> --}}
+                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill mt-3 text-danger " style=" font-size: 1em ">
+                                                   {{$item["AGF_id"]}}
+                                                  </span>
                                             </li>
+
                                             <li class="p-0 m-0">
                                             {{-- @dump($resultado) --}}
                                                 @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
