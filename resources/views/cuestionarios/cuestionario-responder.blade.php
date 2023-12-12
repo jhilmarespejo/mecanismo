@@ -53,7 +53,7 @@
         <div class="text-center head">
             <p class="m-0 p-0 fs-3" id="establecimiento">{{ $EST_nombre }}</p>
             <p class="text-primary m-0 p-0 fs-3" id="titulo"> {{ $FRM_titulo }}</p>
-            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: {{ $AGF_copia }}</p>
+            <p class="text-primary m-0 p-0 fs-5" id="titulo">Responder/llenar cuestionario: código-{{ $AGF_id }}</p>
         </div>
 
         {{-- Cuestionario --}}
@@ -136,7 +136,7 @@
         });
     });
 
-    
+
 
     /*Boton para confirmar los datos del formulario*/
 
