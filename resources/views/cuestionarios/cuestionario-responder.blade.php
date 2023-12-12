@@ -136,6 +136,35 @@
         });
     });
 
+    function confirmaCuestionario( FRM_id ){
+        $.ajax({
+                async: true,
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                url: '/cuestionario/confirmaCuestionario',
+                type: 'POST',
+                data: {estado: 'completado', FRM_id: FRM_id },
+                // contentType: false,
+                // processData: false,
+                beforeSend: function () { },
+                success: function (data, response) {
+                    // console.log(data.message);
+                    // Swal.fire(data.message);
+
+
+                    Swal.fire({
+                        text: data.message,
+                        // icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                        }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.history.back();
+                        }
+                    })
+                },
+                //complete : function(data, response) {},
+                error: function(response){  }
+            });
+    }
 
 
     /*Boton para confirmar los datos del formulario*/

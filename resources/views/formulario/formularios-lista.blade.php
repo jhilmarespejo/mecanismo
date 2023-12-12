@@ -91,9 +91,9 @@
                                                 {{-- <span class="badge bg-primary rounded-pill text-shadow p-1 ">
                                                     Código-<span class="fs-5">{{$item["AGF_id"]}}</span>
                                                 </span> --}}
-                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill mt-3 text-danger " style=" font-size: 1em ">
-                                                   {{$item["AGF_id"]}}
-                                                  </span>
+                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill text-danger " style=" font-size: 1.2em; margin-top: 0.8rem">
+                                                    {{$item["AGF_id"]}}
+                                                   </span>
                                             </li>
 
                                             <li class="p-0 m-0">
