@@ -35,7 +35,7 @@ class CuestionarioController extends Controller {
         DB::enableQueryLog();
         $total = count($copias);
         if( $total > 0 ){ //count($copias) cantidad de formularios aplicados
-            dump( $total );
+            // dump( $total );
 
             $preguntas = ModBancoPregunta::from('banco_preguntas as bp')
             ->select( 'bp.BCP_pregunta','bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_tipoRespuesta',

@@ -64,7 +64,7 @@
                                     <td>{{round(($respuesta/$total)*100, 0) }} %</td>
                                 </tr>
                                 @endforeach
-                                @dump($respuestParcial)
+                                {{-- @dump($respuestParcial) --}}
                                 @if ($respuestParcial < $total)
                                 <tr>
                                     <td>-- Sin respuesta -- </td>
