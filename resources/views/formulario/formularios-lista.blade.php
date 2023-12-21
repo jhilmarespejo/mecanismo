@@ -54,15 +54,11 @@
                                 <a href="/cuestionario/duplicar/{{$value[0]["FRM_id"]}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
                                     <strong>Nuevo formulario</strong>
                                 </a>
-                                {{-- <form action="{{ route('cuestionario.duplicar') }}" method="Post" class=" frm-duplicar-cuestionario m-0 p-0"> --}}
-                                <form action="" id="frm_duplicar" method="Post" class="frm-duplicar-cuestionario m-0 p-0">
-                                    @csrf
-                                    <input type="hidden" name="FRM_id" value="{{ $value[0]["FRM_id"] }}">
-                                    {{-- <button type=submit id="duplicar_formulario" class="btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">Nuevo formulario</button> --}}
-                                    {{-- <span id="btn_duplicar_formulario" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
-                                        <strong>Nuevo formulario</strong>
-                                    </span> --}}
-                                </form>
+
+                                <a href="/cuestionario/resultados/{{$value[0]["FRM_id"]}}/{{ $value[0]["FRM_titulo"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
+                                    <i class="i bi-bar-chart-line"></i> Resultados
+                                </a>
+
                             </div>
                         </div>
                     </div>

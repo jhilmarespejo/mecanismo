@@ -174,24 +174,7 @@ class FormularioController extends Controller
     public function buscaFormularios( $VIS_id = 0 , $resultado = 0){
         DB::enableQueryLog();
         $z = 0;
-        // $formularios = ModVisita::from('visitas as v')
-            // ->select('e.EST_id','e.EST_nombre','te.TES_tipo','v.VIS_tipo','f.FRM_id','f.FRM_titulo','f.FRM_version','f.FRM_fecha','f.FK_VIS_id', 'af.AGF_id', 'af.FK_USER_id', 'af.createdAt', 'af.estado')
-            // ->join ('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-            // ->join ('tipo_establecimiento as te', 'te.TES_id', 'e.FK_TES_id')
-            // ->leftJoin( 'formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-            // //->leftJoin( '', 'af.FK_FRM_id', 'f.FRM_id' AND 'af.FK_USER_id', 142
-            // ->leftjoin('agrupador_formularios as af', function($join){
-            //     $join->on('af.FK_FRM_id', 'f.FRM_id')
-            //     ->on('af.FK_USER_id','=', 'r.FK_RBF_id');
-            // })
-            // ->where ('v.VIS_id', $VIS_id);
-            // // ->where ('e.estado', '1');
-            // if( Auth::user()->rol == 'Operador' ){
-            //     $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
-            // }
-            // $formularios = $formularios->orderby('f.createdAt', 'desc')
-            // ->orderby('f.FRM_titulo', 'asc')
-        // ->get()->toArray();
+
         $operador=' ';
         $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."AGF_copia","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
         if( Auth::user()->rol == 'Operador' ){
@@ -208,9 +191,9 @@ class FormularioController extends Controller
         $formulario = CustomController::array_group( $formularios, 'FRM_id' );
 
         // $VIS_id = $formularios[0]['VIS_id'];
-
+        // dump($formularios[0]);
         // SETEAR VARIABLES DE ENTORNO
-        session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo']]);
+        session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo'], 'FRM_titulo' => $formularios[0]['FRM_titulo']  ]);
 
         $colorVisita = VisitaController::colorTipoVisita( $formularios[0]['VIS_tipo'] );
 

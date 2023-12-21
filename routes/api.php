@@ -20,8 +20,8 @@ Route::get('api_lista_establecimientos', [ApiMultiplesController::class, 'ApiLis
 //  https://test-mnp.defensoria.gob.bo/api/api_visitas_formularios
 Route::get('api_visitas_formularios', [ApiMultiplesController::class, 'ApiVisitasFormularios']);//->middleware('auth');
 
-// https://test-mnp.defensoria.gob.bo/api/api_formularios_cuestionarios
-Route::get('api_formularios_cuestionarios', [ApiMultiplesController::class, 'ApiFormulariosCuestionarios']);//->middleware('auth');
+// https://test-mnp.defensoria.gob.bo/api/api_formularios_cuestionario
+Route::get('api_formularios_cuestionario', [ApiMultiplesController::class, 'ApiFormulariosCuestionario']);//->middleware('auth');
 
 
 

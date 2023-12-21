@@ -35,9 +35,9 @@
     </div> --}}
 
     {{-- CONSULTA DINAMICA --}}
-    {{-- <div class="row mt-4">
+    <div class="row mt-4">
         @include('index.dinamico')
-    </div> --}}
+    </div>
 </div>
 {{-- </div> --}}
 

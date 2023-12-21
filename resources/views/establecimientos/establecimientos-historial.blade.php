@@ -51,6 +51,7 @@
         // dump($avance); //exit;
     @endphp
     <h3 class="text-center">{{ ( $formularios[0]->EST_poblacion == 'Privados privadas de libertad')? 'Centro penitenciario '. $formularios[0]->EST_nombre : $formularios[0]->EST_nombre }}</h3>
+    
 
     {{-- para nuevo formulario --}}
     {{-- @if(Auth::user()->rol == 'Administrador' )

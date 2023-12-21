@@ -113,8 +113,7 @@ class IndexController extends Controller
         /* CONSULTA PARA RESPUESTAS DE TIPO AFIRMACION */
         /* 3RA parte (FINAL) se insertan las $opciones en la consulta final */
         if( $bcpIds != '' ){
-            $consultaAfirmaciones = 'select "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" = \'Si\')::int) as "si",
-            SUM( ("r"."RES_respuesta" = \'No\')::int) as "no", SUM( ("r"."RES_respuesta" IS NULL)::int) as "nulo" from "banco_preguntas" as "bp" left join "r_bpreguntas_formularios" as "rbf" on "rbf"."FK_BCP_id" = "bp"."BCP_id"
+            $consultaAfirmaciones = 'select "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" = \'Si\')::int) as "si", SUM( ("r"."RES_respuesta" = \'No\')::int) as "no", SUM( ("r"."RES_respuesta" IS NULL)::int) as "nulo" from "banco_preguntas" as "bp" left join "r_bpreguntas_formularios" as "rbf" on "rbf"."FK_BCP_id" = "bp"."BCP_id"
             left join "respuestas" as "r" on "r"."FK_RBF_id" = "rbf"."RBF_id"
             left join "formularios" as "f" on "f"."FRM_id" = "rbf"."FK_FRM_id" where "bp"."BCP_id" in ('.rtrim($bcpIds, ",").') and "f"."FRM_id" in ('.$formularios.') and "f"."estado" = 1 group by "bp"."BCP_pregunta"';
 
@@ -136,19 +135,22 @@ class IndexController extends Controller
     public function buscarListasCasillas( Request $request ){
         // dump( $request->except('_tocken') );
         // exit;
+
+        //se extraen las opciones por cada pregunta individual
         $opcionesPregunta = ModBancoPregunta::select('BCP_tipoRespuesta', 'BCP_opciones', 'BCP_pregunta')
         ->where('BCP_id', $request->BCP_id)
         ->get()->first()->toArray();
-        $titulo = $opcionesPregunta['BCP_pregunta'];
-
         $opcionesPregunta = json_decode( $opcionesPregunta['BCP_opciones'], true );
+
+        $titulo = $opcionesPregunta['BCP_pregunta'];
         $elemento = '';
+
         foreach( $opcionesPregunta as $opcionPregunta ){
             $elemento .= 'SUM( ("r"."RES_respuesta" ilike '."'%".$opcionPregunta."%'".')::int) as "'.$opcionPregunta.'",';
         }
 
         $consultaListaCasillas = 'select "rbf"."FK_FRM_id", "e"."EST_nombre", '.rtrim($elemento, ",").'  from "respuestas" as "r" left join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id" left join "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "formularios" as "f" on "rbf"."FK_FRM_id" = "f"."FRM_id" left join "establecimientos" as "e" on "e"."EST_id" = "f"."FK_EST_id" where "rbf"."FK_BCP_id" = '.$request->BCP_id.' and "f"."FRM_id" in ('.$request->formularios.') group by "e"."EST_nombre", "rbf"."FK_FRM_id" ';
-        // dump( $consultaListaCasillas );
+        dump( $consultaListaCasillas );//exit;
 
         $listaCasillas = DB::select( $consultaListaCasillas );
 
@@ -158,22 +160,3 @@ class IndexController extends Controller
         /* Hacer una consulta para obtener todas las opciones de respuesta del la pregunta seleccionada ya es que es de tipo  "Casilla de verificación" y "Lista desplegable" */
     }
 }
-
-
-
-/*
-$categoria => 74
-$formularios = [257,260,259]
-
-1. $lista_de_preguntas = Buscar todas las preguntas que pertenezcan a $categoria y $formularios
-2. Con $lista_de_preguntas( BCP_id, BCP_pregunta ) en un foreach armar parte de la consulta para $consultaAfirmaciones
-3. $consultaAfirmaciones saca y cuenta todas las preguntas de tipo "Afirmación"
-4. $casillasListas = todas las preguntas de tipo "Casilla de verificación" y "Lista desplegable" que pertenezcan a $categoria y $formularios
-
-5. ENVIAR  $consultaAfirmaciones $casillasListas ambos datos a  index-responses
-6. MOSTAR EN GRAFICO $consultaAfirmaciones
-7. MOSTRAR EN LISTA DESPLEGABLE $casillasListas , para que el usuario seleccione una pregunta
-8. Con la pregunta seleccionada ($BCP_id) ENVIAR A LA FUNCION buscarListasCasillas
-9.
-
-*/
