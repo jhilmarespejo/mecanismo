@@ -87,7 +87,7 @@ Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class
 
 Route::post('cuestionario/confirmaCuestionario/', [CuestionarioController::class, 'confirmaCuestionario'])->name('cuestionario.confirmaCuestionario')->middleware('auth');
 
-Route::get('cuestionario/resultados/{id}/{FRM_titulo}', [CuestionarioController::class, 'resultadosCuestionario'])->name('cuestionario.resultados')->middleware('auth');
+Route::get('cuestionario/resultados/{id}', [CuestionarioController::class, 'resultadosCuestionario'])->name('cuestionario.resultados')->middleware('auth');
 
 
 

@@ -19,17 +19,23 @@ class CuestionarioController extends Controller {
 
 
 
-    public function resultadosCuestionario($FRM_id, $FRM_titulo){
+    public function resultadosCuestionario($FRM_id){
 
         //ferificar si el formulario tiene copias
-        $copias = ModAgrupadorFormulario::select('AGF_id', 'AGF_copia')
-        ->where('FK_FRM_id', $FRM_id)
+        $copias = ModAgrupadorFormulario::from('agrupador_formularios as agf')
+        ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
+        ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
+        ->where('agf.FK_FRM_id', $FRM_id)
         ->get()->toArray();
+        $FRM_titulo = $copias[0]['FRM_titulo'];
+        // dump($copias);
+
+
 
         DB::enableQueryLog();
         $total = count($copias);
         if( $total > 0 ){ //count($copias) cantidad de formularios aplicados
-            // dump( $total );
+            dump( $total );
 
             $preguntas = ModBancoPregunta::from('banco_preguntas as bp')
             ->select( 'bp.BCP_pregunta','bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_tipoRespuesta',

@@ -55,7 +55,7 @@
                                     <strong>Nuevo formulario</strong>
                                 </a>
 
-                                <a href="/cuestionario/resultados/{{$value[0]["FRM_id"]}}/{{ $value[0]["FRM_titulo"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
+                                <a href="/cuestionario/resultados/{{ $value[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
                                     <i class="i bi-bar-chart-line"></i> Resultados
                                 </a>
 
