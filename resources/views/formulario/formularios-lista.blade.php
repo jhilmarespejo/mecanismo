@@ -43,29 +43,35 @@
 
           <h5 class="card-title">Formularios:</h5>
 
-            @php foreach ($formulario as $key => $value): @endphp
+            @php foreach ($formulario as $key => $form): @endphp
                 <div class="row">
                     <div class="col-lg-4 col-12">
                         <div class="card mb-3" style="max-width: 18rem;">
-                            <div class="card-header">{{ $value[0]["FRM_titulo"] }}</div>
+                            <div class="card-header">{{ $form[0]["FRM_titulo"] }}</div>
                             <div class="card-body text-center">
                                 <img src="/img/icon-form-4.png" class="img-fluid w-75" alt="Nuevo formulario">
 
-                                <a href="/cuestionario/duplicar/{{$value[0]["FRM_id"]}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
+                                <a href="/cuestionario/duplicar/{{$form[0]["FRM_id"]}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
                                     <strong>Nuevo formulario</strong>
                                 </a>
 
-                                <a href="/cuestionario/resultados/{{ $value[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
-                                    <i class="i bi-bar-chart-line"></i> Resultados
-                                </a>
-
+                                @if (Auth::user()->rol == 'Administrador')
+                                    <a href="/cuestionario/resultados/{{ $form[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
+                                        <i class="i bi-bar-chart-line"></i> Resultados
+                                    </a>
+                                @endif
+                                    @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
+                                        @if ( $indice == $form[0]["FRM_id"])
+                                        <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
+                                        @endif
+                                    @endforeach
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-8 col-12">
                         <div class="row">
-                            @foreach ($value as $item)
+                            @foreach ($form as $item)
                             {{-- @dump($item) --}}
                             <?php if ( $resultado == $item["AGF_id"]){
                                     $sombra = 'gren-shadow';
@@ -89,38 +95,35 @@
                                                 </span> --}}
                                                 <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill text-danger " style=" font-size: 1.2em; margin-top: 0.8rem">
                                                     {{$item["AGF_id"]}}
-                                                   </span>
-                                            </li>
-
-                                            <li class="p-0 m-0">
-                                            {{-- @dump($resultado) --}}
-                                                @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
-                                                <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
-                                                    @csrf
-                                                    <input type="hidden" name="FRM_id" value="{{ $item["FRM_id"] }}">
-                                                    <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-danger fs-5"></i></button>
-                                                </form>
-                                                @endif
+                                                </span>
                                             </li>
                                         </ul>
                                     </div>
                                     <div class="card-body text-center p-0 m-0  ">
                                         <img src="/img/icon-form-5.png" class="img-fluid" alt="Formulario">
-
                                     </div>
                                     <div class="card-footer p-0">
                                         <ul class="list-group list-group-horizontal list-unstyled ">
                                             {{-- <li class="p-0 m-0">
-                                                <a href="/cuestionario/ver/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-eye-fill px-2 text-primary fs-5"></i></a>
-                                            </li> --}}
-                                            <li class="p-0 m-0">
                                                 <a href="/cuestionario/imprimir/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
-                                            </li>
+                                            </li> --}}
                                             <li class="p-0 m-0">
                                                 <a href="/cuestionario/responder/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pen-fill px-2 fs-5 {{ $lapiz }}"></i></a>
                                             </li>
+                                            {{-- @dump($item) --}}
+                                            @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
+                                                <li class="p-0 m-0">
+                                                    <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
+                                                        @csrf
+                                                        {{ $item["AGF_id"] }}
+                                                        <input type="hidden" name="AGF_id" value="{{ $item["AGF_id"] }}">
+                                                        <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-warning fs-5"></i></button>
+                                                    </form>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </div>
+                                    <div class="p-0 m-0 alert alert-info" role="alert" style="font-size: 13px">P: <b>{{$item["cantidad_preguntas"]}}</b> - R: <b class="{{ ($item["cantidad_respuestas"] == 0)? 'bg-warning text-white px-2 box-shadow rounded-circle':'' }}">{{$item["cantidad_respuestas"]}}</b> </div>
                                 </div>
                             @endif
 

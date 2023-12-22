@@ -176,7 +176,11 @@ class FormularioController extends Controller
         $z = 0;
 
         $operador=' ';
-        $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."AGF_copia","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
+        // $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."AGF_copia","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
+
+        $sql = 'SELECT"e"."EST_id","e"."EST_nombre","v"."VIS_tipo","te"."TES_tipo","f"."FRM_id","f"."FRM_titulo","f"."FRM_version","f"."FRM_fecha","f"."FK_USER_id","f"."FK_VIS_id","af"."estado","af"."AGF_id","af"."AGF_copia","af"."FK_USER_id","af"."createdAt",COALESCE("catidad_respuestas", 0) AS "cantidad_respuestas",COALESCE("cantidad_preguntas", 0) AS "cantidad_preguntas" FROM"establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id" LEFT JOIN (SELECT "FK_AGF_id", COUNT(*) AS "catidad_respuestas"FROM "respuestas"GROUP BY "FK_AGF_id" ) AS "respuestas" ON "respuestas"."FK_AGF_id" = "af"."AGF_id" LEFT JOIN (SELECT "FK_FRM_id", COUNT(*) AS "cantidad_preguntas"FROM "r_bpreguntas_formularios"GROUP BY "FK_FRM_id" ) AS "preguntas" ON "preguntas"."FK_FRM_id" = "f"."FRM_id" ';
+
+
         if( Auth::user()->rol == 'Operador' ){
             $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
         }
@@ -185,19 +189,25 @@ class FormularioController extends Controller
 
 
         $formularios = collect( DB::select($sql) )->map(function($x){ return (array)$x; })->toArray();
-        $quries = DB::getQueryLog();
-        // dump($sql);//exit;
 
-        $formulario = CustomController::array_group( $formularios, 'FRM_id' );
 
-        // $VIS_id = $formularios[0]['VIS_id'];
-        // dump($formularios[0]);
+
         // SETEAR VARIABLES DE ENTORNO
         session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo'], 'FRM_titulo' => $formularios[0]['FRM_titulo']  ]);
 
+        $formulario = CustomController::array_group( $formularios, 'FRM_id' );
+
         $colorVisita = VisitaController::colorTipoVisita( $formularios[0]['VIS_tipo'] );
 
-        return view('formulario.formularios-lista', compact('formulario', 'colorVisita', 'resultado', 'VIS_id'));
+        //* Contar la cantidad de copias aplicadas por cada formulario  */
+        foreach ($formulario as $clave => $elemento) {
+            $cantidadSubelementos = count($elemento);
+            $cantidadCopiasFormulario[$clave] = $cantidadSubelementos;
+        }
+        // dump($formularios);
+
+
+        return view('formulario.formularios-lista', compact('formulario', 'colorVisita', 'resultado', 'VIS_id','cantidadCopiasFormulario'));
     }
 
 }
