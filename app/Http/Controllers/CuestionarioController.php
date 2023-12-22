@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 // use App\Http\Livewire\Cuestionario;
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario, ModCategoria, ModCuestionario, ModRespuesta, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario, ModAgrupadorFormulario};
+use App\Models\{ModFormulario,ModRespuesta, ModCategoria, ModCuestionario, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario, ModAgrupadorFormulario};
 use Illuminate\Support\Facades\DB;
 // use Image;
 use Intervention\Image\Facades\Image;
@@ -35,8 +35,6 @@ class CuestionarioController extends Controller {
             DB::enableQueryLog();
             $total = count($copias);
             if( $total > 0 ){ //count($copias) cantidad de formularios aplicados
-                // dump( $total );
-
                 $preguntas = ModBancoPregunta::from('banco_preguntas as bp')
                 ->select( 'bp.BCP_pregunta','bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_tipoRespuesta',
                 'bp.BCP_opciones', 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria',
@@ -48,25 +46,41 @@ class CuestionarioController extends Controller {
                 ->orderBy('rbf.RBF_orden')
                 ->orderBy('rbf.RBF_id')
                 ->get();
+                ////poner una condicional
+            // ARRAY CON LAS RESPUESTAS DE TIPO Respuesta corta, Respuesta larga, numeral
+                $respuestasAbiertas=ModRespuesta::from('respuestas as r')
+                ->select('c.CAT_categoria', 'bp.BCP_pregunta', 'r.RES_respuesta', 'rbf.RBF_id','rbf.RBF_orden','r.FK_AGF_id')
+                ->leftJoin('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
+                ->leftJoin('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+                ->leftJoin('categorias as c', 'c.CAT_id', 'bp.FK_CAT_id')
+                ->whereIn('bp.BCP_tipoRespuesta', ['Respuesta corta', 'Respuesta larga', 'Numeral'])
+                ->where('rbf.FK_FRM_id', $FRM_id)
+                ->groupBy('c.CAT_categoria', 'bp.BCP_pregunta','rbf.RBF_orden', 'rbf.RBF_id','r.RES_respuesta', 'bp.BCP_pregunta','r.FK_AGF_id')
+                ->orderBy('rbf.RBF_orden')
+                ->orderBy('rbf.RBF_id')
+                ->get();
+                dump($respuestasAbiertas);
+            //ARRAY CON EL CONTEO DE RESPUESTAS PARA LAS PREGUNTAS TIPO 'Afirmación'
+                $respuestasAfirmacion = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",SUM( ("r"."RES_respuesta" ilike \'%No%\')::int) as "No", "rbf"."RBF_id", "rbf"."RBF_orden"   from "respuestas" as "r"
+                left join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id"
+                left join  "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id"
+                left join "categorias" as "c" on "c"."CAT_id" = "bp"."FK_CAT_id"
+                where "bp"."BCP_tipoRespuesta" = \'Afirmación\' and "rbf"."FK_FRM_id"= '.$FRM_id.'
+                group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id"
+                order by "rbf"."RBF_id", "rbf"."RBF_orden"';
+                $conteoRespuestasAfirmacion = DB::select( $respuestasAfirmacion );
 
-                //ARRAY CON EL CONTEO DE RESPUESTAS PARA LAS PREGUNTAS TIPO 'Afirmación'
-                    $respuestasAfirmacion = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",SUM( ("r"."RES_respuesta" ilike \'%No%\')::int) as "No", "rbf"."RBF_id", "rbf"."RBF_orden"   from "respuestas" as "r"
-                    left join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id"
-                    left join  "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id"
-                    left join "categorias" as "c" on "c"."CAT_id" = "bp"."FK_CAT_id"
-                    where "bp"."BCP_tipoRespuesta" = \'Afirmación\' and "rbf"."FK_FRM_id"= '.$FRM_id.'
-                    group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id"
-                    order by "rbf"."RBF_id", "rbf"."RBF_orden"';
-                    $conteoRespuestasAfirmacion = DB::select( $respuestasAfirmacion );
-
-                    // Se convierte el resultado en un array
-                    $arrayConteoRespAfir= json_decode(json_encode($conteoRespuestasAfirmacion), true);
-                    // dump( $conteoRespuestasAfirmacion );
+                // Se convierte el resultado en un array
+                $arrayConteoRespAfir= json_decode(json_encode($conteoRespuestasAfirmacion), true);
+                $arrayRespuestasAbierta= json_decode(json_encode($respuestasAbiertas), true);
+                // dump( $conteoRespuestasAfirmacion );
 
                 $arrayConteoRespCasVarif=[];
                 foreach($preguntas as $pregunta){
+                    // OPCIONES PARA LAS PREGUNTAS TIPO CASILLA VERIFICACION Y LISTA DESPLEGABLE
                     if($pregunta->BCP_tipoRespuesta == 'Lista desplegable' || $pregunta->BCP_tipoRespuesta == 'Casilla verificación' ){
-                    //    OPCIONES PARA LAS PREGUNTAS TIPO CASILLA VERIFICACION
+
+                        // SE BUSCAN LAS OPCIONES SELECCIONADAS EN ESTE TIPO DE RESPUESTAS
                         $opcionesSeleccionadas = DB::table('respuestas as r')
                         ->select('r.RES_respuesta')
                         ->join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
@@ -85,7 +99,8 @@ class CuestionarioController extends Controller {
 
                         $columnasOpciones = '';
                         $columnasOpcionesTotal='';
-                        // Se prepara parte de la consulta sql
+
+                        // cON LAS OPCIONES DE RESPUESTA SE prepara parte de la consulta sql
                         foreach( $outputArray as $opcionPregunta ){
                             if($opcionPregunta == null){
                                 $opcionPregunta = 'Sin respuesta';
@@ -122,28 +137,28 @@ class CuestionarioController extends Controller {
 
 
                 // $data = ModFormulario::from('formularios as f')
-                // ->select('bp.BCP_pregunta','bp.BCP_complemento','r.RES_respuesta','r.RES_complemento','rbf.RBF_id','bp.BCP_id','bp.BCP_tipoRespuesta','bp.BCP_opciones','c.CAT_id as categoriaID','c.CAT_categoria as subcategoria','c.FK_CAT_id','c2.CAT_categoria as categoria','f.FRM_id','f.FRM_titulo','f.FRM_fecha','e.EST_nombre','e.EST_id','r.RES_id','af.AGF_copia','af.AGF_id','rbf.RBF_orden','rbf.RBF_salto_FK_BCP_id')
-                // ->join ('agrupador_formularios as af',
-                // 'f.FRM_id', 'af.FK_FRM_id')
-                // ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
-                // ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
-                // ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
-                // ->leftJoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
-                // ->leftjoin('respuestas as r', function($join){
-                //     $join->on('r.FK_AGF_id', 'af.AGF_id')
-                //     ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
-                // })
-                // ->join ('visitas as v', 'v.VIS_id', 'f.FK_VIS_id')
-                // ->join ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-                // ->where ('rbf.FK_FRM_id', $FRM_id)
-                // // --and 'af.AGF_id', 361
-                // ->where ('rbf.estado', 1)
-                // ->orderBy ('rbf.RBF_orden', 'asc')
-                // ->orderBy('rbf.RBF_id', 'asc')->first()
-                // ->get()->toArray();
-                // $quries = DB::getQueryLog();
-                // dump($preguntas);
-                // exit;
+                    // ->select('bp.BCP_pregunta','bp.BCP_complemento','r.RES_respuesta','r.RES_complemento','rbf.RBF_id','bp.BCP_id','bp.BCP_tipoRespuesta','bp.BCP_opciones','c.CAT_id as categoriaID','c.CAT_categoria as subcategoria','c.FK_CAT_id','c2.CAT_categoria as categoria','f.FRM_id','f.FRM_titulo','f.FRM_fecha','e.EST_nombre','e.EST_id','r.RES_id','af.AGF_copia','af.AGF_id','rbf.RBF_orden','rbf.RBF_salto_FK_BCP_id')
+                    // ->join ('agrupador_formularios as af',
+                    // 'f.FRM_id', 'af.FK_FRM_id')
+                    // ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
+                    // ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+                    // ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
+                    // ->leftJoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
+                    // ->leftjoin('respuestas as r', function($join){
+                    //     $join->on('r.FK_AGF_id', 'af.AGF_id')
+                    //     ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
+                    // })
+                    // ->join ('visitas as v', 'v.VIS_id', 'f.FK_VIS_id')
+                    // ->join ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
+                    // ->where ('rbf.FK_FRM_id', $FRM_id)
+                    // // --and 'af.AGF_id', 361
+                    // ->where ('rbf.estado', 1)
+                    // ->orderBy ('rbf.RBF_orden', 'asc')
+                    // ->orderBy('rbf.RBF_id', 'asc')->first()
+                    // ->get()->toArray();
+                    // $quries = DB::getQueryLog();
+                    // dump($preguntas);
+                    // exit;
                 // dump($data);exit;
             }else{
                 $data = null;
