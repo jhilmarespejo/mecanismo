@@ -100,6 +100,10 @@
                                         </ul>
                                     </div>
                                     <div class="card-body text-center p-0 m-0  ">
+                                        {{-- @if ( $item["estado"] == 0 )
+                                            <img src="/img/icon-form-empty.png" class="img-fluid" alt="Formulario">
+                                        @else
+                                        @endif --}}
                                         <img src="/img/icon-form-5.png" class="img-fluid" alt="Formulario">
                                     </div>
                                     <div class="card-footer p-0">
@@ -115,7 +119,6 @@
                                                 <li class="p-0 m-0">
                                                     <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
                                                         @csrf
-                                                        {{ $item["AGF_id"] }}
                                                         <input type="hidden" name="AGF_id" value="{{ $item["AGF_id"] }}">
                                                         <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-warning fs-5"></i></button>
                                                     </form>
@@ -123,7 +126,7 @@
                                             @endif
                                         </ul>
                                     </div>
-                                    <div class="p-0 m-0 alert alert-info" role="alert" style="font-size: 13px">P: <b>{{$item["cantidad_preguntas"]}}</b> - R: <b class="{{ ($item["cantidad_respuestas"] == 0)? 'bg-warning text-white px-2 box-shadow rounded-circle':'' }}">{{$item["cantidad_respuestas"]}}</b> </div>
+                                    <div class="p-0 m-0 alert alert-info" role="alert" style="font-size: 13px">P: <b>{{$item["cantidad_preguntas"]}}</b> - R: <b class="{{ ($item["cantidad_respuestas"] == 0)? 'bg-danger text-white px-2 box-shadow rounded-circle':'' }}">{{$item["cantidad_respuestas"]}}</b> </div>
                                 </div>
                             @endif
 
