@@ -31,8 +31,6 @@ class CuestionarioController extends Controller {
             // dump($copias);
 
 
-
-            DB::enableQueryLog();
             $total = count($copias);
             if( $total > 0 ){ //count($copias) cantidad de formularios aplicados
                 $preguntas = ModBancoPregunta::from('banco_preguntas as bp')
@@ -46,34 +44,33 @@ class CuestionarioController extends Controller {
                 ->orderBy('rbf.RBF_orden')
                 ->orderBy('rbf.RBF_id')
                 ->get();
-                ////poner una condicional
+
             // ARRAY CON LAS RESPUESTAS DE TIPO Respuesta corta, Respuesta larga, numeral
                 $respuestasAbiertas=ModRespuesta::from('respuestas as r')
-                ->select('c.CAT_categoria', 'bp.BCP_pregunta', 'r.RES_respuesta', 'rbf.RBF_id','rbf.RBF_orden','r.FK_AGF_id')
-                ->leftJoin('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
+                ->select('c.CAT_categoria', 'bp.BCP_pregunta', 'r.RES_respuesta', 'rbf.RBF_id','rbf.RBF_orden','r.FK_AGF_id', 'bp.BCP_tipoRespuesta')
+                ->rightJoin('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
                 ->leftJoin('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
                 ->leftJoin('categorias as c', 'c.CAT_id', 'bp.FK_CAT_id')
                 ->whereIn('bp.BCP_tipoRespuesta', ['Respuesta corta', 'Respuesta larga', 'Numeral'])
                 ->where('rbf.FK_FRM_id', $FRM_id)
-                ->groupBy('c.CAT_categoria', 'bp.BCP_pregunta','rbf.RBF_orden', 'rbf.RBF_id','r.RES_respuesta', 'bp.BCP_pregunta','r.FK_AGF_id')
+                ->groupBy('c.CAT_categoria', 'bp.BCP_pregunta','rbf.RBF_orden', 'rbf.RBF_id','r.RES_respuesta', 'bp.BCP_pregunta','r.FK_AGF_id', 'r.FK_AGF_id', 'bp.BCP_tipoRespuesta')
                 ->orderBy('rbf.RBF_orden')
                 ->orderBy('rbf.RBF_id')
                 ->get();
-                dump($respuestasAbiertas);
+
+
             //ARRAY CON EL CONTEO DE RESPUESTAS PARA LAS PREGUNTAS TIPO 'Afirmación'
-                $respuestasAfirmacion = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",SUM( ("r"."RES_respuesta" ilike \'%No%\')::int) as "No", "rbf"."RBF_id", "rbf"."RBF_orden"   from "respuestas" as "r"
-                left join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id"
+                $respuestasAfirmacion = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", SUM( ("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",SUM( ("r"."RES_respuesta" ilike \'%No%\')::int) as "No", "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta"  from "respuestas" as "r"
+                right join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id"
                 left join  "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id"
                 left join "categorias" as "c" on "c"."CAT_id" = "bp"."FK_CAT_id"
                 where "bp"."BCP_tipoRespuesta" = \'Afirmación\' and "rbf"."FK_FRM_id"= '.$FRM_id.'
-                group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id"
+                group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id", "bp"."BCP_tipoRespuesta"
                 order by "rbf"."RBF_id", "rbf"."RBF_orden"';
                 $conteoRespuestasAfirmacion = DB::select( $respuestasAfirmacion );
 
                 // Se convierte el resultado en un array
                 $arrayConteoRespAfir= json_decode(json_encode($conteoRespuestasAfirmacion), true);
-                $arrayRespuestasAbierta= json_decode(json_encode($respuestasAbiertas), true);
-                // dump( $conteoRespuestasAfirmacion );
 
                 $arrayConteoRespCasVarif=[];
                 foreach($preguntas as $pregunta){
@@ -81,9 +78,11 @@ class CuestionarioController extends Controller {
                     if($pregunta->BCP_tipoRespuesta == 'Lista desplegable' || $pregunta->BCP_tipoRespuesta == 'Casilla verificación' ){
 
                         // SE BUSCAN LAS OPCIONES SELECCIONADAS EN ESTE TIPO DE RESPUESTAS
+
+                        // DB::enableQueryLog();
                         $opcionesSeleccionadas = DB::table('respuestas as r')
                         ->select('r.RES_respuesta')
-                        ->join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
+                        ->Join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
                         ->join('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
                         ->where('rbf.FK_FRM_id', $FRM_id)
                         ->where('rbf.FK_BCP_id', $pregunta->BCP_id)
@@ -100,7 +99,7 @@ class CuestionarioController extends Controller {
                         $columnasOpciones = '';
                         $columnasOpcionesTotal='';
 
-                        // cON LAS OPCIONES DE RESPUESTA SE prepara parte de la consulta sql
+                        // CON LAS OPCIONES DE RESPUESTA SE prepara parte de la consulta sql
                         foreach( $outputArray as $opcionPregunta ){
                             if($opcionPregunta == null){
                                 $opcionPregunta = 'Sin respuesta';
@@ -111,30 +110,42 @@ class CuestionarioController extends Controller {
                         }
 
                         $columnasOpcionesTotal = rtrim($columnasOpcionesTotal, '+ ');
+
                         // se prepara la consulta sql completa para ejecutar
-                        $respuestasCasillaVarif = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", '.$columnasOpciones.' "rbf"."RBF_id", "rbf"."RBF_orden"  from "respuestas" as "r"  left join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id" left join  "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "categorias" as "c" on "c"."CAT_id" = "bp"."FK_CAT_id" where "rbf"."FK_FRM_id"= '.$FRM_id.' and "rbf"."FK_BCP_id"='.$pregunta->BCP_id.' group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id" order by "rbf"."RBF_id", "rbf"."RBF_orden"';
+                        $respuestasCasillaVarif = 'select  "c"."CAT_categoria", "bp"."BCP_pregunta", '.$columnasOpciones.' "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta" from "respuestas" as "r"  right join "r_bpreguntas_formularios" as "rbf" on "rbf"."RBF_id" = "r"."FK_RBF_id" left join  "banco_preguntas" as "bp" on "bp"."BCP_id" = "rbf"."FK_BCP_id" left join "categorias" as "c" on "c"."CAT_id" = "bp"."FK_CAT_id" where "rbf"."FK_FRM_id"= '.$FRM_id.' and "rbf"."FK_BCP_id"='.$pregunta->BCP_id.' group by "c"."CAT_categoria", "bp"."BCP_pregunta","rbf"."RBF_orden", "rbf"."RBF_id", "bp"."BCP_tipoRespuesta" order by "rbf"."RBF_id", "rbf"."RBF_orden"';
+                        // print_r($respuestasCasillaVarif);echo'<br><br>';
 
                         array_push($arrayConteoRespCasVarif, DB::select( $respuestasCasillaVarif ));
                     }
 
                 } //foreach
+                // $quries = DB::getQueryLog();
 
                 // Se convierte el resultado en un array
                 $arrayConteoRespCasVarif = array_map('current', json_decode(json_encode($arrayConteoRespCasVarif), true));
 
                 // une los dos arrays de resultados en uno solo
                 $resultados=array_merge(  $arrayConteoRespAfir, $arrayConteoRespCasVarif );
-
                 // elimina elementos vacios del array
                 $resultados= array_filter($resultados, [CustomController::class, 'arrayNoVacio'] );
-                usort($resultados, [CustomController::class, 'ordernarRespuestas'] );
 
                 /* agrupar las respuestas de cada elemento del array resultados */
-                $resultados = CustomController::reorganizarArray($resultados);
+                $resultados = CustomController::agruparRespuestasCerradas($resultados);
 
-                /* Arupa los resultado por categorias */
+
+                // Se agrupan las respuestas abiertas en por cada pregunta
+                $arrayRespuestasAbiertas = CustomController::agruparRespuestasAbiertas( json_decode(json_encode($respuestasAbiertas), true) );
+                // Se inserta el array de respuestas abiertas al array resultado final
+                $resultados=array_merge(  $resultados, $arrayRespuestasAbiertas );
+
+
+                /* Ordena las preguntas y respuestas del resultado final segun el orden original del formulario */
+                usort($resultados, [CustomController::class, 'ordernarRespuestas'] );
+
+                /* Se agrupan la respuestas del resultado final por categorias */
                 $resultados = CustomController::array_group( $resultados, 'CAT_categoria' );
 
+                // CustomController::pr( $resultados );exit;
 
                 // $data = ModFormulario::from('formularios as f')
                     // ->select('bp.BCP_pregunta','bp.BCP_complemento','r.RES_respuesta','r.RES_complemento','rbf.RBF_id','bp.BCP_id','bp.BCP_tipoRespuesta','bp.BCP_opciones','c.CAT_id as categoriaID','c.CAT_categoria as subcategoria','c.FK_CAT_id','c2.CAT_categoria as categoria','f.FRM_id','f.FRM_titulo','f.FRM_fecha','e.EST_nombre','e.EST_id','r.RES_id','af.AGF_copia','af.AGF_id','rbf.RBF_orden','rbf.RBF_salto_FK_BCP_id')
@@ -159,11 +170,10 @@ class CuestionarioController extends Controller {
                     // $quries = DB::getQueryLog();
                     // dump($preguntas);
                     // exit;
-                // dump($data);exit;
             }else{
                 $data = null;
             }
-            return view('cuestionarios.cuestionario-resultado', compact('resultados','FRM_titulo', 'total'));
+            return view('cuestionarios.cuestionario-resultado', compact('resultados','FRM_titulo', 'total', 'FRM_id'));
         } else{
             return redirect()->back()->with('warning', 'Usuario no autorizado para esta función');
         }
