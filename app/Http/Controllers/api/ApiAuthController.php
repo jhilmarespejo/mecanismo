@@ -18,7 +18,7 @@ class ApiAuthController extends Controller
             $token = $user->createToken('token')->plainTextToken;
             $cookie = cookie('mnp_token', $token, 60*8);
             // response()->setStatusCode()->json;
-            return response(['token' => $token], 200)->withCookie($cookie);
+            return response(['token' => $token, 'success' => true, 'USER_id' => $user->id], 200)->withCookie($cookie);
         }else{
             return response()->json([
                 'mensaje'=> 'ERROR'
@@ -28,7 +28,7 @@ class ApiAuthController extends Controller
 
     public function apiSalir(Request $request){
         $cookie = \Cookie::forget('mnp_token');
-        return response()->json(["message"=>"Cierre sesión correcto"])->withCookie($cookie);
+        return response()->json(["message"=>"Cierre sesión correcto", 'success'=>true ])->withCookie($cookie);
     }
 
     /* see uso para la verificacion del token */
