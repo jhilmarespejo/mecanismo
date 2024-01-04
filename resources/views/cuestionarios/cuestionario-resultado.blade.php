@@ -114,7 +114,7 @@
                                             <td class="ps-5">-- Sin respuestas --</td>
                                         @else
                                             <td class="ps-5"><b style="font-size: 10px">{{$clave4+1}}</b>.&nbsp;&nbsp;&nbsp;&nbsp;
-                                                <a href="/cuestionario/responder/{{$FRM_id}}/{{$respuestaAbierta['FK_AGF_id']}}">{{$respuestaAbierta['respuesta']}}</a>
+                                                <a target="_blank" href="/cuestionario/responder/{{$FRM_id}}/{{$respuestaAbierta['FK_AGF_id']}}">{{$respuestaAbierta['respuesta']}}</a>
                                             </td>
                                         @endif
                                     </tr>
