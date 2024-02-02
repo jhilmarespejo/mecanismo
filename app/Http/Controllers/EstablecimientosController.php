@@ -23,14 +23,10 @@ class EstablecimientosController extends Controller
         // exit;
         $tiposEstablecimientos = DB::table('tipo_establecimiento')
             ->select('TES_id', 'TES_tipo')
+            ->orderBy('TES_tipo')
             ->get();
 
-
-        if($request->FK_TES_id){
             $FK_TES_id = $request->FK_TES_id;
-        } else {
-            $FK_TES_id = 1; // para centros penitenciarios predeterminado
-        }
 
         DB::enableQueryLog();
         $establecimientos = ModEstablecimiento::from('establecimientos as e')
@@ -40,17 +36,13 @@ class EstablecimientosController extends Controller
         ->leftJoin('ciudades as c2', 'c2.CID_id', 'c.FK_CID_id')
         ->leftJoin('ciudades as c3', 'c3.CID_id', 'c2.FK_CID_id')
         ->where('e.estado', 1);
-        //->where('e.EST_nombre',  'ilike', '%' . $this->buscarEstablecimiento . '%')
-        if( $FK_TES_id != 'todo' ){
-            $establecimientos = $establecimientos->orWhere('e.FK_TES_id', $FK_TES_id);
+        if( $FK_TES_id != 'todo' && $FK_TES_id != null ){
+            $establecimientos = $establecimientos->Where('e.FK_TES_id', $FK_TES_id);
         }
 
         //->orderBy('tes.TES_id', 'asc' )
         // ->orderBy('e.EST_nombre')
         $establecimientos = $establecimientos->get();
-            //->where('tes.TES_tipo','Centro Penitenciario' )
-            //->orderby($this->ordenColumna, $this->ordenDireccion)
-            //->paginate(5);
             $quries = DB::getQueryLog();
             // dump($quries);//exit;
             return view('establecimientos.establecimientos-responses', compact('establecimientos', 'tiposEstablecimientos', 'FK_TES_id'));
@@ -94,33 +86,7 @@ class EstablecimientosController extends Controller
             ->where( 'e.EST_id', $id )
             ->groupBy('e.EST_nombre','e.EST_id')->get();
 
-        // dump($formularios->toArray());
-            // $a=0;
-            // $aux=[];
-            // $visitasformularios = [];
-            // foreach($formularios as $k=>$formulario){
-            //     if($formulario->FK_VIS_id != $a){
-            //         array_push($aux, $formulario->FK_VIS_id);
-            //     }
-            //     $a = $formulario->FK_VIS_id;
-            // }
-
-            // foreach($aux as $key=>$a){
-            //     foreach( $formularios as $k=>$formulario ){
-            //         if($a == $formulario->FK_VIS_id){
-
-            //             $visitasformularios[$key] = ['VIS_fechas' => $formulario->VIS_fechas, 'VIS_numero' => $formulario->VIS_numero, 'VIS_tipo' => $formulario->VIS_tipo];
-
-            //             // array_push($visitasformularios[$key][$k], $formulario );
-            //             $visitasformularios[$key][$k]= ['datos' => $formulario->toArray()];
-            //         }
-            //     }
-            // }
-
-        // dump($visitas->toArray());
-
         return view('establecimientos.establecimientos-historial', compact('visitas','formularios', 'id', 'recomendaciones'));
-        // return view('establecimientos.establecimientos-visitas', compact('visitas', 'formularios', 'id', 'recomendaciones'));
     }
 
 
@@ -128,11 +94,7 @@ class EstablecimientosController extends Controller
         //dump($request->except('_token'));//exit;
         $validator = Validator::make( $request->all(), [
             'EST_nombre' => 'required',
-            // 'EST_direccion' => 'required',
-            // 'EST_telefonoContacto' => 'required',
             'FK_TES_id' => 'required',
-            // 'FK_NSG_id' => 'required',
-            // 'FK_CID_id' => 'required',
         ], [
             'required' => '¡El dato es requerido!',
             'required_if' => '¡El dato es requerido!',
