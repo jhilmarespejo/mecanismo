@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\api;
-use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario,ModPreguntasFormulario};
+use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario,ModPreguntasFormulario,ModRespuesta, ModAgrupadorFormulario};
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomController;
 use Illuminate\Http\Request;
@@ -88,80 +88,32 @@ class ApiMultiplesController extends Controller
         return $historial;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+    public function ApiGuardarRespuestas(Request $request) {
+        try {
+            $datos = $request->all();
+            // Obtener datos de la solicitud
+            // Descomprimir los datos JSON
+            $agf = json_decode($datos['agf'], true);
+            $r = json_decode($datos['r'], true);
+
+            // Iniciar una transacción
+            DB::beginTransaction();
+
+            // Guardar datos en la tabla 'agrupador_formularios' usando insert
+            DB::table('agrupador_formularios')->insert($agf);
+
+            // Guardar datos en la tabla 'respuestas' usando insert
+            DB::table('respuestas')->insert($r);
+
+            // Confirmar la transacción
+            DB::commit();
+
+            return response()->json(['success' => true], 200);
+        } catch (\Exception $e) {
+            // Revertir la transacción en caso de error
+            DB::rollBack();
+            return response()->json(['error' => $e], 500);
+        }
+
     }
-
-     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-
-    }
-
-    // /**
-    //  * Show the form for creating a new resource.
-    //  *
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function create()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Store a newly created resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function store(Request $request)
-    // {
-    //     //
-    // }
-
-
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function edit($id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function update(Request $request, $id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy($id)
-    // {
-    //     //
-    // }
 }
