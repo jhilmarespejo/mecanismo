@@ -68,10 +68,6 @@ class ApiMultiplesController extends Controller
         ->leftjoin ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
         ->get()->toArray();
 
-        //$visitas_formularios = CustomController::array_group( $visitas, 'VIS_tipo' );
-        // $quries = DB::getQueryLog();
-        // print_r( $quries );
-
         return $visitas;
         //  $quries = DB::getQueryLog();
     }
@@ -84,7 +80,7 @@ class ApiMultiplesController extends Controller
          $historial = ModEstablecimiento::select( 'f.FRM_titulo','v.VIS_titulo', 'establecimientos.EST_nombre', 'f.FRM_tipo', 'f.FK_VIS_id','establecimientos.EST_id', 'v.VIS_tipo',   'f.FK_USER_id', 'f.FRM_orden' )
         ->join ('visitas as v', 'v.FK_EST_id', 'establecimientos.EST_id')
         ->join ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-         ->get();
+        ->get();
         return $historial;
     }
 
@@ -92,11 +88,9 @@ class ApiMultiplesController extends Controller
         try {
             $datos = $request->all();
             // Obtener datos de la solicitud
-            // Descomprimir los datos JSON
-            $agf = json_decode($datos['agf'], true);
-            $r = json_decode($datos['r'], true);
+            $agf = json_decode($datos['agrupador_formularios'], JSON_PRETTY_PRINT);
+            $r = json_decode($datos['respuestas'], JSON_PRETTY_PRINT);
 
-            // Iniciar una transacción
             DB::beginTransaction();
 
             // Guardar datos en la tabla 'agrupador_formularios' usando insert

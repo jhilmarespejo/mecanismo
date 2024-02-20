@@ -24,7 +24,7 @@ Route::get('api_visitas_formularios', [ApiMultiplesController::class, 'ApiVisita
 Route::get('api_formularios_cuestionario', [ApiMultiplesController::class, 'ApiFormulariosCuestionario']);//->middleware('auth');
 
 // https://test-mnp.defensoria.gob.bo/api/api_guardar_respuestas
-Route::post('api_guardar_respuestas', [ApiMultiplesController::class, 'ApiGuardarRespuestas']);
+Route::post('api_guardar_respuestas', [ApiMultiplesController::class, 'ApiGuardarRespuestas']);//->middleware('auth');
 
 // Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
 // });

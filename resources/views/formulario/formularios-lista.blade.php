@@ -43,13 +43,16 @@
 
           <h5 class="card-title">Formularios:</h5>
 
-            @php foreach ($formulario as $key => $form): @endphp
+            @php  $aux=0; foreach ($formulario as $key => $form): @endphp
                 <div class="row">
                     <div class="col-lg-4 col-12">
                         <div class="card mb-3" style="max-width: 18rem;">
                             <div class="card-header">{{ $form[0]["FRM_titulo"] }}</div>
+
                             <div class="card-body text-center">
-                                <img src="/img/icon-form-4.png" class="img-fluid w-75" alt="Nuevo formulario">
+
+                                <img src="/img/{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
+
 
                                 <a href="/cuestionario/duplicar/{{$form[0]["FRM_id"]}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
                                     <strong>Nuevo formulario</strong>
@@ -60,11 +63,12 @@
                                         <i class="i bi-bar-chart-line"></i> Resultados
                                     </a>
                                 @endif
-                                    @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
-                                        @if ( $indice == $form[0]["FRM_id"])
-                                        <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
-                                        @endif
-                                    @endforeach
+                                @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
+                                    @if ( $indice == $form[0]["FRM_id"])
+                                    <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
+                                    @endif
+                                @endforeach
+
                             </div>
                         </div>
                     </div>
@@ -72,7 +76,6 @@
                     <div class="col-lg-8 col-12">
                         <div class="row">
                             @foreach ($form as $item)
-                            {{-- @dump($item) --}}
                             <?php if ( $resultado == $item["AGF_id"]){
                                     $sombra = 'gren-shadow';
                                     $lapiz = 'text-danger';
@@ -84,27 +87,17 @@
                             @if ($item['AGF_id'] )
                                 <div class="col-auto d-flex card m-1 border-bottom m-0 p-0 {{ $sombra }}" id="{{$item["AGF_id"]}}"  >
                                     <div class="card-header p-0 ">
-                                        {{-- <span class="bg-danger text-white" >{{$item["AGF_id"]}}</span> --}}
                                         <ul class="list-group list-group-horizontal list-unstyled text-center">
                                             <li class="p-0 m-0">
-                                                {{-- <span class="badge bg-primary rounded-pill text-shadow p-1 ">
-                                                    {{ \Carbon\Carbon::parse($item['createdAt'])->format('d-m-Y') }}
-                                                </span> --}}
-                                                {{-- <span class="badge bg-primary rounded-pill text-shadow p-1 ">
-                                                    Código-<span class="fs-5">{{$item["AGF_id"]}}</span>
-                                                </span> --}}
-                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill text-danger " style=" font-size: 1.2em; margin-top: 0.8rem">
+
+                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill text-danger " style=" font-size: 1em; margin-top: 0.7rem">
                                                     {{$item["AGF_id"]}}
                                                 </span>
                                             </li>
                                         </ul>
                                     </div>
                                     <div class="card-body text-center p-0 m-0  ">
-                                        {{-- @if ( $item["estado"] == 0 )
-                                            <img src="/img/icon-form-empty.png" class="img-fluid" alt="Formulario">
-                                        @else
-                                        @endif --}}
-                                        <img src="/img/icon-form-5.png" class="img-fluid" alt="Formulario">
+                                        <img src="/img/c-{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
                                     </div>
                                     <div class="card-footer p-0">
                                         <ul class="list-group list-group-horizontal list-unstyled ">
@@ -129,13 +122,16 @@
                                     <div class="p-0 m-0 alert alert-info" role="alert" style="font-size: 13px">P: <b>{{$item["cantidad_preguntas"]}}</b> - R: <b class="{{ ($item["cantidad_respuestas"] == 0)? 'bg-danger text-white px-2 box-shadow rounded-circle':'' }}">{{$item["cantidad_respuestas"]}}</b> </div>
                                 </div>
                             @endif
-
                        @endforeach
                         </div>
                     </div>
                 </div>
                 <hr>
-            @php endforeach @endphp
+
+            @php
+               $aux = ($aux + 1) % 5;
+                endforeach
+            @endphp
           {{-- </ul> --}}
           @endif
 
@@ -212,7 +208,6 @@
 </script>
 
 @endsection
-
 
 
 
