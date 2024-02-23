@@ -38,6 +38,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link " aria-current="page" href="/formularios">. </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
+                                </li>
                                 {{-- @else --}}
                             @endif
                             {{-- <li class="nav-item">

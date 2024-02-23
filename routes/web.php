@@ -6,7 +6,7 @@ use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController, AjustesController,InformeVisitasController, AccesoController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, IndicadoresController, AjustesController,InformeVisitasController, AccesoController, InteroperabilidadController};
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -139,6 +139,9 @@ Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.i
 
 // INFORME DE VISITAS
 Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
+
+// INTEROPERABILIDAD
+Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
 
 // Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 
