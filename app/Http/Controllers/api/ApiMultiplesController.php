@@ -40,8 +40,7 @@ class ApiMultiplesController extends Controller
     */
     public function ApiFormulariosCuestionario() {
         $results = ModEstablecimiento::from('r_bpreguntas_formularios as rbf')
-        ->select( 'rbf.RBF_id', 'rbf.FK_FRM_id', 'rbf.FK_BCP_id', 'bp.BCP_id', 'rbf.RBF_orden', 'rbf.estado', 'c.CAT_id', 'c2.CAT_id as CAT_subcat_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'c.CAT_categoria as CAT_subcategoria', 'c2.CAT_categoria as CAT_categoria', 'f.FRM_titulo'
-        )
+        ->select( 'rbf.RBF_id', 'rbf.FK_FRM_id', 'rbf.FK_BCP_id', 'bp.BCP_id', 'rbf.RBF_orden', 'rbf.estado', 'c.CAT_id', 'c2.CAT_id as CAT_subcat_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'c.CAT_categoria as CAT_subcategoria', 'c2.CAT_categoria as CAT_categoria', 'f.FRM_titulo', 'RBF_salto_FK_BCP_id' )
         ->leftJoin ('formularios as f', 'f.FRM_id', 'rbf.FK_FRM_id')
         ->leftJoin ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
         ->leftJoin ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
@@ -51,6 +50,7 @@ class ApiMultiplesController extends Controller
         ->orderBy('rbf.RBF_orden')
         ->get()->toArray();
 
+        
         return $results;
     }
 
