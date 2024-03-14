@@ -63,7 +63,7 @@
 
         }, {
             name: 'Visitas temáticas',
-            data: [10]
+            data: [20]
 
         }, {
             name: 'Visitas Ad hoc',
@@ -71,7 +71,7 @@
 
         }, {
             name: 'TOTAL',
-            data: [10]
+            data: [20]
 
         },
     ],
