@@ -63,12 +63,20 @@
                                         <i class="i bi-bar-chart-line"></i> Resultados
                                     </a>
                                 @endif
+<<<<<<< HEAD
                                 @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
                                     @if ( $indice == $form[0]["FRM_id"])
                                     <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
                                     @endif
                                 @endforeach
 
+=======
+                                    @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
+                                        @if ( $indice == $form[0]["FRM_id"])
+                                            <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
+                                        @endif
+                                    @endforeach
+>>>>>>> main
                             </div>
                         </div>
                     </div>

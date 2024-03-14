@@ -68,7 +68,7 @@ Highcharts.chart('container1', {
             { name: 'Celdas policiales', y: 0 },
             { name: 'Cuarteles', y: 0 },
             { name: 'Centros de acogida', y: 0 },
-            { name: 'Centros penitenciarios', y: 10 },
+            { name: 'Centros penitenciarios', y: 20 },
             { name: 'Centros de reintegración p/adolescentes', y: 0 },
             { name: 'Centros de formación militar y policial', y: 12 },
             { name: 'Hospitales psiquiatricos', y: 0 }

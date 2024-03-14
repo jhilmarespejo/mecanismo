@@ -76,7 +76,7 @@
             name: 'Cantidad:',
             innerSize: '50%',
             data: [
-                ['Mujeres', 263],
+                ['Mujeres', 490],
                 ['Hombres', 1033],
                 // ['TOTAL', 403]
             ],
