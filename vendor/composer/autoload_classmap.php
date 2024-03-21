@@ -29,6 +29,7 @@ return array(
     'App\\Http\\Controllers\\ReportesController' => $baseDir . '/app/Http/Controllers/ReportesController.php',
     'App\\Http\\Controllers\\VisitaController' => $baseDir . '/app/Http/Controllers/VisitaController.php',
     'App\\Http\\Controllers\\api\\ApiAuthController' => $baseDir . '/app/Http/Controllers/api/ApiAuthController.php',
+    'App\\Http\\Controllers\\api\\ApiMultiplesController' => $baseDir . '/app/Http/Controllers/api/ApiMultiplesController.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Livewire\\BancoPreguntasIndex' => $baseDir . '/app/Http/Livewire/BancoPreguntasIndex.php',
     'App\\Http\\Livewire\\BancoPreguntasNueva' => $baseDir . '/app/Http/Livewire/BancoPreguntasNueva.php',

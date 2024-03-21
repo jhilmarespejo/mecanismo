@@ -614,6 +614,7 @@ class ComposerStaticInit80bd64798c2f80b20ce45358f206f1d2
         'App\\Http\\Controllers\\ReportesController' => __DIR__ . '/../..' . '/app/Http/Controllers/ReportesController.php',
         'App\\Http\\Controllers\\VisitaController' => __DIR__ . '/../..' . '/app/Http/Controllers/VisitaController.php',
         'App\\Http\\Controllers\\api\\ApiAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/api/ApiAuthController.php',
+        'App\\Http\\Controllers\\api\\ApiMultiplesController' => __DIR__ . '/../..' . '/app/Http/Controllers/api/ApiMultiplesController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Livewire\\BancoPreguntasIndex' => __DIR__ . '/../..' . '/app/Http/Livewire/BancoPreguntasIndex.php',
         'App\\Http\\Livewire\\BancoPreguntasNueva' => __DIR__ . '/../..' . '/app/Http/Livewire/BancoPreguntasNueva.php',
