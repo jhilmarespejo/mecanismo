@@ -20,6 +20,9 @@
     {{-- <div class="row">
         @include('index.recomendaciones')
     </div> --}}
+    <div class="btn btn-primary tbn-lg box-shadow">
+        <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
+    </div>
 
     <div class="row sm-m-2 m-2">
         <div class="col-sm-6 border">@include('index.mdl-visitas')</div>

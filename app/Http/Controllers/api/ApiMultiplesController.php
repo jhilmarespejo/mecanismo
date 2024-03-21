@@ -50,7 +50,7 @@ class ApiMultiplesController extends Controller
         ->orderBy('rbf.RBF_orden')
         ->get()->toArray();
 
-        
+
         return $results;
     }
 
@@ -106,8 +106,22 @@ class ApiMultiplesController extends Controller
         } catch (\Exception $e) {
             // Revertir la transacción en caso de error
             DB::rollBack();
-            return response()->json(['error' => $e], 500);
+            return response()->json(['errorxx' => $e], 500);
         }
+
+        /*$datos = $request->all();
+        // Obtener datos de la solicitud
+        $agf = json_decode($datos['agrupador_formularios'], JSON_PRETTY_PRINT);
+        $r = json_decode($datos['respuestas'], JSON_PRETTY_PRINT);
+        dd($agf);
+        dd($r);exit;
+
+
+        // Guardar datos en la tabla 'agrupador_formularios' usando insert
+        //DB::table('agrupador_formularios')->insert($agf);
+
+        // Guardar datos en la tabla 'respuestas' usando insert
+        //DB::table('respuestas')->insert($r);*/
 
     }
 }
