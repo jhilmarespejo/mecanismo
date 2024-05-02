@@ -19,12 +19,11 @@
         @mobile
         <div class="container-fluid row border-top border-bottom p-3">
             <div class="col ">
-                {{-- ARREGLAR  <a class="text-decoration-none fs-4" href="/establecimientos/historial/{{$elemento->EST_id}}" >
-                <i class="bi bi-arrow-90deg-left"></i> </a> --}}
+
                 <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i></a>
             </div>
             <div class="col ">
-                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$FRM_id}}/{{$AGF_id}}" >
+                <a class="text-decoration-none fs-4" href="/cuestionario/imprimir/{{$VIS_id}}/{{$FRM_id}}/{{$AGF_id}}" >
                     <i class="bi bi-printer-fill"></i></span>
                 </a>
             </div>
@@ -37,10 +36,10 @@
               <div class="collapse navbar-collapse border-bottom p-1" id="navbarNav">
                 <ul class="navbar-nav" id="nav_2">
                     <li class="nav-item p-1 px-3">
-                        <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Atrás</a>
+                        <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Página anterior</a>
                     </li>
                     <li class="nav-item p-1 px-3" id="btn_imprimir">
-                        <a class="text-decoration-none" href="/cuestionario/imprimir/{{$FRM_id}}/{{$AGF_id}}" >
+                        <a class="text-decoration-none" href="/cuestionario/imprimir/{{$VIS_id}}/{{$FRM_id}}/{{$AGF_id}}" >
                             <i class="bi bi-printer"></i> Imprimir</span>
                         </a>
                     </li>

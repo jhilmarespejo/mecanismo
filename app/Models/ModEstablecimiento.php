@@ -17,7 +17,7 @@ class ModEstablecimiento extends Model
     const CREATED_AT = 'createdAt';
     const UPDATED_AT = 'updatedAt';
 
-    protected $fillable = ['EST_nombre', 'EST_direccion', 'EST_normativaInterna', 'EST_telefonoContacto', 'EST_genero', 'EST_grupoGeneracional', 'EST_poblacion', 'EST_superficie', 'EST_superficieConstruida', 'FK_CID_id', 'FK_TES_id', 'FK_NSG_id', 'EST_coberturaMunicipios'];
+    protected $guarded = [];
 
 
 }

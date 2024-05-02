@@ -4,20 +4,18 @@ namespace App\Http\Controllers;
 
 // use App\Http\Livewire\Cuestionario;
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario,ModRespuesta, ModCategoria, ModCuestionario, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModRecomendacionArchivo, ModRespuestaArchivo, ModAdjunto, ModPreguntasFormulario, ModAgrupadorFormulario};
+use App\Models\{ModFormulario,ModRespuesta, ModCategoria, ModAdjunto, ModCuestionario, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModPreguntasFormulario, ModAgrupadorFormulario};
 use Illuminate\Support\Facades\DB;
 // use Image;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
 
 use function PHPUnit\Framework\isNull;
+use App\Http\Controllers\{ CustomController};
 
 // use Psy\Command\WhereamiCommand;
 
 class CuestionarioController extends Controller {
-
-
-
 
     public function resultadosCuestionario($FRM_id){
         if(Auth::user()->rol == 'Administrador' ){
@@ -188,43 +186,27 @@ class CuestionarioController extends Controller {
      * $id Formulario dado
      */
 
-    public function responderCuestionario( $FRM_id, $AGF_id){
-        /*Consulta para obtener las RECOMENDACIONES de formulario correspondiente */
-            // $recomendaciones = ModRecomendacion::select( 'recomendaciones.*', 'a.ARC_id','a.ARC_ruta', 'ra.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_extension', 'a.ARC_tipo', 'a.ARC_tipoArchivo', 'e.EST_id', 'e.EST_nombre', 'FK_ARC_id')
-            //     ->leftJoin( 'r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
-            //     ->leftJoin( 'archivos as a', 'ra.FK_ARC_id', 'a.ARC_id' )
-            //     ->rightJoin( 'formularios as f', 'f.FRM_id', 'recomendaciones.FK_FRM_id' )
-            //     //->rightJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
-            //     //->where( 'e.EST_id', $est_id )
-            //     ->where( 'f.FRM_id', $FRM_id )
-            //     ->orderBy('recomendaciones.REC_id', 'desc')
-        // ->get();
+    public function responderCuestionario($VIS_id, $FRM_id, $AGF_id){
 
         /*Consulta para obtener las DOCUMENTOS ADJUNTOS de formulario correspondiente */
-            $adjuntos = ModAdjunto::from( 'archivos as a' )
-            ->select('a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'fa.FK_ARC_id', 'fa.FK_FRM_id')
-            ->leftjoin ('r_formularios_archivos as fa', 'fa.FK_ARC_id', 'a.ARC_id')
-            ->leftjoin ('formularios as f', 'f.FRM_id','fa.FK_FRM_id')
-            // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-            // ->leftjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
-            ->where ('fa.FK_FRM_id', $FRM_id)
-            ->orderBy('a.ARC_id', 'desc')
-            ->get();
+            // $adjuntos = ModAdjunto::from( 'archivos as a' )
+            // ->select('a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'fa.FK_ARC_id', 'fa.FK_FRM_id')
+            // ->leftjoin ('r_formularios_archivos as fa', 'fa.FK_ARC_id', 'a.ARC_id')
+            // ->leftjoin ('formularios as f', 'f.FRM_id','fa.FK_FRM_id')
+            // // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
+            // // ->leftjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
+            // ->where ('fa.FK_FRM_id', $FRM_id)
+            // ->orderBy('a.ARC_id', 'desc')
+            // ->get();
 
-        // dump( $adjuntos );exit;
+        // dump( $VIS_id, $FRM_id, $AGF_id );exit;
 
 
         DB::enableQueryLog();
 
         /* Se consultan las preguntas, respuestas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
         $elementos = ModFormulario::from('formularios as f')
-        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
-        'bp.BCP_adjunto', 'bp.BCP_aclaracion',
-        'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria',
-        'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id',
-        'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id'
-        , 'rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id',
-        'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id','rbf.RBF_orden','rbf.RBF_salto_FK_BCP_id' )
+        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto', 'bp.BCP_aclaracion', 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria', 'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id', 'a.ARC_ruta', 'a.ARC_id',  'a.ARC_formatoArchivo',  'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id', 'rbf.RBF_orden', 'rbf.RBF_salto_FK_BCP_id' )
         ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
@@ -234,10 +216,7 @@ class CuestionarioController extends Controller {
             $join->on('r.FK_AGF_id', 'af.AGF_id')
             ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
         })
-        ->join ('visitas as v', 'v.VIS_id', 'f.FK_VIS_id')
-        ->join ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-        ->leftjoin ('r_respuestas_archivos as rra', 'r.RES_id', 'rra.FK_RES_id')
-        ->leftjoin ('archivos as a', 'rra.FK_ARC_id', 'a.ARC_id')
+        ->leftjoin ('archivos as a', 'r.RES_id', 'a.FK_RES_id')
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
         ->where('rbf.estado', 1)
@@ -247,25 +226,15 @@ class CuestionarioController extends Controller {
         ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
 
-
-        // ->where ('rbf.FK_FRM_id', $FRM_id)
-        // ->where('af.AGF_id', $AGF_id)
-        // ->where('bp.estado', 1)
-        // ->orderBy('rbf.RBF_orden', 'asc')
-        // ->get()->toArray();
-
-        // DB::enableQueryLog();
-        // $quries = DB::getQueryLog();
-        // dump($quries);
-        // exit;
+        // dump($elementos[0]['FRM_titulo']);exit;
 
         // DB::enableQueryLog();
         if ( count($elementos) > 0 ){
-            $EST_nombre = $elementos[0]['EST_nombre'];
+            $EST_nombre =  session('EST_nombre');
             $FRM_titulo = $elementos[0]['FRM_titulo'];
             $AGF_copia = $elementos[0]['AGF_copia'];
             $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias', 'AGF_id') );
+            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id',  'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias', 'AGF_id','VIS_id') );
         } else {
             return view( 'cuestionarios.cuestionario-responder', compact( 'elementos','FRM_id' ) );
         }
@@ -285,27 +254,28 @@ class CuestionarioController extends Controller {
         // return view('cuestionarios.cuestionario-ver', compact( 'elementos', 'FRM_id' ));
     }
 
-    public function duplicarCuestionario( $FRM_id,  ){
-        /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
-        $max_FRM_version = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->max( 'AGF_copia' );
-        $FRM = ModFormulario::select('FRM_tipo', 'FK_VIS_id')->where( 'FRM_id', $FRM_id )->get()->toArray();
 
+    public function duplicarCuestionario( $FRM_id, $VIS_id ){
+        /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
+        $max_FRM_version = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->where('FK_VIS_id', $VIS_id)->max( 'AGF_copia' );
+
+        $FRM = ModFormulario::select('FRM_tipo', 'FK_VIS_id')->where( 'FRM_id', $FRM_id )->first();
         /* Se completa el array $nuevoFormulario */
         $nuevoFormulario['FK_FRM_id'] = $FRM_id;
         $nuevoFormulario['AGF_copia'] = $max_FRM_version+1;
-        $nuevoFormulario['FK_USER_id'] = Auth::user()->id;
+        $nuevoFormulario['FK_VIS_id'] = $VIS_id;
+
         /* Sólo si el formulario es de TIPO 1, puede duplicarse muchas veces */
-        if( is_null($max_FRM_version) && ($FRM[0]["FRM_tipo"] == '1' ) ){
-            // dump("Posible crear");
+        if( is_null($max_FRM_version) && ($FRM->FRM_tipo == '1' ) ){
+            // dump("solo una aplicacion");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
-        }elseif( $FRM[0]["FRM_tipo"] == 'N' ){
-            // dump("Posible crear");
+        }elseif( $FRM->FRM_tipo == 'N' ){
+            // dump("Multiple aplicacion");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
         }else{
             $resultado = 0;
         }
-        // dump(  ); exit;
-        return redirect('/formulario/buscaFormularios/'.$FRM[0]["FK_VIS_id"].'/'. $resultado);
+        return redirect('/formulario/buscaFormularios/'.$VIS_id.'/'. $resultado);
     }
     /*  return > 0: se guardó el dato correctamente
         return -1: Error al guardar el dato
@@ -357,48 +327,8 @@ class CuestionarioController extends Controller {
         // exit;
         // return $elementos;
     }
-    /* Guarda las recomendaciones uno a uno */
-    /* SE DEBEN PREPARAR ARRAY DE CADA ELEMENTO Y GUARDARLOS CON OPCION DE ROLLBACK */
-    public function guardarRecomendaciones( Request $request ){
-        // $ids = [];
 
-        // /* Guardar Y COMPRIME las imagenes en un foreach */
-        // if ( $request->file('REC_archivo') ){
-        //     /* Array para guardar las imagenes */
-        //     foreach($request->file('REC_archivo') as $key => $archivo ){
-
-        //         $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
-
-        //         if( $tipoArchivo[0] == 'image'){
-        //             $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/imagenes'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
-
-        //             array_push( $ids, $idArchivo->ARC_id );
-
-        //             $image = Image::make($archivo->path());
-
-        //             $image->resize(null, 600, function ($const) {
-        //                 $const->aspectRatio();
-        //             })->save( public_path('/uploads/imagenes/').$archivo->store('') );
-        //         } else {
-        //             $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/documentos'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanyo' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
-
-        //             array_push( $ids, $idArchivo->ARC_id );
-
-        //             $archivo->move(public_path('/uploads/documentos/'), $archivo->store(''));
-        //         }
-        //     }
-        //     /* Si existe mas de una imagen o archivo por recomendacion itera los id de los archivos para guardarlos en la tabla relacionada */
-        //     foreach ($ids as $key => $value) {
-        //         ModRecomendacionArchivo::create(['FK_ARC_id' => $value, 'FK_REC_id' => $rec->REC_id]);
-        //     }
-        // } else {
-
-        // }
-        // /* Guarda la recomendacion enviada */
-        // $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_FRM_id' => $request->FK_FRM_id] );
-        // exit;
-    }
-
+    //***VERIF */
     public function buscarRecomendaciones( Request $request ){
         // dump($request->except('_token'));exit;
         $id = $request->id;
@@ -512,97 +442,44 @@ class CuestionarioController extends Controller {
     }
 
     /**
-     * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
-     * Muestra el cuestionario VACÍO. DONDE se deben construir la estructura de categorias subcategorias y preguntas
-     */
-    public function index($id){
-        $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-        ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-        ->where('FRM_id', $id)->first();
-
-        $categorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
-        ->whereNull('FK_CAT_id')->get();
-        return view('cuestionarios.cuestionario-index', compact('formulario', 'categorias'));
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     * Guarda la estructura del cuestionario construido en la funcion index
-     *     */
-    public function store( Request $request ){
-        // dump( $request->except('_token') );
-        // exit;
-        $a = array();
-        foreach ($request->except('_token') as $key => $value){
-            $columna = explode("_", $key);
-
-            if($columna[1] == "preguntaId" ){
-                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $value ]);
-            }
-            if($columna[1] == "etiqueta" ){
-                // $bcpId = ModBancoPregunta::insert($p);
-                $pregunta = ModBancoPregunta::create([
-                    'BCP_pregunta' => $value,
-                    'FK_CAT_id' => '0',
-                ]);
-                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $pregunta->BCP_id ]);
-            }
-        }
-    // dump( $a );
-    // exit;
-        if( ModCuestionario::insert($a) ){
-            return redirect()->route('cuestionario.imprimir', $request['FRM_id']);
-        }
-    }
-
-    /**
      * Display the specified resource.
      * @param  \App\Models\ModCuestionario  $cuestionario
      * @return \Illuminate\Http\Response
      * Muestra el formulario ya construido listo para imprimir
      */
-    public function imprimirCuestionario($FRM_id, $AGF_id){
+    public function imprimirCuestionario($VIS_id, $FRM_id, $AGF_id){
 
+        /* Se consultan las preguntas, respuestas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
         $elementos = ModFormulario::from('formularios as f')
-        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
-        'bp.BCP_aclaracion',
-        'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria',
-        'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'e.EST_nombre', 'e.EST_id','af.FK_FRM_id', 'af.AGF_id')
-        //'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id'
-        //, 'rra.FK_RES_id', 'a.ARC_ruta', 'a.ARC_id',
-        //'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id')
+        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto', 'bp.BCP_aclaracion', 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria', 'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id', 'a.ARC_ruta', 'a.ARC_id',  'a.ARC_formatoArchivo',  'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id', 'rbf.RBF_orden', 'rbf.RBF_salto_FK_BCP_id' )
         ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
         ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
         ->leftjoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
-        //>leftjoin('respuestas as r', function($join){
-        //     $join->on('r.FK_AGF_id', 'af.AGF_id')
-        //     ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
-        // })
-        ->join ('visitas as v', 'v.VIS_id', 'f.FK_VIS_id')
-        ->join ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-        // ->leftjoin ('r_respuestas_archivos as rra', 'r.RES_id', 'rra.FK_RES_id')
-        // ->leftjoin ('archivos as a', 'rra.FK_ARC_id', 'a.ARC_id')
+        ->leftjoin('respuestas as r', function($join){
+            $join->on('r.FK_AGF_id', 'af.AGF_id')
+            ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
+        })
+        ->leftjoin ('archivos as a', 'r.RES_id', 'a.FK_RES_id')
         ->where ('rbf.FK_FRM_id', $FRM_id)
         ->where('af.AGF_id', $AGF_id)
         ->where('rbf.estado', 1)
+        // ->orderBy('c.CAT_id', 'asc')
+        // ->orderBy('bp.BCP_id', 'asc')
         ->orderBy('rbf.RBF_orden', 'asc')
         ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
 
+        // dump($elementos[0]['FRM_titulo']);exit;
+
+        // DB::enableQueryLog();
         if ( count($elementos) > 0 ){
-            $EST_nombre = $elementos[0]['EST_nombre'];
+            $EST_nombre =  session('EST_nombre');;
             $FRM_titulo = $elementos[0]['FRM_titulo'];
-            $AGF_id = $elementos[0]['AGF_id'];
-
+            $AGF_copia = $elementos[0]['AGF_copia'];
             $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-
-            return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id'));
+            return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id', 'VIS_id'));
         } else {
             return view('cuestionarios.cuestionario-imprimir', compact('elementos'));
         }
@@ -635,6 +512,86 @@ class CuestionarioController extends Controller {
         // exit;
         return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
     }
+
+
+     /**
+     * Display a listing of the resource.
+     * @return \Illuminate\Http\Response
+     * Muestra el cuestionario VACÍO. DONDE se deben construir la estructura de categorias subcategorias y preguntas
+     * VERIF
+     */
+    public function index( ){
+        // dump('index');exit;
+        // $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
+        // ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
+        // ->where('FRM_id', $id)->first();
+
+        // $categorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
+        // ->whereNull('FK_CAT_id')->get();
+        $a=0;
+        return view('cuestionarios.cuestionario-index', compact('a'));
+    }
+    public function buscarPreguntas( Request $request ){
+        $q = $request->q;
+        DB::enableQueryLog();
+
+        $preguntas = ModBancoPregunta::select(
+            'banco_preguntas.BCP_id',
+            'banco_preguntas.BCP_pregunta',
+            'banco_preguntas.FK_CAT_id as ID_categoria',
+            'categorias.CAT_categoria as categoria',
+            'subcategoria.CAT_categoria as subcategoria'
+        )
+        ->leftJoin('categorias', 'banco_preguntas.FK_CAT_id', '=', 'categorias.CAT_id')
+        ->leftJoin('categorias as subcategoria', 'categorias.FK_CAT_id', '=', 'subcategoria.CAT_id')
+        ->where('BCP_pregunta', 'ilike', '%'.$q . '%')->get();
+
+        $quries = DB::getQueryLog();
+        // dump($quries);
+        // exit;
+        $preguntas = CustomController::ordenaPreguntasCategorias($preguntas->toArray());
+
+        return response()->json($preguntas);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     * Guarda la estructura del cuestionario construido en la funcion index
+     *   */
+    public function guardaCuestionarioEditado( Request $request ){
+        // dump( $request->except('_token') );
+        // exit;
+        $a = array();
+        foreach ($request->except('_token') as $key => $value){
+            $columna = explode("_", $key);
+
+            if($columna[1] == "preguntaId" ){
+                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $value ]);
+            }
+            if($columna[1] == "etiqueta" ){
+                // $bcpId = ModBancoPregunta::insert($p);
+                $pregunta = ModBancoPregunta::create([
+                    'BCP_pregunta' => $value,
+                    'FK_CAT_id' => '0',
+                ]);
+                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $pregunta->BCP_id ]);
+            }
+        }
+    // dump( $a );
+    // exit;
+        if( ModCuestionario::insert($a) ){
+            return redirect()->route('cuestionario.imprimir', $request['FRM_id']);
+        }
+    }
+
+
+
+
+
+
+
 
 
 }

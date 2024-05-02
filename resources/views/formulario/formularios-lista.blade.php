@@ -4,17 +4,21 @@
 @section('title', 'Formularios')
 
 @section('content')
-
 @php
+    use Carbon\Carbon;
+@endphp
+@php
+// rcuperar las variables de sesion
     $TES_tipo = session('TES_tipo');
     $EST_nombre = session('EST_nombre');
-    $VIS_tipo = session('VIS_tipo');
+
+
 @endphp
 {{-- SUB MENU --}}
     <div class="btn-toolbar " role="toolbar" aria-label="Toolbar with button groups">
         <div class="btn-group me-2 mt-4" role="group" aria-label="First group">
 
-          <a href="javascript:history.back()" role="button" class="btn btn-primary text-white text-decoration-none"> <i class="bi bi-arrow-return-left"></i> Atrás</a>
+          <a href="javascript:history.back()" role="button" class="btn btn-primary text-white text-decoration-none"> <i class="bi bi-arrow-return-left"></i> Página anterior</a>
 
         </div>
     </div><hr>
@@ -27,10 +31,9 @@
             {{$VIS_tipo}} <br>
             {{ $TES_tipo .' '. $EST_nombre }}
         </div>
+
         <div class="card-body">
-
-
-            @if ( array_key_exists('nokey', $formulario) )
+            @if ( empty($grupo_formularios) )
                 <div class="alert alert-warning" role="alert">
                     Aún no se asignaron formularios para esta visita <br>
                     @if( Auth::user()->rol == 'Administrador' )
@@ -43,48 +46,78 @@
 
           <h5 class="card-title">Formularios:</h5>
 
-            @php  $aux=0; foreach ($formulario as $key => $form): @endphp
+          @php  $aux=0; foreach ($grupo_formularios as $key => $formulario): @endphp
+            {{-- @dump($formulario[0]['FRM_id']) --}}
+
                 <div class="row">
                     <div class="col-lg-4 col-12">
                         <div class="card mb-3" style="max-width: 18rem;">
-                            <div class="card-header">{{ $form[0]["FRM_titulo"] }}</div>
+                            <div class="card-header">{{ $key }}</div>
 
                             <div class="card-body text-center">
 
                                 <img src="/img/{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
 
 
-                                <a href="/cuestionario/duplicar/{{$form[0]["FRM_id"]}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
-                                    <strong>Nuevo formulario</strong>
+                                <a href="/cuestionario/duplicar/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
+                                    <strong>Crear Nuevo formulario</strong>
                                 </a>
 
                                 @if (Auth::user()->rol == 'Administrador')
-                                    <a href="/cuestionario/resultados/{{ $form[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
+                                    <a href="/cuestionario/resultados/{{ $formulario[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
                                         <i class="i bi-bar-chart-line"></i> Resultados
                                     </a>
                                 @endif
-                                @foreach ($cantidadCopiasFormulario as $indice=>$copiasFormulario)
-                                    @if ( $indice == $form[0]["FRM_id"])
-                                        <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{$copiasFormulario}}</b></p>
-                                    @endif
-                                @endforeach
+                                <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{count($formulario)}}</b></p>
+
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-8 col-12">
-                        <div class="row">
-                            @foreach ($form as $item)
-                            <?php if ( $resultado == $item["AGF_id"]){
+
+                        @foreach ($formulario as $item)
+                            {{-- @dump($item) --}}
+                            <?php/* if ( $resultado == $item["AGF_id"]){
                                     $sombra = 'gren-shadow';
                                     $lapiz = 'text-danger';
                                 }else{
                                     $sombra = 'shadow';
                                     $lapiz = 'text-primary';
-                                }
+                                }*/
                             ?>
-                            @if ($item['AGF_id'] )
-                                <div class="col-auto d-flex card m-1 border-bottom m-0 p-0 {{ $sombra }}" id="{{$item["AGF_id"]}}"  >
+                            <div class="row border border-2 rounded m-1 p-0 align-items-center">
+                                <div class="col-1">
+                                    <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}" class="m-0 p-1 d-block text-decoration-none text-dark">
+                                    <i class="bi bi-file-earmark-ruled fs-5"></i></a>
+                                </div>
+                                <div class="col m-0 p-0 fs-6">
+                                    @if ($item['AGF_id'] )
+                                        <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}" class="m-0 p-1 d-block text-decoration-none text-dark">
+                                            <p class="m-0">{{ mb_strimwidth($item["FRM_titulo"], 0, 40, '...', 'UTF-8') }}</p>
+                                            <p class="m-0 text-muted"><small>Credo: {{ Carbon::parse($item["createdAt"])->translatedFormat('d. M. Y H:i:s') }} | Código {{$item["AGF_id"]}}</small></p>
+                                        </a>
+                                    @endif
+                                </div>
+
+                                <div class="col-1 fs-3 m-0 p-0">
+                                    <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pencil-square "></i></a>
+                                </div>
+                                @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
+                                    <div class="col-1 fs-3">
+                                        <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
+                                            @csrf
+                                            <input type="hidden" name="AGF_id" value="{{ $item["AGF_id"] }}">
+                                            <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-warning fs-3"></i></button>
+                                        </form>
+                                    </div>
+                                @endif
+
+
+                            </div>
+
+                            {{-- @if ($item['AGF_id'] )
+                                <div class="col-auto d-flex card m-1 border-bottom m-0 p-0 " id="{{$item["AGF_id"]}}"  >
                                     <div class="card-header p-0 ">
                                         <ul class="list-group list-group-horizontal list-unstyled text-center">
                                             <li class="p-0 m-0">
@@ -96,17 +129,13 @@
                                         </ul>
                                     </div>
                                     <div class="card-body text-center p-0 m-0  ">
-                                        <img src="/img/c-{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
                                     </div>
                                     <div class="card-footer p-0">
                                         <ul class="list-group list-group-horizontal list-unstyled ">
-                                            {{-- <li class="p-0 m-0">
-                                                <a href="/cuestionario/imprimir/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-printer-fill px-2 text-primary fs-5"></i></a>
-                                            </li> --}}
+
                                             <li class="p-0 m-0">
-                                                <a href="/cuestionario/responder/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pen-fill px-2 fs-5 {{ $lapiz }}"></i></a>
+                                                <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pen-fill px-2 fs-5  $$$lapiz "></i></a>
                                             </li>
-                                            {{-- @dump($item) --}}
                                             @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
                                                 <li class="p-0 m-0">
                                                     <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
@@ -118,11 +147,9 @@
                                             @endif
                                         </ul>
                                     </div>
-                                    <div class="p-0 m-0 alert alert-info" role="alert" style="font-size: 13px">P: <b>{{$item["cantidad_preguntas"]}}</b> - R: <b class="{{ ($item["cantidad_respuestas"] == 0)? 'bg-danger text-white px-2 box-shadow rounded-circle':'' }}">{{$item["cantidad_respuestas"]}}</b> </div>
                                 </div>
-                            @endif
-                       @endforeach
-                        </div>
+                            @endif --}}
+                        @endforeach
                     </div>
                 </div>
                 <hr>
@@ -142,7 +169,7 @@
 @endsection
 
 @section('js')
-    @if (Session::has('success'))
+    {{-- @if (Session::has('success'))
         <script>
             Swal.fire(
                 '{{Session::get('success') }}',
@@ -156,54 +183,55 @@
             )
         </script>
 
-    @endif
+    @endif --}}
 <style>
     .gren-shadow {
   box-shadow: 4px 4px 4px #3d8bfd;}
 </style>
 <script>
-        $(document).ready(function (){
-            $('html, body').animate({
-                scrollTop: $("#{{$resultado}}").offset().top
-            }, 300);
-        });
-
-    $('.frm-duplicar-cuestionario').submit( function(e){
-        e.preventDefault();
-
-
-        // Swal.fire({
-        //     title: '¿Está seguro de duplicar?',
-        //     type: 'warning',
-        //     showCancelButton: true,
-        //     confirmButtonColor: '#3085d6',
-        //     cancelButtonColor: '#d33',
-        //     cancelButtonText: 'Cancelar',
-        //     confirmButtonText: 'Duplicar'
-        // }).then((result) => {
-        //     if (result.value) {
-        //         this.submit();
-        //     }
+        // $(document).ready(function (){
+        //     $('html, body').animate({
+        //     }, 300);
         // });
-    });
-    $('.frm-eliminar-cuestionario').submit( function(e){
-        e.preventDefault();
-        // var form = $(this).parents('form');
-        Swal.fire({
-            title: '¿Está seguro de eliminar?',
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            cancelButtonText: 'Cancelar',
-            confirmButtonText: 'Eliminar'
-        }).then((result) => {
-            if (result.value) {
-                this.submit();
-                // Swal.fire('Eliminado', 'Elimando correctamente!', 'success');
-            }
-        });
-    });
+
+    // $('.frm-duplicar-cuestionario').submit( function(e){
+    //     e.preventDefault();
+
+
+    //     // Swal.fire({
+    //     //     title: '¿Está seguro de duplicar?',
+    //     //     type: 'warning',
+    //     //     showCancelButton: true,
+    //     //     confirmButtonColor: '#3085d6',
+    //     //     cancelButtonColor: '#d33',
+    //     //     cancelButtonText: 'Cancelar',
+    //     //     confirmButtonText: 'Duplicar'
+    //     // }).then((result) => {
+    //     //     if (result.value) {
+    //     //         this.submit();
+    //     //     }
+    //     // });
+    // });
+
+    // ELIMINAR EL FORMULARIO SELECCIONADO CON AJAX Y NO RECARGAR LA PAGINA, SI LA RESPUESTA AJAX ES CORRECTA SOLO ELIMINAR EL ELMENTO DEL DOOM
+    // $('.frm-eliminar-cuestionario').submit( function(e){
+    //     e.preventDefault();
+    //     // var form = $(this).parents('form');
+    //     Swal.fire({
+    //         title: '¿Está seguro de eliminar?',
+    //         type: 'warning',
+    //         showCancelButton: true,
+    //         confirmButtonColor: '#3085d6',
+    //         cancelButtonColor: '#d33',
+    //         cancelButtonText: 'Cancelar',
+    //         confirmButtonText: 'Eliminar'
+    //     }).then((result) => {
+    //         if (result.value) {
+    //             this.submit();
+    //             // Swal.fire('Eliminado', 'Elimando correctamente!', 'success');
+    //         }
+    //     });
+    // });
 </script>
 
 @endsection

@@ -18,16 +18,6 @@ class IndexController extends Controller
      */
     public function dashboard(){
         DB::enableQueryLog();
-        // Mostrar cantidad total de recomendaciones, cumplidas e incumplidas por establecomiento
-        // $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
-        // ->select( 'e.EST_nombre','e.EST_id',
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" ') )
-        // ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
-        // ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
-        // ->groupBy('e.EST_nombre','e.EST_id')->get();
-
         $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
         ->select( 'e.EST_nombre','e.EST_id',
             DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),

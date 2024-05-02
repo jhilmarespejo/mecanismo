@@ -10,29 +10,20 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Nombre </th>
+                    <th scope="col">Tipo</th>
                     <th scope="col">Departamento</th>
-                    <th scope="col">Provincia</th>
                     <th scope="col">Municipio</th>
-                    <th scope="col"></th>
-                    {{-- <th scope="col">Tipo</th> --}}
-                    {{-- <th scope="col">Teléfono</th> --}}
-                    {{-- <th scope="col"> Opciones</th> --}}
                 </tr>
             </thead>
             <tbody>
                 @foreach ($establecimientos as $key=>$establecimiento)
                     <tr>
                         <th></th>
-                        <td> <a class="text-decoration-none" href="/establecimientos/historial/{{$establecimiento->EST_id}}">{{ $establecimiento->EST_nombre }}</a></td>
+                        <td> <a class="text-decoration-none" href="/visita/historial/{{$establecimiento->EST_id}}">{{ $establecimiento->EST_nombre }}</a></td>
+                        <td>{{ $establecimiento->TES_tipo }}</td>
                         <td>{{ $establecimiento->EST_departamento }}</td>
                         <td>{{ $establecimiento->EST_municipio }}</td>
-                        <td>{{ $establecimiento->EST_provincia }}</td>
-                        <td><a style="text-decoration: none" href="ajustes/{{$establecimiento->EST_id}}">Opciones</a></td>
-                        {{-- <td>{{ $establecimiento->TES_tipo }}</td> --}}
-                        {{-- <td>{{ $establecimiento->EST_telefonoContacto }}</td> --}}
-                        {{-- <td class=" col-2 text-center">
-                            <a href="/establecimientos/historial/{{$establecimiento->EST_id}}" class="btn btn-success text-light" ><i class="bi bi-clock-history"></i> Historial</a>
-                        </td> --}}
+                       
                     </tr>
                 @endforeach
             </tbody>
@@ -95,11 +86,6 @@
                                 <small class="error text-danger" id="EST_departamento_err" ></small>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Provincia</label>
-                                <input type="text" class="form-control" name="EST_provincia">
-                                <small class="error text-danger" id="EST_provincia_err" ></small>
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label">Municipio</label>
                                 <input type="text" class="form-control" name="EST_municipio">
                                 <small class="error text-danger" id="EST_municipio_err" ></small>
@@ -130,9 +116,6 @@
             </div>
         @endif
 
-
-
-
 <script>
     $(document).on('click', '#btn_guardar', function(e){
         $.ajax({
@@ -148,13 +131,22 @@
                     $('#'+key+'_err').append( value );
                 });
                 if(!data.errors){
-                    // console.log('data.errors');
                     Swal.fire({
+                        text: 'Agregado correctamente',
+                        icon: 'success',
+                        confirmButtonText: 'ok!'
+                        }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload()
+                        }
+                    })
+                    // console.log('data.errors');
+                    /*Swal.fire({
                         icon: 'success',
                         title: data.message,
                         showConfirmButton: false,
                     });
-                    setTimeout(function(){ location.reload() }, 2000);
+                    setTimeout(function(){ location.reload() }, 2000);*/
                 }
             },
             error: function(response){ console.log(response) }

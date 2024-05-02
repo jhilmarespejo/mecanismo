@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModArchivo, ModEstablecimiento, ModVisita};
-
 use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
+use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModArchivo, ModEstablecimiento, ModVisita};
+use Illuminate\Support\Facades\{DB, Auth, Redirect, Validator, Session};
 use Intervention\Image\Facades\Image;
-use App\Http\Controllers\VisitaController;
-use App\Http\Controllers\CustomController;
+use App\Http\Controllers\{VisitaController, CustomController};
+
 
 // use Illuminate\Support\Facades\Storage;
 
@@ -24,11 +19,9 @@ class FormularioController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index($VIS_id){
-
-        // $TES_tipo = session('TES_tipo');
-        // $EST_nombre = session('EST_nombre');
-        // $VIS_tipo = session('VIS_tipo');
         // dump($EST_nombre);exit;
+
+        // Si las variables de sesion no existen redireccionar al usuario al index
         DB::enableQueryLog();
         if( Auth::user()->rol == 'Administrador' ){
             // $quries = DB::getQueryLog();
@@ -38,7 +31,7 @@ class FormularioController extends Controller
 
             $formularios = json_decode(json_encode(DB::select($q)), true);;
 
-            // dump( $formularios );exit;
+            dump( $formularios );exit;
             return view('formulario.formularios-index', compact('formularios','VIS_id'));
         } else {
             return redirect('panel');
@@ -171,43 +164,62 @@ class FormularioController extends Controller
         $id = Visita ID
 
     */
-    public function buscaFormularios( $VIS_id = 0 , $resultado = 0){
+    public function buscaFormularios( $VIS_id ){
         DB::enableQueryLog();
-        $z = 0;
-
-        $operador=' ';
-        // $sql = 'SELECT "e"."EST_id", "e"."EST_nombre", "v"."VIS_tipo", "te"."TES_tipo", "f"."FRM_id", "f"."FRM_titulo", "f"."FRM_version", "f"."FRM_fecha",  "f"."FK_USER_id", "f"."FK_VIS_id", "f"."estado", "af"."AGF_id","af"."AGF_copia","af"."FK_USER_id", "af"."createdAt" FROM "establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id"';
-
-        $sql = 'SELECT"e"."EST_id","e"."EST_nombre","v"."VIS_tipo","te"."TES_tipo","f"."FRM_id","f"."FRM_titulo","f"."FRM_version","f"."FRM_fecha","f"."FK_USER_id","f"."FK_VIS_id","af"."estado","af"."AGF_id","af"."AGF_copia","af"."FK_USER_id","af"."createdAt",COALESCE("catidad_respuestas", 0) AS "cantidad_respuestas",COALESCE("cantidad_preguntas", 0) AS "cantidad_preguntas" FROM"establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimiento" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id" LEFT JOIN (SELECT "FK_AGF_id", COUNT(*) AS "catidad_respuestas"FROM "respuestas"GROUP BY "FK_AGF_id" ) AS "respuestas" ON "respuestas"."FK_AGF_id" = "af"."AGF_id" LEFT JOIN (SELECT "FK_FRM_id", COUNT(*) AS "cantidad_preguntas"FROM "r_bpreguntas_formularios"GROUP BY "FK_FRM_id" ) AS "preguntas" ON "preguntas"."FK_FRM_id" = "f"."FRM_id" ';
+        //Obtener los formularios asociados con esta visita acompañado de las copias correspondientes
+        $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
 
 
-        if( Auth::user()->rol == 'Operador' ){
-            $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
+        $formularios = ModFormulario::from('formularios as f')
+        ->select('f.FRM_id','f.FRM_titulo','f.FRM_tipo','af.FK_VIS_id', 'af.AGF_id', 'af.estado', 'af.createdAt')
+        ->leftjoin('agrupador_formularios as af', 'af.FK_FRM_id', 'f.FRM_id')
+        ->where('af.FK_VIS_id', $VIS_id)
+        ->get()->toArray();
+        $grupo_formularios = CustomController::array_group($formularios, 'FRM_titulo');
+        if(!session('EST_nombre')){
+            dump('panel' );
+            return redirect()->route('panel');
         }
-        $where = ' WHERE "v"."VIS_id" = '.$VIS_id.' ORDER BY  "f"."FRM_orden" ASC;';
-        $sql = $sql.$operador.$where;
-
-
-        $formularios = collect( DB::select($sql) )->map(function($x){ return (array)$x; })->toArray();
 
 
 
-        // SETEAR VARIABLES DE ENTORNO
-        session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo'], 'FRM_titulo' => $formularios[0]['FRM_titulo']  ]);
+        // $z = 0;
 
-        $formulario = CustomController::array_group( $formularios, 'FRM_id' );
+        // $operador=' ';
 
-        $colorVisita = VisitaController::colorTipoVisita( $formularios[0]['VIS_tipo'] );
+        // $sql = 'SELECT"e"."EST_id","e"."EST_nombre","v"."VIS_tipo","te"."TES_tipo","f"."FRM_id","f"."FRM_titulo","f"."FRM_version","f"."FRM_fecha","f"."FK_USER_id","f"."FK_VIS_id","af"."estado","af"."AGF_id","af"."AGF_copia","af"."FK_USER_id","af"."createdAt",COALESCE("catidad_respuestas", 0) AS "cantidad_respuestas",COALESCE("cantidad_preguntas", 0) AS "cantidad_preguntas" FROM"establecimientos" AS "e" JOIN "visitas" AS "v" ON "v"."FK_EST_id" = "e"."EST_id" JOIN "tipo_establecimientos" AS "te" ON "te"."TES_id" = "e"."FK_TES_id" LEFT JOIN "formularios" AS "f" ON "f"."FK_VIS_id" = "v"."VIS_id" LEFT JOIN "agrupador_formularios" AS "af" ON "af"."FK_FRM_id" = "f"."FRM_id" LEFT JOIN (SELECT "FK_AGF_id", COUNT(*) AS "catidad_respuestas"FROM "respuestas"GROUP BY "FK_AGF_id" ) AS "respuestas" ON "respuestas"."FK_AGF_id" = "af"."AGF_id" LEFT JOIN (SELECT "FK_FRM_id", COUNT(*) AS "cantidad_preguntas"FROM "r_bpreguntas_formularios"GROUP BY "FK_FRM_id" ) AS "preguntas" ON "preguntas"."FK_FRM_id" = "f"."FRM_id" ';
+        // // dump($sql);exit;
 
-        //* Contar la cantidad de copias aplicadas por cada formulario  */
-        foreach ($formulario as $clave => $elemento) {
-            $cantidadSubelementos = count($elemento);
-            $cantidadCopiasFormulario[$clave] = $cantidadSubelementos;
-        }
-        // dump($formularios);
+        // if( Auth::user()->rol == 'Operador' ){
+        //     $operador = ' AND "af"."FK_USER_id" = '.Auth::user()->id;
+        // }
+        // $where = ' WHERE "v"."VIS_id" = '.$VIS_id.' ORDER BY  "f"."FRM_orden" ASC;';
+        // $sql = $sql.$operador.$where;
 
 
-        return view('formulario.formularios-lista', compact('formulario', 'colorVisita', 'resultado', 'VIS_id','cantidadCopiasFormulario'));
+        // $formularios = collect( DB::select($sql) )->map(function($x){ return (array)$x; })->toArray();
+
+
+        // // SETEAR VARIABLES DE ENTORNO
+        // session(['TES_tipo' => $formularios[0]['TES_tipo'], 'EST_nombre' => $formularios[0]['EST_nombre'], 'VIS_tipo' => $formularios[0]['VIS_tipo'], 'FRM_titulo' => $formularios[0]['FRM_titulo']  ]);
+
+        // $formulario = CustomController::array_group( $formularios, 'FRM_id' );
+
+
+        $VIS_tipo = $VIS_tipo->VIS_tipo;
+        // dump( $VIS_tipo->VIS_tipo );exit;
+        $colorVisita = CustomController::colorTipoVisita( $VIS_tipo );
+
+        // //* Contar la cantidad de copias aplicadas por cada formulario  */
+        // foreach ($formulario as $clave => $elemento) {
+        //     $cantidadSubelementos = count($elemento);
+        //     $cantidadCopiasFormulario[$clave] = $cantidadSubelementos;
+        // }
+        // // dump($formularios);
+
+
+        // return view('formulario.formularios-lista', compact('formulario', 'colorVisita', 'resultado', 'VIS_id','cantidadCopiasFormulario'));
+        return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
     }
 
 }

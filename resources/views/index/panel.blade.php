@@ -4,64 +4,73 @@
 
 
 @section('content')
-{{-- <link rel="stylesheet" href="/tinycarousel/tinycarousel.css" type="text/css" media="screen"/> --}}
-{{-- <script type="text/javascript" src="/tinycarousel/jquery.tinycarousel.min.js"></script> --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+    #map {
+      height: 600px;
+    }
+  </style>
 
-<script src="charts/highcharts.js"></script>
-<script src="charts/exporting.js"></script>
-<script src="charts/export-data.js"></script>
-{{-- <script src="charts/variable-pie.js"></script> --}}
-<script src="charts/accessibility.js"></script>
+<div class="container m-0 p-0">
+    {{-- <h4 class="text-center py-0 m-1">Estadísticas</h4> --}}
 
-{{-- <div class="py-12 container"> --}}
-{{-- <div class="mx-0 text-center p-3 container-fluid"> --}}
-<div class="container">
-    <h4 class="mt-4 text-center py-4">Estadísticas</h4>
-    {{-- <div class="row">
-        @include('index.recomendaciones')
-    </div> --}}
-    <div class="btn btn-primary tbn-lg box-shadow">
-        <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
+
+    <div class="row">
+        <div class="col-md-3 order-md-1 order-1 border border-2">
+            <div class="btn btn-primary tbn-lg box-shadow">
+                <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
+
+            </div>
+            <h3 class="test-center">Panel de datos estadísticos</h3>
+        </div>
+        <div class="col-md-9 order-md-2 order-2 border border-2"><div id="map"></div></div>
     </div>
 
-    <div class="row sm-m-2 m-2">
-        <div class="col-sm-6 border">@include('index.mdl-visitas')</div>
-        <div class="col-sm-6 border">@include('index.mdl-tipos')</div>
-    </div>
-    <div class="row m-2">
-        <div class="col-sm-6 border">@include('index.mdl-entrevistados')</div>
-        <div class="col-sm-6 border">@include('index.mdl-hacinamiento')</div>
-    </div>
 
-    {{-- <div class="row mt-4">
-        @include('index.formularios')
-    </div> --}}
 
-    {{-- CONSULTA DINAMICA --}}
-    {{-- <div class="row mt-4">
-        @include('index.dinamico')
-    </div> --}}
 </div>
-{{-- </div> --}}
 
-{{-- M O D A L S --}}
-<!-- Modal -->
-{{-- <div class="modal fade" id="modal_1" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-visitas')
-</div>
-<div class="modal fade" id="modal_2" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-tipos')
-</div>
-<div class="modal fade" id="modal_3" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-entrevistados')
-</div> --}}
-
-
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="text/javascript">
-    // $(document).ready(function(){
-    //     $('.slider').tinycarousel();
-    // });
+  // Crear un mapa centrado en Bolivia
+  var map = L.map('map').setView([-16.2902, -63.5887], 6);
+
+  // Agregar una capa de mapa base de OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Cargar el archivo GeoJSON de los departamentos de Bolivia
+  fetch('js/Departamentos_Bolivia.geojson')
+    .then(response => response.json())
+    .then(data => {
+      // Añadir la capa GeoJSON al mapa y mostrar Popup al hacer clic
+      L.geoJSON(data, {
+        onEachFeature: function(feature, layer) {
+          // Obtener información del departamento
+          var departamentoInfo = `Departamento: ${feature.properties.NOM_DEP}`;
+
+          // Mostrar Popup al hacer clic
+          layer.bindPopup(departamentoInfo);
+
+          // Cambiar el color al pasar el mouse sobre el departamento
+          layer.on({
+            mouseover: function(e) {
+              e.target.setStyle({
+                fillColor: '#ff0000', // Cambia el color de relleno a rojo
+                fillOpacity: 0.7 // Ajusta la opacidad del relleno
+              });
+            },
+            mouseout: function(e) {
+              e.target.setStyle({
+                fillColor: '#3388ff', // Restablece el color de relleno predeterminado
+                fillOpacity: 0.5 // Restablece la opacidad del relleno predeterminada
+              });
+            }
+          });
+        }
+      }).addTo(map);
+    });
 </script>
 
 @endsection

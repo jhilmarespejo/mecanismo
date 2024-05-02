@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ModTipoEstablecimiento extends Model
 {
-    protected $table = 'tipo_establecimiento';
+    protected $table = 'tipo_establecimientos';
     use HasFactory;
     //protected $fillable = ['BCP_pregunta', 'BCP_superPregunta', 'BCP_tipoPregunta', 'FK_CAT_id', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'deletedBy', 'deletedAt'];
 

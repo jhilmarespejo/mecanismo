@@ -1,41 +1,44 @@
-<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-light">
-    <div class="container">
+<nav id="nav1" class="navbar navbar-expand-md navbar-secondary border-bottom sticky-top bg-secondary ">
+    <div class="container text-light">
         <!-- Logo -->
         <span class="navbar-brandx col" href="/">
             <x-jet-application-mark width="36" />
         </span>
         @isset( Auth::user()->rol )
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler text-light text-shadow btn btn-ligth" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <i class="bi bi-menu-button-wide-fill"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav me-auto fs-5">
+                    <ul class="navbar-nav me-auto fs-5 ">
                         {{-- <li class="nav-item bg-danger">
                             <a class="nav-link active" href="/panel">MNP V2</a>
                         </li> --}}
 
-                        <x-jet-nav-link href="{{ route('panel') }}" :active="request()->routeIs('panel')">
+                        <x-jet-nav-link href="{{ route('panel') }}" class="text-light text-shadow" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="/establecimientos">Establecimientos</a>
+                                <a class="nav-link text-light text-shadow" href="/establecimientos">Establecimientos</a>
                             </li>
 
                             @if( Auth::user()->rol == 'Administrador' )
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/bancoDePreguntas">Banco de Preguntas</a>
+                                    <a class="nav-link text-light text-shadow" href="/bancoDePreguntas">Banco de Preguntas</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/categorias">Categorías</a>
                                 </li>
 
-                               {{--<li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/formularios">. </a>
+                                <li class="nav-item">
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/cuestionario">C </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">f </a>
+                                </li>
+                                {{--<li class="nav-item">
                                     <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
                                 </li>--}}
                                 {{-- @else --}}
@@ -55,7 +58,7 @@
                     @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                         <x-jet-dropdown id="teamManagementDropdown">
                             <x-slot name="trigger">
-                                {{ Auth::user()->currentTeam->name }}
+                                {{ Auth::user()->currentTeam->name }}zzzz
 
                                 <svg class="ms-2" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -69,7 +72,7 @@
                                 </h6>
 
                                 <!-- Team Settings -->
-                                <x-jet-dropdown-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
+                                <x-jet-dropdown-link  href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
                                     {{ __('Team Settings') }}
                                 </x-jet-dropdown-link>
 
@@ -95,7 +98,7 @@
 
                     <!-- Settings Dropdown -->
                     @auth
-                        <x-jet-dropdown id="settingsDropdown">
+                        <x-jet-dropdown id="settingsDropdown" class="btn text-light text-shadow bg-dark">
                             <x-slot name="trigger">
                                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                     <img class="rounded-circle" width="32" height="32" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />

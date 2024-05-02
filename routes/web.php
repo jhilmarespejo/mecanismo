@@ -67,23 +67,23 @@ Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
 Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
 
 // CUESTIONARIO
-Route::get('cuestionario/{id}', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
+Route::get('cuestionario', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
+Route::post('cuestionario/buscarPreguntas', [CuestionarioController::class, 'buscarPreguntas'])->name('buscarPreguntas');
 
-Route::get('cuestionario/imprimir/{FRM_id}/{AGF_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
+Route::post('cuestionario/guardaCuestionarioEditado', [CuestionarioController::class, 'store'])->name('cuestionario.guardaCuestionarioEditado')->middleware('auth');
+Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones')->middleware('auth');
 
-Route::get('cuestionario/duplicar/{FRM_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
+Route::get('cuestionario/imprimir/{VIS_id}/{FRM_id}/{AGF_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
 
-Route::get('cuestionario/responder/{FRM_id}/{AGF_copia}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
+Route::get('cuestionario/duplicar/{FRM_id}/{VIS_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicar')->middleware('auth');
+
+Route::get('cuestionario/responder/{VIS_id}/{FRM_id}/{AGF_copia}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
 
 Route::get('cuestionario/ver/{id}', [CuestionarioController::class, 'verCuestionario'])->name('cuestionario.ver')->middleware('auth');
 
 Route::post('cuestionario/eliminar', [CuestionarioController::class, 'eliminarCuestionario'])->name('cuestionario.eliminar')->middleware('auth');
 
 Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioController::class, 'guardarRespuestasCuestionario'])->name('cuestionario.guardarRespuestasCuestionario')->middleware('auth');
-
-Route::post('cuestionario/store', [CuestionarioController::class, 'store'])->name('cuestionario.store')->middleware('auth');
-
-Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones')->middleware('auth');
 
 Route::post('cuestionario/confirmaCuestionario/', [CuestionarioController::class, 'confirmaCuestionario'])->name('cuestionario.confirmaCuestionario')->middleware('auth');
 
@@ -93,11 +93,8 @@ Route::get('cuestionario/resultados/{id}', [CuestionarioController::class, 'resu
 
 // RECOMENDACIONES
 Route::get('recomendaciones/{VIS_id}', [RecomendacionesController::class, 'recomendaciones'])->name('recomendaciones')->middleware('auth');
-
 Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento')->middleware('auth');
-
-
-Route::post('recomendaciones/nuevaRecomendacion', [RecomendacionesController::class, 'nuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
+Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesController::class, 'guardarNuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
 
 
 
@@ -111,7 +108,7 @@ Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'gu
 
 // ESTABLECIMIENTOS
 Route::get('establecimientos', [EstablecimientosController::class, 'index'])->name('establecimientos')->middleware('auth');
-Route::get('establecimientos/historial/{id}', [EstablecimientosController::class, 'historial'])->name('establecimientos.historial')->middleware('auth');
+
 Route::post('establecimientos/listar', [EstablecimientosController::class, 'listar'])->name('establecimientos.listar')->middleware('auth');
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.guardarNuevoEstablecimiento')->middleware('auth');
 
@@ -120,6 +117,7 @@ Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
 // VISITAS
 Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
+Route::get('visita/historial/{id}', [VisitaController::class, 'historial'])->name('visita.historial')->middleware('auth');
 
 
 Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita'])->name('visita.actaVisita')->middleware('auth');
