@@ -7,8 +7,10 @@
 <div class="container p-4">
 
     <h4 class="text-center">Acta de visita</h4>
-
-    @if ($visita[0]['ARC_ruta'])
+{{-- @php
+    dump();exit;
+@endphp --}}
+    @if ( !empty($visita) )
     <div class="card mb-3">
         <div class="card-body">
             <div>

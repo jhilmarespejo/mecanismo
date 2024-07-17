@@ -28,3 +28,5 @@ Route::post('api_guardar_respuestas', [ApiMultiplesController::class, 'ApiGuarda
 
 // Route::group( [ 'midleware' => ['auth:sanctum']] , function () {
 // });
+//test https://mnp-bolivia.defensoria.gob.bo/api/api_test
+Route::get('api_test', [ApiMultiplesController::class, 'api_test']);

@@ -56,237 +56,267 @@
             </div>
         </div>
     </div>
+    @php
+        dump($datos_api);
+        // exit;
+        //------Cantidad_delitos------------------------
+        $cantidad_delitos = $datos_api['cantidad_delitos'];
+        $series = array_map(function($item) {
+            return [
+                'name' => $item['delito'],
+                'data' => [$item['cantidad']]
+            ];
+        }, $cantidad_delitos);
+        $delitos = json_encode($series);
+
+        //--------Rangos de edad----------------------
+            $rangos_edad = $datos_api['rangos_edad'];
+            $new_data = [];
+
+            foreach ($rangos_edad as $rango) {
+                // Construir un nuevo objeto con el formato deseado
+                $new_data[] = [
+                    'name' => "{$rango['rango_edad']} años",
+                    'y' => $rango['cantidad']
+                ];
+            }
+
+            $result = [
+                [
+                    'name' => 'Cantidad',
+                    'data' => $new_data
+                ]
+            ];
+            $rangos_edad = json_encode($result, JSON_UNESCAPED_UNICODE);
+
+    @endphp
     <script>
-        Highcharts.chart('i-1', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: ''
-            },
-            // colors: [
-            //         '#95CEFF',
-            //         '#ff3300',
-            //     ],
 
-            xAxis: {
-                categories: ['Ben',' Chuquisaca', 'Cochabamba', 'La Paz', 'Oruro', 'Pando', 'Potosí', 'Santa Cruz', 'Tarija'],
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var estado_legal = {!! json_encode($datos_api['estado_legal'], JSON_UNESCAPED_UNICODE) !!};
+
+            var categories = estado_legal.map(function(item) {
+                return item.departamento;
+            });
+
+            var sentenciadosData = estado_legal.map(function(item) {
+                return item.sentenciados;
+            });
+
+            var preventivosData = estado_legal.map(function(item) {
+                return item.preventivos;
+            });
+
+            Highcharts.chart('i-1', {
+                chart: {
+                    type: 'column'
+                },
                 title: {
-                    text: null
-                }
-            },
-            yAxis: {
-                min: 0,
-                labels: {
-                    overflow: 'justify'
-                }
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        enabled: true
+                    text: ''
+                },
+                xAxis: {
+                    categories: categories,
+                    title: {
+                        text: null
                     }
                 },
-
-            },
-            credits: {
-                text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
-                href: 'https://www.defensoria.gob.bo'
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'top',
-                x: -40,
-                y: 80,
-                floating: true,
-                borderWidth: 1,
-                backgroundColor:
-                    Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
-                shadow: true
-            },
-
-            series: [{
-                name: 'Sentenciados',
-                data: [2, 1, 2, 1, 2, 1, 2, 1, 2]
-            }, {
-                name: 'Preventivos',
-                data: [1, 1, 1, 1, 1, 1, 1, 1, 1]
-            },
-
-            ]
-        });
-
-        Highcharts.chart('i-2', {
-            chart: {
-                type: 'bar'
-            },
-            title: {
-                text: ''
-            },
-            colors: [
-                    '#060A80',
-                    '#FF3549',
-                ],
-
-            xAxis: {
-                categories: ['Beni', 'Chuquisaca', 'Cochabamba', 'La Paz', 'Oruro', 'Pando', 'Potosí', 'Santa Cruz', 'Tarija'],
-                title: {
-                    text: null
-                }
-            },
-            yAxis: {
-                min: 0,
-                labels: {
-                    overflow: 'justify'
-                }
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        enabled: true
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: null
+                    },
+                    labels: {
+                        overflow: 'justify'
                     }
                 },
-
-            },
-            credits: {
-                text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
-                href: 'https://www.defensoria.gob.bo'
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'top',
-                x: -40,
-                y: 80,
-                floating: true,
-                borderWidth: 1,
-                backgroundColor:
-                    Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
-                shadow: true
-            },
-
-            series: [{
-                name: 'Hombres',
-                data: [3, 3, 2, 3, 2, 3, 3, 3, 3]
-            }, {
-                name: 'Mujeres',
-                data: [2, 3, 2, 2, 2, 2, 3, 2, 3]
-            },
-
-            ]
-        });
-
-        Highcharts.chart('i-3', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: ''
-            },
-            yAxis: {
-                title: {
-                    useHTML: true,
-                    text: 'Clasificación por delito'
-                }
-            },
-            plotOptions: {
-                column: {
-                    dataLabels: {
-                        enabled: true
-                    },
-                },
-            },
-            credits: {
-                text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
-                href: 'https://www.defensoria.gob.bo'
-            },
-
-            series: [{
-                name: 'Abuso sexual',
-                data: [12]
-
-            }, {
-                name: 'Abuso de Firma en blanco',
-                data: [10]
-
-            }, {
-                name: 'Allanamientos',
-                data: [8]
-
-            }, {
-                name: 'Amenazas',
-                data: [7]
-
-            }, {
-                name: 'Asesinato',
-                data: [6]
-
-            }, {
-                name: 'Bigamia',
-                data: [5]
-
-            }, ],
-        });
-
-        Highcharts.chart('i-4', {
-            chart: {
-                plotBackgroundColor: null,
-                plotBorderWidth: null,
-                plotShadow: false,
-                type: 'pie'
-            },
-
-            title: {
-                text: ''
-            },
-            tooltip: {
-                pointFormat: '{series.name}: {point.percentage:.1f}%'
-            },
-            accessibility: {
-                // point: {
-                //     // valueSuffix: '%'
-                // }
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '{point.name}: {point.y}',
-                        connectorColor: 'silver',
-
-                    },
-                    dataLabels: {
-                        formatter: function() {
-                            const point = this.point;
-                            return '<span style="color: ' + point.color + ';font-size: 12px;">' +
-                            point.name + ': ' + point.y + '</span>';
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: true
                         }
                     }
-                }
-            },
-            credits: {
-                text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
-                href: 'https://www.defensoria.gob.bo'
-            },
-            series: [{
-                name: 'Cantidad',
-                data: [
-                    { name: '18-25 años', y: 5 },
-                    { name: '26-30 años', y: 8 },
-                    { name: '31-35 años', y: 11 },
-                    { name: '36-40 años', y: 15 },
-                    { name: '41-50 años', y: 9 },
-                    { name: '51-60 años', y: 6 },
-                    { name: '> a 60 años', y: 4 }
-                    // { name: 'Centros de acogida (niños, adultos mayores y drogodependientes)', y: 17 },
-                    // { name: 'Centros de reintegración para adolescentes con responsabilidad penal', y: 14 },
-                ],
-
-            }]
+                },
+                credits: {
+                    text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
+                    href: 'https://www.defensoria.gob.bo'
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -40,
+                    y: 80,
+                    floating: true,
+                    borderWidth: 1,
+                    backgroundColor:
+                        Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+                    shadow: true
+                },
+                series: [{
+                    name: 'Sentenciados',
+                    data: sentenciadosData
+                }, {
+                    name: 'Preventivos',
+                    data: preventivosData
+                }]
+            });
         });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var genero_departamento = {!! json_encode($datos_api['genero_departamento'], JSON_UNESCAPED_UNICODE) !!};
+
+            var categories = genero_departamento.map(function(item) {
+                return item.departamento;
+            });
+
+            var femeninoData = genero_departamento.map(function(item) {
+                return item.femenino;
+            });
+
+            var masculinoData = genero_departamento.map(function(item) {
+                return item.masculino;
+            });
+
+            Highcharts.chart('i-2', {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: ''
+                },
+                colors: [
+                        '#060A80',
+                        '#FF3549',
+                    ],
+
+                xAxis: {
+                    categories: categories,
+                    title: { text: null }
+                },
+                yAxis: {
+                    min: 0,
+                    labels: {
+                        overflow: 'justify'
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    },
+
+                },
+                credits: {
+                    text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
+                    href: 'https://www.defensoria.gob.bo'
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -40,
+                    y: 80,
+                    floating: true,
+                    borderWidth: 1,
+                    backgroundColor:
+                        Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+                    shadow: true
+                },
+
+                series: [{
+                    name: 'Hombres',
+                    data: masculinoData
+                }, {
+                    name: 'Mujeres',
+                    data: femeninoData
+                },
+
+                ]
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var cantidad_delitos = {!! $delitos !!};
+
+            Highcharts.chart('i-3', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: ''
+                },
+                yAxis: {
+                    title: {
+                        useHTML: true,
+                        text: 'Clasificación por delito'
+                    }
+                },
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                    },
+                },
+                credits: {
+                    text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
+                    href: 'https://www.defensoria.gob.bo'
+                },
+                series: cantidad_delitos,
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var rangos = {!! $rangos_edad !!};
+            Highcharts.chart('i-4', {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+
+                title: {
+                    text: ''
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: {point.percentage:.1f}%'
+                },
+
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}: {point.y}',
+                            connectorColor: 'silver',
+
+                        },
+                        dataLabels: {
+                            formatter: function() {
+                                const point = this.point;
+                                return '<span style="color: ' + point.color + ';font-size: 12px;">' +
+                                point.name + ': ' + point.y + '</span>';
+                            }
+                        }
+                    }
+                },
+                credits: {
+                    text: 'MNP - Mecanismo Nacional de Prevención de la Tortura',
+                    href: 'https://www.defensoria.gob.bo'
+                },
+                series: rangos,
+            });
+
+        });
+
+
+
+
 
         Highcharts.chart('i-5', {
             chart: {

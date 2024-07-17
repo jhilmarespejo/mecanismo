@@ -39,7 +39,14 @@ class RecomendacionesController extends Controller{
             DB::beginTransaction();
             try {
                  /* Guarda la recomendacion enviada */
-                 $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_VIS_id' => $request->VIS_id, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                //Verificar si la recomendacion es para el Estado o para un establecimiento
+                if($request->VIS_estado){
+                    $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'REC_estado' => $request->VIS_estado, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                }elseif($request->VIS_id){
+                    $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_VIS_id' => $request->VIS_id, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                }
+
+
                 //  dump($REC->REC_id);exit;
                 // verifica si el request trae un archivo
                 if ( $request->file('ARC_archivo') ){
@@ -78,7 +85,7 @@ class RecomendacionesController extends Controller{
     }
 
 
-    public function recomendaciones( $VIS_id = null ){
+    public function recomendaciones( $VIS_id ){
         // $EST_id = Session::get('EST_id');
         // $TES_tipo = Session::get('TES_tipo');
         // $EST_nombre = Session::get('EST_nombre');
@@ -182,5 +189,37 @@ class RecomendacionesController extends Controller{
         }
     }
 
+    public function recomendacionesEstatales(){
+        DB::enableQueryLog();
+
+        $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
+        ->from('recomendaciones as r')
+        ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
+        ->where('r.REC_estado', 'Si')
+        ->orderBy('r.REC_id', 'desc')
+        ->get()->toArray();
+
+        $progresos = ModSeguimientoRecomendacion::select('sr.SREC_id', 'sr.SREC_descripcion','sr.SREC_fecha_seguimiento', 'sr.FK_REC_id', 'sr.SREC_autoridad_competente',  'a.ARC_id', 'a.ARC_formatoArchivo', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.FK_SREC_id')
+        ->from('seguimiento_recomendaciones as sr')
+        ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
+        ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
+        ->where('r.REC_estado', "Si")
+        ->get()->toArray();
+
+
+        // $quries = DB::getQueryLog();
+
+        $progresos = CustomController::agruparSeguimientosImagenes( $progresos );
+        $recomendaciones = CustomController::agruparRecomendacionesImagenes( $recomendaciones);
+
+        // dump($recomendaciones, $progresos);exit;
+
+        return view('recomendaciones.recomendaciones-estatales', compact('progresos', 'recomendaciones'));
+        //mostrar una ventana donde se realicen recomendaciones al estado
+    }
+
+    public function recomendacionesPorEstablecimiento(){
+        //mostrar un rating, por cantidad de recomendaciones dadas por establecimiento
+    }
 
 }

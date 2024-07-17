@@ -176,9 +176,6 @@ class CuestionarioController extends Controller {
             return redirect()->back()->with('warning', 'Usuario no autorizado para esta función');
         }
     }
-
-
-
      /**
      * responderCuestionario the form for creating a new resource.
      * @return \Illuminate\Http\Response
@@ -206,12 +203,12 @@ class CuestionarioController extends Controller {
 
         /* Se consultan las preguntas, respuestas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
         $elementos = ModFormulario::from('formularios as f')
-        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto', 'bp.BCP_aclaracion', 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria', 'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id', 'a.ARC_ruta', 'a.ARC_id',  'a.ARC_formatoArchivo',  'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id', 'rbf.RBF_orden', 'rbf.RBF_salto_FK_BCP_id' )
+        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto', 'bp.BCP_aclaracion',/* 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria',*/ 'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id', 'a.ARC_ruta', 'a.ARC_id',  'a.ARC_formatoArchivo',  'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id', 'rbf.RBF_orden', 'rbf.RBF_salto_FK_BCP_id' )
         ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
         ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
         ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
-        ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
-        ->leftjoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
+        //->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
+        //->leftjoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
         ->leftjoin('respuestas as r', function($join){
             $join->on('r.FK_AGF_id', 'af.AGF_id')
             ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
@@ -226,25 +223,29 @@ class CuestionarioController extends Controller {
         ->orderBy('rbf.RBF_id', 'asc')
         ->get()->toArray();
 
-        // dump($elementos[0]['FRM_titulo']);exit;
+        //dump($elementos);exit;
 
         // DB::enableQueryLog();
         if ( count($elementos) > 0 ){
             $EST_nombre =  session('EST_nombre');
             $FRM_titulo = $elementos[0]['FRM_titulo'];
             $AGF_copia = $elementos[0]['AGF_copia'];
-            $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id',  'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias', 'AGF_id','VIS_id') );
+            //$elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
+            //return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id',  'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias', 'AGF_id','VIS_id') );
+
+            // dump( $elementos );exit;
+
+            return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id',  'EST_nombre','FRM_titulo','AGF_copia', 'AGF_id','VIS_id') );
         } else {
             return view( 'cuestionarios.cuestionario-responder', compact( 'elementos','FRM_id' ) );
         }
 
 
         $quries = DB::getQueryLog();
-        // dump( $elementos_categorias );//exit;
 
         //exit;
-        return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias' ) );
+        //return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia', 'elementos_categorias' ) );
+        // return view( 'cuestionarios.cuestionario-responder', compact( 'elementos', 'FRM_id', 'adjuntos', 'EST_nombre','FRM_titulo','AGF_copia' ) );
     }
 
     /* Muestra en forma de tabla vertical solo las respuetas del formulario seleccionado */
@@ -275,7 +276,7 @@ class CuestionarioController extends Controller {
         }else{
             $resultado = 0;
         }
-        return redirect('/formulario/buscaFormularios/'.$VIS_id.'/'. $resultado);
+        return redirect('/formulario/buscaFormularios/'.$VIS_id);
     }
     /*  return > 0: se guardó el dato correctamente
         return -1: Error al guardar el dato

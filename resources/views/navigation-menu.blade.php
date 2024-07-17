@@ -20,29 +20,67 @@
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-light text-shadow" href="/establecimientos">Establecimientos</a>
-                            </li>
+
 
                             @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Idicadores
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
+                                        <li><a class="dropdown-item" href="/indicadores/panel">Panel de datos</a></li>
+                                        <li><a class="dropdown-item" href="/indicadores/actualizar">Actualizar datos</a></li>
+
+                                    </ul>
+                                </li>
+                                @endif
                                 <li class="nav-item">
-                                    <a class="nav-link text-light text-shadow" href="/bancoDePreguntas">Banco de Preguntas</a>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/visita/resumen">Visitas</a>
                                 </li>
                                 <li class="nav-item">
+                                    <a class="nav-link text-light text-shadow" href="/recomendacionesEstatales">Recomendaciones</a>
+                                </li>
+                                @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Gestión
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
+                                        <li><a class="dropdown-item" href="/interoperabilidad">Módulo de Interoperablidad</a></li>
+                                        <li><a class="dropdown-item" href="/asesoramientos">Módulo de Asesoramiento</a></li>
+                                        <li><a class="dropdown-item" href="/">Modulo Educativo</a></li>
+                                        <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
+                                        {{-- <li><a class="dropdown-item" href="/">Lugares de detención</a></li>
+                                        <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}
+                                    </ul>
+                                </li>
+                                @endif
+                                {{-- <li class="nav-item">
                                     <a class="nav-link  text-light text-shadow" aria-current="page" href="/categorias">Categorías</a>
                                 </li>
 
                                 <li class="nav-item">
-                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/cuestionario">C </a>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/cuestionario">Cuestionarios </a>
+                                </li> --}}
+                                @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Usuarios
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                                      <li><a class="dropdown-item" href="/register">Nuevo usuario</a></li>
+                                      <li><a class="dropdown-item" href="/users/verify">Verificar usuarios</a></li>
+                                    </ul>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">f </a>
-                                </li>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">. </a>
+                                </li>@endif
                                 {{--<li class="nav-item">
                                     <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
                                 </li>--}}
                                 {{-- @else --}}
-                            @endif
+
                             {{-- <li class="nav-item">
                                 <a class="nav-link " aria-current="page" href="/reportes">Reportes</a>
                             </li> --}}
@@ -58,7 +96,7 @@
                     @if (Laravel\Jetstream\Jetstream::hasTeamFeatures())
                         <x-jet-dropdown id="teamManagementDropdown">
                             <x-slot name="trigger">
-                                {{ Auth::user()->currentTeam->name }}zzzz
+                                {{ Auth::user()->currentTeam->name }}
 
                                 <svg class="ms-2" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />

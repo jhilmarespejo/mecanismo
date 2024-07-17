@@ -9,7 +9,29 @@ class ModTipoEstablecimiento extends Model
 {
     protected $table = 'tipo_establecimientos';
     use HasFactory;
-    //protected $fillable = ['BCP_pregunta', 'BCP_superPregunta', 'BCP_tipoPregunta', 'FK_CAT_id', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'deletedBy', 'deletedAt'];
+
+
+    protected $primaryKey = 'TES_id';
+    public $incrementing = true;
+
+    public $timestamps = false;
+    protected $guarded = [];
+
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->createdBy = Auth::id();
+            $model->createdAt = now();
+        });
+        static::updating(function ($model) {
+            $model->createdBy = Auth::id();
+            $model->updatedAt = now();
+        });
+        // static::deleting(function ($model) {
+        //     $model->deletedBy = Auth::id();
+        //     $model->deletedAt = now();
+        // });
+    }
 
 
 

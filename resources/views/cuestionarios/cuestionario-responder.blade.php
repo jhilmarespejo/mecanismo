@@ -93,14 +93,7 @@
         </div> --}}
 
     @else
-        <div class="text-center head">
 
-            {{-- ARREGLAR AQUI --}}
-            {{-- <p class=" m-0 p-0" id="establecimiento" style="font-size: 20px">Establecimiento: {{ $rec->EST_nombre }}</p> --}}
-
-
-            {{-- <p class="text-primary m-0 p-0" id="titulo" style="font-size: 30px" >Responder/llenar cuestionario: {{ $elemento->FRM_version }}</p> --}}
-        </div>
         @if(Auth::user()->rol == 'Administrador' )
             <div class="alert alert-warning p-3">
 
@@ -167,14 +160,7 @@
 
 
     /*Boton para confirmar los datos del formulario*/
-
-
    /* Guarda cada respuesta del formulario cuando se el mouse se mueve a la siguiente pregunta*/
-
-
-
-
-
 </script>
 
 @endsection

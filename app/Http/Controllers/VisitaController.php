@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta,ModArchivo};
+use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta,ModArchivo, ModTipoEstablecimiento};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Validator, Auth, Session, URL, Storage};
 
 use Intervention\Image\Facades\Image;
+use App\Http\Controllers\{CustomController};
+use Illuminate\Support\Arr;
 
 
 use PhpOffice\PhpWord\SimpleType\Jc;
@@ -34,7 +36,7 @@ class VisitaController extends Controller{
             try {
                 ModVisita::insert($request->except('_token'));
                 DB::commit();
-                dump($request->except('_token'));exit;
+                // dump($request->except('_token'));exit;
                 //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
             }catch (\Exception $e) {
                 DB::rollback();
@@ -43,44 +45,7 @@ class VisitaController extends Controller{
         }
     }
 
-    /* Consulta para obtener los formularios aplicados en la visita
-        $id = Visita ID
-    */
-    public function buscaFormularios( $visita_id ){
-        DB::enableQueryLog();
-        $z = 0;
-        /** Busca los formularios correspondientes a la visita, z=0 es el formulario generico  */
-        // $r= 'select distinct on("f"."FRM_titulo") "f"."FRM_titulo", "f"."FRM_id", "f"."FK_VIS_id"
-        // from formularios f where "f"."FK_VIS_id" ='.$visita_id.' and "f"."FK_USER_id" = \''.$z.'\' order by "f"."FRM_titulo", "f"."FRM_id"';
 
-        // $fs = DB::select( $r );
-        // $fs = json_decode(json_encode($fs), true);
-        // dump($r);exit;
-
-        $formularios = ModVisita::from('visitas as v')
-        ->select('f.FRM_id', 'f.FRM_titulo', 'f.FRM_version', 'f.FRM_fecha', 'f.FK_USER_id', 'f.FK_VIS_id', 'f.estado', 'e.EST_id', 'e.EST_nombre'/*, 'v.VIS_numero', 'v.VIS_tipo', 'v.VIS_fechas'*/)
-        ->rightjoin ('establecimientos as e', 'v.FK_EST_id', 'e.EST_id')
-        ->leftjoin ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-        ->where ('f.FK_VIS_id', $visita_id)
-        ->where ('e.estado', '1');
-        if( Auth::user()->rol == 'Operador' ){
-            $formularios = $formularios->where('f.FK_USER_id', Auth::user()->id);
-        }
-        $formularios = $formularios->orderby('f.createdAt', 'desc')
-        ->orderby('f.FRM_titulo', 'asc')
-        ->get();
-
-
-        $establecimiento = ModEstablecimiento::from('establecimientos as e')
-        ->select('e.EST_id', 'e.EST_nombre', 'e.EST_departamento', 'e.EST_provincia', 'e.EST_municipio')
-        ->leftjoin ('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-        ->where ( 'v.VIS_id', $visita_id )->first()->toArray();
-
-        // $quries = DB::getQueryLog();
-        // dump($quries);
-        // exit;
-        return view('formulario.formularios-lista', compact('formularios'));
-    }
 
     /**
      * historial
@@ -105,15 +70,16 @@ class VisitaController extends Controller{
         session()->put('EST_nombre', $visitas->toArray()[0]['EST_nombre']);
         session()->put('TES_tipo', $visitas->toArray()[0]['TES_tipo']);
 
-        return view('establecimientos.establecimientos-historial', compact('visitas'));
+        return view('visita.visita-historial', compact('visitas'));
     }
 
     /*Vista para guardar nueva acta de Visita */
     public function actaVisita( $VIS_id ){
-        // dump( $id); exit;
         $visita = ModArchivo::select('ARC_formatoArchivo', 'ARC_ruta', 'ARC_extension', 'FK_VIS_id')
         ->where('FK_VIS_id', $VIS_id)
         ->get()->toArray();
+        // dump( $visita); exit;
+
 
         return view('visita.acta-visita', compact('VIS_id','visita'));
     }
@@ -153,6 +119,36 @@ class VisitaController extends Controller{
             DB::rollback();
             exit ($e->getMessage());
         }
+    }
+
+    public function resumen() {
+
+        $totalVisitas = DB::table('tipo_establecimientos as te')
+            ->join('establecimientos as e', 'e.FK_TES_id', 'te.TES_id')
+            ->join('visitas as v', 'v.FK_EST_id', 'e.EST_id')
+            ->join(DB::raw('(SELECT e."EST_nombre",  COUNT(v."VIS_id") AS total_establecimiento
+                            FROM establecimientos e
+                            JOIN visitas v ON v."FK_EST_id" = e."EST_id"
+                            GROUP BY e."EST_nombre") total_establecimiento'),
+                    'total_establecimiento.EST_nombre', 'e.EST_nombre')
+            ->select('te.TES_tipo', 'e.EST_nombre', 'v.VIS_tipo', 'e.EST_id','v.VIS_fechas',
+                    DB::raw('COUNT(v."VIS_id") AS total_tipo_visitas'),
+                    DB::raw('SUM(COUNT(v."VIS_id")) OVER(PARTITION BY te."TES_tipo") AS total_tipo_establecimiento'),
+                    'total_establecimiento.total_establecimiento AS total_establecimiento')
+            ->groupBy('te.TES_tipo', 'e.EST_nombre', 'e.EST_id', 'v.VIS_tipo', 'total_establecimiento.total_establecimiento', 'total_general.total_general', 'v.VIS_fechas')
+            ->orderBy('te.TES_tipo')
+            ->orderBy('e.EST_nombre')
+            ->orderBy('e.EST_id')
+            ->orderBy('v.VIS_tipo')
+            ->leftJoin(DB::raw('(SELECT COUNT(v."VIS_id") AS total_general
+                                FROM visitas v) total_general'),
+                    DB::raw('1'), '=', DB::raw('1'))
+            ->addSelect(DB::raw('total_general.total_general AS total_general'))
+            ->get();
+            $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
+        // dump( $totalVisitas );exit;
+        return view('visita.visita-resumen', compact('totalVisitas'));
+
     }
 
 
@@ -372,3 +368,5 @@ class VisitaController extends Controller{
 
 
 }
+
+

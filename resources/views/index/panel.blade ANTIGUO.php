@@ -73,7 +73,7 @@
     4. Cantidad de visitas
     5. Tipos de visitas:
         5.1. visitas en profundidad se ve todo, personal
-        5.2 visitas tematicas, tema esoecifico como extorsion o ascinamiento
+        5.2 visitas tematicas, tema esoecifico como extorsion o hacinamiento
         5.3. Visitas de seguimiento general mente depues de las visitas en profundidad en funcion a las recomendaciones realizadas en las visitas de profundidad
         5.4. Visitas Adhoc. Visitas no planificadas cuando sucede un evento mayor como un incendio o algo fortuito, que realiza
         5.5 Visitas reactivas. Despues de una queja realizada por un ppl, familiar u ong

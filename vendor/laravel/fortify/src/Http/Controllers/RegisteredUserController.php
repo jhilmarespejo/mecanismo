@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Contracts\RegisterViewResponse;
+use Illuminate\Support\Facades\DB;
 
 class RegisteredUserController extends Controller
 {
@@ -57,4 +58,6 @@ class RegisteredUserController extends Controller
 
         return app(RegisterResponse::class);
     }
+
+
 }

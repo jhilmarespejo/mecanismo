@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria};
+use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria, ModTipoEstablecimiento};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,26 +18,15 @@ class IndexController extends Controller
      */
     public function dashboard(){
         DB::enableQueryLog();
-        $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
-        ->select( 'e.EST_nombre','e.EST_id',
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" '),
-            DB::raw('COUNT( ("r"."REC_id")::int ) as "total" ') )
-        ->leftJoin( 'visitas as v', 'v.VIS_id', 'r.FK_VIS_id' )
-        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'v.FK_EST_id' )
-        // ->where( 'e.EST_id', $id )
-        ->groupBy('e.EST_nombre','e.EST_id')->get();
+        // enviar los tipos de establecimientos
+        $tipos = ModTipoEstablecimiento::select('TES_tipo', 'TES_id')->get()->toArray();
 
-        $formularios = ModFormulario::select(DB::raw('DISTINCT("FRM_titulo")'))
-        ->orderBy('FRM_titulo')
-        ->get();
-
+        $tipos_establecimientos = json_encode($tipos);
         // $quries = DB::getQueryLog();
-        // dump( $quries );
+        // dump( $recomendaciones );
         // exit;
 
-    return view('index.panel', compact( 'recomendaciones', 'formularios' ));
+    return view('index.panel', compact( 'tipos_establecimientos' ));
     }
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */

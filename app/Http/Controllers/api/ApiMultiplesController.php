@@ -124,4 +124,49 @@ class ApiMultiplesController extends Controller
         //DB::table('respuestas')->insert($r);*/
 
     }
+
+    //EL SIGUIENTE API ES SOLO PARA TEST YA QUE AUN NO SE CUENTA CON INTEROPERABILIDAD CON REGIMEN PENITENCIARIO
+    public function api_test(){
+        $estado_legal = DB::table('test')
+        ->select(
+            'departamento',
+            DB::raw("SUM(CASE WHEN estado_legal = 'Senteciado' THEN 1 ELSE 0 END) as Sentenciados"),
+            DB::raw("SUM(CASE WHEN estado_legal = 'Detención preventiva' THEN 1 ELSE 0 END) as Preventivos")
+        )
+        ->groupBy('departamento')
+        ->get()->toArray();
+
+        $genero_departamento = DB::table('test')
+        ->select('departamento',
+            DB::raw("SUM(CASE WHEN sexo = 'F' THEN 1 ELSE 0 END) as Femenino"),
+            DB::raw("SUM(CASE WHEN sexo = 'M' THEN 1 ELSE 0 END) as Masculino")
+        )
+        ->groupBy('departamento')
+        ->get()->toArray();
+
+        $cantidad_delitos= DB::table('test')->select(
+            'delito',
+            DB::raw('COUNT(*) as cantidad')
+        )
+        ->groupBy('delito')
+        ->orderBy('delito')->get()->toArray();
+
+        $rangos_edad = DB::table('test')
+            ->selectRaw("
+                CASE
+                    WHEN edad BETWEEN 18 AND 25 THEN '18-25'
+                    WHEN edad BETWEEN 26 AND 35 THEN '26-35'
+                    WHEN edad BETWEEN 36 AND 59 THEN '36-59'
+                    WHEN edad >= 60 THEN '60+'
+                    ELSE 'Unknown'
+                END as rango_edad, COUNT(*) as cantidad
+            ")
+            ->groupBy('rango_edad')
+            ->get()->toArray();
+
+
+        return response( ['estado_legal' => $estado_legal, 'genero_departamento' => $genero_departamento, 'cantidad_delitos' => $cantidad_delitos, 'rangos_edad' => $rangos_edad] );
+        // return response()->json($estado_legal);
+    }
+
 }

@@ -1,26 +1,21 @@
 @php
-    // $formulario = CustomController::array_group( $formularios, 'FRM_id' );
-    // $elementos_categorias = CustomController::array_group( $elementos, 'categoria' );
-// exit;
+    $elemento = $elementos;
 @endphp
-{{-- @dump($elementos_categorias) --}}
 <div id="frm_cuestionario">
-    <ol id="q" >
+    {{-- <ol id="q" > --}}
         @php $c = 1; @endphp
-        @foreach ($elementos_categorias as $key => $elemento)
-            <li class="">
-                {{-- SUBCATEGORIAS --}}
+        {{-- @foreach ($elementos_categorias as $key => $elemento) --}}
+            {{-- <li class="">
                 <strong id="categorias" class="mb-2">{{ strtoupper($key) }}</strong>
-            </li>{{--subcategoria --}}
-            <ul class="list-unstyled">
-                {{-- @foreach ($categorias as $keySC=>$elementos_categorias ) --}}
-                <li class="mt-1" id="con_subcategorias">
-                    <ul class="list-unstyled">
+            </li> --}}
+            {{--subcategoria --}}
+            {{-- <ul class="list-unstyled">
+                <li class="mt-1" id="con_subcategorias"> --}}
+                    <ul class="list-unstyled" id="q">
                         @foreach($elemento as $k => $item)
-                            <li class="subCategoria_{{$item['categoriaID']}} RBF_id_{{$item['RBF_id']}}" id="BCP_id_{{$item['BCP_id']}}">
+                            {{-- <li class="subCategoria_{{$item['categoriaID']}} RBF_id_{{$item['RBF_id']}}" id="BCP_id_{{$item['BCP_id']}}"> --}}
                                 <div class=" row border-bottom py-3 hover p-2 elementos">
                                     <div class="col-sm-5 col-preguntas-sc">
-                                        {{-- <strong>{{ $item['BCP_id'] }} </strong> --}}
 
                                         {{-- PREGUNTAS --}}
                                         @if ($item['BCP_tipoRespuesta'] == 'Etiqueta')
@@ -33,7 +28,6 @@
                                     </div>
                                     {{-- RESPUESTAS --}}
                                     <div class="col-sm-7 col-respuestas-sc">
-
                                         <form method="POST" enctype="multipart/form-data" id="frm_{{$item['RBF_id']}}" class="frm-respuesta"> @csrf
                                             @php
                                                 $opcionesSC = json_decode( $item['BCP_opciones'], true);
@@ -102,16 +96,14 @@
                                         </form>
                                     </div>
                                 </div>
-                            </li>
+                            {{-- </li> --}}
                         @php $c++; @endphp
                         @endforeach
                     </ul>
-                </li>
-                {{-- @endforeach --}}
-            </ul>
+                {{-- </li>
+            </ul> --}}
+        {{-- @endforeach --}}
     {{-- </ol> --}}
-        @endforeach
-    </ol>
             <div class="row m-2 d-flex">
                 <span class="btn btn-primary text-light text-shadow box-shadow" id="btn_confirmacion">Confirmar datos</span>
                 <small class="alert alert-danger d-none" id="msg_vacios">¡Existen campos vacíos!</small>
@@ -192,9 +184,9 @@
         }
     }
 
-    // guarda cada respuesta 
+    // guarda cada respuesta
     $(".frm-respuesta").focusout(function(e){
-    e.preventDefault();
+        e.preventDefault();
         let id = $(this).attr('id').replace(/[^0-9]/g,'');
         let formData = new FormData($('#frm_'+id)[0]);
         // console.log(formData);

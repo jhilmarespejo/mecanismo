@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Validator;
 use Illuminate\Support\Facades\DB;
 
-// use Image;
-// use Intervention\Image\Facades\Image;
-// use Illuminate\Support\Facades\Redirect;
-// use Illuminate\Support\Facades\Storage;
-
 class AccesoController extends Controller
 {
     /**
@@ -32,6 +27,7 @@ class AccesoController extends Controller
         ];
         $recordar = ( ($request->remember) ? true: false );
         // dump( $recordar  );exit;
+
         if( Auth::attempt( $credenciales, $recordar) ){
             $request->session()->regenerate();
             return redirect()->intended('/panel');

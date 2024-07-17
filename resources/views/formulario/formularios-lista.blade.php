@@ -8,7 +8,7 @@
     use Carbon\Carbon;
 @endphp
 @php
-// rcuperar las variables de sesion
+// recuperar las variables de sesion
     $TES_tipo = session('TES_tipo');
     $EST_nombre = session('EST_nombre');
 
@@ -37,7 +37,7 @@
                 <div class="alert alert-warning" role="alert">
                     Aún no se asignaron formularios para esta visita <br>
                     @if( Auth::user()->rol == 'Administrador' )
-                        <a href="/formulario/{{$VIS_id}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Crear formulario </a>
+                        <a href="/formulario/eleccion/{{$VIS_id}}/{{$VIS_tipo}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Crear formulario </a>
                     @endif
 
                 </div>
@@ -46,6 +46,7 @@
 
           <h5 class="card-title">Formularios:</h5>
 
+          {{-- @dump($errors->all()) --}}
           @php  $aux=0; foreach ($grupo_formularios as $key => $formulario): @endphp
             {{-- @dump($formulario[0]['FRM_id']) --}}
 
@@ -59,7 +60,7 @@
                                 <img src="/img/{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
 
 
-                                <a href="/cuestionario/duplicar/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
+                                <a href="/cuestionario/duplicarCuestionario/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
                                     <strong>Crear Nuevo formulario</strong>
                                 </a>
 
@@ -95,9 +96,13 @@
                                     @if ($item['AGF_id'] )
                                         <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}" class="m-0 p-1 d-block text-decoration-none text-dark">
                                             <p class="m-0">{{ mb_strimwidth($item["FRM_titulo"], 0, 40, '...', 'UTF-8') }}</p>
-                                            <p class="m-0 text-muted"><small>Credo: {{ Carbon::parse($item["createdAt"])->translatedFormat('d. M. Y H:i:s') }} | Código {{$item["AGF_id"]}}</small></p>
+                                            <p class="m-0 text-muted"><small>Creado: {{ Carbon::parse($item["createdAt"])->translatedFormat('d. M. Y H:i:s') }} | Código {{$item["AGF_id"]}}</small></p>
                                         </a>
                                     @endif
+                                </div>
+                                <div class="col m-0 p-0 fs-6">
+                                    <p class="m-0">Preguntas: {{$item["preguntas"]}}</p>
+                                    <p class="m-0">Respuestas: {{$item["respuestas"]}}</p>
                                 </div>
 
                                 <div class="col-1 fs-3 m-0 p-0">

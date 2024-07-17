@@ -190,7 +190,7 @@ class CustomController extends Controller {
         }elseif($tipoVisita == 'Visita de seguimiento'){
             $colorVisita = 'text-white bg-primary';
         }elseif($tipoVisita == 'Visita reactiva'){
-            $colorVisita = 'text-white bg-red';
+            $colorVisita = 'text-white bg-info';
         }elseif($tipoVisita == 'Visita Ad hoc'){
             $colorVisita = 'text-white bg-warning';
         }elseif( is_null($tipoVisita) ){
@@ -215,6 +215,81 @@ class CustomController extends Controller {
 
         return $preguntasOrdenadas;
 
+    }
+
+    //Agrupar las visitas por tipo y nombre
+    public static function agruparPorTipoYNombre($datos)
+    {
+        // // Agrupar por TES_tipo y EST_nombre
+        // $agrupadosPorTipoYNombre = $coleccion->groupBy(['TES_tipo', 'EST_nombre'])->toArray();
+
+        // // Devolver los resultados
+        // return $agrupadosPorTipoYNombre;
+        $resultado = [];
+
+        foreach ($datos as $item) {
+            $tesTipo = $item->TES_tipo;
+            $estNombre = $item->EST_nombre;
+            $totalGeneal= $item->total_general;
+            $EST_id = $item->EST_id;
+            $VIS_fechas = $item->VIS_fechas;
+            // dump($totalGeneal);
+
+            // Asegurarse de que la clave TES_tipo exista
+            if (!isset($resultado[$tesTipo])) {
+                $resultado[$tesTipo] = [
+                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento,
+                    'establecimientos' => [],
+                ];
+                // $resultado['total_general'] = $totalGeneal;
+            }
+
+            // Asegurarse de que la clave EST_nombre exista dentro de TES_tipo
+            if (!isset($resultado[$tesTipo]['establecimientos'][$estNombre])) {
+                $resultado[$tesTipo]['establecimientos'][$estNombre] = [
+                    'total_establecimiento' => $item->total_establecimiento,
+                    'EST_id' => $EST_id,
+
+                    'visitas' => []
+                ];
+            }
+
+            // Añadir la visita al arreglo correspondiente
+            $resultado[$tesTipo]['establecimientos'][$estNombre]['visitas'][] = [
+                'VIS_tipo' => $item->VIS_tipo,
+                'total_tipo_visitas' => $item->total_tipo_visitas,
+                'VIS_fechas' => $VIS_fechas,
+
+            ];
+        }
+            return ['resultado'=>$resultado, 'total_geneal' => $totalGeneal];
+
+
+    }
+
+    // Agrupa los indicadores por categorias
+    public static function organizarIndicadores($indicadores) {
+        $result = [];
+
+        foreach ($indicadores as $indicador) {
+            $categoria = $indicador['IND_categoria'];
+            $indicadorClave = $indicador['IND_indicador'];
+
+            // Inicializar el array de la categoría si no existe
+            if (!isset($result[$categoria])) {
+                $result[$categoria] = [];
+            }
+
+            // Inicializar el array del indicador si no existe
+            if (!isset($result[$categoria][$indicadorClave])) {
+                $result[$categoria][$indicadorClave] = [];
+            }
+
+            // Añadir el indicador al array correspondiente
+            $result[$categoria][$indicadorClave][] = $indicador;
+        }
+
+        return $result;
     }
 }
 
