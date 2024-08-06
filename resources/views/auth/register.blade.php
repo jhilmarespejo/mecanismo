@@ -19,6 +19,31 @@
 @section('content')
 <div class="card-body">
     <h2 class="text-center" >Registro de nuevo usuario</h2>
+
+ <!-- Display success message -->
+@if (session('status'))
+ <div class="mb-4 font-medium text-sm text-green-600">
+     {{ session('status') }}
+ </div>
+@endif
+
+<!-- Display error messages -->
+@if ($errors->any())
+ <div class="mb-4">
+     <ul class="list-disc list-inside text-sm text-red-600">
+        @foreach ($errors->all() as $error)
+            @if ($error == 'validation.unique')
+                <span class="alert alert-warning" >El nombre de usuario ya existe!</span>
+            @else
+                <li>{{ $error }}</li>
+            @endif
+
+         @endforeach
+     </ul>
+ </div>
+@endif
+
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

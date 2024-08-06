@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class UsersController extends Controller
 {
-    public function verify(){
-        $users = DB::table('users')->select('id', 'username', 'name', 'rol', 'status')->get()->toArray();
+    public function list(){
+        $users = DB::table('users')->select('id', 'username', 'name', 'rol', 'status')->OrderBy('id', 'desc')->get()->toArray();
         // dump($users);
         return view('users.users-list', compact('users'));
     }

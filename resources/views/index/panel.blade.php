@@ -12,14 +12,14 @@
     li.tipos_e:hover{
         background-color: rgb(138, 196, 215);
         color: white;
-        font-size: 110%;
+        font-size: 105%;
         cursor: pointer;
     }
-    .info-div { width: 100px !important;}
+    .info-div { width: 150px !important;}
 </style>
 
 <div class="row">
-    <div class="col-md-3 col-sm-12 order-md-1 order-2 border border-2" style="height: 600px;">
+    <div class="col-md-3 col-sm-12 order-md-1 order-2 border border-2" style="height: 603px;">
         <div class="btn btn-primary btn-sm box-shadow mt-3 text-center">
             <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
         </div>
@@ -40,14 +40,11 @@
     </div>
 </div>
 
-
-
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
             // Crear un mapa centrado en Bolivia
-        var listaEstablecimientos  = <?php echo $tipos_establecimientos; ?>;
+        var listaEstablecimientos  = <?php echo $establecimientosPorTipo; ?>;
         var map = L.map('map').setView([-16.2902, -63.5887], 6);
 
         // Agregar una capa de mapa base de OpenStreetMap
@@ -67,31 +64,17 @@
 
                     departamentoInfo += '<p class="m-0 p-0">Seleccione una opcion:</p><ul class="p-1">';
                     listaEstablecimientos.forEach(function(establecimiento) {
-                        departamentoInfo += `<li class="tipos_e text-primary" onclick="mostrarContenido(${establecimiento.TES_id}, '${feature.properties.name}', '${establecimiento.TES_tipo}')" >${establecimiento.TES_tipo}</li>`;
+                        departamentoInfo += `<li class="tipos_e text-primary" onclick="mostrarContenido(${establecimiento.TES_id}, '${feature.properties.name}', '${establecimiento.TES_tipo}')" >${establecimiento.TES_tipo} </li>`;
                     });
                     departamentoInfo += '</ul>';
 
                     layer.bindPopup(departamentoInfo);
                     // Obtener coordenadas del departamento
                     var coords = layer.getBounds().getCenter();
-
-                    // Crear línea vertical hacia arriba
-                    // var verticalLine = L.polyline([
-                    // [coords.lat , coords.lng - 0.5],
-                    // [coords.lat - 0.9, coords.lng - 0.5] // Ajusta la longitud de la línea vertical
-                    // ], {
-                    // color: 'black', // Color de la línea
-                    // weight: 2 // Grosor de la línea
-                    // }).addTo(map);
-
-                    // isertar el elemento de este array al departameto correspondiente
-                    // ['Beni': 1234567, 'Chuquisaca': 987654, 'Cochabamba': 2345678, 'La Paz': 3456789, 'Oruro': 876543, 'Pando': 654321, 'Potosí': 4321098, 'Santa Cruz': 7654321, 'Tarija': 210987]
-                    //Ajustar la posición del marcador y el div
                     var icon = L.divIcon({
                     className: 'info-div',
-                    html: `<div class="bg-light border-start border-5 border-warning p-1">
-                                <p class="m-0 p-0">Lugades de Detención:</p>
-                                <p class="m-0 p-0">${obtenerValorNumerico(feature.properties.name)}</p>
+                    html: `<div class="border-start border-5 border-primary" style="height:30px" >
+                                <p class="m-0 p-0 bg-light box-shadow rounded-end">Lugades de Detención: <b>${obtenerValorNumerico(feature.properties.name)}</b></p>
 
                             </div>`,
                         iconAnchor: [0, 0], // Ajustar la posición del icono (div) en relación con su punto de anclaje
@@ -118,21 +101,9 @@
         });
     });
     function obtenerValorNumerico(departamento) {
-        // Inserta aquí la lógica para obtener el valor numérico correspondiente al departamento
-        // Por ejemplo, puedes buscar el valor en un objeto JavaScript o en un array
-        // Aquí te muestro un ejemplo básico
-        var valores = {
-            'Beni': '23',
-            'Chuquisaca': '34',
-            'Cochabamba': '77',
-            'La Paz': '58',
-            'Oruro': '11',
-            'Pando': '5',
-            'Potosí': '13',
-            'Santa Cruz': '84',
-            'Tarija': '20'
-        };
-        return valores[departamento] || 'Valor no encontrado'; // Devuelve el valor correspondiente o un mensaje si no se encuentra
+        var cantidades  = <?php echo $establecimientosPorDepartamento; ?>;
+        console.log(cantidades);
+        return cantidades[departamento] || 'Valor no encontrado'; // Devuelve el valor correspondiente o un mensaje si no se encuentra
     }
 
     //funcion ajax para buscar y mostrar los establecimientos que pertenecen al TES_id enviado desde el MAPA

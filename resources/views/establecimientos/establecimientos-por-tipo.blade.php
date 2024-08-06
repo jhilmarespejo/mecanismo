@@ -9,7 +9,7 @@
 @endif
 
 
-    <ul class="list-group" style="height: 450px; overflow-y: auto;">
+    <ul class="list-group" style="height: 360px; overflow-y: auto;">
         @foreach ($establecimientos as $establecimiento)
             <li class="list-group-item">
                 <p class="m-0 p-0" ><a class="text-decoration-none" href="/visita/historial/{{$establecimiento->EST_id}}">{{$establecimiento->EST_nombre}}</a></p>

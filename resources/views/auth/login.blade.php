@@ -23,7 +23,7 @@
                     <x-jet-input-error for="email"></x-jet-input-error> --}}
 
                     <x-jet-label for="auth" value="{{ __('Nombre de usuario') }}" />
-                    <x-jet-input id="auth" class="block mt-1 w-full" type="text" name="auth" :value="old('auth')" required autofocus />
+                    <x-jet-input id="auth" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autofocus />
 
 
                 </div>

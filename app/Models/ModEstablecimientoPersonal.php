@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class ModEstablecimiento extends Model
+class ModEstablecimientoPersonal extends Model
 {
-    protected $table = 'establecimientos';
+    protected $table = 'establecimientos_personal';
     use HasFactory;
 
-    protected $primaryKey = 'EST_id';
+    protected $primaryKey = 'EPER_id';
     public $incrementing = true;
-
 
     public $timestamps = false;
     protected $guarded = [];
+
     protected static function boot() {
         parent::boot();
         static::creating(function ($model) {
@@ -32,13 +32,4 @@ class ModEstablecimiento extends Model
         //     $model->deletedAt = now();
         // });
     }
-
-
 }
-
-
-
-
-
-
-

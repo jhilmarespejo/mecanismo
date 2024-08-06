@@ -7,7 +7,12 @@
  <div class="text-center">
     <h2 class="text-primary fs-2">Verificación y edición de datos de usuarios </h2>
 </div>
-
+<!-- Display success message -->
+@if (session('status'))
+<div class="mb-4 font-medium text-sm text-green-600">
+    <p class="alert alert-success">{{ session('status') }}</p>
+</div>
+@endif
     <div class="container m-sm-3 p-sm-4 p-0" style="overflow-x:auto;">
         <table class="p-3 table table-border table-hover table-responsive-lg bg-light border" id="users">
             <thead>

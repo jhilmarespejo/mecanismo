@@ -5,19 +5,20 @@ use App\Http\Livewire\Formularios;
 use App\Http\Livewire\CuestionarioIndex;
 use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController,InformeVisitasController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-/* -----------login personalizado ----------- */
+
+Route::post('/register', [RegisterController::class, 'store'])->name('register');
+
+
+// Rutas para el inicio de sesión
+Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('login', [AuthenticatedSessionController::class, 'store']);
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+
 
 // Route::view('/acceso', 'acceso')->name('acceso');
 // Route::view('/resgistro', 'resgistro')->name('registro');
@@ -120,11 +121,23 @@ Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'gu
 // ESTABLECIMIENTOS
 
 Route::get('establecimientos/tipo', [EstablecimientosController::class, 'tipo'])->name('establecimientos')->middleware('auth');
-
 Route::post('establecimientos/listarSegunTipo', [EstablecimientosController::class, 'listarSegunTipo'])->name('establecimientos.listarSegunTipo')->middleware('auth');
-
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.listaguardarNuevoEstablecimientorPorTipo')->middleware('auth');
 
+Route::get('establecimientos/index', [EstablecimientosController::class, 'index'])->name('establecimientos.index')->middleware('auth');
+Route::get('establecimientos/mostrar/{id}', [EstablecimientosController::class, 'mostrar'])->name('establecimientos.mostrar');
+
+Route::get('establecimientos/crear', [EstablecimientosController::class, 'crear'])->name('establecimientos.crear');
+Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'almacenar'])->name('establecimientos.almacenar');
+
+    // estanblecimientos_info
+    Route::get('establecimientos/infoMostrar/{EST_id}', [EstablecimientosController::class, 'infoMostrar'])->name('establecimientos.infoMostrar');
+    Route::post('establecimientos/infoActualizar', [EstablecimientosController::class, 'infoActualizar'])->name('establecimientos.infoActualizar');
+
+
+    // estanblecimientos_personal
+    Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
+    Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
 
 // REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
@@ -136,6 +149,9 @@ Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita']
 Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
 Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
 Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
+
+
+
 // INFORME DE VISITAS
 Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
 
@@ -148,7 +164,7 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
 
 // USERS
 // verificar y editar usuarios
- Route::get('users/verify', [UsersController::class, 'verify'])->middleware('auth')->name('verify');
+ Route::get('users/list', [UsersController::class, 'list'])->middleware('auth')->name('users.list');
 
  Route::delete('users/{id}', [UsersController::class, 'destroy'])->middleware('auth')->name('users.destroy');
  Route::post('users/changeState', [UsersController::class, 'changeState'])->middleware('auth')->name('users.changeState');

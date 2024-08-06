@@ -43,13 +43,14 @@
                                 @if( Auth::user()->rol == 'Administrador' )
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Gestión
+                                        Administración
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
                                         <li><a class="dropdown-item" href="/interoperabilidad">Módulo de Interoperablidad</a></li>
                                         <li><a class="dropdown-item" href="/asesoramientos">Módulo de Asesoramiento</a></li>
                                         <li><a class="dropdown-item" href="/">Modulo Educativo</a></li>
                                         <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
+                                        <li><a class="dropdown-item" href="/establecimientos/index">Lugares de detención</a></li>
                                         {{-- <li><a class="dropdown-item" href="/">Lugares de detención</a></li>
                                         <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}
                                     </ul>
@@ -69,7 +70,7 @@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                                       <li><a class="dropdown-item" href="/register">Nuevo usuario</a></li>
-                                      <li><a class="dropdown-item" href="/users/verify">Verificar usuarios</a></li>
+                                      <li><a class="dropdown-item" href="/users/list">Verificar usuarios</a></li>
                                     </ul>
                                 </li>
 

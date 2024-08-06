@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria, ModTipoEstablecimiento};
+use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria, ModTipoEstablecimiento, ModEstablecimiento};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -22,11 +22,28 @@ class IndexController extends Controller
         $tipos = ModTipoEstablecimiento::select('TES_tipo', 'TES_id')->get()->toArray();
 
         $tipos_establecimientos = json_encode($tipos);
+
+        $establecimientosPorTipo = ModTipoEstablecimiento::from('tipo_establecimientos as tes')->select('tes.TES_tipo','TES_id', DB::raw('COUNT("establecimientos"."EST_id") as total'))
+        ->leftJoin('establecimientos', 'tes.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->groupBy('tes.TES_id', 'TES_id', 'tes.TES_tipo')
+        ->get()->toArray();
+        $establecimientosPorTipo = json_encode($establecimientosPorTipo);
+
+        $establecimientosPorDepartamento = ModEstablecimiento::select('EST_departamento', DB::raw('COUNT("EST_id") as total_establecimientos'))
+            ->groupBy('EST_departamento')
+            ->get();
+
+        $establecimientosPorDepartamento = collect($establecimientosPorDepartamento)->pluck('total_establecimientos', 'EST_departamento')->map(function ($value) {
+            return (string) $value;
+        })->all();
+
+       $establecimientosPorDepartamento = json_encode($establecimientosPorDepartamento, JSON_PRETTY_PRINT);
+
         // $quries = DB::getQueryLog();
-        // dump( $recomendaciones );
+        // dump( $establecimientosPorDepartamento );
         // exit;
 
-    return view('index.panel', compact( 'tipos_establecimientos' ));
+    return view('index.panel', compact( 'tipos_establecimientos', 'establecimientosPorTipo', 'establecimientosPorDepartamento' ));
     }
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */
