@@ -10,4 +10,5 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/vendor
 resources/views/welcome.blade.php
