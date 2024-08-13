@@ -18,10 +18,15 @@
         padding-top: 0px !important;
         padding-left: 10px !important;
     }
-
 </style>
 <div class="container mt-3 p-4 bg-white">
     @include('layouts.breadcrumbs', $breadcrumbs)
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <div class="row sm-m-2 m-2">
+        <div class="col-sm-6 ">@include('establecimientos.estabs-departamento')</div>
+        <div class="col-sm-6 ">@include('establecimientos.estabs-tipo')</div>
+    </div>
     <a class="btn btn-primary mb-3" href="/establecimientos/crear"><i class="bi bi-clipboard-plus"></i> Añadir Nuevo lugar de detención    </a>
     <h1 class="mb-2 text-center text-primary">Lugares de detención</h1>
      <!-- Mostrar mensajes de éxito o error -->

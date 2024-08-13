@@ -86,6 +86,44 @@ class EstablecimientosController extends Controller
     }
 
     public function index(Request $request){
+
+        // 1. Distribución de Establecimientos por Tipo
+        $distribucionPorTipo = ModEstablecimiento::select('tipo_establecimientos.TES_tipo', DB::raw('count("establecimientos"."EST_id") as total'))
+        ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', 'tipo_establecimientos.TES_id')
+        ->groupBy('tipo_establecimientos.TES_tipo')
+        ->orderBy('total', 'desc')
+        ->get();
+        $estabsPorTipo = [];
+        foreach ($distribucionPorTipo as $item) {
+            $estabsPorTipo[] = [
+                'name' => $item->TES_tipo,
+                'y' => $item->total
+            ];
+        }
+        
+        
+        // 2. Establecimientos por Departamento
+        $establecimientosPorDepartamento = ModEstablecimiento::select('EST_departamento', DB::raw('count("EST_id") as total'))
+        ->groupBy('EST_departamento')
+        ->orderBy('total', 'desc')
+        ->get();
+
+        $estabsPorDepartamento = [];
+        foreach ($establecimientosPorDepartamento as $item) {
+            $estabsPorDepartamento[] = [
+                'name' => $item->EST_departamento,
+                'y' => $item->total
+            ];
+        }
+        // Agregar el total general como una serie adicional
+        $totalGeneral = $establecimientosPorDepartamento->sum('total');
+        // $estabsPorDepartamento[] = [
+        //     'name' => 'Total General',
+        //     'y' => $totalGeneral,
+        //     'color' => '#FF6F61', // Un color destacado para el total general
+        //     'dataLabels' => ['enabled' => false] // Opcional: Ocultar las etiquetas de datos para el total general
+        // ];
+        
         $tipo_establecimientos = ModTipoEstablecimiento::select('TES_id', 'TES_tipo')->get();
 
         DB::enableQueryLog();
@@ -99,16 +137,16 @@ class EstablecimientosController extends Controller
         ->select('e.EST_id','e.FK_TES_id','e.EST_nombre','e.EST_departamento','e.EST_municipio','e.EST_direccion','e.EST_telefono_contacto', 'te.TES_tipo')
         ->orderBy('e.EST_id', 'DESC')->get()->toArray();
 
-        // dump ($quries);
-
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Lugares de detención', 'url' => ''],
         ];
 
-        return view('establecimientos.establecimientos-index', compact('tipo_establecimientos', 'establecimientos','TES_id','breadcrumbs'));
+        return view('establecimientos.establecimientos-index', compact('tipo_establecimientos', 'establecimientos','TES_id','estabsPorDepartamento', 'estabsPorTipo', 'totalGeneral', 'breadcrumbs'));
     }
     public function mostrar($id) {
+        
+
         $establecimiento = ModEstablecimiento::select('EST_nombre', 'EST_departamento', 'EST_municipio', 'EST_direccion', 'EST_telefono_contacto', 'EST_anyo_funcionamiento', 'EST_capacidad_creacion')->findOrFail($id);
 
         $info = ModEstablecimientoInfo::select('EINF_cantidad_policias_varones','EINF_cantidad_policias_mujeres','EINF_cantidad_celdas_varones','EINF_cantidad_celdas_mujeres','EINF_normativa_interna','EINF_formato_registro_aprehendidos','EINF_cantidad_actual_internos','EINF_poblacion_atendida','EINF_rangos_edad_poblacion','EINF_tipo_entidad','EINF_tipo_administracion','EINF_banyo_ppl','EINF_telefono_ppl','EINF_camaras_vigilancia','EINF_ambientes_visita','EINF_informacion_ddhh','EINF_observaciones','EINF_gestion')
@@ -392,4 +430,3 @@ class EstablecimientosController extends Controller
     //     }
     // }
 }
-

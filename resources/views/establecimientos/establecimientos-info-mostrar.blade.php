@@ -160,10 +160,10 @@
 
                 </div>
             </div>
-                <span class="btn btn-primary" id="edit_info_btn">Editar la información actual</span>
+                <!-- <span class="btn btn-primary" id="edit_info_btn">Editar la información actual</span> -->
 
             @if($infoAdicional['EINF_gestion'] == date('Y'))
-                {{-- <button type="button" class="btn btn-primary" id="edit_info_btn">Editar la información actual</button> --}}
+                <button type="button" class="btn btn-primary" id="edit_info_btn">Editar la información actual</button>
             @endif
 
             <button type="button" class="btn btn-success" id="update_info_btn" style="display: none;">Actualizar Información</button>
