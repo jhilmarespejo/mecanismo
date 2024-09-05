@@ -6,27 +6,44 @@ use Illuminate\Support\Facades\DB;
 
 class AsesoramientoController extends Controller
 {
-    public function index()
-    {
+    public function index(Request $request){
+        $anioActual = date('Y');
+        if( is_null($request->anio_actual ) ){
+            $anioActual = date('Y');
+        } else {
+            $anioActual = $request->anio_actual;
+        }
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            // ['name' => 'Módulo de asesoría', 'url' => route('establecimientos.index')],
+            ['name' => 'Módulo de asesoría', 'url' => ''],
+        ];
+
+
         $asesoramientos = DB::table('asesoramientos as ase')
         ->select('ase.*', 'man.MAN_mandato', 'man.MAN_descripcion_mandato')
         ->leftJoin('mandatos as man', 'man.MAN_id', 'ase.FK_MAN_id')
+        ->whereYear('ase.ASE_fecha_actividad', $anioActual)
         ->get();
 
         $asesoramientos = $asesoramientos->groupBy(['MAN_mandato', 'MAN_descripcion_mandato'])->toArray();
         // @dump($asesoramientos);exit;
 
-        return view('asesoramientos.index', compact('asesoramientos'));
+        return view('asesoramientos.index', compact('asesoramientos', 'breadcrumbs', 'anioActual'));
     }
 
-    public function create()
-    {
+    public function create() {
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Módulo de asesoría', 'url' => '/asesoramientos'],
+            ['name' => 'Nuevo registro', 'url' => ''],
+        ];
+
         $mandatos = DB::table('mandatos')->get();
-        return view('asesoramientos.create', ['mandatos' => $mandatos]);
+        return view('asesoramientos.create', compact('mandatos', 'breadcrumbs'));
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         // Definir las reglas de validación
         $request->validate([
             'ASE_actividad' => 'required|string|',
@@ -45,41 +62,64 @@ class AsesoramientoController extends Controller
             'FK_MAN_id.integer' => 'El mandato debe ser un número entero.',
             'FK_MAN_id.exists' => 'El mandato seleccionado no existe.',
         ]);
+        DB::beginTransaction();
+        try {
+            // Insertar los datos en la tabla 'asesoramientos'
+            DB::table('asesoramientos')->insert([
+                'ASE_actividad' => $request->input('ASE_actividad'),
+                'ASE_fecha_actividad' => $request->input('ASE_fecha_actividad'),
+                'ASE_recomendacion' => $request->input('ASE_recomendacion'),
+                'FK_MAN_id' => $request->input('FK_MAN_id'),
+            ]);
 
-        // Insertar los datos en la tabla 'asesoramientos'
-        DB::table('asesoramientos')->insert([
-            'ASE_actividad' => $request->input('ASE_actividad'),
-            'ASE_fecha_actividad' => $request->input('ASE_fecha_actividad'),
-            'ASE_recomendacion' => $request->input('ASE_recomendacion'),
-            'FK_MAN_id' => $request->input('FK_MAN_id'),
-        ]);
-
-        // Redirigir al listado de asesoramientos
-        return redirect('/asesoramientos')->with('success', 'Asesoramiento creado exitosamente.');
+           
+            DB::commit();
+            session()->flash('success', 'Los datos han sido actualizados con éxito.');
+            return redirect('/asesoramientos')->with('success', 'Asesoramiento creado exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Ocurrió un error al actualizar los datos: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 
-    public function show($id)
-    {
+    public function show($id) {
         $asesoramiento = DB::table('asesoramientos')->where('ASE_id', $id)->first();
         return view('asesoramientos.show', ['asesoramiento' => $asesoramiento]);
     }
 
-    public function edit($id)
-    {
-        $asesoramiento = DB::table('asesoramientos')->where('ASE_id', $id)->first();
-        $mandatos = DB::table('mandatos')->get();
-        return view('asesoramientos.edit', ['asesoramiento' => $asesoramiento, 'mandatos' => $mandatos]);
+    public function edit($id) {
+            $breadcrumbs = [
+                ['name' => 'Inicio', 'url' => route('panel')],
+                ['name' => 'Módulo de asesoría', 'url' => '/asesoramientos'],
+                ['name' => 'Edición de registro', 'url' => ''],
+            ];
+            $asesoramiento = DB::table('asesoramientos')->where('ASE_id', $id)->first();
+            $mandatos = DB::table('mandatos')->get();
+           
+            return view('asesoramientos.edit', compact('asesoramiento', 'mandatos', 'breadcrumbs'));
+
+        
     }
 
-    public function update(Request $request, $id)
-    {
-        DB::table('asesoramientos')->where('ASE_id', $id)->update([
-            'ASE_actividad' => $request->input('ASE_actividad'),
-            'ASE_fecha_actividad' => $request->input('ASE_fecha_actividad'),
-            'ASE_recomendacion' => $request->input('ASE_recomendacion'),
-            'FK_MAN_id' => $request->input('FK_MAN_id'),
-        ]);
-        return redirect('/asesoramientos');
+
+    public function update(Request $request, $id) {
+        DB::beginTransaction();
+        try {
+            DB::table('asesoramientos')->where('ASE_id', $id)->update([
+                'ASE_actividad' => $request->input('ASE_actividad'),
+                'ASE_fecha_actividad' => $request->input('ASE_fecha_actividad'),
+                'ASE_recomendacion' => $request->input('ASE_recomendacion'),
+                'FK_MAN_id' => $request->input('FK_MAN_id'),
+            ]);
+            DB::commit();
+            session()->flash('success', 'Los datos han sido actualizados con éxito.');
+            return redirect('/asesoramientos');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('error', 'Ocurrió un error al actualizar los datos: ' . $e->getMessage());
+            return redirect()->back();
+        }
     }
 
     public function destroy($id)

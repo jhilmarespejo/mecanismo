@@ -146,7 +146,7 @@ class VisitaController extends Controller{
             ->addSelect(DB::raw('total_general.total_general AS total_general'))
             ->get();
             $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
-        // dump( $totalVisitas );exit;
+        // dump( $totalVisitas->toArray() );exit;
         return view('visita.visita-resumen', compact('totalVisitas'));
 
     }

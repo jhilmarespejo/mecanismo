@@ -173,13 +173,22 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
  // ---- MÓDULO DE ASESORAMIENTO ----------
 
 
-Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth');
-Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth');
-Route::post('/asesoramientos', [AsesoramientoController::class, 'store'])->middleware('auth');
-Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth');
-Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth');
-Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth');
-Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth');
+// Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth');
+// Route::post('/asesoramientos/crear', [AsesoramientoController::class, 'crear'])->middleware('auth');
+// Route::post('/asesoramientos/store', [AsesoramientoController::class, 'store'])->middleware('auth');
+// Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth');
+// Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth');
+// Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth');
+// Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth');
+
+Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');
+Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth')->name('asesoramientos.create');
+Route::post('/asesoramientos', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
+Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth')->name('asesoramientos.show');
+Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth')->name('asesoramientos.edit');
+Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth')->name('asesoramientos.update');
+Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth')->name('asesoramientos.destroy');
+
 
 //----MODULO DE INDICADORES --------------------------
 
@@ -188,7 +197,14 @@ Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar']
 Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('guardar.indicadores');
 
 //--------MODULO DE EDUCACION -------
-Route::resource('educacion', EducacionController::class)->middleware('auth');
+// Route::resource('educacion', EducacionController::class)->middleware('auth');
+
+// Ruta personalizada para el index que recibe un ID
+Route::get('educacion/index/{id}', [EducacionController::class, 'index'])->name('educacion.index')->middleware('auth');
+// Las demás rutas del resource (store, create, show, etc.)
+Route::resource('educacion', EducacionController::class)->except('index')->middleware('auth');
+
+
 // AJUSTES
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
 
@@ -196,3 +212,6 @@ Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.i
 
 // INTEROPERABILIDAD
 Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
+
+// MODULO DE EDUCACION
+Route::resource('educacion', EducacionController::class);

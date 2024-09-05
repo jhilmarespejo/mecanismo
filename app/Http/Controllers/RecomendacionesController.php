@@ -74,7 +74,7 @@ class RecomendacionesController extends Controller{
                     }
                 }
                 DB::commit();
-                return response()->json([ "success" => "Guardado correctamente" ]);
+                return response()->json([ "success" => "Almacenado correctamente" ]);
             }
             catch (\Exception $e) {
                 dump($e);

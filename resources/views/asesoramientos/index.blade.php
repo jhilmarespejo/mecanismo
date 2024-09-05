@@ -8,11 +8,54 @@
     }
 </style>
 @section('content')
-    <div class="container mt-5">
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert" id="success-alert">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" id="error-alert">
+        {{ session('error') }}
+    </div>
+@endif
+
+<script>
+$(document).ready(function(){
+    // Desvanecer alerta de éxito después de 5 segundos
+    setTimeout(function() {
+        $("#success-alert").fadeOut("slow");
+    }, 5000);
+
+    // Desvanecer alerta de error después de 5 segundos
+    setTimeout(function() {
+        $("#error-alert").fadeOut("slow");
+    }, 5000);
+});
+</script>
+
+
+    <div class="container mt-3 p-4 bg-white">
+        @include('layouts.breadcrumbs', $breadcrumbs)
         <div class="d-flex justify-content-between align-items-center mb-3 ">
             <h2 class="text-primary">Módulo de asesoría </h2>
-            <a href="/asesoramientos/create" class="btn btn-primary btn-lg text-shadow box-shadow">Nueva actividad de asesoramiento</a>
+           
         </div>
+        <!-- Select box para Filtrar por el año -->
+        <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
+            <form action="/asesoramientos" method="GET" class="mb-3">
+                <label for="anio_actual" class="col-sm-8 col-form-label col-form-label-lg">Filtrar por año:</label>
+                <select name="anio_actual" id="anio_actual" class="form-select form-select-lg" onchange="this.form.submit()">
+                    <option value="">Seleccionar año</option>
+                    <option value="2024" {{ $anioActual == '2024' ? 'selected' : '' }}>2024</option>
+                    <option value="2025" {{ $anioActual == '2025' ? 'selected' : '' }}>2025</option>
+                    <option value="2026" {{ $anioActual == '2026' ? 'selected' : '' }}>2026</option>
+                </select>
+            </form>
+        </div>
+
+
+        <a href="/asesoramientos/create" class="btn btn-primary btn-lg text-shadow box-shadow">Nueva actividad de asesoramiento</a>
         @if (count($asesoramientos)>0)
         <div class="accordion" id="accordionMandato">
             @php $a = 0; @endphp

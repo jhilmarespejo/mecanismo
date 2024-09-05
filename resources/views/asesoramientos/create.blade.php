@@ -4,10 +4,11 @@
 
 @section('content')
 <div class="card ">
+    @include('layouts.breadcrumbs', $breadcrumbs)
     <div class="card-header">
         <h2 class="mb-4 text-center text-primary">Nueva actividad de asesoramiento</h2>
     </div>
-    <form action="/asesoramientos" method="POST">
+    <form action="/asesoramientos/store" method="POST">
         @csrf
         <div class="card-body">
             <div class="mb-3">
@@ -38,6 +39,7 @@
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
             </div>
+           
 
 
         </div>

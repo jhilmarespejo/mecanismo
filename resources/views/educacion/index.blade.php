@@ -1,92 +1,326 @@
-
 @extends('layouts.app')
-@section('title', 'Educativo')
-
+@section('title', 'Módulo Educativo')
 @section('content')
 
-<div class="container">
 
-    {{-- <a href="{{ route('indicadores.create') }}" class="btn btn-primary mb-3">Crear Nuevo Indicador</a> --}}
-    <h1>Módulo Educativo</h1>
-    {{-- <div class="container mt-5">
-        <div class="card">
-          <div class="card-header">
-            Formulario de registro de datos
-          </div>
-          <div class="card-body">
-            <form>
-              <div class="mb-3">
-                <label for="tema" class="form-label">Tema del taller o capacitación:</label>
-                <input type="text" class="form-control" id="tema" name="tema" placeholder="Ingrese el tema">
-              </div>
-              <div class="mb-3">
-                <label for="beneficiarios" class="form-label">Beneficiarios:</label>
-                <input type="text" class="form-control" id="beneficiarios" name="beneficiarios" placeholder="Ingrese los beneficiarios">
-              </div>
-              <div class="mb-3">
-                <label for="cantidadBeneficiarios" class="form-label">Cantidad de Beneficiarios:</label>
-                <input type="number" class="form-control" id="cantidadBeneficiarios" name="cantidadBeneficiarios" placeholder="Ingrese la cantidad de beneficiarios">
-              </div>
-              <div class="mb-3">
-                <label for="medioVerificacion" class="form-label">Medio de Verificación:</label>
-                <input type="text" class="form-control" id="medioVerificacion" name="medioVerificacion" placeholder="Ingrese el medio de verificación">
-              </div>
-              <div class="mb-3">
-                <label for="medioVerificacion" class="form-label">Imagen del medio de verificación</label>
-                <input type="file" class="form-control" id="medioVerificacion" name="medioVerificacion" placeholder="Ingrese el medio de verificación">
-              </div>
-              <button type="submit" class="btn btn-primary">Guardar registro</button>
-            </form>
-          </div>
+
+<div class="container mt-3 p-4 bg-white">
+
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success') }}
         </div>
-    </div> --}}
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
 
 
-<div class="container mt-5">
-    <h1 class="mb-4">Reportes de activiades educativas</h1>
 
-    <!-- Reporte de Cantidad de Talleres por Tema -->
-    <div>
-      <h2>Reporte de Cantidad de capacitacione por Tema</h2>
-      <table class="table table-striped">
+
+    @include('layouts.breadcrumbs', $breadcrumbs)
+  <!-- Estadísticas -->
+  <h1 class="mb-2 text-center text-primary">Módulo Educativo</h1>
+<!-- Select box para Filtrar por el año -->
+<div class="row m-4 p-3 " style="background-color: #cfe2ff;">
+    <form action="{{ route('educacion.index') }}" method="GET" class="mb-3">
+        <label for="anio_actual" class="col-sm-8 col-form-label col-form-label-lg">Filtrar por año:</label>
+        <select name="anio_actual" id="anio_actual" class="form-select form-select-lg" onchange="this.form.submit()">
+            <option value="">Seleccionar año</option>
+            <option value="2024" {{ $anioActual == '2024' ? 'selected' : '' }}>2024</option>
+            <option value="2025" {{ $anioActual == '2025' ? 'selected' : '' }}>2025</option>
+            <option value="2026" {{ $anioActual == '2026' ? 'selected' : '' }}>2026</option>
+        </select>
+    </form>
+</div>
+
+  <div class="my-5">
+    <h2>Estadísticas</h2>
+      
+        <div class="row">
+        <div class="col border border-1 m-1" id="beneficiariosPorCiudadContainer" style="height: 400px;"></div>
+        <div class="col border border-1 m-1" id="beneficiariosPorTipoContainer" style="height: 400px;"></div>
+        </div>
+        <div class="row">
+        <div class="col border border-1 m-1" id="temasPorCiudadContainer" style="height: 400px;"></div>
+        <div class="col border border-1 m-1" id="temasAbordadosContainer" style="height: 400px;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-3 p-4 bg-white">
+    <h1 class="text-primary fs-2 text-center">Registro de actividades educativas</h1>
+    <a href="{{ route('educacion.create') }}" class="btn btn-primary mb-3">Crear nuevo registro</a>
+    <table class="table table-bordered" id="educativo">
         <thead>
-          <tr>
-            <th>Tema de la capacitación</th>
-            <th>Cantidad de capacitaciones</th>
-          </tr>
+            <tr>
+                <th>ID</th>
+                <th>Tema</th>
+                <th>Beneficiarios</th>
+                <th>Cantidad</th>
+                <th>Ciudad</th>
+                <th>Medio de Verificación</th>
+                <th>Acciones</th>
+            </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Introducción a los Derechos Humanos y la Prevención de la Tortura</td>
-            <td>500 policías</td>
-          </tr>
-          <tr>
-            <td>Marco Legal Nacional e Internacional en la Lucha contra la Tortura</td>
-            <td>300 policias</td>
-          </tr>
-          <tr>
-            <td>Protocolos y Procedimientos de Prevención y Denuncia de la Tortura</td>
-            <td>1000 soldados</td>
-          </tr>
-          <tr>
-            <td>Ética Profesional y Conducta Ética en el Trato a Personas Detenidas</td>
-            <td>100 policias</td>
-          </tr>
-          <!-- Agregar más filas según sea necesario -->
+            @foreach($educacions as $educacion)
+            <tr>
+                <td>{{ $educacion->edu_id }}</td>
+                <td>{{ $educacion->edu_tema }}</td>
+                <td>{{ $educacion->edu_beneficiarios }}</td>
+                <td>{{ $educacion->edu_cantidad_beneficiarios }}</td>
+                <td>{{ $educacion->edu_ciudad }}</td>
+                <td>{{ $educacion->edu_medio_verificacion }}</td>
+                <td>
+                    <a href="{{ route('educacion.edit', $educacion->edu_id) }}" class="btn btn-sm col-8 btn-warning mb-2 box-shadow">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    {{-- <form action="{{ route('educacion.destroy', $educacion->edu_id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm col-8 btn-danger box-shadow">
+                          <i class="fas fa-trash-alt"></i>Eliminar
+                      </button>
+                    </form> --}}
+                </td>
+            </tr>
+            @endforeach
         </tbody>
-      </table>
-    </div>
+    </table>
+</div>
 
-    <!-- Otros Reportes -->
-    <!-- Agregar aquí otros reportes según sea necesario -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
-  </div>
+<style>
+    /* ESTILOS PARA EL DATATABLE */
 
-@endsection
+    .dataTables_wrapper .top {
+        display: flex;
+        justify-content: space-between;
+    }
+    .dataTables_info{
+        padding-top: 0.3em !important;
+    }
 
-@section('js')
-    <script>
+    table.modal-body tbody tr td{
+        padding-top: 0px !important;
+        padding-left: 10px !important;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $('#educativo').DataTable({
+            "columnDefs": [
+                {
+                    "targets": [0], // Índice de la columna que deseas ocultar
+                    "visible": false, // Hacer la columna no visible
+                }
+            ],
+            "order": [[0, "desc"]],
+            "dom": '<"top"ilf>rt<"bottom"p><"clear">',
 
-    </script>
+            "language": {
+                //"info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                "info": "<b>_TOTAL_</b> resultados",
+                "lengthMenu": "Mostrar _MENU_ elementos",
+                "search": "Buscar:"
+            }
+        });
+    });
+  </script>
+{{-- Cantidad de Beneficiarios por Ciudad --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var data = @json($beneficiariosPorCiudad);
 
+        var ciudades = data.map(function (item) {
+            return item.edu_ciudad;
+        });
+
+        var beneficiarios = data.map(function (item) {
+            return parseInt(item.total_beneficiarios);
+        });
+
+        Highcharts.chart('beneficiariosPorCiudadContainer', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Cantidad de Beneficiarios por Ciudad'
+            },
+            xAxis: {
+                categories: ciudades,
+                title: {
+                    text: 'Ciudad'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Cantidad de Beneficiarios'
+                }
+            },
+            series: [{
+                name: 'Beneficiarios',
+                data: beneficiarios
+            }],
+            plotOptions: {
+                column: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{{-- Cantidad de Beneficiarios por Tipo --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var data = @json($beneficiariosPorTipo);
+
+        var tipos = data.map(function (item) {
+            return item.edu_beneficiarios;
+        });
+
+        var beneficiarios = data.map(function (item) {
+            return parseInt(item.total_beneficiarios);
+        });
+
+        Highcharts.chart('beneficiariosPorTipoContainer', {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: 'Cantidad de Beneficiarios por Tipo'
+            },
+            xAxis: {
+                categories: tipos,
+                title: {
+                    text: 'Tipo de Beneficiarios'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Cantidad de Beneficiarios'
+                }
+            },
+            series: [{
+                name: 'Beneficiarios',
+                data: beneficiarios
+            }],
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{{-- Cantidad de Temas por Ciudad --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var data = @json($temasPorCiudad);
+
+        var ciudades = data.map(function (item) {
+            return item.edu_ciudad;
+        });
+
+        var temas = data.map(function (item) {
+            return parseInt(item.total_temas);
+        });
+
+        Highcharts.chart('temasPorCiudadContainer', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Cantidad de Temas por Ciudad'
+            },
+            xAxis: {
+                categories: ciudades,
+                title: {
+                    text: 'Ciudad'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Cantidad de Temas'
+                }
+            },
+            series: [{
+                name: 'Temas',
+                data: temas
+            }],
+            plotOptions: {
+                column: {
+                    dataLabels: {
+                        enabled: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+{{-- //Temas Abordados y Cantidad de Beneficiarios --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var data = @json($temasBeneficiarios);
+
+        var temas = data.map(function (item) {
+            return item.edu_tema;
+        });
+
+        var beneficiarios = data.map(function (item) {
+            return parseInt(item.cantidad_beneficiarios);
+        });
+
+        Highcharts.chart('temasAbordadosContainer', {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: 'Temas Abordados y Cantidad de Beneficiarios'
+            },
+            xAxis: {
+                categories: temas,
+                title: {
+                    text: 'Tema'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Cantidad de Beneficiarios'
+                }
+            },
+            series: [{
+                name: 'Beneficiarios',
+                data: beneficiarios
+            }],
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.0f}'  // Mostrar valor en cada barra
+                    }
+                }
+            }
+        });
+    });
+</script>
 @endsection

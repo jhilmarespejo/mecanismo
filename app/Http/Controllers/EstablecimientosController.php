@@ -159,16 +159,20 @@ class EstablecimientosController extends Controller
 
         return response()->json(compact('establecimiento', 'info', 'personal'));
     }
-    public function crear()
-    {
+    public function crear() {   
+
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Lugares de detención', 'url' => route('establecimientos.index')],
+            ['name' => 'Crear nuevo registro', 'url' => ''],
+        ];
         $tipos = ModTipoEstablecimiento::all(); // Obtén los tipos de establecimiento
-        return view('establecimientos.establecimientos-crear', compact('tipos'));
+        return view('establecimientos.establecimientos-crear', compact('tipos', 'breadcrumbs'));
     }
 
     public function almacenar(Request $request){
         // dump( date('Y') );exit;
         $validated = $request->validate([
-
             'establecimiento.FK_TES_id' => 'required',
             'establecimiento.EST_nombre' => 'required|string|max:300|min:4',
             'establecimiento.EST_departamento' => 'required|string|max:20|min:4',
@@ -196,7 +200,7 @@ class EstablecimientosController extends Controller
             'info.EINF_ambientes_visita' => 'nullable|string|max:50',
             'info.EINF_informacion_ddhh' => 'nullable|string|max:50',
             'info.EINF_observaciones' => 'nullable|string|max:450',
-            'info.EINF_gestion' => 'nullable|string|max:5|min:2',
+            'info.EINF_gestion' => 'required|string|max:5|min:2',
             // Agregar validación para otros campos según sea necesario
 
             // Validación para personal
@@ -206,7 +210,7 @@ class EstablecimientosController extends Controller
             'personal.EPER_experiencia' => 'nullable|string|max:70|min:2',
             'personal.EPER_telefono' => 'nullable|string|max:50|min:2',
             'personal.EPER_email' => 'nullable|email|max:100|min:2',
-            'personal.EPER_gestion' => 'nullable|string|max:5|min:2',
+            'personal.EPER_gestion' => 'required|string|max:5|min:2',
 
         ], [
             'required' => 'El dato es necesario!',
@@ -238,7 +242,6 @@ class EstablecimientosController extends Controller
                 ModEstablecimientoPersonal::create($personalData);
             }
 
-            DB::commit();
 
             return redirect()->route('establecimientos.index')->with('success', 'Establecimiento guardado exitosamente!');
         } catch (\Exception $e) {
@@ -409,24 +412,4 @@ class EstablecimientosController extends Controller
 
 
 
-    // public function personalActualizar(Request $request) {
-    //     $data = $request->personal;
-    //     $gestion = $data['EPER_gestion'];
-
-
-    //     DB::enableQueryLog();
-
-    //     $info = ModEstablecimientoPersonal::where('FK_EST_id', $data['FK_EST_id'])
-    //     ->where('EPER_gestion', $gestion)
-    //     ->first();
-    //     $quries = DB::getQueryLog();
-    //     // dump($info );exit;
-
-    //     if ($info) {
-    //         $info->update($data);
-    //         return response()->json(['success' => true]);
-    //     } else {
-    //         return response()->json(['success' => false], 404);
-    //     }
-    // }
 }

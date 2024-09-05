@@ -20,6 +20,7 @@
     }
 </style>
 <div class="container mt-3 p-4 bg-white">
+    <h1 class="mb-2 text-center text-primary">Lugares de detención</h1>
     @include('layouts.breadcrumbs', $breadcrumbs)
 
     <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -28,7 +29,7 @@
         <div class="col-sm-6 ">@include('establecimientos.estabs-tipo')</div>
     </div>
     <a class="btn btn-primary mb-3" href="/establecimientos/crear"><i class="bi bi-clipboard-plus"></i> Añadir Nuevo lugar de detención    </a>
-    <h1 class="mb-2 text-center text-primary">Lugares de detención</h1>
+    <h1 class="mb-2 text-center text-primary">Listado de lugares de detención</h1>
      <!-- Mostrar mensajes de éxito o error -->
      @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

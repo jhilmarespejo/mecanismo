@@ -10,6 +10,7 @@
         <div class="card-header">
             <h2 class="mb-4 text-center text-primary">Modificacion de registro</h2>
         </div>
+        @include('layouts.breadcrumbs', $breadcrumbs)
         <form action="/asesoramientos/{{ $asesoramiento->ASE_id }}" method="POST">
             @csrf @method('PUT')
 
@@ -55,14 +56,6 @@
             </div>
         </form>
     </div>
-
-
-
-
-
-
-
-
 
 </div>
 

@@ -5,8 +5,9 @@
 
 @section('content')
 
-    <div class="container mt-5">
-        <h2 class="mb-4">Crear Nuevo Establecimiento</h2>
+    <div class="container mt-3 p-4 bg-white">
+        <h1 class="mb-2 text-center text-primary">Crear Nuevo Lugar de detención</h1>
+        @include('layouts.breadcrumbs', $breadcrumbs)
         <form id="create-establecimiento-form" action="{{ route('establecimientos.almacenar') }}" method="POST">
             @csrf
             <div class="card mb-3">
@@ -270,7 +271,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="EINF_gestion" class="form-label">Gestión</label>
-                        <input type="text" class="form-control @error('info.EINF_gestion') is-invalid @enderror" id="EINF_gestion" name="info[EINF_gestion]" value="{{ old('info.EINF_gestion') }}">
+                        <input type="text" class="form-control @error('info.EINF_gestion') is-invalid @enderror" id="EINF_gestion" name="info[EINF_gestion]" value="{{ (old('info.EINF_gestion'))? old('info.EINF_gestion'): date('Y')  }}">
                         @error('info.EINF_gestion')
                             <small class="text-danger">{{ $message }} </small>
                         @enderror
