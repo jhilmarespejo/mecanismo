@@ -121,9 +121,20 @@ class VisitaController extends Controller{
         }
     }
 
-    public function resumen() {
+    public function resumen(Request $request) {
+        $anioActual=0;
+            if( is_null($request->anio_actual ) ){
+                $anioActual = date('Y');
+            } else {
+                $anioActual = $request->anio_actual;
+            }
+            DB::enableQueryLog();
 
         $totalVisitas = DB::table('tipo_establecimientos as te')
+            ->select('te.TES_tipo', 'e.EST_nombre', 'v.VIS_tipo', 'e.EST_id','v.VIS_fechas',
+            DB::raw('COUNT(v."VIS_id") AS total_tipo_visitas'),
+            DB::raw('SUM(COUNT(v."VIS_id")) OVER(PARTITION BY te."TES_tipo") AS total_tipo_establecimiento'),
+            'total_establecimiento.total_establecimiento AS total_establecimiento')
             ->join('establecimientos as e', 'e.FK_TES_id', 'te.TES_id')
             ->join('visitas as v', 'v.FK_EST_id', 'e.EST_id')
             ->join(DB::raw('(SELECT e."EST_nombre",  COUNT(v."VIS_id") AS total_establecimiento
@@ -131,23 +142,22 @@ class VisitaController extends Controller{
                             JOIN visitas v ON v."FK_EST_id" = e."EST_id"
                             GROUP BY e."EST_nombre") total_establecimiento'),
                     'total_establecimiento.EST_nombre', 'e.EST_nombre')
-            ->select('te.TES_tipo', 'e.EST_nombre', 'v.VIS_tipo', 'e.EST_id','v.VIS_fechas',
-                    DB::raw('COUNT(v."VIS_id") AS total_tipo_visitas'),
-                    DB::raw('SUM(COUNT(v."VIS_id")) OVER(PARTITION BY te."TES_tipo") AS total_tipo_establecimiento'),
-                    'total_establecimiento.total_establecimiento AS total_establecimiento')
+            ->leftJoin(DB::raw('(SELECT COUNT(v."VIS_id") AS total_general
+                    FROM visitas v) total_general'), DB::raw('1'), '=', DB::raw('1'))
+            ->whereYear('v.VIS_fechas', $anioActual)
             ->groupBy('te.TES_tipo', 'e.EST_nombre', 'e.EST_id', 'v.VIS_tipo', 'total_establecimiento.total_establecimiento', 'total_general.total_general', 'v.VIS_fechas')
             ->orderBy('te.TES_tipo')
             ->orderBy('e.EST_nombre')
             ->orderBy('e.EST_id')
             ->orderBy('v.VIS_tipo')
-            ->leftJoin(DB::raw('(SELECT COUNT(v."VIS_id") AS total_general
-                                FROM visitas v) total_general'),
-                    DB::raw('1'), '=', DB::raw('1'))
             ->addSelect(DB::raw('total_general.total_general AS total_general'))
             ->get();
+
+     
             $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
-        // dump( $totalVisitas->toArray() );exit;
-        return view('visita.visita-resumen', compact('totalVisitas'));
+        $quries = DB::getQueryLog();
+        // dump($totalVisitas); exit;
+        return view('visita.visita-resumen', compact('totalVisitas', 'anioActual'));
 
     }
 

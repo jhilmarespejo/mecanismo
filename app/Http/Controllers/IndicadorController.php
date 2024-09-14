@@ -11,12 +11,7 @@ use Carbon\Carbon;
 
 class IndicadorController extends Controller
 {
-    public function actualizar( Request $request )
-    {
-
-
-        // $indicadores = ModIndicador::orderBy('IND_id', 'asc')->get()->toArray();
-
+    public function actualizar( Request $request ) {
         $categorias = ModIndicador::select(
             'indicadores.*',
             'historial_indicadores.HIN_respuesta',
@@ -29,18 +24,18 @@ class IndicadorController extends Controller
         return view('indicadores.actualizar', compact('categorias'));
     }
 
-    public function guardar(Request $request)
-    {
+    public function guardar(Request $request) {
         try {
-
+            
             $respuesta = $request->respuesta;
             $indicadorId = $request->FK_IND_id;
             $gestion = Carbon::now()->format('Y');
-
+            
             // Buscar si ya existe un registro con la misma respuesta y el mismo indicador
             $existingRecord = DB::table('historial_indicadores')
-                ->where('FK_IND_id', $indicadorId)
-                ->first();
+            ->where('FK_IND_id', $indicadorId)
+            ->first();
+            // dump($existingRecord);exit;
 
             if ($existingRecord) {
                 // Verificar si la gestión es la misma

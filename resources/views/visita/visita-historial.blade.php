@@ -21,6 +21,7 @@
 </style>
 
     <h2 class="text-center py-2">Historial de visitas</h2>
+    
     @if (Session::has('TES_tipo') && Session::has('EST_nombre') && Session::has('EST_id') )
         @php
             $EST_id = session('EST_id');

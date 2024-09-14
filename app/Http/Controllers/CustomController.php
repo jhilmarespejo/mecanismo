@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\isNull;
+
 // use Image;
 // use Intervention\Image\Facades\Image;
 // use Illuminate\Support\Facades\Redirect;
@@ -221,10 +223,12 @@ class CustomController extends Controller {
     public static function agruparPorTipoYNombre($datos)
     {
         // // Agrupar por TES_tipo y EST_nombre
-        // $agrupadosPorTipoYNombre = $coleccion->groupBy(['TES_tipo', 'EST_nombre'])->toArray();
-
         // // Devolver los resultados
         // return $agrupadosPorTipoYNombre;
+        if( !count($datos) > 0 ){
+            return ['resultado'=>0, 'total_geneal' => 0];
+        }
+
         $resultado = [];
 
         foreach ($datos as $item) {
@@ -233,7 +237,6 @@ class CustomController extends Controller {
             $totalGeneal= $item->total_general;
             $EST_id = $item->EST_id;
             $VIS_fechas = $item->VIS_fechas;
-            // dump($totalGeneal);
 
             // Asegurarse de que la clave TES_tipo exista
             if (!isset($resultado[$tesTipo])) {
@@ -263,8 +266,6 @@ class CustomController extends Controller {
             ];
         }
             return ['resultado'=>$resultado, 'total_geneal' => $totalGeneal];
-
-
     }
 
     // Agrupa los indicadores por categorias

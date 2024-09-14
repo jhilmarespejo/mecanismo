@@ -17,21 +17,21 @@ class ModEducacion extends Model
 
     public $timestamps = false;
     protected $guarded = [];
-    // protected static function boot() {
-    //     parent::boot();
-    //     static::creating(function ($model) {
-    //         $model->createdBy = Auth::id();
-    //         $model->createdAt = now();
-    //     });
-    //     static::updating(function ($model) {
-    //         $model->updatedBy = Auth::id();
-    //         $model->updatedAt = now();
-    //     });
-    //     // static::deleting(function ($model) {
-    //     //     $model->deletedBy = Auth::id();
-    //     //     $model->deletedAt = now();
-    //     // });
-    // }
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->createdBy = Auth::id();
+            $model->createdAt = now();
+        });
+        static::updating(function ($model) {
+            $model->updatedBy = Auth::id();
+            $model->updatedAt = now();
+        });
+        // static::deleting(function ($model) {
+        //     $model->deletedBy = Auth::id();
+        //     $model->deletedAt = now();
+        // });
+    }
 
 
 }

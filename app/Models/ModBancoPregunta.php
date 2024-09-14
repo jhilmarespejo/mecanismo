@@ -17,15 +17,7 @@ class ModBancoPregunta extends Model
     protected $fillable = ['BCP_id', 'BCP_pregunta', 'BCP_tipoRespuesta', 'FK_CAT_id',
 'BCP_complemento', 'BCP_aclaracion', 'BCP_opciones', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt', 'deletedBy', 'deletedAt'];
 
-    public function categoria()
-    {
-        return $this->belongsTo(Categoria::class);
-    }
-
-    public function opcion()
-    {
-        return $this->hasMany(Opcion::class);
-    }
+    
 
 
 }

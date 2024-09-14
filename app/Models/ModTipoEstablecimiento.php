@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ModTipoEstablecimiento extends Model
 {
@@ -24,7 +25,7 @@ class ModTipoEstablecimiento extends Model
             $model->createdAt = now();
         });
         static::updating(function ($model) {
-            $model->createdBy = Auth::id();
+            $model->upatedBy = Auth::id();
             $model->updatedAt = now();
         });
         // static::deleting(function ($model) {

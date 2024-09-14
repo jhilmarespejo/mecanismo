@@ -24,7 +24,7 @@ class ModSeguimientoRecomendacion extends Model
             $model->createdAt = now();
         });
         static::updating(function ($model) {
-            $model->createdBy = Auth::id();
+            $model->upatedBy = Auth::id();
             $model->updatedAt = now();
         });
     }
