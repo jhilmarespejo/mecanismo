@@ -1,6 +1,6 @@
 
 @extends('layouts.app')
-@section('title', 'Mód Educativo')
+@section('title', 'Módulo Educativo')
 @section('content')
 <div class="container mt-3 p-4 bg-white">
     <h1 class="text-primary fs-2 text-center">Crear Nuevo Registro de Educación</h1>

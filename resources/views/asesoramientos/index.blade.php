@@ -56,6 +56,7 @@ $(document).ready(function(){
 
 
         <a href="/asesoramientos/create" class="btn btn-primary btn-lg text-shadow box-shadow">Nueva actividad de asesoramiento</a>
+        
         @if (count($asesoramientos)>0)
         <div class="accordion" id="accordionMandato">
             @php $a = 0; @endphp

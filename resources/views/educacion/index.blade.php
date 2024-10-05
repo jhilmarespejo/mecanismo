@@ -68,23 +68,23 @@
         <tbody>
             @foreach($educacions as $educacion)
             <tr>
-                <td>{{ $educacion->edu_id }}</td>
-                <td>{{ $educacion->edu_tema }}</td>
-                <td>{{ $educacion->edu_beneficiarios }}</td>
-                <td>{{ $educacion->edu_cantidad_beneficiarios }}</td>
-                <td>{{ $educacion->edu_ciudad }}</td>
-                <td>{{ $educacion->edu_medio_verificacion }}</td>
+                <td>{{ $educacion->EDU_id }}</td>
+                <td>{{ $educacion->EDU_tema }}</td>
+                <td>{{ $educacion->EDU_beneficiarios }}</td>
+                <td>{{ $educacion->EDU_cantidad_beneficiarios }}</td>
+                <td>{{ $educacion->EDU_ciudad }}</td>
+                <td>{{ $educacion->EDU_medio_verificacion }}</td>
                 <td>
-                    <a href="{{ route('educacion.edit', $educacion->edu_id) }}" class="btn btn-sm col-8 btn-warning mb-2 box-shadow">
+                    <a href="{{ route('educacion.edit', $educacion->EDU_id) }}" class="btn btn-sm col-8 btn-warning mb-2 box-shadow">
                         <i class="bi bi-pencil-square"></i>
                     </a>
-                    {{-- <form action="{{ route('educacion.destroy', $educacion->edu_id) }}" method="POST" class="d-inline">
+                    <form action="{{ route('educacion.destroy', $educacion->EDU_id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-sm col-8 btn-danger box-shadow">
                           <i class="fas fa-trash-alt"></i>Eliminar
                       </button>
-                    </form> --}}
+                    </form>
                 </td>
             </tr>
             @endforeach

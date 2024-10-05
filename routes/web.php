@@ -169,17 +169,12 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
  Route::delete('users/{id}', [UsersController::class, 'destroy'])->middleware('auth')->name('users.destroy');
  Route::post('users/changeState', [UsersController::class, 'changeState'])->middleware('auth')->name('users.changeState');
 
+//----MODULO DE INDICADORES --------------------------
 
- // ---- MÓDULO DE ASESORAMIENTO ----------
-
-
-// Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth');
-// Route::post('/asesoramientos/crear', [AsesoramientoController::class, 'crear'])->middleware('auth');
-// Route::post('/asesoramientos/store', [AsesoramientoController::class, 'store'])->middleware('auth');
-// Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth');
-// Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth');
-// Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth');
-// Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth');
+Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth');
+Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth');
+Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('guardar.indicadores');
+// ---- MÓDULO DE ASESORAMIENTO ----------
 
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');
 Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth')->name('asesoramientos.create');
@@ -189,22 +184,19 @@ Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit']
 Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth')->name('asesoramientos.update');
 Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth')->name('asesoramientos.destroy');
 
-
-//----MODULO DE INDICADORES --------------------------
-
-Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth');
-Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth');
-Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('guardar.indicadores');
-
 //--------MODULO DE EDUCACION -------
 // Route::resource('educacion', EducacionController::class)->middleware('auth');
 
-// Ruta personalizada para el index que recibe un ID
-Route::get('educacion/index/{id}', [EducacionController::class, 'index'])->name('educacion.index')->middleware('auth');
-// Las demás rutas del resource (store, create, show, etc.)
-Route::resource('educacion', EducacionController::class)->except('index')->middleware('auth');
-
-
+Route::middleware('auth')->group(function () {
+    Route::get('/educacion', [EducacionController::class, 'index'])->name('educacion.index');
+    Route::get('/educacion/create', [EducacionController::class, 'create'])->name('educacion.create');
+    Route::post('/educacion', [EducacionController::class, 'store'])->name('educacion.store');
+    Route::get('/educacion/{id}', [EducacionController::class, 'show'])->name('educacion.show');
+    Route::get('/educacion/{id}/edit', [EducacionController::class, 'edit'])->name('educacion.edit');
+    
+    Route::put('/educacion/{id}', [EducacionController::class, 'update'])->name('educacion.update');
+    Route::delete('/educacion/{id}', [EducacionController::class, 'destroy'])->name('educacion.destroy');
+});
 // AJUSTES
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
 
