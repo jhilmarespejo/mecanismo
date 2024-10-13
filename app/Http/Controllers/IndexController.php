@@ -18,32 +18,55 @@ class IndexController extends Controller
      */
     public function dashboard(){
         DB::enableQueryLog();
-        // enviar los tipos de establecimientos
-        $tipos = ModTipoEstablecimiento::select('TES_tipo', 'TES_id')->get()->toArray();
-
-        $tipos_establecimientos = json_encode($tipos);
+        // enviar los tipos de establecimientos al mapa
 
         $establecimientosPorTipo = ModTipoEstablecimiento::from('tipo_establecimientos as tes')->select('tes.TES_tipo','TES_id', DB::raw('COUNT("establecimientos"."EST_id") as total'))
         ->leftJoin('establecimientos', 'tes.TES_id', '=', 'establecimientos.FK_TES_id')
         ->groupBy('tes.TES_id', 'TES_id', 'tes.TES_tipo')
         ->get()->toArray();
-        $establecimientosPorTipo = json_encode($establecimientosPorTipo);
 
-        $establecimientosPorDepartamento = ModEstablecimiento::select('EST_departamento', DB::raw('COUNT("EST_id") as total_establecimientos'))
-            ->groupBy('EST_departamento')
-            ->get();
+        $porDepartamento  = ModEstablecimiento::from('establecimientos as e')->select(
+            'e.EST_departamento',
+            'tipo_establecimientos.TES_tipo',
+            'tipo_establecimientos.TES_id',
+            DB::raw('COUNT("e"."EST_id") as cantidad')
+        )
+        ->join('tipo_establecimientos', 'e.FK_TES_id', 'tipo_establecimientos.TES_id')
+        ->groupBy('e.EST_departamento', 'tipo_establecimientos.TES_tipo', 'tipo_establecimientos.TES_id')
+        ->orderBy('e.EST_departamento')
+        ->get();
 
-        $establecimientosPorDepartamento = collect($establecimientosPorDepartamento)->pluck('total_establecimientos', 'EST_departamento')->map(function ($value) {
-            return (string) $value;
-        })->all();
 
-       $establecimientosPorDepartamento = json_encode($establecimientosPorDepartamento, JSON_PRETTY_PRINT);
+        $establecimientosPorDepartamento = [];
 
-        // $quries = DB::getQueryLog();
-        // dump( $establecimientosPorDepartamento );
-        // exit;
+        foreach ($porDepartamento as $item) {
+            $departamento = $item->EST_departamento;
+            $tipoNombre = $item->TES_tipo;
+            $tipoId = $item->TES_id;
+            $cantidad = $item->cantidad;
 
-    return view('index.panel', compact( 'tipos_establecimientos', 'establecimientosPorTipo', 'establecimientosPorDepartamento' ));
+            // Inicializa el departamento si no existe aún en el array
+            if (!isset($establecimientosPorDepartamento[$departamento])) {
+                $establecimientosPorDepartamento[$departamento] = [
+                    'total' => 0,
+                    'tipos' => []
+                ];
+            }
+
+            // Sumar al total de establecimientos en el departamento
+            $establecimientosPorDepartamento[$departamento]['total'] += $cantidad;
+
+            // Agregar el tipo de establecimiento y su información al departamento correspondiente
+            $establecimientosPorDepartamento[$departamento]['tipos'][] = [
+                'TES_id' => $tipoId,
+                'TES_tipo' => $tipoNombre,
+                'cantidad' => $cantidad
+            ];
+        }
+
+    // dump($establecimientosPorDepartamento, $establecimientosPorTipo);//exit;
+
+    return view('index.panel', compact( 'establecimientosPorDepartamento', 'establecimientosPorTipo' ));
     }
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */
