@@ -63,10 +63,10 @@ class IndexController extends Controller
                 'cantidad' => $cantidad
             ];
         }
-
+        $totalEstablecimientos = array_sum(array_column($establecimientosPorDepartamento, 'total'));
     // dump($establecimientosPorDepartamento, $establecimientosPorTipo);//exit;
 
-    return view('index.panel', compact( 'establecimientosPorDepartamento', 'establecimientosPorTipo' ));
+    return view('index.panel', compact( 'establecimientosPorDepartamento', 'establecimientosPorTipo', 'totalEstablecimientos' ));
     }
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */

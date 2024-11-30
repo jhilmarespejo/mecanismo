@@ -20,11 +20,15 @@
     <div class="col-md-3 col-sm-12 order-md-1 order-2 border border-2" style="height: 603px;">
         {{-- <div class="btn btn-primary btn-sm box-shadow mt-3 text-center">
             <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
-        </div> --}}
+        </div> --}} 
+        <div class="row p-3 m-1 border-bottom text-center">
+            <h5> Lugares de deteción en total: </h5>
+            <h3 class="bg-info p-4 rounded text-shadow"> {{ $totalEstablecimientos }} </h3>
+        </div>
         <div class="container p-0" >
             <div class="buscador">
-                <label for="input_establecimiento" class="form-label">Establecimiento:</label>
-                <input type="text" id="input_establecimiento" class="form-control" >
+                <label for="input_establecimiento" class="form-label">Lugares de detención:</label>
+                <input type="text" id="input_establecimiento" class="form-control" placeholder="Buscar">
             </div>
             {{-- @include('establecimientos.establecimientos-nuevo') --}}
             <div class="spinner-border text-primary text-center d-none" role="status" id="spiner-estab"> </div>
