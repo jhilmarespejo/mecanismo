@@ -94,13 +94,13 @@
                 <ul class="navbar-nav" id="nav_2">
                 <li class="nav-item p-1 px-3">
 
-                    <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Atrás</a>
+                    <a href="javascript:history.back()" role="button" class="text-decoration-none"> <i class="bi bi-arrow-90deg-left"></i> Página anterior</a>
                 </li>
                 <li class="nav-item p-1 px-3" id="btn_imprimir">
                     <a class="text-decoration-none" id="imprimir_formulario"><i class="bi bi-printer"></i> Imprimir</a>
                 </li>
                 <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/cuestionario/responder/{{$FRM_id}}/{{$AGF_id}}" >
+                    <a class="text-decoration-none" href="/cuestionario/responder/{{$VIS_id}}/{{$FRM_id}}/{{$AGF_id}}" >
                         <i class="bi bi-pencil-square"></i> Responder
                     </a>
                 </li>

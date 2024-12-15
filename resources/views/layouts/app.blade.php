@@ -14,7 +14,7 @@
 
         <!-- Styles -->
         {{-- <link rel=StyleSheet href="/bootstrap5/css/custom.css" type="text/css"> --}}
-        <link rel=StyleSheet href="/bootstrap5/css/bootstap_personalized.css" type="text/css">
+        <link rel=StyleSheet href="/bootstrap5/css/bootstrap.min.css" type="text/css">
         {{-- <link rel=StyleSheet href="/bootstrap5/css/custom2.css" type="text/css"> --}}
         {{-- <script
             src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -44,7 +44,7 @@
 
         {{-- @laravelPWA --}}
     </head>
-    <body class="font-sans antialiased bg-secondary bg-gradient">
+    <body class="font-sans antialiased bg-light bg-gradient">
         {{-- <x-jet-banner /> --}}
         @livewire('navigation-menu')
 
@@ -111,7 +111,10 @@
         .box-shadow{
             box-shadow: 1px 1px 3px black;
         }
-        
+        /* body{
+            overflow-y: hidden;
+        } */
+
     </style>
 
     </body>

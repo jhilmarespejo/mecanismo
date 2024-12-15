@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria};
+use App\Models\{ModRecomendacion, ModVisita, ModBancoPregunta, ModFormulario, ModCategoria, ModTipoEstablecimiento, ModEstablecimiento};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,36 +18,55 @@ class IndexController extends Controller
      */
     public function dashboard(){
         DB::enableQueryLog();
-        // Mostrar cantidad total de recomendaciones, cumplidas e incumplidas por establecomiento
-        // $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
-        // ->select( 'e.EST_nombre','e.EST_id',
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
-        //     DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" ') )
-        // ->leftJoin( 'formularios as f', 'f.FRM_id', 'r.FK_FRM_id' )
-        // ->leftJoin( 'establecimientos as e', 'e.EST_id', 'f.FK_EST_id' )
-        // ->groupBy('e.EST_nombre','e.EST_id')->get();
+        // enviar los tipos de establecimientos al mapa
 
-        $recomendaciones = ModRecomendacion::from( 'recomendaciones as r' )
-        ->select( 'e.EST_nombre','e.EST_id',
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 0)::int ) as "incumplido"'),
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 1)::int ) as "cumplido" '),
-            DB::raw('SUM( ("r"."REC_cumplimiento" = 2)::int ) as "parcial" '),
-            DB::raw('COUNT( ("r"."REC_id")::int ) as "total" ') )
-        ->leftJoin( 'visitas as v', 'v.VIS_id', 'r.FK_VIS_id' )
-        ->leftJoin( 'establecimientos as e', 'e.EST_id', 'v.FK_EST_id' )
-        // ->where( 'e.EST_id', $id )
-        ->groupBy('e.EST_nombre','e.EST_id')->get();
+        $establecimientosPorTipo = ModTipoEstablecimiento::from('tipo_establecimientos as tes')->select('tes.TES_tipo','TES_id', DB::raw('COUNT("establecimientos"."EST_id") as total'))
+        ->leftJoin('establecimientos', 'tes.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->groupBy('tes.TES_id', 'TES_id', 'tes.TES_tipo')
+        ->get()->toArray();
 
-        $formularios = ModFormulario::select(DB::raw('DISTINCT("FRM_titulo")'))
-        ->orderBy('FRM_titulo')
+        $porDepartamento  = ModEstablecimiento::from('establecimientos as e')->select(
+            'e.EST_departamento',
+            'tipo_establecimientos.TES_tipo',
+            'tipo_establecimientos.TES_id',
+            DB::raw('COUNT("e"."EST_id") as cantidad')
+        )
+        ->join('tipo_establecimientos', 'e.FK_TES_id', 'tipo_establecimientos.TES_id')
+        ->groupBy('e.EST_departamento', 'tipo_establecimientos.TES_tipo', 'tipo_establecimientos.TES_id')
+        ->orderBy('e.EST_departamento')
         ->get();
 
-        // $quries = DB::getQueryLog();
-        // dump( $quries );
-        // exit;
 
-    return view('index.panel', compact( 'recomendaciones', 'formularios' ));
+        $establecimientosPorDepartamento = [];
+
+        foreach ($porDepartamento as $item) {
+            $departamento = $item->EST_departamento;
+            $tipoNombre = $item->TES_tipo;
+            $tipoId = $item->TES_id;
+            $cantidad = $item->cantidad;
+
+            // Inicializa el departamento si no existe aún en el array
+            if (!isset($establecimientosPorDepartamento[$departamento])) {
+                $establecimientosPorDepartamento[$departamento] = [
+                    'total' => 0,
+                    'tipos' => []
+                ];
+            }
+
+            // Sumar al total de establecimientos en el departamento
+            $establecimientosPorDepartamento[$departamento]['total'] += $cantidad;
+
+            // Agregar el tipo de establecimiento y su información al departamento correspondiente
+            $establecimientosPorDepartamento[$departamento]['tipos'][] = [
+                'TES_id' => $tipoId,
+                'TES_tipo' => $tipoNombre,
+                'cantidad' => $cantidad
+            ];
+        }
+        $totalEstablecimientos = array_sum(array_column($establecimientosPorDepartamento, 'total'));
+    // dump($establecimientosPorDepartamento, $establecimientosPorTipo);//exit;
+
+    return view('index.panel', compact( 'establecimientosPorDepartamento', 'establecimientosPorTipo', 'totalEstablecimientos' ));
     }
 
     /* Busca los ids que coincidan con el nombre del formulario seleccionado */

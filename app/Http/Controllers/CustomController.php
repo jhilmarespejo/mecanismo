@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Validator;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\isNull;
+
 // use Image;
 // use Intervention\Image\Facades\Image;
 // use Illuminate\Support\Facades\Redirect;
@@ -36,6 +38,7 @@ class CustomController extends Controller {
         // Si RBF_orden es igual, ordena por RBF_id
         return $a['RBF_id'] - $b['RBF_id'];
     }
+
     /* Elimina elementos vacios de un array */
     public static function arrayNoVacio($array) {
         return !empty($array);
@@ -105,6 +108,189 @@ class CustomController extends Controller {
         echo '</pre>';
         echo '</div>';
     }
-}
 
+    //Agrupa las recomendaciones con sus respectivos archivos adjuntos
+    public static function agruparRecomendacionesImagenes($array) {
+        $result = [];
+        foreach ($array as $item) {
+            $recId = $item['REC_id'];
+
+            if (!isset($result[$recId])) {
+                $result[$recId] = [
+                    'REC_id' => $item['REC_id'],
+                    'REC_recomendacion' => $item['REC_recomendacion'],
+                    'REC_fechaRecomendacion' => $item['REC_fechaRecomendacion'],
+                    'REC_cumplimiento' => $item['REC_cumplimiento'],
+                    'REC_fechaCumplimiento' => $item['REC_fechaCumplimiento'],
+                    'REC_autoridad_competente' => $item['REC_autoridad_competente'],
+                    'archivos' => []
+                ];
+            }
+
+            if ($item['ARC_id'] !== null) {
+                $result[$recId]['archivos'][] = [
+                    'ARC_id' => $item['ARC_id'],
+                    'FK_REC_id' => $item['FK_REC_id'],
+                    'ARC_descripcion' => $item['ARC_descripcion'],
+                    'ARC_ruta' => $item['ARC_ruta'],
+                    'ARC_extension' => $item['ARC_extension'],
+                    'ARC_formatoArchivo' => $item['ARC_formatoArchivo'],
+                ];
+            }
+        }
+        return array_values($result);
+    }
+    //Agrupa los seguimientos de las recomendaciones con sus respectivos archivos adjuntos
+    public static function agruparSeguimientosImagenes($array) {
+        $nuevoArray = [];
+
+        foreach ($array as $item) {
+            $fk_rec_id = $item['FK_REC_id'];
+
+            // Agrupar por FK_REC_id
+            if (!isset($nuevoArray[$fk_rec_id])) {
+                $nuevoArray[$fk_rec_id] = [];
+            }
+
+            $srec_id = $item['SREC_id'];
+
+            // Agrupar por SREC_id dentro de FK_REC_id
+            if (!isset($nuevoArray[$fk_rec_id][$srec_id])) {
+                $nuevoArray[$fk_rec_id][$srec_id] = [
+                    'SREC_id' => $item['SREC_id'],
+                    'SREC_descripcion' => $item['SREC_descripcion'],
+                    'SREC_fecha_seguimiento' => $item['SREC_fecha_seguimiento'],
+                    'FK_REC_id' => $item['FK_REC_id'],
+                    'archivos' => []
+                ];
+            }
+
+            // Agregar imágenes si SREC_id es igual a FK_SREC_id
+            if ($item['SREC_id'] === $item['FK_SREC_id']) {
+                $imagen = [
+                    'ARC_id' => $item['ARC_id'],
+                    'ARC_formatoArchivo' => $item['ARC_formatoArchivo'],
+                    'ARC_descripcion' => $item['ARC_descripcion'],
+                    'ARC_ruta' => $item['ARC_ruta'],
+                    'ARC_extension' => $item['ARC_extension'],
+                    'FK_SREC_id' => $item['FK_SREC_id']
+                ];
+
+                $nuevoArray[$fk_rec_id][$srec_id]['archivos'][] = $imagen;
+            }
+        }
+
+        return $nuevoArray;
+    }
+
+    public static function colorTipoVisita( $tipoVisita ){
+        // dump($tipoVisita);exit;
+        if($tipoVisita == 'Visita en profundidad'){
+            $colorVisita = 'text-white bg-success';
+        }elseif($tipoVisita == 'Visita Temática') {
+            $colorVisita = 'text-white bg-danger';
+        }elseif($tipoVisita == 'Visita de seguimiento'){
+            $colorVisita = 'text-white bg-primary';
+        }elseif($tipoVisita == 'Visita reactiva'){
+            $colorVisita = 'text-white bg-info';
+        }elseif($tipoVisita == 'Visita Ad hoc'){
+            $colorVisita = 'text-white bg-warning';
+        }elseif( is_null($tipoVisita) ){
+            return redirect()->route('panel');
+        }
+        return $colorVisita;
+    }
+
+    //Ordena un array de preguntas seguidas de sus respectivas Categorias y Subcategorías
+    public static function ordenaPreguntasCategorias( $preguntas ){
+        $preguntasOrdenadas = [];
+
+        foreach ($preguntas as $item) {
+            if ($item['categoria'] && $item['subcategoria']) {
+                // Si ambos tienen valor, intercambiarlos
+                $categoria = $item['categoria'];
+                $item['categoria'] = $item['subcategoria'];
+                $item['subcategoria'] = $categoria;
+            }
+            $preguntasOrdenadas[] = $item;
+        }
+
+        return $preguntasOrdenadas;
+
+    }
+
+    //Agrupar las visitas por tipo y nombre
+    public static function agruparPorTipoYNombre($datos)
+    {
+        // // Agrupar por TES_tipo y EST_nombre
+        // // Devolver los resultados
+        // return $agrupadosPorTipoYNombre;
+        if( !count($datos) > 0 ){
+            return ['resultado'=>0, 'total_geneal' => 0];
+        }
+
+        $resultado = [];
+
+        foreach ($datos as $item) {
+            $tesTipo = $item->TES_tipo;
+            $estNombre = $item->EST_nombre;
+            $totalGeneal= $item->total_general;
+            $EST_id = $item->EST_id;
+            $VIS_fechas = $item->VIS_fechas;
+
+            // Asegurarse de que la clave TES_tipo exista
+            if (!isset($resultado[$tesTipo])) {
+                $resultado[$tesTipo] = [
+                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento,
+                    'establecimientos' => [],
+                ];
+                // $resultado['total_general'] = $totalGeneal;
+            }
+
+            // Asegurarse de que la clave EST_nombre exista dentro de TES_tipo
+            if (!isset($resultado[$tesTipo]['establecimientos'][$estNombre])) {
+                $resultado[$tesTipo]['establecimientos'][$estNombre] = [
+                    'total_establecimiento' => $item->total_establecimiento,
+                    'EST_id' => $EST_id,
+
+                    'visitas' => []
+                ];
+            }
+
+            // Añadir la visita al arreglo correspondiente
+            $resultado[$tesTipo]['establecimientos'][$estNombre]['visitas'][] = [
+                'VIS_tipo' => $item->VIS_tipo,
+                'total_tipo_visitas' => $item->total_tipo_visitas,
+                'VIS_fechas' => $VIS_fechas,
+
+            ];
+        }
+            return ['resultado'=>$resultado, 'total_geneal' => $totalGeneal];
+    }
+
+    // Agrupa los indicadores por categorias
+    public static function organizarIndicadores($indicadores) {
+        $result = [];
+
+        foreach ($indicadores as $indicador) {
+            $categoria = $indicador['IND_categoria'];
+            $indicadorClave = $indicador['IND_indicador'];
+
+            // Inicializar el array de la categoría si no existe
+            if (!isset($result[$categoria])) {
+                $result[$categoria] = [];
+            }
+
+            // Inicializar el array del indicador si no existe
+            if (!isset($result[$categoria][$indicadorClave])) {
+                $result[$categoria][$indicadorClave] = [];
+            }
+
+            // Añadir el indicador al array correspondiente
+            $result[$categoria][$indicadorClave][] = $indicador;
+        }
+
+        return $result;
+    }
+}
 

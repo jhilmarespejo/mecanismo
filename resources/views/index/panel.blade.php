@@ -1,85 +1,157 @@
-
 @extends('layouts.app')
 @section('title', 'Panel')
 
-
 @section('content')
-{{-- <link rel="stylesheet" href="/tinycarousel/tinycarousel.css" type="text/css" media="screen"/> --}}
-{{-- <script type="text/javascript" src="/tinycarousel/jquery.tinycarousel.min.js"></script> --}}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+    #map {
+      height: 600px;
+    }
+    li.tipos_e:hover{
+        background-color: rgb(138, 196, 215);
+        color: white;
+        font-size: 105%;
+        cursor: pointer;
+    }
+    .info-div { width: 150px !important;}
+</style>
 
-<script src="charts/highcharts.js"></script>
-<script src="charts/exporting.js"></script>
-<script src="charts/export-data.js"></script>
-{{-- <script src="charts/variable-pie.js"></script> --}}
-<script src="charts/accessibility.js"></script>
-
-{{-- <div class="py-12 container"> --}}
-{{-- <div class="mx-0 text-center p-3 container-fluid"> --}}
-<div class="container">
-    <h4 class="mt-4 text-center py-4">Estadísticas</h4>
-    {{-- <div class="row">
-        @include('index.recomendaciones')
-    </div> --}}
-
-    <div class="row sm-m-2 m-2">
-        <div class="col-sm-6 border">@include('index.mdl-visitas')</div>
-        <div class="col-sm-6 border">@include('index.mdl-tipos')</div>
+<div class="row">
+    <div class="col-md-3 col-sm-12 order-md-1 order-2 border border-2" style="height: 603px;">
+        {{-- <div class="btn btn-primary btn-sm box-shadow mt-3 text-center">
+            <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
+        </div> --}} 
+        <div class="row p-3 m-1 border-bottom text-center">
+            <h5> Lugares de deteción en total: </h5>
+            <h3 class="bg-info p-4 rounded text-shadow"> {{ $totalEstablecimientos }} </h3>
+        </div>
+        <div class="container p-0" >
+            <div class="buscador">
+                <label for="input_establecimiento" class="form-label">Lugares de detención:</label>
+                <input type="text" id="input_establecimiento" class="form-control" placeholder="Buscar">
+            </div>
+            {{-- @include('establecimientos.establecimientos-nuevo') --}}
+            <div class="spinner-border text-primary text-center d-none" role="status" id="spiner-estab"> </div>
+            <div id="establecimientos" class="mt-3"></div>
+        </div>
     </div>
-    <div class="row m-2">
-        <div class="col-sm-6 border">@include('index.mdl-entrevistados')</div>
-        <div class="col-sm-6 border">@include('index.mdl-hacinamiento')</div>
+    <div class="col-md-9 col-sm-12 order-md-2 order-1 border border-2">
+        <div id="map" style="height: 600px;"></div>
     </div>
-
-    {{-- <div class="row mt-4">
-        @include('index.formularios')
-    </div> --}}
-
-    {{-- CONSULTA DINAMICA --}}
-    {{-- <div class="row mt-4">
-        @include('index.dinamico')
-    </div> --}}
 </div>
-{{-- </div> --}}
 
-{{-- M O D A L S --}}
-<!-- Modal -->
-{{-- <div class="modal fade" id="modal_1" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-visitas')
-</div>
-<div class="modal fade" id="modal_2" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-tipos')
-</div>
-<div class="modal fade" id="modal_3" tabindex="-1" aria-hidden="true">
-    @include('index.mdl-entrevistados')
-</div> --}}
-
-
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="text/javascript">
-    // $(document).ready(function(){
-    //     $('.slider').tinycarousel();
-    // });
+    $(document).ready(function () {
+        // Crear un mapa centrado en Bolivia
+        var cantidades = <?php echo json_encode($establecimientosPorDepartamento); ?>;
+        var map = L.map('map').setView([-16.2902, -63.5887], 6);
+
+        // Agregar una capa de mapa base de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Cargar el archivo GeoJSON de los departamentos de Bolivia
+        fetch('js/bo.json')
+        .then(response => response.json())
+        .then(data => {
+            // Añadir la capa GeoJSON al mapa
+            var geojsonLayer = L.geoJSON(data, {
+                onEachFeature: function(feature, layer) {
+                    var departamento = feature.properties.name;
+
+                    // Obtener información del departamento
+                    var departamentoInfo = `<b>${departamento}</b>`;
+
+                    // Obtener los tipos y cantidades para este departamento
+                    var tiposEstablecimientos = cantidades[departamento] ? cantidades[departamento]['tipos'] : [];
+
+                    departamentoInfo += '<p class="m-0 p-0">Seleccione una opción:</p><ul class="p-1">';
+                    tiposEstablecimientos.forEach(function(establecimiento) {
+                        departamentoInfo += `<li class="tipos_e text-primary" onclick="mostrarContenido(${establecimiento.TES_id}, '${departamento}', '${establecimiento.TES_tipo}')" >${establecimiento.TES_tipo} (${establecimiento.cantidad})</li>`;
+                    });
+                    departamentoInfo += '</ul>';
+
+                    layer.bindPopup(departamentoInfo);
+
+                    // Obtener coordenadas del departamento
+                    var coords = layer.getBounds().getCenter();
+
+                    // Obtener el total de establecimientos en el departamento
+                    var totalEstablecimientos = cantidades[departamento] ? cantidades[departamento]['total'] : 0;
+
+                    var icon = L.divIcon({
+                        className: 'info-div',
+                        html: `<div class="border-start border-5 border-primary" style="height:30px" >
+                                    <p class="m-0 p-0 bg-light box-shadow rounded-end">Lugares de Detención: <b>${totalEstablecimientos}</b></p>
+                                </div>`,
+                        iconAnchor: [0, 0],
+                        popupAnchor: [0, 0]
+                    });
+
+                    L.marker([coords.lat, coords.lng - 0.5], {icon: icon}).addTo(map);
+
+                    layer.on('mouseover', function() {
+                        layer.setStyle({
+                            fillColor: 'lightblue' // Cambia el color de relleno del departamento al pasar el mouse
+                        });
+                    });
+
+                    // Al sacar el mouse del departamento, vuelve al color original
+                    layer.on('mouseout', function() {
+                        layer.setStyle({
+                            fillColor: 'blue' // Restaura el color de relleno del departamento al sacar el mouse
+                        });
+                    });
+                }
+            }).addTo(map);
+        });
+    });
+
+    //funcion ajax para buscar y mostrar los establecimientos que pertenecen al TES_id enviado desde el MAPA
+    function mostrarContenido(TES_id, EST_departamento, TES_tipo ) {
+        // Limpiar el input de búsqueda
+        $('#input_establecimiento').val('');
+        $.ajax({
+            async: true,
+            headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+            url: "/establecimientos/listarSegunTipo",
+            type: 'post',
+            data: {TES_id, EST_departamento,TES_tipo},
+            beforeSend: function () {
+                $('#spiner-estab').removeClass('d-none');
+            },
+            success: function (data, response) {
+                $('#establecimientos').html(data);
+                $('#spiner-estab').addClass('d-none');
+            },
+            error: function(response){ console.log(response) }
+        });
+    }
+
+    //Ajax para buscar establecimientos con el input
+    $('#input_establecimiento').on('input', function() {
+        if ($(this).val().length > 3) {
+            $.ajax({
+                async: true,
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                url: "/establecimientos/listarSegunTipo",
+                type: 'post',
+                data: { EST_nombre: $(this).val() },
+                beforeSend: function () {
+                    $('#spiner-estab').removeClass('d-none');
+                },
+                success: function (data, response) {
+                    $('#establecimientos').html(data);
+                    $('#spiner-estab').addClass('d-none');
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
+    });
 </script>
 
 @endsection
-
-{{--
-    1. Cantida de lugares visitados
-    2. Desagregado por tipos de lugares visitados
-    3. Cantidad de entrevistados por sexo
-    4. Cantidad de visitas
-    5. Tipos de visitas:
-        5.1. visitas en profundidad se ve todo, personal
-        5.2 visitas tematicas, tema esoecifico como extorsion o ascinamiento
-        5.3. Visitas de seguimiento general mente depues de las visitas en profundidad en funcion a las recomendaciones realizadas en las visitas de profundidad
-        5.4. Visitas Adhoc. Visitas no planificadas cuando sucede un evento mayor como un incendio o algo fortuito, que realiza
-        5.5 Visitas reactivas. Despues de una queja realizada por un ppl, familiar u ong
-
-
-CANTIDAD DE VISITAS con el cuadro word
-TIPOS DE VISITAS
-CANTIDAD DE ENTREVISTADOS
---}}
-{{-- penitenciarias y carceletas 21
-
-celdas policiales 10 --}}

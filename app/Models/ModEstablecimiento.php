@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ModEstablecimiento extends Model
 {
@@ -14,10 +15,30 @@ class ModEstablecimiento extends Model
     public $incrementing = true;
 
 
-    const CREATED_AT = 'createdAt';
-    const UPDATED_AT = 'updatedAt';
-
-    protected $fillable = ['EST_nombre', 'EST_direccion', 'EST_normativaInterna', 'EST_telefonoContacto', 'EST_genero', 'EST_grupoGeneracional', 'EST_poblacion', 'EST_superficie', 'EST_superficieConstruida', 'FK_CID_id', 'FK_TES_id', 'FK_NSG_id', 'EST_coberturaMunicipios'];
+    public $timestamps = false;
+    protected $guarded = [];
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($model) {
+            $model->createdBy = Auth::id();
+            $model->createdAt = now();
+        });
+        static::updating(function ($model) {
+            $model->upatedBy = Auth::id();
+            $model->updatedAt = now();
+        });
+        // static::deleting(function ($model) {
+        //     $model->deletedBy = Auth::id();
+        //     $model->deletedAt = now();
+        // });
+    }
 
 
 }
+
+
+
+
+
+
+

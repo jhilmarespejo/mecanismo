@@ -1,45 +1,87 @@
-<nav id="nav1" class="navbar navbar-expand-md navbar-light border-bottom sticky-top bg-light">
-    <div class="container">
+<nav id="nav1" class="navbar navbar-expand-md navbar-secondary border-bottom sticky-top bg-secondary ">
+    <div class="container text-light">
         <!-- Logo -->
         <span class="navbar-brandx col" href="/">
             <x-jet-application-mark width="36" />
         </span>
         @isset( Auth::user()->rol )
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler text-light text-shadow btn btn-ligth" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <i class="bi bi-menu-button-wide-fill"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav me-auto fs-5">
+                    <ul class="navbar-nav me-auto fs-5 ">
                         {{-- <li class="nav-item bg-danger">
                             <a class="nav-link active" href="/panel">MNP V2</a>
                         </li> --}}
 
-                        <x-jet-nav-link href="{{ route('panel') }}" :active="request()->routeIs('panel')">
+                        <x-jet-nav-link href="{{ route('panel') }}" class="text-light text-shadow" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="/establecimientos">Establecimientos</a>
-                            </li>
+
 
                             @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Idicadores
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
+                                        <li><a class="dropdown-item" href="/indicadores/panel">Panel de datos</a></li>
+                                        <li><a class="dropdown-item" href="/indicadores/actualizar">Actualizar datos</a></li>
+
+                                    </ul>
+                                </li>
+                                @endif
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/bancoDePreguntas">Banco de Preguntas</a>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/visita/resumen">Visitas</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/categorias">Categorías</a>
+                                    <a class="nav-link text-light text-shadow" href="/recomendacionesEstatales">Recomendaciones</a>
+                                </li>
+                                @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Administración
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
+                                        <li><a class="dropdown-item" href="/interoperabilidad">Módulo de Interoperablidad</a></li>
+                                        <li><a class="dropdown-item" href="/asesoramientos">Módulo de Asesoramiento</a></li>
+                                        <li><a class="dropdown-item" href="/educacion">Modulo Educativo</a></li>
+                                        <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
+                                        <li><a class="dropdown-item" href="/establecimientos/index">Lugares de detención</a></li>
+                                        {{-- <li><a class="dropdown-item" href="/">Lugares de detención</a></li>
+                                        <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}
+                                    </ul>
+                                </li>
+                                @endif
+                                {{-- <li class="nav-item">
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/categorias">Categorías</a>
                                 </li>
 
-                                {{-- <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/informeVisitas">Informe de visitas</a>
-                                </li> --}}
                                 <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/formularios">. </a>
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/cuestionario">Cuestionarios </a>
+                                </li> --}}
+                                @if( Auth::user()->rol == 'Administrador' )
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Usuarios
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                                      <li><a class="dropdown-item" href="/register">Nuevo usuario</a></li>
+                                      <li><a class="dropdown-item" href="/users/list">Verificar usuarios</a></li>
+                                    </ul>
                                 </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">. </a>
+                                </li>@endif
+                                {{--<li class="nav-item">
+                                    <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
+                                </li>--}}
                                 {{-- @else --}}
-                            @endif
+
                             {{-- <li class="nav-item">
                                 <a class="nav-link " aria-current="page" href="/reportes">Reportes</a>
                             </li> --}}
@@ -69,7 +111,7 @@
                                 </h6>
 
                                 <!-- Team Settings -->
-                                <x-jet-dropdown-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
+                                <x-jet-dropdown-link  href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
                                     {{ __('Team Settings') }}
                                 </x-jet-dropdown-link>
 
@@ -95,7 +137,7 @@
 
                     <!-- Settings Dropdown -->
                     @auth
-                        <x-jet-dropdown id="settingsDropdown">
+                        <x-jet-dropdown id="settingsDropdown" class="btn text-light text-shadow bg-dark">
                             <x-slot name="trigger">
                                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                     <img class="rounded-circle" width="32" height="32" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />

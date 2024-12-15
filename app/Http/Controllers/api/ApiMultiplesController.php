@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\api;
-use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario,ModPreguntasFormulario};
+use App\Models\{ModEstablecimiento, ModTipoEstablecimiento, ModFormulario,ModPreguntasFormulario,ModRespuesta, ModAgrupadorFormulario};
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CustomController;
 use Illuminate\Http\Request;
@@ -40,8 +40,7 @@ class ApiMultiplesController extends Controller
     */
     public function ApiFormulariosCuestionario() {
         $results = ModEstablecimiento::from('r_bpreguntas_formularios as rbf')
-        ->select( 'rbf.RBF_id', 'rbf.FK_FRM_id', 'rbf.FK_BCP_id', 'bp.BCP_id', 'rbf.RBF_orden', 'rbf.estado', 'c.CAT_id', 'c2.CAT_id as CAT_subcat_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'c.CAT_categoria as CAT_subcategoria', 'c2.CAT_categoria as CAT_categoria', 'f.FRM_titulo'
-        )
+        ->select( 'rbf.RBF_id', 'rbf.FK_FRM_id', 'rbf.FK_BCP_id', 'bp.BCP_id', 'rbf.RBF_orden', 'rbf.estado', 'c.CAT_id', 'c2.CAT_id as CAT_subcat_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'c.CAT_categoria as CAT_subcategoria', 'c2.CAT_categoria as CAT_categoria', 'f.FRM_titulo', 'RBF_salto_FK_BCP_id' )
         ->leftJoin ('formularios as f', 'f.FRM_id', 'rbf.FK_FRM_id')
         ->leftJoin ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
         ->leftJoin ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
@@ -50,6 +49,7 @@ class ApiMultiplesController extends Controller
         ->orderBy('rbf.RBF_id')
         ->orderBy('rbf.RBF_orden')
         ->get()->toArray();
+
 
         return $results;
     }
@@ -68,10 +68,6 @@ class ApiMultiplesController extends Controller
         ->leftjoin ('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
         ->get()->toArray();
 
-        //$visitas_formularios = CustomController::array_group( $visitas, 'VIS_tipo' );
-        // $quries = DB::getQueryLog();
-        // print_r( $quries );
-
         return $visitas;
         //  $quries = DB::getQueryLog();
     }
@@ -84,84 +80,93 @@ class ApiMultiplesController extends Controller
          $historial = ModEstablecimiento::select( 'f.FRM_titulo','v.VIS_titulo', 'establecimientos.EST_nombre', 'f.FRM_tipo', 'f.FK_VIS_id','establecimientos.EST_id', 'v.VIS_tipo',   'f.FK_USER_id', 'f.FRM_orden' )
         ->join ('visitas as v', 'v.FK_EST_id', 'establecimientos.EST_id')
         ->join ('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-         ->get();
+        ->get();
         return $historial;
     }
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+    public function ApiGuardarRespuestas(Request $request) {
+        try {
+            $datos = $request->all();
+            // Obtener datos de la solicitud
+            $agf = json_decode($datos['agrupador_formularios'], JSON_PRETTY_PRINT);
+            $r = json_decode($datos['respuestas'], JSON_PRETTY_PRINT);
+
+            DB::beginTransaction();
+
+            // Guardar datos en la tabla 'agrupador_formularios' usando insert
+            DB::table('agrupador_formularios')->insert($agf);
+
+            // Guardar datos en la tabla 'respuestas' usando insert
+            DB::table('respuestas')->insert($r);
+
+            // Confirmar la transacción
+            DB::commit();
+
+            return response()->json(['success' => true], 200);
+        } catch (\Exception $e) {
+            // Revertir la transacción en caso de error
+            DB::rollBack();
+            return response()->json(['errorxx' => $e], 500);
+        }
+
+        /*$datos = $request->all();
+        // Obtener datos de la solicitud
+        $agf = json_decode($datos['agrupador_formularios'], JSON_PRETTY_PRINT);
+        $r = json_decode($datos['respuestas'], JSON_PRETTY_PRINT);
+        dd($agf);
+        dd($r);exit;
+
+
+        // Guardar datos en la tabla 'agrupador_formularios' usando insert
+        //DB::table('agrupador_formularios')->insert($agf);
+
+        // Guardar datos en la tabla 'respuestas' usando insert
+        //DB::table('respuestas')->insert($r);*/
+
     }
 
-     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
+    //EL SIGUIENTE API ES SOLO PARA TEST YA QUE AUN NO SE CUENTA CON INTEROPERABILIDAD CON REGIMEN PENITENCIARIO
+    public function api_test(){
+        $estado_legal = DB::table('test')
+        ->select(
+            'departamento',
+            DB::raw("SUM(CASE WHEN estado_legal = 'Senteciado' THEN 1 ELSE 0 END) as Sentenciados"),
+            DB::raw("SUM(CASE WHEN estado_legal = 'Detención preventiva' THEN 1 ELSE 0 END) as Preventivos")
+        )
+        ->groupBy('departamento')
+        ->get()->toArray();
 
+        $genero_departamento = DB::table('test')
+        ->select('departamento',
+            DB::raw("SUM(CASE WHEN sexo = 'F' THEN 1 ELSE 0 END) as Femenino"),
+            DB::raw("SUM(CASE WHEN sexo = 'M' THEN 1 ELSE 0 END) as Masculino")
+        )
+        ->groupBy('departamento')
+        ->get()->toArray();
+
+        $cantidad_delitos= DB::table('test')->select(
+            'delito',
+            DB::raw('COUNT(*) as cantidad')
+        )
+        ->groupBy('delito')
+        ->orderBy('delito')->get()->toArray();
+
+        $rangos_edad = DB::table('test')
+            ->selectRaw("
+                CASE
+                    WHEN edad BETWEEN 18 AND 25 THEN '18-25'
+                    WHEN edad BETWEEN 26 AND 35 THEN '26-35'
+                    WHEN edad BETWEEN 36 AND 59 THEN '36-59'
+                    WHEN edad >= 60 THEN '60+'
+                    ELSE 'Unknown'
+                END as rango_edad, COUNT(*) as cantidad
+            ")
+            ->groupBy('rango_edad')
+            ->get()->toArray();
+
+
+        return response( ['estado_legal' => $estado_legal, 'genero_departamento' => $genero_departamento, 'cantidad_delitos' => $cantidad_delitos, 'rangos_edad' => $rangos_edad] );
+        // return response()->json($estado_legal);
     }
 
-    // /**
-    //  * Show the form for creating a new resource.
-    //  *
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function create()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Store a newly created resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function store(Request $request)
-    // {
-    //     //
-    // }
-
-
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function edit($id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function update(Request $request, $id)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy($id)
-    // {
-    //     //
-    // }
 }
