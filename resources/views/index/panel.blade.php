@@ -132,6 +132,7 @@
 
     //Ajax para buscar establecimientos con el input
     $('#input_establecimiento').on('input', function() {
+        console.log("entro");
         if ($(this).val().length > 3) {
             $.ajax({
                 async: true,

@@ -1,3 +1,13 @@
+<style>
+    /* Mostrar dropdown en hover */
+    .formularios:hover .dropdown-menu {
+        display: block;
+        margin-top: 0; /* Evita el salto en el efecto */
+    }
+</style>
+
+
+
 <nav id="nav1" class="navbar navbar-expand-md navbar-secondary border-bottom sticky-top bg-secondary ">
     <div class="container text-light">
         <!-- Logo -->
@@ -12,27 +22,23 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto fs-5 ">
-                        {{-- <li class="nav-item bg-danger">
-                            <a class="nav-link active" href="/panel">MNP V2</a>
-                        </li> --}}
 
                         <x-jet-nav-link href="{{ route('panel') }}" class="text-light text-shadow" :active="request()->routeIs('panel')">
                             {{ __('Inicio') }}
                         </x-jet-nav-link>
 
-
-
                             @if( Auth::user()->rol == 'Administrador' )
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuIndicadores" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Idicadores
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuIndicadores">
                                         <li><a class="dropdown-item" href="/indicadores/panel">Panel de datos</a></li>
                                         <li><a class="dropdown-item" href="/indicadores/actualizar">Actualizar datos</a></li>
 
                                     </ul>
                                 </li>
+                                
                                 @endif
                                 <li class="nav-item">
                                     <a class="nav-link  text-light text-shadow" aria-current="page" href="/visita/resumen">Visitas</a>
@@ -46,11 +52,22 @@
                                         Administración
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="meniInteroperabilidad">
-                                        <li><a class="dropdown-item" href="/interoperabilidad">Módulo de Interoperablidad</a></li>
+                                        {{-- <li><a class="dropdown-item" href="/interoperabilidad">Módulo de Interoperablidad</a></li> --}}
+                                        
                                         <li><a class="dropdown-item" href="/asesoramientos">Módulo de Asesoramiento</a></li>
                                         <li><a class="dropdown-item" href="/educacion">Modulo Educativo</a></li>
                                         <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
                                         <li><a class="dropdown-item" href="/establecimientos/index">Lugares de detención</a></li>
+                                        <li class="nav-item dropdown formularios">
+                                            <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuFormularios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Formularios
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuFormularios">
+                                                <li><a class="dropdown-item"  href="/formulario/nuevo">Crear</a></li>
+                                                <li><a class="dropdown-item" href="#">Asignar</a></li>
+                                            </ul>
+                                        </li>
+                                        
                                         {{-- <li><a class="dropdown-item" href="/">Lugares de detención</a></li>
                                         <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}
                                     </ul>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModArchivo, ModEstablecimiento, ModVisita, ModBancoPregunta};
+use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModArchivo, ModPreguntasFormulario, ModVisita, ModBancoPregunta, };
 use Illuminate\Support\Facades\{DB, Auth, Redirect, Validator, Session};
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\{VisitaController, CustomController};
@@ -30,53 +30,52 @@ class FormularioController extends Controller
         }
     }
 
-    public function nuevo(Request $request){
+    // public function nuevo(Request $request){
+    //     // dump($request->all());exit;
+    //     $validated = $request->validate([
+    //         'opcion' => 'required',
+    //         'FRM_id' => 'sometimes|required_if:opcion,asignar,anterior', // Regla de validación condicional
+    //         'nuevo_formulario' => 'sometimes|required_if:opcion,nuevo',
+    //     ], [
+    //         'required' => 'Debe seleccionar una opción',
+    //         'FRM_id.required_if' => 'Debe seleccionar un formulario',
+    //         'nuevo_formulario.required_if' => 'Debe ingresar un nombre para el nuevo formulario',
+    //     ]);
 
-        // dump($request->all());exit;
-        $validated = $request->validate([
-            'opcion' => 'required',
-            'FRM_id' => 'sometimes|required_if:opcion,asignar,anterior', // Regla de validación condicional
-            'nuevo_formulario' => 'sometimes|required_if:opcion,nuevo',
-        ], [
-            'required' => 'Debe seleccionar una opción',
-            'FRM_id.required_if' => 'Debe seleccionar un formulario',
-            'nuevo_formulario.required_if' => 'Debe ingresar un nombre para el nuevo formulario',
-        ]);
+    //     if( $request->opcion == 'nuevo' ){
+    //         //crear formulario desde 0
 
-        if( $request->opcion == 'nuevo' ){
-            //crear formulario desde 0
+    //             // dump($preguntas);exit;
+    //         return view('formulario.formulario-nuevo', ['nuevo_formulario' => $request->nuevo_formulario]);
+    //     }
+    //     elseif($request->opcion== 'anterior' ){
+    //         // Tomar el valor del input nuevo_formulario y buscar formularios anteriores
+    //         // buscar formularios segun el el valor del input nuevo_formulario en la tabla formularios y mostra sus categorias, preguntas y opcciones en pantalla para editar
+    //         // dump($request->all());
+    //         $formulario = ModFormulario::from('formularios as f')
+    //         ->select('f.FRM_titulo',
+    //         'bp.BCP_pregunta as Pregunta','bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
+    //         'categorias1.CAT_categoria as categoria',
+    //         'categorias2.CAT_categoria as subcategoria')
+    //         ->join('r_bpreguntas_formularios as rb', 'f.FRM_id', 'rb.FK_FRM_id')
+    //         ->join('banco_preguntas as bp', 'rb.FK_BCP_id', 'bp.BCP_id')
+    //         ->leftJoin('categorias as categorias1', 'bp.FK_CAT_id', 'categorias1.CAT_id')
+    //         ->leftJoin('categorias as categorias2', 'categorias1.FK_CAT_id', 'categorias2.CAT_id')
+    //         ->where('f.FRM_id', $request->FRM_id)
+    //         ->get()->toArray();
 
-                // dump($preguntas);exit;
-            return view('formulario.formulario-nuevo', ['nuevo_formulario' => $request->nuevo_formulario]);
-        }
-        elseif($request->opcion== 'anterior' ){
-            // Tomar el valor del input nuevo_formulario y buscar formularios anteriores
-            // buscar formularios segun el el valor del input nuevo_formulario en la tabla formularios y mostra sus categorias, preguntas y opcciones en pantalla para editar
-            // dump($request->all());
-            $formulario = ModFormulario::from('formularios as f')
-            ->select('f.FRM_titulo',
-            'bp.BCP_pregunta as Pregunta','bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
-            'categorias1.CAT_categoria as categoria',
-            'categorias2.CAT_categoria as subcategoria')
-            ->join('r_bpreguntas_formularios as rb', 'f.FRM_id', 'rb.FK_FRM_id')
-            ->join('banco_preguntas as bp', 'rb.FK_BCP_id', 'bp.BCP_id')
-            ->leftJoin('categorias as categorias1', 'bp.FK_CAT_id', 'categorias1.CAT_id')
-            ->leftJoin('categorias as categorias2', 'categorias1.FK_CAT_id', 'categorias2.CAT_id')
-            ->where('f.FRM_id', $request->FRM_id)
-            ->get()->toArray();
+    //         $preguntas_ordenadas = CustomController::ordenaPreguntasCategorias($formulario);
+    //         $elementos_formulario = CustomController::array_group( $preguntas_ordenadas, 'subcategoria' );
+    //         // dump($datos_agrupados);exit;
+    //         return view('formulario.formulario-anterior', compact('elementos_formulario'));
+    //     }
 
-            $preguntas_ordenadas = CustomController::ordenaPreguntasCategorias($formulario);
-            $elementos_formulario = CustomController::array_group( $preguntas_ordenadas, 'subcategoria' );
-            // dump($datos_agrupados);exit;
-            return view('formulario.formulario-anterior', compact('elementos_formulario'));
-        }
+    //     elseif($request->opcion== 'asignar' ){
+    //         //Tomar el valor del input nuevo_formulario y buscar formularios anteriores
+    //         // visualizar todos sus datos y asignarle a esta visita
+    //     }
+    // }
 
-        elseif($request->opcion== 'asignar' ){
-            //Tomar el valor del input nuevo_formulario y buscar formularios anteriores
-            // visualizar todos sus datos y asignarle a esta visita
-        }
-
-    }
     public function buscarPregunta(Request $request){
         $preguntas = ModBancoPregunta::select(
             // 'categorias.CAT_categoria as categoria',
@@ -131,7 +130,7 @@ class FormularioController extends Controller
 
 
         $formularios =  ModFormulario::from('formularios as f')
-        ->select('f.FRM_id','f.FRM_titulo','f.FRM_tipo','af.FK_VIS_id','af.AGF_id','af.estado','af.createdAt',
+        ->select('f.FRM_id','f.FRM_titulo','f.FRM_tipo','f.FRM_tipo','af.FK_VIS_id','af.AGF_id','af.estado','af.createdAt',
             DB::raw('(SELECT COUNT(*) FROM r_bpreguntas_formularios WHERE r_bpreguntas_formularios."FK_FRM_id" = f."FRM_id") AS preguntas'),
             DB::raw('(SELECT COUNT(*) FROM respuestas as r INNER JOIN r_bpreguntas_formularios as rb ON r."FK_RBF_id" = rb."RBF_id" WHERE af."AGF_id" = r."FK_AGF_id") AS respuestas')
         )
@@ -150,127 +149,247 @@ class FormularioController extends Controller
         }
 
         $VIS_tipo = $VIS_tipo->VIS_tipo;
-        // dump( $VIS_tipo->VIS_tipo );exit;
+        dump( $grupo_formularios );//exit;
         $colorVisita = CustomController::colorTipoVisita( $VIS_tipo );
 
         return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
     }
 
-    public function store(Request $request){
-        dump($request->all());
+    // public function store(Request $request)
+    // {
+    //     // Recuperar todos los datos del formulario
+    //     $datos = $request->all();
+    //     dd($datos);
+    //     // Crear un array para almacenar las preguntas procesadas
+    //     $preguntas = [];
 
-    }
-     // /**
-    //  * Store a newly created resource in storage.
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function store(Request $request) {
-    //     // dump($request->except('_token'));
+    //     // Procesar cada pregunta
+    //     foreach ($datos['pregunta'] as $index => $preguntaTexto) {
 
-    //     $validator = Validator::make($request->all(), [
-    //         'FRM_titulo' => 'required|max:300',
-    //         'FK_EST_id' => 'required',
-    //         'FRM_version' => 'required',
-    //         'FRM_tipoVisita' => 'required',
-    //         'FRM_fecha' => 'required|min:10',
-    //     ], [
-    //         'required' => 'El dato es requerido!',
-    //         'max' => 'Texto muy extenso!',
-    //         'min' => 'Texto muy corto!',
-    //     ]);
-    //     if ( $validator->fails() ){
-    //         return response()->json( [ 'errors' => $validator->errors() ] );
-    //     } else {
-    //         DB::beginTransaction();
-    //         try {
-    //             ModFormulario::insert($request->except('_token'));
-    //             DB::commit();
-    //             return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
-    //         }catch (\Exception $e) {
-    //             DB::rollback();
-    //             exit ($e->getMessage());
+    //         // Obtener las opciones asociadas a la pregunta
+    //         $opcionesClave = 'opciones_' . ($index + 1); // Clave dinámica para opciones
+    //         $opciones = isset($datos[$opcionesClave]) ? $datos[$opcionesClave] : [];
+
+    //         // Convertir las opciones al formato JSON requerido {"0":"A","1":"B","2":"C"}
+    //         $opcionesJSON = json_encode(array_values($opciones), JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE);
+    //         if($opcionesJSON == '{}'){
+    //             $opcionesJSON = null;
     //         }
-    //     }
-    // }
 
-    // // *** VERIFICAR EL LUGAR DONDE SE USA ESTA FUNCION
-    // /* Muestra en una nueva ventana los archivos adjuntos en cada formulario */
-    // public function adjuntosFormulario($EST_id, $FRM_id = null){
-    //     DB::enableQueryLog();
+    //         // Obtener tipo de respuesta
+    //         $tipoRespuesta = isset($datos['tipoRespuesta'][$index]) ? $datos['tipoRespuesta'][$index] : null;
 
-    //     // $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-    //     // ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-    //     // ->where('FRM_id', $FRM_id)->first();
-    //     // $establecimiento = ModEstablecimiento::select('EST_nombre')->where('EST_id', $EST_id)->get();
-
-    //     // dump($establecimiento->toArray);exit;
-
-    //     $adj = ModAdjunto::from( 'adjuntos as ad' )
-    //     ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id', 'f.FRM_titulo', 'e.EST_nombre')
-    //     ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
-    //     ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-    //     ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-    //     ->rightjoin ('establecimientos as e', 'e.EST_id', 'f.FK_EST_id')
-    //     ->where ('e.EST_id', $EST_id);
-
-    //     if( $FRM_id ){
-    //         $adjuntos = $adj->where ('ad.FK_FRM_id', $FRM_id)->orderBy('ad.ADJ_id', 'desc')->get();
-    //     }else{
-    //         $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
+    //         // Obtener número de orden
+    //         $orden = isset($datos['RBF_orden'][$index]) ? $datos['RBF_orden'][$index] : ($index + 1);
+            
+    //         // Construir el array de preguntas
+    //         $preguntas[] = [
+    //             'BCP_pregunta'       => null,
+    //             'BCP_pregunta'       => $preguntaTexto,               // Texto de la pregunta
+    //             'BCP_tipoRespuesta'  => $tipoRespuesta,               // Tipo de respuesta
+    //             'BCP_opciones'       => $opcionesJSON,                // Opciones en formato JSON
+    //             'BCP_complemento'    => null,                         // Complemento (nulo por defecto)
+    //             'BCP_aclaracion'     => null,                         // Aclaraciones (nulo por defecto)
+    //             'FK_CAT_id'          => 1,                            // ID de categoría
+    //             'estado'             => 1,                            // Estado activo
+    //             'RBF_orden'          => $orden                        // Número de orden
+    //         ];
     //     }
 
-    //     // $quries = DB::getQueryLog();
-    //     // dump($quries);
-    //     // exit;
-    //     return view('formulario.formularios-adjuntos', compact('adjuntos', 'EST_id', 'FRM_id'));
+
+    //     dump($preguntas);
+    //     exit;
+    //     // Guardar las preguntas en la base de datos
+    //     // DB::table('banco_preguntas')->insert($preguntas);
+        
+    //     // Redireccionar con un mensaje de éxito
+    //     return redirect()->back()->with('success', 'Formulario guardado correctamente.');
     // }
+    
+    // guarda el formulario creado dinamicamente
+    public function store(Request $request)
+        {
+            // dd($request->all());
+            // Iniciar la transacción
+            DB::beginTransaction();
+            try {
+                $datos = $request->all();
+            
+                // **Paso 1: Crear el formulario**
+                $nuevoFormulario = ModFormulario::create([
+                    'FRM_titulo' => $datos['FRM_titulo'],
+                    'FK_USER_id' => Auth::id(),
+                ]);
+                $nuevo_FRM_id = $nuevoFormulario->FRM_id; // ID del formulario creado
 
-    // // *** VERIFICAR EL LUGAR DONDE SE USA ESTA FUNCION
-    // /* Adiciona nuevos archivos adjuntos por formulario (fotos, archivos, no videos) (es diferente de las recomendaciones)*/
-    // public function adjuntosNuevo(Request $request){
-    //     $validator = Validator::make($request->all(), [
-    //         'ARC_archivo' => 'required|mimes:pdf,jpg,jpeg,png,.pdf,.mp3,.ogg,.acc,.flac,.wav,.xls,.xlsx,.ppt,.pptx,.doc,.docx|max:20048',
-    //         'ARC_descripcion' => 'required',
+                // **Paso 2: Procesar preguntas desde JSON si existe**
+                if (isset($datos['listaPreguntasJSON'])) {
+                    $preguntas = json_decode($datos['listaPreguntasJSON'], true);
 
-    //     ], [
-    //         'ARC_archivo.required' => 'El archivo requerido',
-    //         'ARC_descripcion.required' => 'Se requere una breve descripción del archivo',
-    //         'max' => 'El archivo debe ser menor a 20Mb',
-    //         'mimes' => 'Puede subir archivos de imagen o PDF'
-    //     ]);
-    //     if ( $validator->fails() ){
-    //         return response()->json( [ 'errors' => $validator->errors() ] );
-    //     } else {
-    //         DB::beginTransaction();
-    //         try{
+                    foreach ($preguntas as $index => $pregunta) {
+                        // **Paso 3: Insertar la pregunta en la tabla "banco_preguntas"**
+                        $nuevaPregunta = ModBancoPregunta::create([
+                            'BCP_pregunta'      => $pregunta['BCP_pregunta'],
+                            'BCP_tipoRespuesta' => $pregunta['BCP_tipoRespuesta'],
+                            'BCP_opciones'      => $pregunta['BCP_opciones'], // Asumimos que ya viene formateado correctamente
+                            'BCP_complemento'   => $pregunta['BCP_complemento'],
+                            'FK_CAT_id'         => 1,
+                        ]);
+                        $nuevo_BCP_id = $nuevaPregunta->BCP_id; // Obtener ID de la pregunta
 
-    //             $ruta = public_path('uploads/adjuntos/');
-    //             $nombre = $request->ARC_archivo->store('');
-    //             $tipoArchivo =  explode( "/", $request->ARC_archivo->getClientMimeType() );
+                        // **Paso 4: Relacionar la pregunta con el formulario**
+                        ModPreguntasFormulario::create([
+                            'FK_FRM_id' => $nuevo_FRM_id,  // ID del formulario
+                            'FK_BCP_id' => $nuevo_BCP_id,  // ID de la pregunta
+                            'RBF_orden' => $pregunta['RBF_orden'] // Orden directo del JSON
+                        ]);
+                    }
+                }
+                
+                // Confirmar la transacción
+                DB::commit();
+                
+                // **Redirigir al método show() con el ID recién creado**
+                return redirect()->route('formulario.verFormularioCreado', $nuevo_FRM_id)
+                                ->with('success', 'Formulario guardado correctamente.');
+            
+            } catch (\Exception $e) {
+                // Revertir cambios en caso de error
+                DB::rollback();
+                dd($e->getMessage());
 
-    //             $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $request->ARC_archivo->getClientOriginalName(),'ARC_ruta' => $request->ARC_archivo->store('/uploads/adjuntos'), 'ARC_extension' => $request->ARC_archivo->extension(), 'ARC_tamanyo' => $request->ARC_archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion, 'ARC_tipo' => 'adjunto', 'ARC_tipoArchivo' => $tipoArchivo[0] ] );
-
-    //             ModFormularioArchivo::create(['FK_FRM_id'=> $request->FK_FRM_id, 'FK_ARC_id' => $idArchivo->ARC_id ]);
-    //             DB::commit();
-
-    //             if( $tipoArchivo[0] == 'image'){
-    //                 Image::make($request->ARC_archivo)
-    //                 ->resize(450, null, function ($constraint) {
-    //                     $constraint->aspectRatio();
-    //                 })->save($ruta.$nombre);
-    //             } else {
-    //                 $request->ARC_archivo->move( $ruta, $nombre );
+                // Registrar el error
+                return redirect()->route('formulario.index')
+                                ->with('error', 'Error al crear el formulario. Intente nuevamente: ' . $e->getMessage());
+            }
+        }
+    
+    
+    
+    // public function store(Request $request)
+    // {
+    //     // Iniciar la transacción
+    //     DB::beginTransaction();
+    //     dd($request->all());
+    //     try {
+    //         $datos = $request->all();
+    
+    //         // **Paso 1: Crear el formulario**
+    //         $nuevoFormulario = ModFormulario::create([
+    //             'FRM_titulo' => $datos['FRM_titulo'],
+    //             'FK_USER_id' => Auth::id(),
+    //         ]);
+    //         $nuevo_FRM_id = $nuevoFormulario->FRM_id; // ID del formulario creado
+    
+    //         // **Paso 2: Procesar preguntas**
+    //         foreach ($datos['pregunta'] as $index => $preguntaTexto) {
+    //             // Obtener el tipo de respuesta
+    //             $tipoRespuesta = $datos['tipoRespuesta'][$index];
+    
+    //             // **Inicializar valores predeterminados**
+    //             $opcionesJSON = null;
+    //             $complemento = null;
+    
+    //             // **Opciones: Asignar solo si el tipo de respuesta lo requiere**
+    //             if (in_array($tipoRespuesta, ['Lista desplegable', 'Casilla verificación'])) {
+    //                 // Clave dinámica ajustada para coincidir con las preguntas (index + 1)
+    //                 $opcionesClave = 'opciones_' . ($index + 1);
+    //                 $opciones = isset($datos[$opcionesClave]) ? $datos[$opcionesClave] : [];
+    
+    //                 // Convertir opciones al formato JSON {"0":"A","1":"B"}
+    //                 $opcionesJSON = !empty($opciones)
+    //                     ? json_encode(array_values($opciones), JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE)
+    //                     : null;
+    //                     dump($preguntaTexto);
+    //                     dump($opcionesJSON);
     //             }
-    //             return response()->json( [ 'success' => 'Correcto!' ] );
-    //         } catch (\Exception $e) {
-    //             DB::rollback();
-    //             exit ($e->getMessage());
+    
+    //             // **Complemento: Asignar solo si el tipo de respuesta lo requiere**
+    //             if ($tipoRespuesta === 'Lista desplegable') {
+    //                 // Clave dinámica ajustada para coincidir con las preguntas (index + 1)
+    //                 $complementoClave = 'BCP_complemento_' . ($index + 1);
+    //                 $complemento = isset($datos[$complementoClave]) ? $datos[$complementoClave] : null;
+    //             }
+    
+    //             // **Orden corregido para ser correlativo**
+    //             $orden = $index + 1;
+    
+    //             // **Paso 3: Insertar la pregunta en la tabla "banco_preguntas"**
+    //             $nuevaPregunta = ModBancoPregunta::create([
+    //                 'BCP_pregunta'       => $preguntaTexto,
+    //                 'BCP_tipoRespuesta'  => $tipoRespuesta,
+    //                 'BCP_opciones'       => $opcionesJSON, // Opciones formateadas
+    //                 'BCP_complemento'    => $complemento,  // Complemento asignado
+    //                 'BCP_aclaracion'     => null,
+    //                 'FK_CAT_id'          => 1, // Cambiar según categoría
+    //                 'estado'             => 1,
+    //             ]);
+                
+    //             $test =([
+    //                 'BCP_pregunta'       => $preguntaTexto,
+    //                 'BCP_tipoRespuesta'  => $tipoRespuesta,
+    //                 'BCP_opciones'       => $opcionesJSON, // Opciones formateadas
+    //                 'BCP_complemento'    => $complemento,  // Complemento asignado
+    //                 'BCP_aclaracion'     => null,
+    //                 'FK_CAT_id'          => 1, // Cambiar según categoría
+    //                 'estado'             => 1,
+    //             ]);
+    //             // dump($nuevaPregunta);
+    //             $nuevo_BCP_id = $nuevaPregunta->BCP_id; // Obtener ID de la pregunta
+    
+    //             // **Paso 4: Relacionar la pregunta con el formulario**
+    //             ModPreguntasFormulario::create([
+    //                 'FK_FRM_id' => $nuevo_FRM_id,   // ID del formulario
+    //                 'FK_BCP_id' => $nuevo_BCP_id,  // ID de la pregunta
+    //                 'RBF_orden' => $orden          // Orden correlativo
+    //             ]);
     //         }
+            
+    //         // Confirmar la transacción
+    //         // DB::commit();
+    //         dd($test);
+    //         exit;
+    //         // **Redirigir al método show() con el ID recién creado**
+    //         return redirect()->route('formulario.verFormularioCreado', $nuevo_FRM_id)
+    //                          ->with('success', 'Formulario guardado correctamente.');
+    
+    //     } catch (\Exception $e) {
+    //         // Revertir cambios en caso de error
+    //         DB::rollback();
+    
+    //         // Registrar el error
+    //         dd('Error al crear formulario: ' . $e->getMessage());
+    
+    //         // Redirigir con mensaje de error
+    //         return redirect()->route('formulario.index')
+    //                          ->with('error', 'Error al crear el formulario. Intente nuevamente.');
     //     }
-
     // }
+    
+        
+    
+            
+    
+    public function verFormularioCreado($id) {
+        // Obtener el formulario
+        $formulario = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_id', $id)->first();
+        
+        // Obtener las preguntas asociadas al formulario
+        $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
+            ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+            ->orderBy('r_bpreguntas_formularios.RBF_orden') // Primera columna
+            ->orderBy('r_bpreguntas_formularios.RBF_id') 
+            ->get();
 
+        // Enviar los datos a la vista
+        return view('formulario.verFormularioCreado', compact('formulario', 'preguntas'));
+    }
+    
+        
+    
 
+    public function nuevo(){
+        return view('formulario.formulario-nuevo');
+    }
+    
 }

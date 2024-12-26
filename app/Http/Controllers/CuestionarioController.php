@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 // use App\Http\Livewire\Cuestionario;
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario,ModRespuesta, ModCategoria, ModAdjunto, ModCuestionario, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModPreguntasFormulario, ModAgrupadorFormulario};
+use App\Models\{ModFormulario,ModRespuesta, ModCategoria, ModAdjunto, ModCuestionario, ModBancoPregunta, ModRecomendacion, ModEstablecimiento, ModArchivo, ModPreguntasFormulario, ModAgrupadorFormulario, ModRespuestaArchivo};
 use Illuminate\Support\Facades\DB;
 // use Image;
 use Intervention\Image\Facades\Image;
@@ -258,6 +258,7 @@ class CuestionarioController extends Controller {
 
     public function duplicarCuestionario( $FRM_id, $VIS_id ){
         /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
+
         $max_FRM_version = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->where('FK_VIS_id', $VIS_id)->max( 'AGF_copia' );
 
         $FRM = ModFormulario::select('FRM_tipo', 'FK_VIS_id')->where( 'FRM_id', $FRM_id )->first();
@@ -266,17 +267,21 @@ class CuestionarioController extends Controller {
         $nuevoFormulario['AGF_copia'] = $max_FRM_version+1;
         $nuevoFormulario['FK_VIS_id'] = $VIS_id;
 
-        /* Sólo si el formulario es de TIPO 1, puede duplicarse muchas veces */
+        /* Si el formulario es de TIPO 1, puede duplicarse solo una vez */
         if( is_null($max_FRM_version) && ($FRM->FRM_tipo == '1' ) ){
-            // dump("solo una aplicacion");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
-        }elseif( $FRM->FRM_tipo == 'N' ){
+        } elseif( $FRM->FRM_tipo == 'N' ){
             // dump("Multiple aplicacion");
             $resultado = $this->fn_duplicar_cuestionario( $nuevoFormulario );
+        
         }else{
             $resultado = 0;
         }
-        return redirect('/formulario/buscaFormularios/'.$VIS_id);
+        if ($resultado ==0) {
+            return redirect('/formulario/buscaFormularios/' . $VIS_id)->with('warning','Este formulario solo puede duplicarse una vez');
+        } else {
+            return redirect('/formulario/buscaFormularios/' . $VIS_id);
+        }
     }
     /*  return > 0: se guardó el dato correctamente
         return -1: Error al guardar el dato
