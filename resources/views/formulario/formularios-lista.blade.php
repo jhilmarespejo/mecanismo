@@ -19,12 +19,13 @@
         <div class="btn-group me-2 mt-4" role="group" aria-label="First group">
 
           <a href="javascript:history.back()" role="button" class="btn btn-primary text-white text-decoration-none"> <i class="bi bi-arrow-return-left"></i> Página anterior</a>
-
+        
         </div>
     </div><hr>
-
+    
     {{-- @dump($formulario) --}}
-
+  
+    
     <div class="card">
 
         <div class="card-header {{$colorVisita}} text-white fs-5 text-center">
@@ -46,12 +47,12 @@
 
           <h5 class="card-title">Formularios:</h5>
 
-          {{-- @dump($errors->all()) --}}
+          @dump( $grupo_formularios)
           @php  $aux=0; foreach ($grupo_formularios as $key => $formulario): @endphp
-            {{-- @dump($formulario[0]['FRM_id']) --}}
-
                 <div class="row">
                     <div class="col-lg-4 col-12">
+                        
+                        
                         <div class="card mb-3" style="max-width: 18rem;">
                             <div class="card-header">{{ $key }}</div>
 
@@ -61,9 +62,9 @@
 
 
                                 <a href="/cuestionario/duplicarCuestionario/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
-                                    <strong>Crear Nuevo formulario</strong>
+                                    <strong>Crear Nuevo formulario_ </strong>
                                 </a>
-
+                                
                                 @if (Auth::user()->rol == 'Administrador')
                                     <a href="/cuestionario/resultados/{{ $formulario[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
                                         <i class="i bi-bar-chart-line"></i> Resultados
@@ -72,10 +73,21 @@
                                 <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{count($formulario)}}</b></p>
 
                             </div>
+                           
+                            
                         </div>
+                        
                     </div>
 
                     <div class="col-lg-8 col-12">
+                         {{-- MENSAJE DE ALERTA cuando se intenta duplicar un formulario cuyo $FRM->FRM_tipo == '1' --}}
+                         @if ($formulario[0]["FRM_tipo"] == '1')
+                            @if(session('warning'))
+                                <div id="alert-warning" class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    {{ session('warning') }}
+                                </div>
+                            @endif
+                        @endif
 
                         @foreach ($formulario as $item)
                             {{-- @dump($item) --}}
@@ -174,26 +186,53 @@
 @endsection
 
 @section('js')
-    {{-- @if (Session::has('success'))
-        <script>
-            Swal.fire(
-                '{{Session::get('success') }}',
-            )
-        </script>
-    @endif
-    @if(Session::has('warning'))
-        <script>
-            Swal.fire(
-                '{{Session::get('warning') }}',
-            )
-        </script>
-
-    @endif --}}
+    
 <style>
     .gren-shadow {
   box-shadow: 4px 4px 4px #3d8bfd;}
 </style>
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Verifica si existe el mensaje de alerta
+        let alertElement = document.getElementById('alert-warning');
+        if (alertElement) {
+            // Mueve el scroll hacia el mensaje de alerta
+            alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Desvanece el mensaje después de 5 segundos
+            setTimeout(function () {
+                let fadeEffect = setInterval(function () {
+                    if (!alertElement.style.opacity) {
+                        alertElement.style.opacity = 1;
+                    }
+                    if (alertElement.style.opacity > 0) {
+                        alertElement.style.opacity -= 0.1;
+                    } else {
+                        clearInterval(fadeEffect);
+                        alertElement.style.display = 'none';
+                    }
+                }, 50);
+            }, 5000); // 5 segundos
+        }
+    });
+    
+
+    setTimeout(function () {
+        let alertElement = document.getElementById('alert-warning');
+        if (alertElement) {
+            let fadeEffect = setInterval(function () {
+                if (!alertElement.style.opacity) {
+                    alertElement.style.opacity = 1;
+                }
+                if (alertElement.style.opacity > 0) {
+                    alertElement.style.opacity -= 0.1;
+                } else {
+                    clearInterval(fadeEffect);
+                    alertElement.style.display = 'none'; // Elimina el elemento del DOM
+                }
+            }, 50);
+        }
+    }, 5000); // 5 segundos
         // $(document).ready(function (){
         //     $('html, body').animate({
         //     }, 300);

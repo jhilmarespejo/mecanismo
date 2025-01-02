@@ -17,6 +17,7 @@
                                 <div class=" row border-bottom py-3 hover p-2 elementos">
                                     <div class="col-sm-5 col-preguntas-sc">
 
+                                        <{{ $item['BCP_id'] }}> <br>
                                         {{-- PREGUNTAS --}}
                                         @if ($item['BCP_tipoRespuesta'] == 'Etiqueta')
                                             <div class="alert alert-danger" role="alert">

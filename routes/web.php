@@ -48,11 +48,15 @@ Route::get('formulario/eleccion/{VIS_id}/{VIS_tipo}', [FormularioController::cla
 
 Route::get('formulario/buscaFormularios/{VIS_id}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
 
-Route::post('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
+// Route::post('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
+Route::get('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
 Route::post('formulario/sugerenciasFormularios', [FormularioController::class, 'sugerenciasFormularios'])->name('formulario.sugerenciasFormularios')->middleware('auth');
 
 Route::post('formulario/buscarPregunta', [FormularioController::class, 'buscarPregunta'])->name('formulario.buscarPregunta')->middleware('auth');
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
+Route::get('/formulario/{id}', [FormularioController::class, 'verFormularioCreado'])->name('formulario.verFormularioCreado')->middleware('auth');
+Route::get('formulario/imprimir/{id}', [FormularioController::class, 'imprimirFormulario'])->name('formulario.imprimirFormulario');
+
 
 // Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
 
