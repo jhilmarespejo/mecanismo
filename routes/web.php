@@ -59,10 +59,6 @@ Route::get('formulario/imprimir/{id}', [FormularioController::class, 'imprimirFo
 
 
 // Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
-
-
-
-
 // INDEX
 // Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
 

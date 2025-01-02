@@ -3,7 +3,11 @@
 @section('title', 'Formulario Detalles')
 
 @section('content')
+<<<<<<< HEAD
 <div class="container my-5">
+=======
+{{-- <div class="container my-5">
+>>>>>>> c00fe7d2986b07e758f5aa7c75dc8bd448d0e78a
     <!-- Mensajes de éxito o error -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

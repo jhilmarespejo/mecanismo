@@ -405,7 +405,20 @@ class FormularioController extends Controller
     
             
     
+    // public function verFormularioCreado($id) {
+    //     // Obtener el formulario
+    //     $formulario = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_id', $id)->first();
+        
+    //     // Obtener las preguntas asociadas al formulario
+    //     $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
+    //         ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+    //         ->orderBy('r_bpreguntas_formularios.RBF_orden') // Primera columna
+    //         ->orderBy('r_bpreguntas_formularios.RBF_id') 
+    //         ->get();
 
+    //     // Enviar los datos a la vista
+    //     return view('formulario.verFormularioCreado', compact('formulario', 'preguntas'));
+    // }
     
         
     
