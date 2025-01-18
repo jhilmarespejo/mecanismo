@@ -7,8 +7,8 @@
 <div class="container mt-3 p-4 bg-white">
     @include('layouts.breadcrumbs', $breadcrumbs)
         <h1 class="mb-3 text-center text-secondary">Información adicional</h1>
-        <h2 class="mb-2 text-center text-primary">{{ $infoAdicional['EST_nombre'] }}</h2>
-        <h5 class="mb-2 text-center text-secondary">{{ $infoAdicional['TES_tipo'] }}</h5>
+        <h2 class="mb-2 text-center text-primary"> <b class="fs-4">Nombre: </b> {{ $infoAdicional['EST_nombre'] }}</h2>
+        <h5 class="mb-2 text-center text-secondary"><b>Tipo: </b>{{ $infoAdicional['TES_tipo'] }}</h5>
 
 
 
@@ -21,6 +21,8 @@
                     <option value="2024" {{ ( $infoAdicional['EINF_gestion'] == '2024' || $gestion == '2024') ? 'selected' : '' }}>2024</option>
                     <option value="2025" {{ ( $infoAdicional['EINF_gestion'] == '2025' || $gestion == '2025') ? 'selected' : '' }}>2025</option>
                     <option value="2026" {{ ( $infoAdicional['EINF_gestion'] == '2026' || $gestion == '2026') ? 'selected' : '' }}>2026</option>
+                    <option value="2027" {{ ( $infoAdicional['EINF_gestion'] == '2027' || $gestion == '2027') ? 'selected' : '' }}>2027</option>
+                    <option value="2028" {{ ( $infoAdicional['EINF_gestion'] == '2028' || $gestion == '2028') ? 'selected' : '' }}>2028</option>
                 </select>
             </div>
         </div>
@@ -161,11 +163,12 @@
                 </div>
             </div>
                 <!-- <span class="btn btn-primary" id="edit_info_btn">Editar la información actual</span> -->
-
-            @if($infoAdicional['EINF_gestion'] == date('Y'))
-                <button type="button" class="btn btn-primary" id="edit_info_btn">Editar la información actual</button>
+            @if($infoAdicional['EINF_gestion'] == date('Y') || is_null($infoAdicional['EINF_gestion']))
+                <button type="button" class="btn btn-primary" id="edit_info_btn" 
+                    style="{{ isset($gestion) && $gestion != date('Y') ? 'display: none;' : '' }}">
+                    Editar la información actual
+                </button>
             @endif
-
             <button type="button" class="btn btn-success" id="update_info_btn" style="display: none;">Actualizar Información</button>
         </form>
 
@@ -174,6 +177,7 @@
 </div>
 <script>
     $(document).ready(function() {
+        const currentYear = new Date().getFullYear();
         $('#edit_info_btn').click(function() {
             $('input, select').prop('disabled', false);
             $('#edit_info_btn').hide();
@@ -241,10 +245,20 @@
             });
         });
 
+        // Evento para cambiar dinámicamente el estado del botón
         $('#anyo_consulta').change(function() {
             let selectedYear = $(this).val();
+            toggleEditButton(selectedYear);
+            // Redirige solo si el año cambia
             window.location.href = "{{ route('establecimientos.infoMostrar', ['EST_id' => $infoAdicional['EST_id']]) }}" + "?gestion=" + selectedYear;
         });
+        function toggleEditButton(selectedYear) {
+            if (selectedYear == currentYear) {
+                $('#edit_info_btn').show();
+            } else {
+                $('#edit_info_btn').hide();
+            }
+        }
     });
 </script>
 

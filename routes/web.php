@@ -130,7 +130,7 @@ Route::get('establecimientos/mostrar/{id}', [EstablecimientosController::class, 
 Route::get('establecimientos/crear', [EstablecimientosController::class, 'crear'])->name('establecimientos.crear');
 Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'almacenar'])->name('establecimientos.almacenar');
 
-    // estanblecimientos_info
+    // establecimientos_info
     Route::get('establecimientos/infoMostrar/{EST_id}', [EstablecimientosController::class, 'infoMostrar'])->name('establecimientos.infoMostrar');
     Route::post('establecimientos/infoActualizar', [EstablecimientosController::class, 'infoActualizar'])->name('establecimientos.infoActualizar');
 
@@ -171,9 +171,12 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
 
 //----MODULO DE INDICADORES --------------------------
 
-Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth');
-Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth');
-Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('guardar.indicadores');
+// Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
+//Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
+
+Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth')->name('indicadores.panel');
+Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
+Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
 // ---- MÓDULO DE ASESORAMIENTO ----------
 
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');

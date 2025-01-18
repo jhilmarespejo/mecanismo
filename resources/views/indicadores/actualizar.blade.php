@@ -1,14 +1,24 @@
 
 @extends('layouts.app')
-@section('title', 'indicadores')
+@section('title', 'Actualizacion - indicadores')
 
 @section('content')
-
-<div class="container">
-
-    {{-- <a href="{{ route('indicadores.create') }}" class="btn btn-primary mb-3">Crear Nuevo Indicador</a> --}}
+<div class="container mt-3 p-4 bg-white">
+    @include('layouts.breadcrumbs', $breadcrumbs)
     <h1 class="text-center">Módulo de Indicadores</h1>
     <h3 class="text-center">Actualización de datos</h3>
+    <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
+        <label for="colFormLabelLg" class="col-sm-8 col-form-label col-form-label-lg">Gestión:</label>
+        <div class="col-sm-4 text-start">
+            <select class=" form-select form-select-lg" id="anyo_consulta" name="anyo_consulta">
+                <option value="2024" {{ ( $gestion == '2024') ? 'selected' : '' }}>2024</option>
+                <option value="2025" {{ ( $gestion == '2025') ? 'selected' : '' }}>2025</option>
+                <option value="2026" {{ ( $gestion == '2026') ? 'selected' : '' }}>2026</option>
+                <option value="2027" {{ ( $gestion == '2027') ? 'selected' : '' }}>2027</option>
+                <option value="2028" {{ ( $gestion == '2028') ? 'selected' : '' }}>2028</option>
+            </select>
+        </div>
+    </div>
 
     <div class="d-flex align-items-start border">
         <div class="col-4 border-end overflow-auto" id="v-pills-tab" style="max-height: 550px; direction: rtl;">
@@ -16,7 +26,7 @@
                 <h3 class="text-center p-2 text-primary my-2">Categorías</h3>
                 @php $i=0; @endphp
                 @foreach ($categorias as $indic => $indicador)
-                    <button class="border-bottom border-top border-star text-start nav-link mb-1 box-shadow " id="v-pills-{{$i}}-tab" data-bs-toggle="pill" data-bs-target="#v-pills-{{$i}}" type="button" role="tab" aria-controls="v-pills-{{$i}}" aria-selected="false">
+                    <button class="border-bottom border-top border-start text-start nav-link mb-1 box-shadow {{ $loop->first ? 'active' : '' }}"  id="v-pills-{{$loop->index}}-tab"  data-bs-toggle="pill"  data-bs-target="#v-pills-{{$loop->index}}"  type="button"  role="tab"  aria-controls="v-pills-{{$loop->index}}>
                         <span class="ms-3">{{$indic}} </span>
 
                         {{-- <span class="ms-3">{{$indic}}. {{$indicador[0]['IND_numero']}}  </span> --}}
@@ -25,22 +35,27 @@
                 @endforeach
             </div>
         </div>
-
+        
         <div class="col-8 p-0 d-flex ">
 
             <div class="tab-content" id="v-pills-tabContent">
+                
+
                 @php $j=0; @endphp
                 @foreach ($categorias as $indic => $indicadores)
 
-                    <div class="tab-pane fade " id="v-pills-{{$j}}" role="tabpanel" aria-labelledby="v-pills-{{$j}}-tab">
+                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" 
+                        id="v-pills-{{$loop->index}}" 
+                        role="tabpanel" 
+                        aria-labelledby="v-pills-{{$loop->index}}-tab">
                         <h3 class="text-center p-2 text-primary">Indicadores</h3>
                         <div class="accordion" id="accordionIndicadores">
                             @php $a=0; @endphp
-                            @foreach ($indicadores as $indic => $indicador)
+                            @foreach ($indicadores as $index => $indicador)
                                 <h2 class="accordion-header mt-1 rounded" id="heading_{{$a}}_{{$j}}">
                                     <button class="accordion-button bg-info bg-gradient text-dark border p-2 d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{$a}}_{{$j}}" aria-expanded="false" aria-controls="collapse_{{$a}}_{{$j}}">
                                         <span class="bg-light rounded-circle p-3 box-shadow"><i class="bi bi-bar-chart-line-fill"></i></span>
-                                        <span class="ms-3"><b>{{$indicador[0]['IND_numero']}}</b> {{$indic}}</span>
+                                        <span class="ms-3"><b>{{$indicador[0]['IND_numero']}}</b> {{$index}}</span>
                                     </button>
                                 </h2>
 
@@ -50,55 +65,93 @@
                                             {{-- mensaje --}}
                                             <div class="alert alert-info box-shadow d-flex align-items-center">
                                                 <span class="rounded rounded-circle bg-light p-0 m-1 me-3"><i class="bi bi-chat-left-text fs-3"></i></span>
-                                                <small class="text-muted mx-2"><i>Fuente de informacion:</i></small>{{$indicador[0]['IND_fuente_informacion']}}
+                                                <small class="text-muted mx-2"><i>Fuente:</i></small>{{$indicador[0]['IND_fuente_informacion']}}
                                             </div>
-                                            <div class="ms-3 p-1 border-start">
+                                            <div class="ms-3 p-1 border-start ">
                                                 @foreach ($indicador as $p => $pregunta)
                                                     <form method="POST" enctype="multipart/form-data" id="formularioIndicadores_{{ $pregunta['IND_id'] }}" class="formularioIndicadores">
                                                         @csrf
-                                                        <div class="mb-3">
+                                                        <div class="mb-3 ">
                                                             <label for="options_{{$pregunta['IND_id']}}" class="form-label">
-                                                                <b class="text-muted">{{$pregunta['IND_codigo_pregunta']}}</b>. {{$pregunta['IND_pregunta']}}
+                                                                {{$pregunta['IND_parametro']}}
                                                             </label>
-
                                                             @php
-                                                            // dump($pregunta['HIN_respuesta']);
                                                                 $opciones = json_decode($pregunta['IND_opciones'], true);
-                                                                if ( $pregunta['IND_tipo_repuesta'] == 'Lista desplegable' ) {
-                                                                    echo '<div class="form-check">';
-                                                                    echo '<label>Opciones:</label>';
-                                                                    foreach ($opciones as $key => $value) {
-                                                                        echo '<div class="form-check">';
-
-                                                                        echo '<input class="form-check-input" type="radio" name="respuesta" id="option' . $key . '" value="' . $value . '"';
-                                                                        echo ($pregunta['HIN_respuesta'] == $value) ? ' checked' : '';
-                                                                        echo '>';
-
-                                                                        echo '<label class="form-check-label" for="option' . $key . '">' . $value . '</label>';
-                                                                        echo '</div>';
-                                                                    }
-                                                                    echo '</div>';
-                                                                } elseif ($pregunta['IND_tipo_repuesta'] == 'Casilla verificacion') {
-                                                                    echo '<div class="form-check">';
-                                                                    echo '<label class="form-check-label">Opciones:</label>';
-                                                                    foreach ($opciones as $key => $value) {
-                                                                        echo '<div class="form-check">';
-                                                                        echo '<input class="form-check-input" type="checkbox" name="respuesta[]" id="option' . $key . '" value="' . $value . '">';
-                                                                        echo '<label class="form-check-label" for="option' . $key . '">' . $value . '</label>';
-                                                                        echo '</div>';
-                                                                    }
-                                                                    echo '</div>';
-                                                                } elseif ($pregunta['IND_tipo_repuesta'] == 'Texto') {
-                                                                    echo '<input type="text" name="respuesta" class="form-control box-shadow" id="respuesta_' . $pregunta['IND_id'] . '" value="' . (isset($pregunta['HIN_respuesta']) ? $pregunta['HIN_respuesta'] : '') . '">';
-                                                                } elseif ($pregunta['IND_tipo_repuesta'] == 'Numero') {
-                                                                    echo '<input type="number" name="respuesta" class="form-control box-shadow" id="respuesta_' . $pregunta['IND_id'] . '" value="' . (isset($pregunta['HIN_respuesta']) ? $pregunta['HIN_respuesta'] : '') . '">';
-                                                                }
                                                             @endphp
+                                                            
+                                                            @if ($pregunta['IND_tipo_repuesta'] == 'Lista desplegable')
+                                                                <div class="form-check">
+                                                                    <label>Opciones:</label>
+                                                                    @foreach ($opciones as $key => $value)
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input" 
+                                                                                type="radio" 
+                                                                                name="respuesta" 
+                                                                                id="option{{ $key }}" 
+                                                                                value="{{ $value }}" 
+                                                                                {{ $pregunta['HIN_respuesta'] == $value ? 'checked' : '' }}>
+                                                                            <label class="form-check-label" for="option{{ $key }}">{{ $value }}</label>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Casilla verificacion')
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">Opciones:</label>
+                                                                    @foreach ($opciones as $key => $value)
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input" 
+                                                                                type="checkbox" 
+                                                                                name="respuesta[]" 
+                                                                                id="option{{ $key }}" 
+                                                                                value="{{ $value }}">
+                                                                            <label class="form-check-label" for="option{{ $key }}">{{ $value }}</label>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Texto')
+                                                                <input type="text" 
+                                                                    name="respuesta" 
+                                                                    class="form-control box-shadow" 
+                                                                    id="respuesta_{{ $pregunta['IND_id'] }}" 
+                                                                    value="{{ $pregunta['HIN_respuesta'] ?? '' }}">
+
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Numeral')
+                                                                <input type="number" 
+                                                                    name="respuesta" 
+                                                                    class="form-control box-shadow" 
+                                                                    id="respuesta_{{ $pregunta['IND_id'] }}" 
+                                                                    value="{{ $pregunta['HIN_respuesta'] ?? '' }}">
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
+                                                            <br>
+                                                                <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
+                                                                    Centros penitenciarios
+                                                                </button>
+                                                                <!-- Incluir el modal -->
+                                                                @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'centros penitenciarios'])
+                                                            
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista sexo')
+                                                                Lista sexo
+                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista delitos')
+                                                                Lista delitos
+                                                            @endif
+                                                            
+                                                            <div class="mb-2 mt-2">
+                                                                <label for="adicional" class="ms-2"><i class="bi bi-info-circle-fill text-warning fs-5 text-shadow"></i> Informacion complementaria:</label>
+                                                                <div class=" px-4">
+                                                                  <input type="text" name="informacion_complementaria" class="form-control box-shadow" id="adicional_{{ $pregunta['IND_id'] }}" value="{{ $pregunta['HIN_informacion_complementaria'] ?? '' }}">
+                                                                </div>
+                                                            </div>
                                                         </div>
 
                                                         <input type="hidden" name="FK_IND_id" value="{{ $pregunta['IND_id'] }}">
-                                                        <button type="button" class="btn btn-primary btn-sm guardarIndicadores" data-id="{{ $pregunta['IND_id'] }}">Actualizar</button>
-                                                        <div id="mensajeConfirmacion_{{ $pregunta['IND_id'] }}" class="mt-3 p-1 alert alert-success d-none"></div>
+                                                        <button type="button" class="btn btn-primary btn-sm guardarIndicadores box-shadow" data-id="{{ $pregunta['IND_id'] }}"><i class="bi bi-check2-circle"></i> Actualizar</button>
+                                                        
+                                                        
+                                                        <div id="mensajeConfirmacion_{{ $pregunta['IND_id'] }}" class="mt-3 alert alert-success d-none p-1"></div>
+                                                        <div id="errorMessage_{{ $pregunta['IND_id'] }}" class="alert alert-danger alert-dismissible fade show d-none p-2 mt-2" role="alert">
+                                                            <strong><i class="bi bi-exclamation-triangle"></i></strong> Inserte una respuesta
+                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                        </div>
                                                         <hr>
                                                     </form>
                                                 @endforeach
@@ -115,31 +168,103 @@
                 @endforeach
             </div>
         </div>
-
+    
     </div>
+    
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;"> <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white;"> <span>Guardando datos...</span> </div> </div>
+{{-- 
+
+
+<!-- Modal CENTROS PENITENCIARIOS -->
+<div class="modal fade" id="centrosModal" tabindex="-1" aria-labelledby="centrosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="centrosModalLabel">Centros Penitenciarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @foreach ($centrosPenitenciarios as $departamento => $centros)
+                    <div class="mb-3">
+                        <h6 class="fw-bold">{{ $departamento }}</h6>
+                        <ul class="list-group">
+                            @foreach ($centros as $centro)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ $centro->EST_nombre }}
+                                    <input type="number" name="numero[{{ $centro->EST_nombre }}]" class="form-control w-25" placeholder="0">
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div> --}}
+
 
 
 @endsection
 
 @section('js')
-<script>
-     $(document).ready(function() {
-        $('.guardarIndicadores').click(function() {
-            var id = $(this).data('id');
-            var formData = $('#formularioIndicadores_' + id).serialize();
-            console.log(formData);
 
+<script>
+    $(document).ready(function() {
+        var anyoConsulta = $('#anyo_consulta').val(); // Obtén el valor de anyo_consulta
+
+        // Mostrar mensaje de SweetAlert
+        // Swal.fire({
+        //     title: 'Actualización de Indicadores',
+        //     text: 'Esta página se prepara para actualizar indicadores de la gestión ' + anyoConsulta,
+        //     icon: 'info',
+        //     confirmButtonText: 'Entendido',
+        // });
+
+        $('.guardarIndicadores').click(function() {
+                var id = $(this).data('id');
+            var form = $('#formularioIndicadores_' + id);
+            var respuesta = form.find('[name="respuesta"]:checked').val();
+            var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
+            
+            
+            // Validar campos vacíos
+            if (typeof respuesta === "undefined" || respuesta === "") {
+                // mostrar el mensaje de alerta de Bootstrap
+                $('#errorMessage_' + id).removeClass('d-none').fadeIn();
+                // Eliminar el mensaje de error después de 3 segundos (opcional)
+                setTimeout(function() {
+                    $('#errorMessage_' + id).fadeOut();
+                }, 3000);
+                
+                return; // Detener el envío del formulario
+            }
+           // Mostrar el overlay 
+           $('#overlay').show();
+            
+            var formData = form.serialize();
+            formData += '&anyo_consulta=' + encodeURIComponent(anyoConsulta); // Agrega anyo_consulta
+
+            
             $.ajax({
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                url: '{{ route("guardar.indicadores") }}',
+                url: '{{ route("indicadores.guardar") }}',
                 type: 'POST',
                 data: formData,
                 success: function(response) {
-                    $('#mensajeConfirmacion_' + id).removeClass('d-none').html('Datos guardados correctamente.');
+                    $('#mensajeConfirmacion_' + id).removeClass('d-none').html('<i class="bi bi-check2-circle"></i> Datos guardados correctamente.');
+                    setTimeout(function() {
+                        $('#mensajeConfirmacion_' + id).addClass('d-none').html('');
+                    }, 3000); // 3000 ms = 3 segundos
+                    // Desbloquear todos los botones y controles 
+                    $('#overlay').hide();
                 },
                 error: function(xhr, status, error) {
                     console.error('Error al guardar los datos:', error);
                     $('#mensajeConfirmacion_' + id).removeClass('d-none').addClass('alert-danger').html('Error al guardar los datos.');
+                    $('#overlay').hide();
                 }
             });
         });

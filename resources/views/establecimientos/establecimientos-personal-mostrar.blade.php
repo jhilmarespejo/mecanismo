@@ -16,6 +16,8 @@
                 <option value="2024" {{ ( $infoPersonal['EPER_gestion'] == '2024' || $gestion == '2024') ? 'selected' : '' }}>2024</option>
                 <option value="2025" {{ ( $infoPersonal['EPER_gestion'] == '2025' || $gestion == '2025') ? 'selected' : '' }}>2025</option>
                 <option value="2026" {{ ( $infoPersonal['EPER_gestion'] == '2026' || $gestion == '2026') ? 'selected' : '' }}>2026</option>
+                <option value="2027" {{ ( $infoPersonal['EPER_gestion'] == '2027' || $gestion == '2027') ? 'selected' : '' }}>2027</option>
+                <option value="2028" {{ ( $infoPersonal['EPER_gestion'] == '2028' || $gestion == '2028') ? 'selected' : '' }}>2028</option>
             </select>
         </div>
     </div>
@@ -61,7 +63,7 @@
                 </div>
             </div>
         </div>
-
+        
         {{-- <button type="button" class="btn btn-primary" id="editBtn">Editar la información actual</button> --}}
         @if($infoPersonal['EPER_gestion'] == date('Y'))
             <button type="button" class="btn btn-primary" id="editBtn">Editar la información actual</button>
