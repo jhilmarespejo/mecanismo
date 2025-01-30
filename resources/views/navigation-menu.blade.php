@@ -40,6 +40,9 @@
     
                                         </ul>
                                     </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">Formularios </a>
+                                    </li>@endif
                                     
                                     @endif
                                     <li class="nav-item">
@@ -93,9 +96,7 @@
                                         </ul>
                                     </li>
     
-                                    <li class="nav-item">
-                                        <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">. </a>
-                                    </li>@endif
+                                   
                                     {{--<li class="nav-item">
                                         <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
                                     </li>--}}

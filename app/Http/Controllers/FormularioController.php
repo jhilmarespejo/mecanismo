@@ -15,6 +15,29 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class FormularioController extends Controller
 {
+    // Método para mostrar todos los formularios
+    public function index() {
+        $formularios = ModFormulario::all();
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Formularios', 'url' => ''],
+        ];
+        return view('formulario.index', compact('formularios', 'breadcrumbs'));
+    }
+
+    // Método para devolver los formularios filtrados (usado para AJAX)
+    public function filtrar(Request $request) {
+        $titulo = $request->input('titulo');
+
+        // Filtrar formularios si hay un título
+        $formularios = ModFormulario::when($titulo, function ($query, $titulo) {
+            return $query->where('FRM_titulo', 'ILIKE', '%' . $titulo . '%');
+        })->get();
+
+        // Devolver solo el HTML de los formularios filtrados
+        return view('formulario._formularios', compact('formularios'));
+    }
+
     /** Funcion para crear un formulario nuevo
      */
     public function eleccion($VIS_id, $VIS_tipo){
@@ -31,53 +54,6 @@ class FormularioController extends Controller
             return redirect('panel');
         }
     }
-    
-    // public function nuevo(Request $request){
-    //     // dump($request->all());exit;
-    //     $validated = $request->validate([
-    //         'opcion' => 'required',
-    //         'FRM_id' => 'sometimes|required_if:opcion,asignar,anterior', // Regla de validación condicional
-    //         'nuevo_formulario' => 'sometimes|required_if:opcion,nuevo',
-    //     ], [
-    //         'required' => 'Debe seleccionar una opción',
-    //         'FRM_id.required_if' => 'Debe seleccionar un formulario',
-    //         'nuevo_formulario.required_if' => 'Debe ingresar un nombre para el nuevo formulario',
-    //     ]);
-
-    //     if( $request->opcion == 'nuevo' ){
-    //         //crear formulario desde 0
-
-    //             // dump($preguntas);exit;
-    //         return view('formulario.formulario-nuevo', ['nuevo_formulario' => $request->nuevo_formulario]);
-    //     }
-    //     elseif($request->opcion== 'anterior' ){
-    //         // Tomar el valor del input nuevo_formulario y buscar formularios anteriores
-    //         // buscar formularios segun el el valor del input nuevo_formulario en la tabla formularios y mostra sus categorias, preguntas y opcciones en pantalla para editar
-    //         // dump($request->all());
-    //         $formulario = ModFormulario::from('formularios as f')
-    //         ->select('f.FRM_titulo',
-    //         'bp.BCP_pregunta as Pregunta','bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
-    //         'categorias1.CAT_categoria as categoria',
-    //         'categorias2.CAT_categoria as subcategoria')
-    //         ->join('r_bpreguntas_formularios as rb', 'f.FRM_id', 'rb.FK_FRM_id')
-    //         ->join('banco_preguntas as bp', 'rb.FK_BCP_id', 'bp.BCP_id')
-    //         ->leftJoin('categorias as categorias1', 'bp.FK_CAT_id', 'categorias1.CAT_id')
-    //         ->leftJoin('categorias as categorias2', 'categorias1.FK_CAT_id', 'categorias2.CAT_id')
-    //         ->where('f.FRM_id', $request->FRM_id)
-    //         ->get()->toArray();
-
-    //         $preguntas_ordenadas = CustomController::ordenaPreguntasCategorias($formulario);
-    //         $elementos_formulario = CustomController::array_group( $preguntas_ordenadas, 'subcategoria' );
-    //         // dump($datos_agrupados);exit;
-    //         return view('formulario.formulario-anterior', compact('elementos_formulario'));
-    //     }
-
-    //     elseif($request->opcion== 'asignar' ){
-    //         //Tomar el valor del input nuevo_formulario y buscar formularios anteriores
-    //         // visualizar todos sus datos y asignarle a esta visita
-    //     }
-    // }
-
     public function buscarPregunta(Request $request){
         $preguntas = ModBancoPregunta::select(
             // 'categorias.CAT_categoria as categoria',
@@ -97,27 +73,44 @@ class FormularioController extends Controller
             ->orderBy('banco_preguntas.BCP_id')
             ->get()->toArray();
             // $preguntas = CustomController::ordenaPreguntasCategorias($preguntas);
-            // dump( $preguntas ); exit;
+            // dump( $preguntas ); exit
             return response()->json($preguntas);
-
+    
     }
+    
+    public function asignar(Request $request)
+        {
+            // Validar los datos entrantes
+            $validatedData = $request->validate([
+                'TES_tipo' => 'required|string',
+                'EST_nombre' => 'required|string',
+                'EST_id' => 'required|integer',
+                'VIS_id' => 'required|integer',
+                'opcion' => 'required|string',
+                'FRM_id' => 'nullable|integer',
+            ]);
 
-    public function sugerenciasFormularios(Request $request){
-        // $rastro = $request->nuevo_formulario
-        // dump($request->nuevo_formulario);exit;
+            try {
+                // Insertar en la tabla agrupador_formularios
+                DB::table('agrupador_formularios')->insert([
+                    'FK_FRM_id' => $validatedData['FRM_id'], // ID del formulario
+                    'FK_VIS_id' => $validatedData['VIS_id'], // ID de la visita
+                    'AGF_copia' => 1, // Opcional: Puedes usar otra lógica para manejar copias
+                    'estado' => '1', // Por defecto, se inserta como activo
+                ]);
+                
+                // Redirigir con mensaje de éxito a la ruta formulario/buscaFormularios/{VIS_id}
+                return redirect()->route('formulario.buscaFormularios', ['VIS_id' => $validatedData['VIS_id']])
+                                ->with('success', 'Formulario asignado correctamente a la visita.');
+            } catch (\Exception $e) {
+                // Manejar errores y redirigir con mensaje de error
+                return redirect()->back()->with('error', 'Ocurrió un error al asignar el formulario. Intente nuevamente.');
+            }
+        }
+            
+    
 
-        $sugerencias_formularios = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_titulo', 'ILIKE', '%' . $request->nuevo_formulario . '%')->get();
-        return response()->json($sugerencias_formularios);
-        // dump( $sugerencias_formularios);exit;
-
-    }
-
-
-    /* Funcion para obtener los formularios aplicados en la visita
-        $id = Visita ID
-    */
     public function buscaFormularios( $VIS_id ){
-
         // dump($VIS_id );exit;
         //Obtener los formularios asociados con esta visita acompañado de las copias correspondientes
         $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
@@ -157,58 +150,6 @@ class FormularioController extends Controller
         return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
     }
 
-    // public function store(Request $request)
-    // {
-    //     // Recuperar todos los datos del formulario
-    //     $datos = $request->all();
-    //     dd($datos);
-    //     // Crear un array para almacenar las preguntas procesadas
-    //     $preguntas = [];
-
-    //     // Procesar cada pregunta
-    //     foreach ($datos['pregunta'] as $index => $preguntaTexto) {
-
-    //         // Obtener las opciones asociadas a la pregunta
-    //         $opcionesClave = 'opciones_' . ($index + 1); // Clave dinámica para opciones
-    //         $opciones = isset($datos[$opcionesClave]) ? $datos[$opcionesClave] : [];
-
-    //         // Convertir las opciones al formato JSON requerido {"0":"A","1":"B","2":"C"}
-    //         $opcionesJSON = json_encode(array_values($opciones), JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE);
-    //         if($opcionesJSON == '{}'){
-    //             $opcionesJSON = null;
-    //         }
-
-    //         // Obtener tipo de respuesta
-    //         $tipoRespuesta = isset($datos['tipoRespuesta'][$index]) ? $datos['tipoRespuesta'][$index] : null;
-
-    //         // Obtener número de orden
-    //         $orden = isset($datos['RBF_orden'][$index]) ? $datos['RBF_orden'][$index] : ($index + 1);
-            
-    //         // Construir el array de preguntas
-    //         $preguntas[] = [
-    //             'BCP_pregunta'       => null,
-    //             'BCP_pregunta'       => $preguntaTexto,               // Texto de la pregunta
-    //             'BCP_tipoRespuesta'  => $tipoRespuesta,               // Tipo de respuesta
-    //             'BCP_opciones'       => $opcionesJSON,                // Opciones en formato JSON
-    //             'BCP_complemento'    => null,                         // Complemento (nulo por defecto)
-    //             'BCP_aclaracion'     => null,                         // Aclaraciones (nulo por defecto)
-    //             'FK_CAT_id'          => 1,                            // ID de categoría
-    //             'estado'             => 1,                            // Estado activo
-    //             'RBF_orden'          => $orden                        // Número de orden
-    //         ];
-    //     }
-
-
-    //     dump($preguntas);
-    //     exit;
-    //     // Guardar las preguntas en la base de datos
-    //     // DB::table('banco_preguntas')->insert($preguntas);
-        
-    //     // Redireccionar con un mensaje de éxito
-    //     return redirect()->back()->with('success', 'Formulario guardado correctamente.');
-    // }
-    
-    // guarda el formulario creado dinamicamente
     public function store(Request $request)
     {
         // dd($request->all());
@@ -265,6 +206,7 @@ class FormularioController extends Controller
                             ->with('error', 'Error al crear el formulario. Intente nuevamente: ' . $e->getMessage());
         }
     }//store
+    
     public function verFormularioCreado($id) {
         // Obtener el formulario
         $formulario = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_id', $id)->first();
@@ -275,9 +217,13 @@ class FormularioController extends Controller
             ->orderBy('r_bpreguntas_formularios.RBF_orden') // Primera columna
             ->orderBy('r_bpreguntas_formularios.RBF_id') 
             ->get();
-        
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Formularios', 'url' => route('formularios.index')],
+            ['name' => 'Formulario actual', 'url' => ''],
+        ];
         // Enviar los datos a la vista
-        return view('formulario.verFormularioCreado', compact('formulario', 'preguntas'));
+        return view('formulario.verFormularioCreado', compact('formulario', 'preguntas', 'breadcrumbs'));
     }
     
     public function imprimirFormulario($id)
@@ -299,6 +245,123 @@ class FormularioController extends Controller
         // Descargar o visualizar el PDF
         return $pdf->stream('Formulario_' . $formulario->FRM_id . '.pdf'); // Para visualizar en el navegador
     }
+    public function nuevo(){
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Formularios', 'url' => route('formularios.index')],
+            ['name' => 'Nuevo Formulario', 'url' => ''],
+        ];
+        return view('formulario.formulario-nuevo', compact('breadcrumbs'));
+    }
+    
+    
+    
+    // public function nuevo(Request $request){
+    //     // dump($request->all());exit;
+    //     $validated = $request->validate([
+    //         'opcion' => 'required',
+    //         'FRM_id' => 'sometimes|required_if:opcion,asignar,anterior', // Regla de validación condicional
+    //         'nuevo_formulario' => 'sometimes|required_if:opcion,nuevo',
+    //     ], [
+    //         'required' => 'Debe seleccionar una opción',
+    //         'FRM_id.required_if' => 'Debe seleccionar un formulario',
+    //         'nuevo_formulario.required_if' => 'Debe ingresar un nombre para el nuevo formulario',
+    //     ]);
+
+    //     if( $request->opcion == 'nuevo' ){
+    //         //crear formulario desde 0
+
+    //             // dump($preguntas);exit;
+    //         return view('formulario.formulario-nuevo', ['nuevo_formulario' => $request->nuevo_formulario]);
+    //     }
+    //     elseif($request->opcion== 'anterior' ){
+    //         // Tomar el valor del input nuevo_formulario y buscar formularios anteriores
+    //         // buscar formularios segun el el valor del input nuevo_formulario en la tabla formularios y mostra sus categorias, preguntas y opcciones en pantalla para editar
+    //         // dump($request->all());
+    //         $formulario = ModFormulario::from('formularios as f')
+    //         ->select('f.FRM_titulo',
+    //         'bp.BCP_pregunta as Pregunta','bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento',
+    //         'categorias1.CAT_categoria as categoria',
+    //         'categorias2.CAT_categoria as subcategoria')
+    //         ->join('r_bpreguntas_formularios as rb', 'f.FRM_id', 'rb.FK_FRM_id')
+    //         ->join('banco_preguntas as bp', 'rb.FK_BCP_id', 'bp.BCP_id')
+    //         ->leftJoin('categorias as categorias1', 'bp.FK_CAT_id', 'categorias1.CAT_id')
+    //         ->leftJoin('categorias as categorias2', 'categorias1.FK_CAT_id', 'categorias2.CAT_id')
+    //         ->where('f.FRM_id', $request->FRM_id)
+    //         ->get()->toArray();
+
+    //         $preguntas_ordenadas = CustomController::ordenaPreguntasCategorias($formulario);
+    //         $elementos_formulario = CustomController::array_group( $preguntas_ordenadas, 'subcategoria' );
+    //         // dump($datos_agrupados);exit;
+    //         return view('formulario.formulario-anterior', compact('elementos_formulario'));
+    //     }
+
+    //     elseif($request->opcion== 'asignar' ){
+    //         //Tomar el valor del input nuevo_formulario y buscar formularios anteriores
+    //         // visualizar todos sus datos y asignarle a esta visita
+    //     }
+    // }
+
+    
+
+    /* Funcion para obtener los formularios aplicados en la visita
+        $id = Visita ID
+    */
+    
+
+    // public function store(Request $request)
+    // {
+    //     // Recuperar todos los datos del formulario
+    //     $datos = $request->all();
+    //     dd($datos);
+    //     // Crear un array para almacenar las preguntas procesadas
+    //     $preguntas = [];
+
+    //     // Procesar cada pregunta
+    //     foreach ($datos['pregunta'] as $index => $preguntaTexto) {
+
+    //         // Obtener las opciones asociadas a la pregunta
+    //         $opcionesClave = 'opciones_' . ($index + 1); // Clave dinámica para opciones
+    //         $opciones = isset($datos[$opcionesClave]) ? $datos[$opcionesClave] : [];
+
+    //         // Convertir las opciones al formato JSON requerido {"0":"A","1":"B","2":"C"}
+    //         $opcionesJSON = json_encode(array_values($opciones), JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE);
+    //         if($opcionesJSON == '{}'){
+    //             $opcionesJSON = null;
+    //         }
+
+    //         // Obtener tipo de respuesta
+    //         $tipoRespuesta = isset($datos['tipoRespuesta'][$index]) ? $datos['tipoRespuesta'][$index] : null;
+
+    //         // Obtener número de orden
+    //         $orden = isset($datos['RBF_orden'][$index]) ? $datos['RBF_orden'][$index] : ($index + 1);
+            
+    //         // Construir el array de preguntas
+    //         $preguntas[] = [
+    //             'BCP_pregunta'       => null,
+    //             'BCP_pregunta'       => $preguntaTexto,               // Texto de la pregunta
+    //             'BCP_tipoRespuesta'  => $tipoRespuesta,               // Tipo de respuesta
+    //             'BCP_opciones'       => $opcionesJSON,                // Opciones en formato JSON
+    //             'BCP_complemento'    => null,                         // Complemento (nulo por defecto)
+    //             'BCP_aclaracion'     => null,                         // Aclaraciones (nulo por defecto)
+    //             'FK_CAT_id'          => 1,                            // ID de categoría
+    //             'estado'             => 1,                            // Estado activo
+    //             'RBF_orden'          => $orden                        // Número de orden
+    //         ];
+    //     }
+
+
+    //     dump($preguntas);
+    //     exit;
+    //     // Guardar las preguntas en la base de datos
+    //     // DB::table('banco_preguntas')->insert($preguntas);
+        
+    //     // Redireccionar con un mensaje de éxito
+    //     return redirect()->back()->with('success', 'Formulario guardado correctamente.');
+    // }
+    
+    // guarda el formulario creado dinamicamente
+   
     
     
     // public function store(Request $request)
@@ -423,8 +486,4 @@ class FormularioController extends Controller
         
     
 
-    public function nuevo(){
-        return view('formulario.formulario-nuevo');
-    }
-    
 }

@@ -38,7 +38,7 @@
                 <div class="alert alert-warning" role="alert">
                     Aún no se asignaron formularios para esta visita <br>
                     @if( Auth::user()->rol == 'Administrador' )
-                        <a href="/formulario/eleccion/{{$VIS_id}}/{{$VIS_tipo}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Crear formulario </a>
+                        <a href="/formulario/eleccion/{{$VIS_id}}/{{$VIS_tipo}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Asignar formulario </a>
                     @endif
 
                 </div>

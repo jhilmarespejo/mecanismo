@@ -20,9 +20,10 @@
 
 
 
-    @include('layouts.breadcrumbs', $breadcrumbs)
+    {{-- @include('layouts.breadcrumbs', $breadcrumbs) --}}
   <!-- Estadísticas -->
   <h1 class="mb-2 text-center text-primary">Módulo Educativo</h1>
+  @include('layouts.breadcrumbs', $breadcrumbs)
 <!-- Select box para Filtrar por el año -->
 <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
     <form action="{{ route('educacion.index') }}" method="GET" class="mb-3">

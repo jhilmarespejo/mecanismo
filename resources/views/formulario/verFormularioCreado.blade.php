@@ -3,11 +3,7 @@
 @section('title', 'Formulario Detalles')
 
 @section('content')
-<<<<<<< HEAD
 <div class="container my-5">
-=======
-{{-- <div class="container my-5">
->>>>>>> c00fe7d2986b07e758f5aa7c75dc8bd448d0e78a
     <!-- Mensajes de éxito o error -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -22,6 +18,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    
+    <!-- BREADCUMB -->
+    @include('layouts.breadcrumbs', $breadcrumbs)
 
     <!-- Encabezado del formulario -->
     <div class="card shadow mb-4">
@@ -33,9 +32,10 @@
             </a>
         </div>
     </div>
-
+    
     <!-- Preguntas -->
     <h4 class="text-primary mt-4"><i class="bi bi-list-task"></i> Preguntas</h4>
+    
     <div class="mb-2">
         @forelse($preguntas as $index => $pregunta)
             @php
@@ -58,32 +58,22 @@
             <div class="ms-5 mb-1 p-1 border rounded shadow-sm bg-light row">
                 <label class="fw-bold d-flex flex-wrap align-items-center"> <!-- Añadido flex-wrap para que el contenido no se desborde -->
             
-                        {{-- @if($pregunta->BCP_tipoRespuesta == 'Lista desplegable')
-                            <i class="bi bi-check-circle text-success me-2 "></i>
-                        @elseif($pregunta->BCP_tipoRespuesta == 'Casilla verificación')
-                            <i class="bi bi-check-square  text-success me-2 "></i>
-                        @elseif($pregunta->BCP_tipoRespuesta == 'Respuesta corta')
-                            <i class="bi bi-pencil-square me-2 text-warning"></i>
-                        @elseif($pregunta->BCP_tipoRespuesta == 'Numeral')
-                            <i class="bi bi-123 me-2 text-info"></i>
-                        @elseif($pregunta->BCP_tipoRespuesta == 'Archivo')
-                            <i class="bi bi-paperclip me-2 text-danger"></i>
-                        @endif --}}
-                        
                         @if( $pregunta->BCP_tipoRespuesta == 'Casilla verificación')
                             <div class="col-12">
-                                <label class="fw-bold"> <i class="bi bi-check-square  text-success me-2 "></i></i> {{ $pregunta->BCP_pregunta }}</label>
+                                <label class="fw-bold"> 
+                                    {{-- <i class="bi bi-check-square  text-success me-2 "></i> --}}
+                                    {{ $pregunta->BCP_pregunta }}</label>
                                 {{ $pregunta->BCP_pregunta }}
                             </div>
                         @endif
                         @if($pregunta->BCP_tipoRespuesta == 'Lista desplegable' )
                             <div class="col-12">
-                                <label class="fw-bold"><i class="bi bi-check-circle text-success me-2 "></i> {{ $pregunta->BCP_pregunta }}</label>
+                                <label class="fw-bold">{{--<i class="bi bi-check-circle text-success me-2 "></i>--}} {{ $pregunta->BCP_pregunta }}</label>
                             </div>
                         @endif
                         @if($pregunta->BCP_tipoRespuesta == 'Respuesta corta')
                             <div class="col-12 mt-2">
-                                <label class="fw-bold"><i class="bi bi-pencil-square me-2 text-warning"></i> {{ $pregunta->BCP_pregunta }}</label> <!-- Mostrar la pregunta -->
+                                <label class="fw-bold">{{--<i class="bi bi-pencil-square me-2 text-warning"></i>--}} {{ $pregunta->BCP_pregunta }}</label> <!-- Mostrar la pregunta -->
                                 <div class="col-12 col-md-7 mt-2">
                                     <input type="text" class="form-control" placeholder="Ingrese una respuesta...">
                                 </div>
@@ -92,7 +82,7 @@
 
                         @if($pregunta->BCP_tipoRespuesta == 'Numeral')
                             <div class="col-12 mt-2">
-                                <label class="fw-bold"><i class="bi bi-123 me-2 text-info"></i> 
+                                <label class="fw-bold">{{--<i class="bi bi-123 me-2 text-info"></i>--}} 
                                      {{ $pregunta->BCP_pregunta }}</label> <!-- Mostrar la pregunta -->
                                 <div class="col-12 col-md-7 mt-2">
                                     <input type="number" class="form-control" placeholder="Ingrese una respuesta numérica...">
@@ -147,7 +137,7 @@
                     @if($pregunta->BCP_complemento)
                         <div class="mt-2 text-muted">
                             <small><i class="bi bi-info-circle"></i> {{ $pregunta->BCP_complemento }}: </small>
-                            <input type="text" class="form-control mt-1" placeholder="Ingrese el complemento..."> <!-- Añadido margen para responsividad -->
+                            <input type="text" class="form-control mt-1" placeholder="..."> <!-- Añadido margen para responsividad -->
                         </div>
                     @endif
                 

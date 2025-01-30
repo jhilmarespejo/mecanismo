@@ -5,38 +5,70 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
     #map {
-      height: 600px;
+        height: 75vh; /* Ajuste de altura para pantallas grandes */
+        min-height: 400px; /* Altura mínima para pantallas pequeñas */
     }
-    li.tipos_e:hover{
+
+    li.tipos_e:hover {
         background-color: rgb(138, 196, 215);
         color: white;
         font-size: 105%;
         cursor: pointer;
     }
-    .info-div { width: 150px !important;}
+
+    .info-div {
+        width: 150px !important;
+    }
+
+    /* Ajuste adicional para pantallas grandes */
+    @media (min-width: 1200px) {
+        #map {
+            height: 85vh; /* Más altura en pantallas extra grandes */
+        }
+
+        .col-md-3 {
+            height: 85vh; /* Asegura que la columna izquierda use el mismo espacio */
+            overflow-y: auto; /* Habilita el scroll si el contenido es mayor */
+        }
+    }
+
+    .badge-ribbon {
+    top: -10px; /* Ajusta la distancia desde la parte superior */
+    right: 10px; /* Ajusta la distancia desde el lado derecho */
+    padding: 10px 20px;
+    /* transform: rotate(45deg); Crea el efecto inclinado de cinta */
+    z-index: 1000; /* Asegura que esté por encima del mapa */
+    font-size: 1rem; /* Tamaño del texto */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombras para mayor estilo */
+    position: absolute;
+}
+
+
+
 </style>
 
-<div class="row">
-    <div class="col-md-3 col-sm-12 order-md-1 order-2 border border-2" style="height: 603px;">
-        {{-- <div class="btn btn-primary btn-sm box-shadow mt-3 text-center">
-            <a href="/uploads/MNP-Bolivia.apk" style="text-decoration:none" class="text-light text-shadow">Descargar App Movil</a>
-        </div> --}} 
-        <div class="row p-3 m-1 border-bottom text-center">
-            <h5> Lugares de deteción en total: </h5>
-            <h3 class="bg-info p-4 rounded text-shadow"> {{ $totalEstablecimientos }} </h3>
-        </div>
-        <div class="container p-0" >
-            <div class="buscador">
-                <label for="input_establecimiento" class="form-label">Lugares de detención:</label>
-                <input type="text" id="input_establecimiento" class="form-control" placeholder="Buscar">
+<div class="container-fluid p-3">
+    <div class="row gx-3 gy-3">
+        <!-- Columna Izquierda -->
+        <div class="col-lg-3 col-md-4 col-sm-12 border border-2">
+            <div class="container p-0">
+                <div class="buscador">
+                    <label for="input_establecimiento" class="form-label">Lugares de detención:</label>
+                    <input type="text" id="input_establecimiento" class="form-control" placeholder="Buscar">
+                </div>
+                <div class="spinner-border text-primary text-center d-none mt-3" role="status" id="spiner-estab"></div>
+                <div id="establecimientos" class="mt-3"></div>
             </div>
-            {{-- @include('establecimientos.establecimientos-nuevo') --}}
-            <div class="spinner-border text-primary text-center d-none" role="status" id="spiner-estab"> </div>
-            <div id="establecimientos" class="mt-3"></div>
         </div>
-    </div>
-    <div class="col-md-9 col-sm-12 order-md-2 order-1 border border-2">
-        <div id="map" style="height: 600px;"></div>
+        
+        <!-- Columna Derecha -->
+        <div class="col-lg-9 col-md-8 col-sm-12 border border-2 position-relative">
+            <div id="map" class=""></div>
+            <span class="position-absolute badge-ribbon bg-danger text-white box-shadow text-shadow rounded-bottom" >
+                {{ $totalEstablecimientos }} Lugares de detención en total 
+            </span>
+           
+        </div>
     </div>
 </div>
 
@@ -133,7 +165,7 @@
     //Ajax para buscar establecimientos con el input
     $('#input_establecimiento').on('input', function() {
         console.log("entro");
-        if ($(this).val().length > 3) {
+        if ( $(this).val().length > 2 ) {
             $.ajax({
                 async: true,
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},

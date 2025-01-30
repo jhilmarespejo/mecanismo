@@ -43,6 +43,10 @@ Route::middleware([
 
 // FORMULARIO
 
+Route::get('/formularios', [FormularioController::class, 'index'])->name('formularios.index');
+Route::get('/formularios/filtrar', [FormularioController::class, 'filtrar'])->name('formularios.filtrar');
+
+
 Route::get('formulario/eleccion/{VIS_id}/{VIS_tipo}', [FormularioController::class, 'eleccion'])->name('formulario.index')->middleware('auth');
 /* Ruta para mostrar los formularios relacionados a la vista */
 
@@ -50,7 +54,7 @@ Route::get('formulario/buscaFormularios/{VIS_id}', [FormularioController::class,
 
 // Route::post('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
 Route::get('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
-Route::post('formulario/sugerenciasFormularios', [FormularioController::class, 'sugerenciasFormularios'])->name('formulario.sugerenciasFormularios')->middleware('auth');
+Route::post('formulario/asignar', [FormularioController::class, 'asignar'])->name('formulario.asignar')->middleware('auth');
 
 Route::post('formulario/buscarPregunta', [FormularioController::class, 'buscarPregunta'])->name('formulario.buscarPregunta')->middleware('auth');
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
@@ -68,8 +72,8 @@ Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListas
 
 
 // LIVEWIRE
-Route::get('formularios', Formularios::class)->middleware('auth');
-Route::get('cuestionario', CuestionarioIndex::class);
+//Route::get('formularios', Formularios::class)->middleware('auth');
+//Route::get('cuestionario', CuestionarioIndex::class);
 // Route::get('establecimientos', Establecimientos::class);
 Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
 Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
@@ -109,7 +113,6 @@ Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesControl
 Route::get('/recomendacionesEstatales', [RecomendacionesController::class, 'recomendacionesEstatales'])->name('recomendaciones.recomendacionesEstatales')->middleware('auth');
 
 
-
 // CATEGORIAS
 Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
 Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta')->middleware('auth');
@@ -119,7 +122,6 @@ Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'gu
 
 
 // ESTABLECIMIENTOS
-
 Route::get('establecimientos/tipo', [EstablecimientosController::class, 'tipo'])->name('establecimientos')->middleware('auth');
 Route::post('establecimientos/listarSegunTipo', [EstablecimientosController::class, 'listarSegunTipo'])->name('establecimientos.listarSegunTipo')->middleware('auth');
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.listaguardarNuevoEstablecimientorPorTipo')->middleware('auth');
@@ -177,6 +179,11 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
 Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth')->name('indicadores.panel');
 Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
 Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
+
+Route::get('/indicadores/obtenerResultadoSiNo', [IndicadorController::class, 'obtenerResultadoSiNo'])->middleware('auth')->name('indicadores.obtenerResultadoSiNo');
+
+
+
 // ---- MÓDULO DE ASESORAMIENTO ----------
 
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');

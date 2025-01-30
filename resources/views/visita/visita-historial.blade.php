@@ -19,8 +19,12 @@
         }
     }
 </style>
+{{-- <div class="container mt-3 p-4 bg-white">
+</div> --}}
 
-    <h2 class="text-center py-2">Historial de visitas</h2>
+<div class="container mt-3 p-4 bg-white">
+    {{-- @include('layouts.breadcrumbs', $breadcrumbs) --}}
+    <h1 class="text-center text-primary ">Historial de visitas</h1>
     
     @if (Session::has('TES_tipo') && Session::has('EST_nombre') && Session::has('EST_id') )
         @php
@@ -31,7 +35,7 @@
                 dump('Regrese al inicio!');
             }
         @endphp
-        <h3 class="text-center">{{ $TES_tipo.': '. $EST_nombre }}</h3>
+        <h3 class="text-center text-primary">{{ $TES_tipo.': '. $EST_nombre }}</h3>
     @else
 
     @endif
@@ -43,7 +47,6 @@
         </div>
     @endif
 
-    <div class="container py-0 mt-4">
         @foreach ( $visitas as $key=>$visita )
             @if ($visita->VIS_id)
                 @php $VIS_id = $visita->VIS_id;

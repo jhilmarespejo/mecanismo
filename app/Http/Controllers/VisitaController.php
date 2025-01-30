@@ -20,7 +20,7 @@ class VisitaController extends Controller{
 
     // Guardar datos de nueva visita
     public function guardarNuevaVisita( Request $request ) {
-
+        
         $validator = Validator::make($request->all(), [
             'VIS_tipo' => 'required',
             'VIS_fechas' => 'required|date|after_or_equal:today',
@@ -61,10 +61,10 @@ class VisitaController extends Controller{
         ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo','e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
         ->rightJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
         ->rightJoin('tipo_establecimientos as tes', 'tes.TES_id', 'e.FK_TES_id'  )
-        ->where('e.EST_id', $id)
+        ->where('e.EST_id', $id)->orderBy('v.VIS_fechas', 'desc')
         ->get();
         // $quries = DB::getQueryLog();
-        // dump($visitas); exit;
+        //dump($visitas); exit;
 
         session()->put('EST_id', $visitas->toArray()[0]['EST_id']);
         session()->put('EST_nombre', $visitas->toArray()[0]['EST_nombre']);

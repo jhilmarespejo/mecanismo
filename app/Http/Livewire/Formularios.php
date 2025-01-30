@@ -25,7 +25,7 @@ class Formularios extends Component
     public function render()
     {
         DB::enableQueryLog();
-
+        
         $formularios = ModFormulario::select('FRM_id', 'FRM_titulo', 'FRM_version', 'FRM_fecha')
         ->where('FRM_titulo',  'ilike', '%' . $this->buscarForm . '%')
         ->orderBy('FRM_id', 'Desc')->paginate(10);

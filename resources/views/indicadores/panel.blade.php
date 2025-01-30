@@ -8,8 +8,8 @@
 
     {{-- <a href="{{ route('indicadores.create') }}" class="btn btn-primary mb-3">Crear Nuevo Indicador</a> --}}
     @include('layouts.breadcrumbs', $breadcrumbs)
-    <h1 class="text-center">Módulo de Indicadores</h1>
-    <h3 class="text-center">Panel de datos</h3>
+    <h1 class="text-center text-primary ">Módulo de Indicadores</h1>
+    <h3 class="text-center text-primary ">Panel de datos</h3>
     <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
         <label for="colFormLabelLg" class="col-sm-8 col-form-label col-form-label-lg">Gestión:</label>
         <div class="col-sm-4 text-start">
@@ -27,7 +27,7 @@
             <i class="bi bi-info-circle"></i> Sin resultados
         </div>
     @endif
-    
+    {{-- @dump($categorias) --}}
     <div class="d-flex align-items-start border">
         <div class="col-4 border-end overflow-auto" id="v-pills-tab" style="max-height: 550px; direction: rtl;">
             <div class="nav flex-column nav-pills me-3" role="tablist" aria-orientation="vertical">

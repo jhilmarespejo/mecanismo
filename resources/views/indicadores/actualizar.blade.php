@@ -10,7 +10,7 @@
     <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
         <label for="colFormLabelLg" class="col-sm-8 col-form-label col-form-label-lg">Gestión:</label>
         <div class="col-sm-4 text-start">
-            <select class=" form-select form-select-lg" id="anyo_consulta" name="anyo_consulta">
+            <select class=" form-select form-select-lg" id="anio_consulta" name="anio_consulta">
                 <option value="2024" {{ ( $gestion == '2024') ? 'selected' : '' }}>2024</option>
                 <option value="2025" {{ ( $gestion == '2025') ? 'selected' : '' }}>2025</option>
                 <option value="2026" {{ ( $gestion == '2026') ? 'selected' : '' }}>2026</option>
@@ -19,6 +19,7 @@
             </select>
         </div>
     </div>
+    {{-- @dump($categorias) --}}
 
     <div class="d-flex align-items-start border">
         <div class="col-4 border-end overflow-auto" id="v-pills-tab" style="max-height: 550px; direction: rtl;">
@@ -40,7 +41,6 @@
 
             <div class="tab-content" id="v-pills-tabContent">
                 
-
                 @php $j=0; @endphp
                 @foreach ($categorias as $indic => $indicadores)
 
@@ -61,7 +61,7 @@
 
                                     <div id="collapse_{{$a}}_{{$j}}" class="accordion-collapse collapse bg-light border-start border-top" aria-labelledby="heading_{{$a}}_{{$j}}" data-bs-parent="#accordionIndicadores">
                                         <div class="accordion-body">
-
+                                            
                                             {{-- mensaje --}}
                                             <div class="alert alert-info box-shadow d-flex align-items-center">
                                                 <span class="rounded rounded-circle bg-light p-0 m-1 me-3"><i class="bi bi-chat-left-text fs-3"></i></span>
@@ -121,31 +121,23 @@
                                                                     class="form-control box-shadow" 
                                                                     id="respuesta_{{ $pregunta['IND_id'] }}" 
                                                                     value="{{ $pregunta['HIN_respuesta'] ?? '' }}">
-                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
-                                                            <br>
-                                                                <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
-                                                                    Centros penitenciarios
-                                                                </button>
-                                                                <!-- Incluir el modal -->
-                                                                @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'centros penitenciarios'])
-                                                            
-                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista sexo')
-                                                                Lista sexo
-                                                            @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista delitos')
-                                                                Lista delitos
                                                             @endif
                                                             
-                                                            <div class="mb-2 mt-2">
-                                                                <label for="adicional" class="ms-2"><i class="bi bi-info-circle-fill text-warning fs-5 text-shadow"></i> Informacion complementaria:</label>
-                                                                <div class=" px-4">
-                                                                  <input type="text" name="informacion_complementaria" class="form-control box-shadow" id="adicional_{{ $pregunta['IND_id'] }}" value="{{ $pregunta['HIN_informacion_complementaria'] ?? '' }}">
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                            {{--Si es una lista de centros penitenciarios, no se muestra información complementaria --}}
+                                                            @if ($pregunta['IND_tipo_repuesta'] == 'Lista desplegable' || $pregunta['IND_tipo_repuesta'] == 'Casilla verificacion' || $pregunta['IND_tipo_repuesta'] == 'Numeral' ||  $pregunta['IND_tipo_repuesta'] == 'Texto')
 
-                                                        <input type="hidden" name="FK_IND_id" value="{{ $pregunta['IND_id'] }}">
-                                                        <button type="button" class="btn btn-primary btn-sm guardarIndicadores box-shadow" data-id="{{ $pregunta['IND_id'] }}"><i class="bi bi-check2-circle"></i> Actualizar</button>
-                                                        
+                                                                <div class="mb-2 mt-2">
+                                                                    <label for="adicional" class="ms-2"><i class="bi bi-info-circle-fill text-warning fs-5 text-shadow"></i> Informacion complementaria:</label>
+                                                                    <div class=" px-4">
+                                                                    <input type="text" name="informacion_complementaria" class="form-control box-shadow" id="adicional_{{ $pregunta['IND_id'] }}" value="{{ $pregunta['HIN_informacion_complementaria'] ?? '' }}">
+                                                                    </div>
+                                                                </div>
+                                                                <input type="hidden" name="FK_IND_id" value="{{ $pregunta['IND_id'] }}">
+                                                            
+                                                                <button type="button" class="btn btn-primary btn-sm guardarIndicadores box-shadow" data-id="{{ $pregunta['IND_id'] }}"><i class="bi bi-check2-circle"></i> Actualizar</button>
+                                                            @endif
+                                                            
+                                                        </div>
                                                         
                                                         <div id="mensajeConfirmacion_{{ $pregunta['IND_id'] }}" class="mt-3 alert alert-success d-none p-1"></div>
                                                         <div id="errorMessage_{{ $pregunta['IND_id'] }}" class="alert alert-danger alert-dismissible fade show d-none p-2 mt-2" role="alert">
@@ -154,7 +146,33 @@
                                                         </div>
                                                         <hr>
                                                     </form>
+                                                    @if ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
+                                                            <br>
+                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
+                                                            Insertar datos
+                                                        </button> <br>
+                                                        {{-- @dump($pregunta['HIN_respuesta']) --}}
+                                                        <!-- Incluir el modal -->
+                                                        @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'centros penitenciarios'])
+                                                    
+                                                    @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista sexo')
+                                                    {{-- {{ $pregunta['IND_tipo_repuesta'] }} --}}
+                                                    <br>
+                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#listaSexoModal">
+                                                            Insertar datos
+                                                        </button> <br>
+                                                        {{-- @dump($pregunta['HIN_respuesta']) --}}
+                                                        
+                                                        <!-- Incluir el modal -->
+                                                        @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista sexo'])
+                                                    
+                                                    @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista delitos')
+                                                        Lista delitos
+                                                        @endif
+
+
                                                 @endforeach
+
                                                 <div id="mensajeConfirmacion" class="mt-3 alert alert-success d-none"></div>
                                             </div>
                                         </div>
@@ -172,57 +190,30 @@
     </div>
     
     <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;"> <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white;"> <span>Guardando datos...</span> </div> </div>
-{{-- 
-
-
-<!-- Modal CENTROS PENITENCIARIOS -->
-<div class="modal fade" id="centrosModal" tabindex="-1" aria-labelledby="centrosModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="centrosModalLabel">Centros Penitenciarios</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @foreach ($centrosPenitenciarios as $departamento => $centros)
-                    <div class="mb-3">
-                        <h6 class="fw-bold">{{ $departamento }}</h6>
-                        <ul class="list-group">
-                            @foreach ($centros as $centro)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ $centro->EST_nombre }}
-                                    <input type="number" name="numero[{{ $centro->EST_nombre }}]" class="form-control w-25" placeholder="0">
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endforeach
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div> --}}
-
-
-
 @endsection
 
 @section('js')
 
 <script>
     $(document).ready(function() {
-        var anyoConsulta = $('#anyo_consulta').val(); // Obtén el valor de anyo_consulta
 
-        // Mostrar mensaje de SweetAlert
+        $('#anio_consulta').change(function() {
+            let selectedYear = $(this).val();
+            // Redirige solo si el año cambia
+            window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
+
+        });
+
+        var anyoConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
+
+        // TODO: Mostrar mensaje de SweetAlert, descomentar esto cuando se implemente
         // Swal.fire({
         //     title: 'Actualización de Indicadores',
         //     text: 'Esta página se prepara para actualizar indicadores de la gestión ' + anyoConsulta,
         //     icon: 'info',
         //     confirmButtonText: 'Entendido',
         // });
-
+        
         $('.guardarIndicadores').click(function() {
                 var id = $(this).data('id');
             var form = $('#formularioIndicadores_' + id);
@@ -245,7 +236,7 @@
            $('#overlay').show();
             
             var formData = form.serialize();
-            formData += '&anyo_consulta=' + encodeURIComponent(anyoConsulta); // Agrega anyo_consulta
+            formData += '&anio_consulta=' + encodeURIComponent(anyoConsulta); // Agrega anio_consulta
 
             
             $.ajax({

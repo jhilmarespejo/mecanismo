@@ -28,7 +28,7 @@
         border-color: #dc3545; /* Rojo de Bootstrap para elementos inválidos */
     }
 </style>
-<div class="container row">
+<div class="container mt-3 p-4 bg-white">
       <!-- Mensaje de éxito -->
       @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -47,14 +47,16 @@
     <!-- Sección única para el formulario -->
     <div class="col-lg-12 mb-4">
         <!-- Contenedor principal -->
-        <div class="border rounded p-4 bg-light shadow-sm position-relative">
+        <div class="p-4 position-relative">
             <!-- Botón para agregar nueva pregunta (pegajoso en la esquina superior derecha) -->
             {{-- <div class="position-absolute top-0 end-0 mt-3 me-3">
                 
             </div> --}}
 
             <!-- Título del formulario -->
+            @include('layouts.breadcrumbs', $breadcrumbs)
             <h3 class="text-primary fw-bold mb-4 text-center">Crear nuevo formulario</h3>
+            
             <form id="formularioPrincipal" method="POST" action="{{ route('formulario.store') }}">
                 @csrf
 
@@ -66,7 +68,7 @@
                         class="form-control form-control-lg shadow-sm text-center text-uppercase" 
                         id="titulo_formulario" 
                         name="FRM_titulo" 
-                        placeholder="ESCRIBA EL TÍTULO DEL FORMULARIO QUI..."  
+                        placeholder="ESCRIBA EL TÍTULO DEL FORMULARIO AQUI..."  
                         value=""
                     />
                 </div>
