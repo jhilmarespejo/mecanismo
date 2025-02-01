@@ -144,7 +144,7 @@ class FormularioController extends Controller
         }
 
         $VIS_tipo = $VIS_tipo->VIS_tipo;
-        dump( $grupo_formularios );//exit;
+        // dump( $grupo_formularios );//exit;
         $colorVisita = CustomController::colorTipoVisita( $VIS_tipo );
 
         return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
