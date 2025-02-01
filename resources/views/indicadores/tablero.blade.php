@@ -140,19 +140,23 @@
             categorias.push(item.gestion);
             resultados.push(parseFloat(item.resultado_final));
         });
-
+        
         // Si ya existe un gráfico, lo destruimos
         if (chart) {
             chart.destroy();
         }
-
+        
         // Creamos el nuevo gráfico
         chart = Highcharts.chart('graficoIndicador', {
             chart: {
                 type: 'column'
             },
+            // title: {
+            //     text: 'Resultados por Gestión',
+            //     margin: 5
+            // },
             title: {
-                text: 'Resultados por Gestión'
+                text: nombreIndicador
             },
             xAxis: {
                 categories: categorias,
@@ -181,6 +185,21 @@
                     }
                 }
             },
+            exporting: {
+                csv: {
+                    columnHeaderFormatter: function(item) {
+                        if (item) {
+                            if (item.isXAxis) {
+                                return 'Gestión';
+                            }
+                            // Para la columna de datos
+                            return nombreIndicador;
+                        }
+                        return false; // Usa el encabezado por defecto si no hay item
+                    }
+                },
+                filename: nombreIndicador // El archivo se guardará con el nombre del indicador
+            },
             series: [{
                 name: 'Resultado',
                 data: resultados,
@@ -190,9 +209,8 @@
                 enabled: false
             }
         });
-
         // Actualizamos el título y mostramos el contenedor
-        $('#tituloIndicador').text(nombreIndicador);
+        // $('#tituloIndicador').text(nombreIndicador);
         $('#contenedorGrafico').show();
     }
 

@@ -47,7 +47,7 @@
 
           <h5 class="card-title">Formularios:</h5>
 
-          @dump( $grupo_formularios)
+          {{-- @dump( $grupo_formularios) --}}
           @php  $aux=0; foreach ($grupo_formularios as $key => $formulario): @endphp
                 <div class="row">
                     <div class="col-lg-4 col-12">
