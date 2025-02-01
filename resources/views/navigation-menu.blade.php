@@ -37,6 +37,7 @@
                                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuIndicadores">
                                             <li><a class="dropdown-item" href="/indicadores/panel">Panel de datos</a></li>
                                             <li><a class="dropdown-item" href="/indicadores/actualizar">Actualizar datos</a></li>
+                                            <li><a class="dropdown-item" href="/indicadores/tablero">test</a></li>
     
                                         </ul>
                                     </li>

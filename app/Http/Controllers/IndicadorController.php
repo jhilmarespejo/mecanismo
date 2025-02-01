@@ -163,6 +163,11 @@ class IndicadorController extends Controller
     // Función tablero que maneja las peticiones
     public function tablero(Request $request)
     {
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Tablero de Indicadores', 'url' => ''],
+        ];
+
         $promediosPorAnyo = [];
         // Si la petición es para obtener los indicadores de una categoría
             if ($request->has('categoria_id')) {
@@ -231,7 +236,7 @@ class IndicadorController extends Controller
                 ->groupBy('IND_categoria')
                 ->orderByRaw('MIN("IND_orden") ASC')
                 ->pluck('IND_categoria');
-            return view('indicadores.tablero', compact('categorias', 'promediosPorAnyo'));
+            return view('indicadores.tablero', compact('categorias', 'promediosPorAnyo', 'breadcrumbs'));
     }
     public function obtenerResultados(Request $request)
         {

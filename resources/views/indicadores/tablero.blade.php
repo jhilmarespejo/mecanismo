@@ -85,7 +85,7 @@
 </style>
 
 <div class="container mt-3 p-4 bg-white">
-    {{-- @include('layouts.breadcrumbs', $breadcrumbs) --}}
+    @include('layouts.breadcrumbs', $breadcrumbs)
     <h1 class="text-center text-primary">Tablero de Indicadores</h1>
     <div class="row g-4">
         <!-- Categorías -->
