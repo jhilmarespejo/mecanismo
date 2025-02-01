@@ -292,5 +292,52 @@ class CustomController extends Controller {
 
         return $result;
     }
+
+    public static function calcularPromedioIndicadores($resultados) {
+        $indicadores = [];
+        // dump($resultados);exit;
+        foreach ($resultados as $row) {
+            $gestion = $row->HIN_gestion;
+            $indicador = $row->IND_indicador;
+            $respuesta = trim(strtolower($row->HIN_respuesta)); // Normalizamos la respuesta
+    
+            // Inicializar estructura si no existe
+            if (!isset($indicadores[$indicador][$gestion])) {
+                $indicadores[$indicador][$gestion] = [
+                    'nombre' => $indicador,
+                    'gestion' => $gestion,
+                    'total_preguntas' => 0,
+                    'total_si' => 0
+                ];
+            }
+    
+            // Solo contar si la respuesta es válida (No consideramos 'Sin respuesta')
+            if ($respuesta === 'si' || $respuesta === 'no') {
+                $indicadores[$indicador][$gestion]['total_preguntas']++;
+                if ($respuesta === 'si') {
+                    $indicadores[$indicador][$gestion]['total_si']++;
+                }
+            }
+        }
+    
+        // Calcular el promedio final
+        $resultadoFinal = [];
+        foreach ($indicadores as $indicador => $gestiones) {
+            foreach ($gestiones as $gestion => $datos) {
+                $promedio = ($datos['total_preguntas'] > 0)
+                    ? round(($datos['total_si'] / $datos['total_preguntas']) * 100, 2)
+                    : 0; // Si no hay preguntas, el promedio es 0
+    
+                $resultadoFinal[] = [
+                    'indicador' => $datos['nombre'],
+                    'gestion' => $datos['gestion'],
+                    'resultado_final' => $promedio . '%'
+                ];
+            }
+        }
+    
+        return $resultadoFinal;
+    }
+    
 }
 
