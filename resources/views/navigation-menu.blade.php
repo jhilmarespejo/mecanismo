@@ -37,7 +37,7 @@
                                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuIndicadores">
                                             <li><a class="dropdown-item" href="/indicadores/panel">Panel de datos</a></li>
                                             <li><a class="dropdown-item" href="/indicadores/actualizar">Actualizar datos</a></li>
-                                            <li><a class="dropdown-item" href="/indicadores/tablero">test</a></li>
+                                            <li><a class="dropdown-item" href="/indicadores/reportes">Reportes</a></li>
     
                                         </ul>
                                     </li>
@@ -64,15 +64,7 @@
                                             <li><a class="dropdown-item" href="/educacion">Modulo Educativo</a></li>
                                             <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
                                             <li><a class="dropdown-item" href="/establecimientos/index">Lugares de detención</a></li>
-                                            <li class="nav-item dropdown formularios">
-                                                <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuFormularios" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Formularios
-                                                </a>
-                                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuFormularios">
-                                                    <li><a class="dropdown-item"  href="/formulario/nuevo">Crear</a></li>
-                                                    <li><a class="dropdown-item" href="#">Asignar</a></li>
-                                                </ul>
-                                            </li>
+                                            
                                             
                                             {{-- <li><a class="dropdown-item" href="/">Lugares de detención</a></li>
                                             <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}

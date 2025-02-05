@@ -179,7 +179,7 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
 Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth')->name('indicadores.panel');
 Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
 Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
-Route::get('/indicadores/tablero', [IndicadorController::class, 'tablero'])->name('indicadores.tablero');
+Route::get('/indicadores/reportes', [IndicadorController::class, 'reportes'])->name('indicadores.reportes');
 Route::get('indicadores/resultados', [IndicadorController::class, 'obtenerResultados'])->name('indicadores.resultados');
 
 

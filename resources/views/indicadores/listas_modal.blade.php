@@ -1,7 +1,3 @@
-{{-- <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
-
-
-
 <!-- Modal SEXO -->
 @if ($tipo == 'Lista sexo')
     <div class="modal fade" id="listaSexoModal" tabindex="-1" aria-labelledby="listaSexoModalLabel" aria-hidden="true">
@@ -178,7 +174,7 @@
                
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" id="guardarCentros" class="btn btn-primary">Guardar datos</button>
+                    <button type="button" id="guardarListaCentros" class="btn btn-primary">Guardar datos</button>
                 </div>
             </div>
         </div>
@@ -186,71 +182,85 @@
 
     <script>
         $(document).ready(function () {
-            $('.anio-actual').text('Año: '+$('#anio_consulta').val());
-            $('#guardarCentros').off('click').click(function () {
-                let centrosData = {}; // Objeto para almacenar los datos agrupados por departamento
-                let valid = true; // Validación para asegurarnos que todos los campos estén llenos
-    
-                // Recorrer cada input
-                $('.centro-numero').each(function () {
-                    let centroId = $(this).attr('id'); // ID del centro
-                    let centroNombre = $(this).data('centro'); // Nombre del centro
-                    let numero = $(this).val(); // Valor ingresado
-                    let departamento = $(this).closest('.mb-3').find('h6').text(); // Nombre del departamento
-                    
-                    // Validar que el número no esté vacío
-                   /* if (numero === "" || numero === null) {
-                        valid = false;
-                        $(this).addClass('is-invalid'); // Resaltar el campo vacío
-                    } else {
-                        $(this).removeClass('is-invalid'); // Quitar la clase de error si es válido
-                    }*/
-    
-                    // Si el departamento no existe en el objeto, lo inicializamos
-                    if (!centrosData[departamento]) {
-                        centrosData[departamento] = [];
-                    }
-    
-                    // Agregar el centro con su ID y número al departamento correspondiente
-                    centrosData[departamento].push({
-                        EST_id: centroId,
-                        EST_nombre: centroNombre,
-                        numero: numero
-                    });
-                });
-    
-                // Validar que todos los campos estén llenos antes de continuar
-                // if (!valid) {
-                //     alert('Por favor, completa todos los campos antes de guardar.');
-                //     return;
-                // }
-    
-                // Convertir los datos a JSON
-                let jsonData = JSON.stringify(centrosData);
-                console.log(jsonData);
-    
-                // Aquí puedes enviar los datos al servidor con AJAX
-                /*
-                $.ajax({
-                    url: '/ruta/del/servidor',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: jsonData,
-                    success: function (response) {
-                        alert('Datos guardados correctamente.');
-                    },
-                    error: function (error) {
-                        alert('Ocurrió un error al guardar los datos.');
-                    }
-                });
-                */
+            $('#guardarListaCentros').off('click').click(function() {
+            var id = "{{ $pregunta['IND_id'] }}";
+            var form = $('#centrosForm');
+            var anyoConsulta = $('#anyo_consulta').val();
+            var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
+            
+            let centrosData = {};
+            let valid = true;
+            
+            $('.centro-numero').each(function() {
+                let centro = $(this).data('centro');
+                let numero = $(this).val();
+                
+                if (numero === "" || numero === null) {
+                    valid = false;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    centrosData[centro] = numero;
+                }
             });
+
+            if (!valid) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Completa todos los campos antes de guardar',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+                return;
+            }
+
+            $('#overlay').show();
+            
+            var csrfToken = $('input[name="_token"]').val();
+            var formData = new FormData();
+            formData.append('respuesta', JSON.stringify(centrosData));
+            formData.append('anyo_consulta', anyoConsulta);
+            formData.append('informacion_complementaria', informacionComplementaria);
+            formData.append('FK_IND_id', id);
+            formData.append('_token', csrfToken);
+            
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '/indicadores/guardar',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#centrosModal').modal('hide');
+                    Swal.fire({
+                        title: 'Éxito!',
+                        text: 'Datos guardados correctamente',
+                        icon: 'success',
+                        confirmButtonText: 'Ok'
+                    });
+                    $('#overlay').hide();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Error al guardar los datos',
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    $('#overlay').hide();
+                }
+            });
+        });
         });
     </script>
 @endif
 
 <!-- Modal Lista delitos -->
-@if ($tipo == 'Lista sexo')
+@if ($tipo == 'Lista delitos')
     <div class="modal fade" id="listaSexoModal" tabindex="-1" aria-labelledby="listaSexoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
@@ -275,12 +285,12 @@
                             <div class="mb-3">
                                 <ul class="list-group">
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Femenino: 
-                                        <input type="number" name="femenino" class="form-control w-25 lista-sexo" placeholder="0"id="femenino" value="{{ $femenino }}">
+                                        Delito 1: 
+                                        <input type="number" name="delito1" class="form-control w-25 lista-sexo" placeholder="0"id="delito1" value="{{ $delito1 }}">
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Masculino:
-                                        <input type="number" name="masculino" class="form-control w-25 lista-sexo" placeholder="0"id="masculino" value="{{ $masculino }}">
+                                        Delito 2:
+                                        <input type="number" name="Delito2" class="form-control w-25 lista-sexo" placeholder="0"id="Delito2" value="{{ $Delito2 }}">
                                     </li>
                                 </ul>
                             </div>
@@ -301,16 +311,17 @@
     </div>
 
     <script>
-         $('#guardarListaSexo').off('click').click(function() {
-        var id = $(this).data('id');
-        var form = $('#listaSexoForm');
+        $(document).ready(function () {
+            $('#guardarListaDelitos').off('click').click(function() {
+        var id = "{{ $pregunta['IND_id'] }}";
+        var form = $('#listaDelitosForm');
         var anyoConsulta = $('#anyo_consulta').val();
         var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
         
-        let sexoData = {};
+        let delitosData = {};
         let valid = true;
         
-        $('.lista-sexo').each(function() {
+        $('.lista-delitos').each(function() {
             let id = $(this).attr('id');
             let numero = $(this).val();
             
@@ -319,7 +330,7 @@
                 $(this).addClass('is-invalid');
             } else {
                 $(this).removeClass('is-invalid');
-                sexoData[id] = numero;
+                delitosData[id] = numero;
             }
         });
 
@@ -335,10 +346,9 @@
 
         $('#overlay').show();
         
-         // Obtener el token CSRF desde el input hidden
         var csrfToken = $('input[name="_token"]').val();
         var formData = new FormData();
-        formData.append('respuesta', JSON.stringify(sexoData));
+        formData.append('respuesta', JSON.stringify(delitosData));
         formData.append('anyo_consulta', anyoConsulta);
         formData.append('informacion_complementaria', informacionComplementaria);
         formData.append('FK_IND_id', id);
@@ -375,6 +385,10 @@
             }
         });
     });
+            
+        });
+
+       
     
     </script>
 @endif

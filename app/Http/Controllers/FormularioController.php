@@ -152,7 +152,7 @@ class FormularioController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
+        //dump($request->all());exit;
         // Iniciar la transacción
         DB::beginTransaction();
         try {
@@ -161,6 +161,7 @@ class FormularioController extends Controller
             // **Paso 1: Crear el formulario**
             $nuevoFormulario = ModFormulario::create([
                 'FRM_titulo' => $datos['FRM_titulo'],
+                'FRM_tipo' => $datos['FRM_tipo'],
                 'FK_USER_id' => Auth::id(),
             ]);
             $nuevo_FRM_id = $nuevoFormulario->FRM_id; // ID del formulario creado
@@ -176,6 +177,7 @@ class FormularioController extends Controller
                         'BCP_tipoRespuesta' => $pregunta['BCP_tipoRespuesta'],
                         'BCP_opciones'      => $pregunta['BCP_opciones'], // Asumimos que ya viene formateado correctamente
                         'BCP_complemento'   => $pregunta['BCP_complemento'],
+                        
                         'FK_CAT_id'         => 1,
                     ]);
                     $nuevo_BCP_id = $nuevaPregunta->BCP_id; // Obtener ID de la pregunta

@@ -161,21 +161,20 @@ class IndicadorController extends Controller
     }
     
     // Función tablero que maneja las peticiones
-    public function tablero(Request $request)
-    {
+    public function reportes(Request $request) {
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
-            ['name' => 'Tablero de Indicadores', 'url' => ''],
+            ['name' => 'Reportes', 'url' => ''],
         ];
-
+        $gestiones = [2024, 2025, 2026, 2027, 2028];
         $promediosPorAnyo = [];
-        // Si la petición es para obtener los indicadores de una categoría
+
+        // (CATEGORIAS) Si la petición es para obtener los indicadores de una categoría
             if ($request->has('categoria_id')) {
                 
                 DB::enableQueryLog();
                 
-                $indicadores=DB::table('indicadores')
-                ->select('*')
+                $indicadores=ModIndicador::select('*')
                 ->from(DB::raw('(
                     SELECT DISTINCT ON ("IND_indicador") *
                     FROM indicadores
@@ -191,44 +190,41 @@ class IndicadorController extends Controller
                 return response()->json($indicadores);
             }
         
-        // Si la petición es para obtener los parámetros de un indicador
+        // (INDICADORES) Si la petición es para obtener los parámetros de un indicador
             if ($request->has('indicador_indicador')) {
                 DB::enableQueryLog();
-                $parametros = DB::table('indicadores')
-                ->select('IND_parametro', 'IND_id')
-                ->where('IND_indicador', $request->indicador_indicador)
-                ->orderBy('IND_orden', 'asc')
-                ->get();
                 
-                $quries = DB::getQueryLog();
-                //dump ($quries);exit;
-                
-                // CALCULA LOS RESULTADOS DEL INDICADOR SELECCIONADO
-                $gestiones = [2024, 2025, 2026, 2027, 2028];
-
-                $resultados = DB::table(DB::raw('(SELECT unnest(ARRAY[' . implode(',', $gestiones) . ']) AS year) AS years'))
-                    ->crossJoin('indicadores')
-                    ->leftJoin('historial_indicadores', function ($join) {
-                        $join->on('historial_indicadores.FK_IND_id', 'indicadores.IND_id')
-                            ->on('historial_indicadores.HIN_gestion', 'years.year');
-                    })
-                    ->select(
-                        DB::raw('years.year AS "HIN_gestion" '), 
-                        'indicadores.IND_id',
-                        'indicadores.IND_indicador',
-                        'indicadores.IND_parametro',
-                        DB::raw("COALESCE(historial_indicadores.\"HIN_respuesta\", 'Sin respuesta') AS \"HIN_respuesta\"")
-                    )
-                    ->where('indicadores.IND_indicador', $request->indicador_indicador)
-                    ->where('indicadores.IND_opciones', '{"0":"No","1":"Si"}')
-                    ->orderBy('indicadores.IND_id')
-                    ->orderBy('years.year')
+                $parametros = ModIndicador::select('IND_parametro', 'IND_id')
+                    ->where('IND_indicador', $request->indicador_indicador)
+                    ->orderBy('IND_orden', 'asc')
                     ->get();
-                    // dump($resultados);exit; 
-                    
-                    $promediosPorAnyo = CustomController::calcularPromedioIndicadores( $resultados );
                 
-                return response()->json(['parametros' => $parametros, 'promediosPorAnyo' => $promediosPorAnyo]);
+                $indicadorPorAnyo = $this->indicadorAnualSiNo($request->indicador_indicador);
+                // if (empty($indicadorPorAnyo)) {
+                //     return response()->json(['error' => 'No se encontraron datos para este indicador'], 404);
+                // }
+                // dump($indicadorPorAnyo);
+                
+            
+                return response()->json(['parametros' => $parametros, 'indicadorPorAnyo' => $indicadorPorAnyo]);
+            }
+
+        // (PARAMETROS) Si la petición es para obtener los parámetros de un indicador
+            if ($request->has('parametro_id')) {
+                $parametroPorAnyo = $this->parametroAnualSiNo($request->input('parametro_id'));
+
+                if ($parametroPorAnyo->count() > 0) {
+                    // Hay resultados SI/No
+                    return response()->json(['parametroPorAnyo' => $parametroPorAnyo]);
+                } else {
+                    // Consultar resultados tipo Lista centros penitenciarios
+                    $parametroPorAnyoListaCentrosP = $this->parametroAnualListaCentrosP($request->input('parametro_id'));
+                    dump("parametroPorAnyo");exit;
+                    
+                    //return response()->json(['message' => 'No se encontraron resultados.']);
+                }
+                
+                
             }
         
         // Si no hay peticiones específicas, cargar la vista principal
@@ -236,63 +232,78 @@ class IndicadorController extends Controller
                 ->groupBy('IND_categoria')
                 ->orderByRaw('MIN("IND_orden") ASC')
                 ->pluck('IND_categoria');
-            return view('indicadores.tablero', compact('categorias', 'promediosPorAnyo', 'breadcrumbs'));
+            return view('indicadores.reportes', compact('categorias', 'promediosPorAnyo', 'breadcrumbs'));
     }
-    public function obtenerResultados(Request $request)
-        {
-            $parametroId = $request->input('parametro_id');
-            
-            // Años a consultar
-            $gestiones = [2024, 2025, 2026, 2027, 2028];
-            
-            $resultados = DB::table('historial_indicadores')
-                ->rightJoin(DB::raw('(SELECT unnest(ARRAY[' . implode(',', $gestiones) . ']) AS gestion) g'), function($join) use ($parametroId) {
-                    $join->on('historial_indicadores.HIN_gestion', '=', 'g.gestion')
-                        ->where('historial_indicadores.FK_IND_id', '=', $parametroId);
-                })
-                ->select(
-                    'g.gestion as HIN_gestion', 
-                    'historial_indicadores.HIN_respuesta',
-                    'historial_indicadores.HIN_fuente_verificacion',
-                    'historial_indicadores.HIN_informacion_complementaria'
-                )
-                ->orderBy('g.gestion')
-                ->get();
-                // dump($resultados);exit;
-            
-            return response()->json($resultados);
-        }
-    // Consulta para obtener los resultados de los indicadores SI/NO
-    /*public function resultadoSiNo()
-    {
-        $years = [2024, 2025, 2026, 2027, 2028];
-        
-        $indicadores = ModIndicador::where('IND_opciones', '{"0":"No","1":"Si"}')
-            ->with(['historial' => function ($query) use ($years) {
-                $query->whereIn('HIN_gestion', $years);
-            }])
-            ->get()
-            ->map(function ($indicador) use ($years) {
-                // Para cada año, verificar si existe una respuesta en el historial
-                $resultadosPorAnio = [];
-                foreach ($years as $year) {
-                    $respuesta = $indicador->historial->firstWhere('HIN_gestion', $year);
-                    $resultadosPorAnio[$year] = $respuesta ? $respuesta->HIN_respuesta : null;
-                }
-                
-                // Agregar los resultados al indicador
-                $indicador->resultados_por_anio = $resultadosPorAnio;
-                return $indicador; // Devolver el indicador modificado
-            });
-
-        // Verificar si hay indicadores
-        if ($indicadores->isEmpty()) {
-            return view('indicadores.resultadosino', ['mensaje' => 'No se encontraron indicadores.']);
-        }
-        
-        return view('indicadores.resultadosino', compact('indicadores'));
-    }*/
     
+    private function indicadorAnualSiNo($indicador) {
+        $gestiones = [2024, 2025, 2026, 2027, 2028];
+
+        $resultados = DB::table(DB::raw('(SELECT unnest(ARRAY[' . implode(',', $gestiones) . ']) AS year) AS years'))
+            ->crossJoin('indicadores')
+            ->leftJoin('historial_indicadores', function ($join) {
+                $join->on('historial_indicadores.FK_IND_id', 'indicadores.IND_id')
+                    ->on('historial_indicadores.HIN_gestion', 'years.year');
+            })
+            ->select(
+                DB::raw('years.year AS "HIN_gestion" '), 
+                'indicadores.IND_id',
+                'indicadores.IND_indicador',
+                'indicadores.IND_parametro',
+                DB::raw("COALESCE(historial_indicadores.\"HIN_respuesta\", 'Sin respuesta') AS \"HIN_respuesta\"")
+            )
+            ->where('indicadores.IND_indicador', $indicador)
+            ->where('indicadores.IND_opciones', '{"0":"No","1":"Si"}')
+            ->orderBy('indicadores.IND_id')
+            ->orderBy('years.year')
+            ->get();
+        
+        return CustomController::calcularPromedioIndicadores($resultados);
+    }
+    
+    private function parametroAnualSiNo($indicadorId){
+        $gestiones = [2024, 2025, 2026, 2027, 2028];
+        
+        // Obtener respuestas de historial_indicadores junto con el parámetro del indicador
+        DB::enableQueryLog(); // Habilita el registro de consultas para depuración
+        $results = DB::table('historial_indicadores as h')
+            ->select('h.HIN_gestion', 'h.HIN_respuesta', 'h.FK_IND_id', 'i.IND_parametro')
+            ->leftJoin('indicadores as i', 'h.FK_IND_id', '=', 'i.IND_id')
+            ->where('i.IND_opciones', '{"0":"No","1":"Si"}')
+            ->where('i.IND_id', $indicadorId)
+            ->whereIn('h.HIN_gestion', $gestiones)
+            ->get()
+            ->keyBy('HIN_gestion'); // Asignamos los resultados usando el año como clave
+        
+        $quries = DB::getQueryLog();
+        // dump ($quries);exit;
+        if ($results->count() == 0) {
+            // No hay resultados retornar null
+            return $results;
+        } else {  
+            // Si  Hay resultados, Generar una colección con valores predeterminados para cada gestión
+            $parametroPorAnyo = collect($gestiones)->mapWithKeys(function ($year) use ($results, $indicadorId) {
+                $response = $results->get($year); // Buscar el resultado del año actual
+                
+                return [
+                    $year => (object) [
+                        'HIN_gestion'  => $year,
+                        'HIN_respuesta' => optional($response)->HIN_respuesta, // Puede ser "Si", "No" o null
+                        'FK_IND_id'    => optional($response)->FK_IND_id ?? $indicadorId,
+                        'IND_parametro' => optional($response)->IND_parametro ?? 'Sin información'
+                    ]
+                ];
+            });
+            return $parametroPorAnyo;
+        }
+        
+        
+        // dump($parametroPorAnyo); // Para depuración, puedes removerlo si ya no es necesario
+        // exit;
+    }
+    
+    private function parametroAnualListaCentrosP($indicadorId) {
+        
+    }
     
     
 }

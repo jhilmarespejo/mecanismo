@@ -149,7 +149,7 @@
                                                     @if ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
                                                             <br>
                                                         <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
-                                                            Insertar datos
+                                                            Insertar datos centros
                                                         </button> <br>
                                                         {{-- @dump($pregunta['HIN_respuesta']) --}}
                                                         <!-- Incluir el modal -->

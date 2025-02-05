@@ -52,7 +52,7 @@
             {{-- <div class="position-absolute top-0 end-0 mt-3 me-3">
                 
             </div> --}}
-
+            
             <!-- Título del formulario -->
             @include('layouts.breadcrumbs', $breadcrumbs)
             <h3 class="text-primary fw-bold mb-4 text-center">Crear nuevo formulario</h3>
@@ -73,9 +73,21 @@
                     />
                 </div>
                 
+                
+                
 
                 <!-- Preguntas dinámicas -->
                 <div id="contenedor_pregunta_seleccionada" class="sortable mb-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">¿Este formulario se aplicará más de una vez?</label>
+                        <div class="d-flex gap-3">
+                            <input type="radio" class="btn-check" name="FRM_tipo" id="FRM_tipo_si" value="N" autocomplete="off">
+                            <label class="btn btn-outline-success" for="FRM_tipo_si">Sí</label>
+                    
+                            <input type="radio" class="btn-check" name="FRM_tipo" id="FRM_tipo_no" value="" autocomplete="off">
+                            <label class="btn btn-outline-danger" for="FRM_tipo_no">No</label>
+                        </div>
+                    </div>
                     <!-- Las preguntas dinámicas se agregarán aquí -->
                 </div>
                 <div id="contenedor_secciones" class="sortable mb-3"></div>
@@ -209,7 +221,7 @@
         function actualizarContadoresSecciones() {
             contadorSecciones = 0;      
             contadorSubsecciones = {}; 
-
+            
             $('#contenedor_pregunta_seleccionada .card').each(function () {
                 var id = $(this).attr('id').replace('seccion_', '');
                 if (id.indexOf('.') === -1) { // Es una sección
@@ -237,16 +249,22 @@
                 ui.item.css("border", "1px solid #dee2e6");
                 ui.item.effect("highlight", { color: "#d4edda" }, 1000);
                 reenumerarPreguntasVisuales();
+            },
+            update: function(event, ui) {
+                reenumerarPreguntasVisuales(); // Asegura actualización inmediata
             }
         });
         
 
+        // Función mejorada para reenumerar preguntas
         function reenumerarPreguntasVisuales() {
             let contadorPreguntas = 0;
             $('#contenedor_pregunta_seleccionada .card').each(function() {
-                if ($(this).hasClass('clase-pregunta')) { // Solo contar elementos que son preguntas
-                    contadorPreguntas++; // Incrementa solo para preguntas
-                    $(this).find('.numero-pregunta').text(contadorPreguntas); // Actualiza el número visual
+                // Verifica si no es una sección o subsección
+                if (!$(this).find('input[name="tipoRespuesta[]"][value="Sección"]').length && 
+                    !$(this).find('input[name="tipoRespuesta[]"][value="Subsección"]').length) {
+                    contadorPreguntas++;
+                    $(this).find('.numero-pregunta').text(contadorPreguntas);
                 }
             });
         }
@@ -354,9 +372,9 @@
     function crearPreguntaConOpciones(contadorId, tipoRespuesta, contadorPreguntasNuevas) {
         var tipoRespuestaTexto = '';
         if (tipoRespuesta === 'varias') {
-            tipoRespuestaTexto = 'Lista desplegable';
-        } else if (tipoRespuesta === 'unica') {
             tipoRespuestaTexto = 'Casilla verificación';
+        } else if (tipoRespuesta === 'unica') {
+            tipoRespuestaTexto = 'Lista desplegable';
         } else {
             tipoRespuestaTexto = tipoRespuesta.charAt(0).toUpperCase() + tipoRespuesta.slice(1);
         }
@@ -530,72 +548,164 @@
         let titulo = $('#titulo_formulario');
         if (!titulo.val().trim()) {
             titulo.addClass('is-invalid');
+            titulo.closest('.mb-4').addClass('is-invalid'); // Marca el contenedor
             Swal.fire({
                 icon: 'error',
                 text: 'El título del formulario no puede estar vacío.',
                 confirmButtonColor: '#3085d6'
             });
             valido = false;
-            return false; // Salir temprano si el título está vacío
+            return false;
         } else {
             titulo.removeClass('is-invalid');
+            titulo.closest('.mb-4').removeClass('is-invalid');
+        }
+        
+        // Validar tipo de formulario
+        if (!$("input[name='FRM_tipo']:checked").length) {
+            $("input[name='FRM_tipo']").closest('.d-flex').addClass('is-invalid');
+            valido = false;
+            Swal.fire({
+                icon: 'error',
+                text: 'Debe seleccionar si el formulario se aplicará más de una vez.',
+                confirmButtonColor: '#3085d6'
+            });
+            return false;
+        } else {
+            $("input[name='FRM_tipo']").closest('.d-flex').removeClass('is-invalid');
         }
 
         // Validar preguntas
-        $('#contenedor_pregunta_seleccionada .card').each(function() {
-            totalPreguntas++; // Incrementar por cada pregunta encontrada
+        // $('#contenedor_pregunta_seleccionada .card').each(function() {
+        //     totalPreguntas++; // Incrementar por cada pregunta encontrada
+        //     let mensajeError = ''; // Variable para almacenar el mensaje de error específico
 
-            // Verificar si el input de la pregunta está vacío
-            let inputPregunta = $(this).find('input[name="pregunta[]"]');
+        //     // Verificar si el input de la pregunta está vacío
+        //     let inputPregunta = $(this).find('input[name="pregunta[]"]');
+        //     if (!inputPregunta.val().trim()) {
+        //         inputPregunta.addClass('is-invalid');
+        //         valido = false;
+        //         mensajeError = 'Debe completar las preguntas';
+        //     } else {
+        //         inputPregunta.removeClass('is-invalid');
+        //     }
+            
+        //     // Verificar opciones, si existen
+        //     $(this).find('input[name^="opciones_"]').each(function() {
+        //         if (!$(this).val().trim()) {
+        //             $(this).addClass('is-invalid');
+        //             valido = false;
+        //             mensajeError = 'Debe completar las opciones de la pregunta.';
+        //         } else {
+        //             $(this).removeClass('is-invalid');
+        //         }
+        //     });
+
+        //     // Verificar complementos, si existen
+        //     $(this).find('input[name^="BCP_complemento_"]').each(function() {
+        //         if (!$(this).val().trim()) {
+        //             $(this).addClass('is-invalid');
+        //             valido = false;
+        //             mensajeError = 'Debe completar el/los complementos de la pregunta.';
+
+        //         } else {
+        //             $(this).removeClass('is-invalid');
+        //         }
+        //     });
+        //     if (!$("input[name^='FRM_tipo']:checked").val()) {
+        //         $(this).addClass('is-invalid');
+        //         valido = false;
+        //         mensajeError = 'Debe seleccionar si el formulario se aplicará más de una vez.';
+        //      event.preventDefault();
+        //     }else{
+        //         $(this).removeClass('is-invalid');
+        //     }
+            
+        //     if(!valido){
+        //         Swal.fire({
+        //             icon: 'error',
+        //             text: mensajeError,
+        //             confirmButtonColor: '#3085d6'
+        //         });
+        //     }
+        // });
+        
+        // Validar preguntas
+        $('#contenedor_pregunta_seleccionada .card').each(function() {
+            let cardElement = $(this);
+            let tipoRespuesta = cardElement.find('input[name="tipoRespuesta[]"]').val();
+            
+            // No contar secciones y subsecciones como preguntas
+            if (tipoRespuesta !== 'Sección' && tipoRespuesta !== 'Subsección') {
+                totalPreguntas++;
+            }
+
+            // Validar texto de la pregunta
+            let inputPregunta = cardElement.find('input[name="pregunta[]"]');
             if (!inputPregunta.val().trim()) {
                 inputPregunta.addClass('is-invalid');
+                cardElement.addClass('is-invalid'); // Marca toda la tarjeta
                 valido = false;
             } else {
                 inputPregunta.removeClass('is-invalid');
+                cardElement.removeClass('is-invalid');
             }
-            
-            // Verificar opciones, si existen
-            $(this).find('input[name^="opciones_"]').each(function() {
-                if (!$(this).val().trim()) {
-                    $(this).addClass('is-invalid');
+
+            // Validar opciones si existen
+            let opcionesContainer = cardElement.find('.input-group');
+            opcionesContainer.each(function() {
+                let opcionInput = $(this).find('input[type="text"]');
+                if (opcionInput.length && !opcionInput.val().trim()) {
+                    opcionInput.addClass('is-invalid');
+                    $(this).addClass('is-invalid'); // Marca el contenedor de la opción
                     valido = false;
                 } else {
+                    opcionInput.removeClass('is-invalid');
                     $(this).removeClass('is-invalid');
                 }
             });
 
-            // Verificar complementos, si existen
-            $(this).find('input[name^="BCP_complemento_"]').each(function() {
-                if (!$(this).val().trim()) {
-                    $(this).addClass('is-invalid');
-                    valido = false;
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-
-            if(!valido){
-                Swal.fire({
-                    icon: 'error',
-                        text: 'Debe completar los campos requeridos.',
-                    confirmButtonColor: '#3085d6'
-                });
+            // Validar complementos
+            let complementoInput = cardElement.find('input[name^="BCP_complemento_"]');
+            if (complementoInput.length && !complementoInput.val().trim()) {
+                complementoInput.addClass('is-invalid');
+                complementoInput.closest('.input-group').addClass('is-invalid');
+                valido = false;
+            } else if (complementoInput.length) {
+                complementoInput.removeClass('is-invalid');
+                complementoInput.closest('.input-group').removeClass('is-invalid');
             }
         });
-
         // Verificar si hay al menos 3 preguntas
-        if (totalPreguntas < 3) {
+        if (totalPreguntas < 2) {
             Swal.fire({
                 icon: 'error',
-                text: 'Debe agregar al menos 3 preguntas al formulario.',
+                text: 'Debe agregar al menos 2 preguntas al formulario.',
                 confirmButtonColor: '#3085d6'
             });
             valido = false;
         }
-        
         return valido; // Retorna false si hay errores
     }
 
+    // Agregar estilos CSS necesarios
+    const style = document.createElement('style');
+    style.textContent = `
+        .card.is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+        }
+        .input-group.is-invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25);
+        }
+        .d-flex.is-invalid {
+            padding: 0.375rem;
+            border: 1px solid #dc3545;
+            border-radius: 0.25rem;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 @endsection
 

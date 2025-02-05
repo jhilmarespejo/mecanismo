@@ -13,30 +13,43 @@
             <input type="text" id="titulo" class="form-control" placeholder="Buscar por título del formulario">
         </div>
         <div class="col-md-4">
-            <a class="btn btn-success w-100" href="{{route('formulario.nuevo')}}"><i class="bi bi-plus-circle"></i> Nuevo formulario</a>
+            <a class="btn btn-success w-100" href="{{route('formulario.nuevo')}}"><i class="bi bi-plus-circle"></i> Crear nuevo formulario</a>
         </div>
     </div>
 
     <!-- Contenedor de formularios, que se actualizará dinámicamente -->
     <div id="formularios-list" class="row">
-        @foreach($formularios as $formulario)
-            <div class="col-md-4 mb-3">
-                <div class="card mb-3" style="height: 100%;">
-                    <div class="card-body text-dark" style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
-                        <!-- Texto ajustado al espacio del div -->
+        @if (count($formularios) == 0)
+            <div class="col-md-12 mb-3 ">
+                <div class="card mb-3 alert alert-warning">
+                    <div class="card-body text-dark">
                         <h5 class="card-title">
-                            {{ $formulario->FRM_titulo }}
+                            <i class="bi bi-info-circle"></i> No hay formularios disponibles
                         </h5>
-                    </div>
-                    <div class="card-footer d-flex justify-content-between">
-                        <a class="btn btn-light" href="/formulario/{{ $formulario->FRM_id }}"><i class="bi bi-eye"></i> Ver</a>
-                        <button class="btn btn-light">
-                            <i class="bi bi-plus-circle"></i> Asignar
-                        </button>
                     </div>
                 </div>
             </div>
-        @endforeach
+            
+        @else
+            @foreach($formularios as $formulario)
+                <div class="col-md-4 mb-3">
+                    <div class="card mb-3" style="height: 100%;">
+                        <div class="card-body text-dark" style="overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">
+                            <!-- Texto ajustado al espacio del div -->
+                            <h5 class="card-title">
+                                {{ $formulario->FRM_titulo }}
+                            </h5>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a class="btn btn-light" href="/formulario/{{ $formulario->FRM_id }}"><i class="bi bi-eye"></i> Ver formulario</a>
+                            {{-- <button class="btn btn-light">
+                                <i class="bi bi-plus-circle"></i> Asignar
+                            </button> --}}
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
     
 </div>
