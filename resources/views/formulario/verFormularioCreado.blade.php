@@ -63,7 +63,7 @@
                                 <label class="fw-bold"> 
                                     {{-- <i class="bi bi-check-square  text-success me-2 "></i> --}}
                                     {{ $pregunta->BCP_pregunta }}</label>
-                                {{ $pregunta->BCP_pregunta }}
+                                {{-- {{ $pregunta->BCP_pregunta }} --}}
                             </div>
                         @endif
                         @if($pregunta->BCP_tipoRespuesta == 'Lista desplegable' )

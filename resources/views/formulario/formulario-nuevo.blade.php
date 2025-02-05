@@ -78,7 +78,7 @@
 
                 <!-- Preguntas dinámicas -->
                 <div id="contenedor_pregunta_seleccionada" class="sortable mb-3">
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <label class="form-label fw-bold">¿Este formulario se aplicará más de una vez?</label>
                         <div class="d-flex gap-3">
                             <input type="radio" class="btn-check" name="FRM_tipo" id="FRM_tipo_si" value="N" autocomplete="off">
@@ -87,7 +87,8 @@
                             <input type="radio" class="btn-check" name="FRM_tipo" id="FRM_tipo_no" value="" autocomplete="off">
                             <label class="btn btn-outline-danger" for="FRM_tipo_no">No</label>
                         </div>
-                    </div>
+                    </div> --}}
+                    <input type="hidden" name="FRM_tipo" id="FRM_tipo_si" value="N">
                     <!-- Las preguntas dinámicas se agregarán aquí -->
                 </div>
                 <div id="contenedor_secciones" class="sortable mb-3"></div>
@@ -562,18 +563,18 @@
         }
         
         // Validar tipo de formulario
-        if (!$("input[name='FRM_tipo']:checked").length) {
-            $("input[name='FRM_tipo']").closest('.d-flex').addClass('is-invalid');
-            valido = false;
-            Swal.fire({
-                icon: 'error',
-                text: 'Debe seleccionar si el formulario se aplicará más de una vez.',
-                confirmButtonColor: '#3085d6'
-            });
-            return false;
-        } else {
-            $("input[name='FRM_tipo']").closest('.d-flex').removeClass('is-invalid');
-        }
+        // if (!$("input[name='FRM_tipo']:checked").length) {
+        //     $("input[name='FRM_tipo']").closest('.d-flex').addClass('is-invalid');
+        //     valido = false;
+        //     Swal.fire({
+        //         icon: 'error',
+        //         text: 'Debe seleccionar si el formulario se aplicará más de una vez.',
+        //         confirmButtonColor: '#3085d6'
+        //     });
+        //     return false;
+        // } else {
+        //     $("input[name='FRM_tipo']").closest('.d-flex').removeClass('is-invalid');
+        // }
 
         // Validar preguntas
         // $('#contenedor_pregunta_seleccionada .card').each(function() {
