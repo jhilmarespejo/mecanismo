@@ -293,7 +293,7 @@
                 filename: nombreIndicador // El archivo se guardará con el nombre del indicador
             },
             series: [{
-                name: 'Resultado por gindicador y estión',
+                name: 'Resultado por indicador y gestión',
                 data: resultados,
                 color: '#007bff'
             }],

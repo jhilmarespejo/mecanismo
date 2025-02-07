@@ -71,6 +71,7 @@
                                                 @foreach ($indicador as $p => $pregunta)
                                                     <form method="POST" enctype="multipart/form-data" id="formularioIndicadores_{{ $pregunta['IND_id'] }}" class="formularioIndicadores">
                                                         @csrf
+                                                          
                                                         <div class="mb-3 ">
                                                             <label for="options_{{$pregunta['IND_id']}}" class="form-label">
                                                                 {{$pregunta['IND_parametro']}}
@@ -201,6 +202,7 @@
             let selectedYear = $(this).val();
             // Redirige solo si el año cambia
             window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
+            
 
         });
 

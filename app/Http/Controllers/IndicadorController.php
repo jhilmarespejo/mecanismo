@@ -95,6 +95,7 @@ class IndicadorController extends Controller
     
     // Guarda los datos que se actualizan en los indicadores
     public function guardar(Request $request) {
+        // dump($request->all());exit;
         try {
             $validatedData = $request->validate([
                 'respuesta' => 'required|string',
@@ -153,7 +154,7 @@ class IndicadorController extends Controller
                     'HIN_gestion' => $gestion,
                 ]);
             }
-
+            
             return response()->json(['success' => true, 'message' => 'Datos guardados correctamente.'], 200);
         } catch (\Exception $e) {
             return response()->json(['error encontrado' => $e->getMessage()], 500);
@@ -199,7 +200,7 @@ class IndicadorController extends Controller
                     ->orderBy('IND_orden', 'asc')
                     ->get();
                 
-                $indicadorPorAnyo = $this->indicadorAnualSiNo($request->indicador_indicador);
+                $indicadorPorAnyo = $this->indicadorAnualSiNo($request->indicador_indicador, $gestiones);
                 // if (empty($indicadorPorAnyo)) {
                 //     return response()->json(['error' => 'No se encontraron datos para este indicador'], 404);
                 // }
@@ -211,22 +212,20 @@ class IndicadorController extends Controller
 
         // (PARAMETROS) Si la petición es para obtener los parámetros de un indicador
             if ($request->has('parametro_id')) {
-                $parametroPorAnyo = $this->parametroAnualSiNo($request->input('parametro_id'));
+                $parametroPorAnyo = $this->parametroAnualSiNo($request->input('parametro_id'), $gestiones);
 
                 if ($parametroPorAnyo->count() > 0) {
                     // Hay resultados SI/No
                     return response()->json(['parametroPorAnyo' => $parametroPorAnyo]);
                 } else {
                     // Consultar resultados tipo Lista centros penitenciarios
-                    $parametroPorAnyoListaCentrosP = $this->parametroAnualListaCentrosP($request->input('parametro_id'));
-                    dump("parametroPorAnyo");exit;
+                    $parametroPorAnyoListaCentrosP = $this->parametroAnualListaCentrosP($request->input('parametro_id'), $gestiones);
+                    return response()->json(['listaCentrosPorAnyo' => $parametroPorAnyoListaCentrosP]);
+                    dump($parametroPorAnyoListaCentrosP->toArray());exit;
                     
                     //return response()->json(['message' => 'No se encontraron resultados.']);
                 }
-                
-                
             }
-        
         // Si no hay peticiones específicas, cargar la vista principal
             $categorias = ModIndicador::select('IND_categoria')
                 ->groupBy('IND_categoria')
@@ -235,9 +234,7 @@ class IndicadorController extends Controller
             return view('indicadores.reportes', compact('categorias', 'promediosPorAnyo', 'breadcrumbs'));
     }
     
-    private function indicadorAnualSiNo($indicador) {
-        $gestiones = [2024, 2025, 2026, 2027, 2028];
-
+    private function indicadorAnualSiNo($indicador, $gestiones) {
         $resultados = DB::table(DB::raw('(SELECT unnest(ARRAY[' . implode(',', $gestiones) . ']) AS year) AS years'))
             ->crossJoin('indicadores')
             ->leftJoin('historial_indicadores', function ($join) {
@@ -260,8 +257,8 @@ class IndicadorController extends Controller
         return CustomController::calcularPromedioIndicadores($resultados);
     }
     
-    private function parametroAnualSiNo($indicadorId){
-        $gestiones = [2024, 2025, 2026, 2027, 2028];
+    private function parametroAnualSiNo($indicadorId,$gestiones){
+        // $gestiones = [2024, 2025, 2026, 2027, 2028];
         
         // Obtener respuestas de historial_indicadores junto con el parámetro del indicador
         DB::enableQueryLog(); // Habilita el registro de consultas para depuración
@@ -301,8 +298,26 @@ class IndicadorController extends Controller
         // exit;
     }
     
-    private function parametroAnualListaCentrosP($indicadorId) {
-        
+    private function parametroAnualListaCentrosP($indicadorId, $gestiones) {
+        $results = ModIndicador::select([
+            'indicadores.IND_numero',
+            'indicadores.IND_indicador',
+            'indicadores.IND_parametro',
+            'indicadores.IND_categoria',
+            'y.hin_gestion as HIN_gestion', // Cambiado a minúsculas en el cross join
+            'historial_indicadores.HIN_respuesta',
+            'historial_indicadores.HIN_informacion_complementaria'
+        ])
+        ->crossJoin(DB::raw('(SELECT unnest(ARRAY[' . implode(',', $gestiones) . ']) as hin_gestion) as y'))
+        ->leftJoin('historial_indicadores', function($join) {
+            $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
+                 ->on('y.hin_gestion', '=', 'historial_indicadores.HIN_gestion');
+        })
+        ->where('indicadores.IND_id', $indicadorId)
+        ->where('indicadores.IND_tipo_repuesta', 'Lista centros penitenciarios')
+        ->orderBy('y.hin_gestion')
+        ->get();
+        return $results;
     }
     
     

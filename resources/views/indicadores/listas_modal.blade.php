@@ -8,7 +8,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <p class=" p-2 text-center modal-title fs-4 border-bottom anio-actual">
-                    Año: 
+                    Año: <strong id="anio">{{ $gestion }}</strong>
                 </p>
 
                 <div class="modal-body">
@@ -53,7 +53,10 @@
          $('#guardarListaSexo').off('click').click(function() {
         var id = $(this).data('id');
         var form = $('#listaSexoForm');
-        var anyoConsulta = $('#anyo_consulta').val();
+        var anyoConsulta = $('#anio_consulta').val();
+        
+        console.log(anyoConsulta); 
+
         var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
         
         let sexoData = {};
@@ -88,7 +91,7 @@
         var csrfToken = $('input[name="_token"]').val();
         var formData = new FormData();
         formData.append('respuesta', JSON.stringify(sexoData));
-        formData.append('anyo_consulta', anyoConsulta);
+        formData.append('anio_consulta', anyoConsulta);
         formData.append('informacion_complementaria', informacionComplementaria);
         formData.append('FK_IND_id', id);
         formData.append('_token', csrfToken);
@@ -130,7 +133,8 @@
 
 <!-- Modal CENTROS PENITENCIARIOS -->
 @if ($tipo == 'centros penitenciarios')
-    <div class="modal fade" id="centrosModal" tabindex="-1" aria-labelledby="centrosModalLabel" aria-hidden="true">
+ 
+    <div class="modal fade" id="centrosModal" id="centrosModal_{{ $pregunta['IND_id'] }}" tabindex="-1" aria-labelledby="centrosModalLabel_{{ $pregunta['IND_id'] }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -138,10 +142,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <p class=" p-2 text-center modal-title fs-4 border-bottom anio-actual">
-                    Año: {{ $pregunta['HIN_gestion'] }}
+                    Año: <strong id="anio">{{ $gestion }}</strong>
                 </p>
                 <div class="modal-body">
-                    <form id="centrosForm">
+                    <form id="centrosForm_{{ $pregunta['IND_id'] }}">
                         @foreach ($centrosPenitenciarios as $departamento => $centros)
                             <div class="mb-3">
                                 <h6 class="fw-bold">{{ $departamento }}</h6>
@@ -151,11 +155,17 @@
                                             {{$centro->EST_nombre }}
                                             <input 
                                                 type="number" 
-                                                name="numero[{{ $centro->EST_nombre }}]" 
-                                                class="form-control w-25 centro-numero" 
-                                                data-centro="{{ $centro->EST_nombre }}" 
+                                                name="numero[{{ $centro->EST_id }}]" 
+                                                class="form-control w-25 centro-numero_{{ $pregunta['IND_id'] }}" 
+                                                data-centro="{{ $centro->EST_nombre }}"
+                                                data-pregunta="{{ $pregunta['IND_id'] }}"
                                                 placeholder="0"
                                                 id="{{ $centro->EST_id }}"
+                                                min="0"
+                                                max="999999"
+                                                maxlength="6"
+                                                oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                                                value="{{ json_decode( $pregunta['HIN_respuesta'], true)[$centro->EST_nombre] ?? '' }}"
                                             >
                                         </li>
                                     @endforeach
@@ -164,9 +174,11 @@
                         @endforeach
 
                         <div class="mb-2 mt-2">
-                            <label for="adicional" class="ms-2"><i class="bi bi-info-circle-fill text-warning fs-5 text-shadow"></i> Informacion complementaria:</label>
-                            <div class=" px-4">
-                            <input type="text" name="informacion_complementaria" class="form-control box-shadow" id="adicional_{{ $pregunta['IND_id'] }}" value="{{ $pregunta['HIN_informacion_complementaria'] ?? '' }}">
+                            <label for="adicional_{{ $pregunta['IND_id'] }}" class="ms-2">
+                                <i class="bi bi-info-circle-fill text-warning fs-5 text-shadow"></i> Informacion complementaria:
+                            </label>
+                            <div class="px-4">
+                                <input type="text" name="informacion_complementaria" class="form-control box-shadow" id="adicional_{{ $pregunta['IND_id'] }}" value="{{ $pregunta['HIN_informacion_complementaria'] ?? '' }}">
                             </div>
                         </div>
                     </form>
@@ -174,87 +186,99 @@
                
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" id="guardarListaCentros" class="btn btn-primary">Guardar datos</button>
+                    <button type="button" id="guardarListaCentros_{{ $pregunta['IND_id'] }}" class="btn btn-primary">Guardar datos</button>
                 </div>
+            
             </div>
         </div>
     </div>
-
+    
     <script>
         $(document).ready(function () {
-            $('#guardarListaCentros').off('click').click(function() {
-            var id = "{{ $pregunta['IND_id'] }}";
-            var form = $('#centrosForm');
-            var anyoConsulta = $('#anyo_consulta').val();
-            var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
-            
-            let centrosData = {};
-            let valid = true;
-            
-            $('.centro-numero').each(function() {
-                let centro = $(this).data('centro');
-                let numero = $(this).val();
+    
+            $(`#guardarListaCentros_{{ $pregunta['IND_id'] }}`).off('click').on('click', function() {
+                const preguntaId = "{{ $pregunta['IND_id'] }}";
+                const form = $(`#centrosForm_${preguntaId}`);
+                const anyoConsulta = $('#anio_consulta').val();
+
+                const informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
                 
-                if (numero === "" || numero === null) {
-                    valid = false;
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                    centrosData[centro] = numero;
-                }
-            });
-
-            if (!valid) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Completa todos los campos antes de guardar',
-                    icon: 'error',
-                    confirmButtonText: 'Entendido',
+                let centrosData = {};
+                let valid = true;
+        
+                $(`.centro-numero_${preguntaId}`).removeClass('is-invalid').each(function() {
+                    let centro = $(this).data('centro');
+                    let numero = $(this).val().trim();
+                    
+                    if (numero === "" || numero === null || isNaN(numero)) {
+                        valid = false;
+                        $(this).addClass('is-invalid');
+                    } else {
+                        centrosData[centro] = numero;
+                    }
                 });
-                return;
-            }
 
-            $('#overlay').show();
-            
-            var csrfToken = $('input[name="_token"]').val();
-            var formData = new FormData();
-            formData.append('respuesta', JSON.stringify(centrosData));
-            formData.append('anyo_consulta', anyoConsulta);
-            formData.append('informacion_complementaria', informacionComplementaria);
-            formData.append('FK_IND_id', id);
-            formData.append('_token', csrfToken);
-            
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: '/indicadores/guardar',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    $('#centrosModal').modal('hide');
-                    Swal.fire({
-                        title: 'Éxito!',
-                        text: 'Datos guardados correctamente',
-                        icon: 'success',
-                        confirmButtonText: 'Ok'
-                    });
-                    $('#overlay').hide();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
+                if (!valid) {
                     Swal.fire({
                         title: 'Error!',
-                        text: 'Error al guardar los datos',
+                        text: 'Completa todos los campos antes de guardar',
                         icon: 'error',
-                        confirmButtonText: 'Ok'
-                    });
-                    $('#overlay').hide();
+                        confirmButtonText: 'Entendido'
+                    });                    return;
                 }
+
+                $('#overlay').show();
+                
+                // var csrfToken = $('input[name="_token"]').val();
+                // var formData = new FormData();
+                // formData.append('respuesta', JSON.stringify(centrosData));
+                // formData.append('anio_consulta', anyoConsulta);
+                // formData.append('informacion_complementaria', informacionComplementaria);
+                // formData.append('FK_IND_id', id);
+                // formData.append('_token', csrfToken);'
+                // 
+
+                var formData = new FormData();
+                formData.append('respuesta', JSON.stringify(centrosData));
+                formData.append('anio_consulta', anyoConsulta);
+                formData.append('informacion_complementaria', informacionComplementaria);
+                formData.append('FK_IND_id', preguntaId);
+                formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+                
+                
+                $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: '/indicadores/guardar',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // $('#centrosModal').modal('hide');
+                        $(`#centrosModal_${preguntaId}`).modal('hide');
+                        Swal.fire({
+                            title: 'Éxito!',
+                            text: 'Datos guardados correctamente',
+                            icon: 'success',
+                            confirmButtonText: 'Ok'
+                        });
+                        $('#overlay').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Error al guardar los datos',
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        });
+                        $('#overlay').hide();
+                    }
+                });
             });
-        });
         });
     </script>
 @endif
@@ -269,7 +293,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <p class=" p-2 text-center modal-title fs-4 border-bottom anio-actual">
-                    Año: 
+                    Año: <strong id="anio">{{ $gestion }}</strong>
                 </p>
 
                 <div class="modal-body">
@@ -315,7 +339,7 @@
             $('#guardarListaDelitos').off('click').click(function() {
         var id = "{{ $pregunta['IND_id'] }}";
         var form = $('#listaDelitosForm');
-        var anyoConsulta = $('#anyo_consulta').val();
+        var anyoConsulta = $('#anio_consulta').val();
         var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
         
         let delitosData = {};
@@ -349,7 +373,7 @@
         var csrfToken = $('input[name="_token"]').val();
         var formData = new FormData();
         formData.append('respuesta', JSON.stringify(delitosData));
-        formData.append('anyo_consulta', anyoConsulta);
+        formData.append('anio_consulta', anyoConsulta);
         formData.append('informacion_complementaria', informacionComplementaria);
         formData.append('FK_IND_id', id);
         formData.append('_token', csrfToken);
