@@ -228,48 +228,53 @@ class FormularioController extends Controller
         return view('formulario.verFormularioCreado', compact('formulario', 'preguntas', 'breadcrumbs'));
     }
     
-    public function imprimirFormulario($id)
+    public function imprimirFormulario($id, $tamano = 'carta')
     {
         // Obtener los datos del formulario
         $formulario = ModFormulario::findOrFail($id);
-    
-        // Obtener las preguntas asociadas
+        
+        // Obtener las preguntas asociadas ordenadas
         $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
             ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
             ->orderBy('r_bpreguntas_formularios.RBF_orden')
             ->orderBy('r_bpreguntas_formularios.RBF_id')
             ->get();
         
-        // Añadir información para el encabezado
-        $encabezado = [
-            'titulo' => 'Encabezado principal',
-            'logo' => public_path('images/logo.png') // Ruta del logo (asegúrate de que exista)
-        ];
-    
-        // Configurar opciones del PDF
-        $options = [
-            'margin-top' => '30mm', // Margen superior para el encabezado
-            'margin-bottom' => '15mm',
-            'margin-left' => '10mm',
-            'margin-right' => '10mm',
-            'footer-font-size' => 8,
-            'footer-left' => 'Página [page] de [topage]',
-            'footer-right' => 'Fecha: ' . date('d/m/Y')
-        ];
-    
-        // Cargar la vista para el PDF con tamaño de papel configurable
-        // Puedes usar 'letter' para carta o 'legal' para oficio
-        $pdf = Pdf::loadView(
-            'formulario.formulario-imprimirFormulario', 
-            compact('formulario', 'preguntas', 'encabezado')
-        )
-        ->setPaper('letter', 'portrait')
-        ->setOptions($options);
-    
+        // Configurar el tamaño del papel (carta u oficio)
+        $configPapel = $tamano === 'oficio' ? 'legal' : 'letter';
+        
+        // Cargar la vista para el PDF
+        $pdf = Pdf::loadView('formulario.formulario-imprimirFormulario', compact('formulario', 'preguntas', 'tamano'))
+                  ->setPaper($configPapel, 'portrait'); // Formato vertical
+        
+        // Configurar opciones adicionales para optimizar la impresión
+        $pdf->setOption('isPhpEnabled', true);        // Permitir PHP en la vista
+        $pdf->setOption('isRemoteEnabled', true);     // Permitir recursos remotos (para logo)
+        $pdf->setOption('defaultFont', 'DejaVu Sans'); // Fuente con soporte para caracteres especiales
+        $pdf->setOption('chroot', public_path());     // Acceso a carpeta public
+        
+        // Generar nombre de archivo significativo
+        $nombreArchivo = 'Formulario_' . $id . '_' . str_replace(' ', '_', $formulario->FRM_titulo) . '.pdf';
+        
         // Descargar o visualizar el PDF
-        return $pdf->stream('Formulario_' . $formulario->FRM_id . '.pdf');
+        return $pdf->stream($nombreArchivo); // Para visualizar en el navegador
+        
+        // Alternativa para descargar directamente
+        // return $pdf->download($nombreArchivo);
     }
     
+    /**
+     * Muestra la página de selección de tamaño de papel para la impresión
+     *
+     * @param int $id ID del formulario
+     * @return \Illuminate\Http\Response
+     */
+    public function seleccionarTamanoPapel($id)
+    {
+        $formulario = ModFormulario::findOrFail($id);
+        return view('formulario.seleccionar-tamano-papel', compact('formulario'));
+    }
+
     public function nuevo(){
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
