@@ -242,7 +242,7 @@ class FormularioController extends Controller
         
         // Configurar el tamaño del papel (carta u oficio)
         $configPapel = $tamano === 'oficio' ? 'legal' : 'letter';
-        
+        //dump($preguntas);
         // Cargar la vista para el PDF
         $pdf = Pdf::loadView('formulario.formulario-imprimirFormulario', compact('formulario', 'preguntas', 'tamano'))
                   ->setPaper($configPapel, 'portrait'); // Formato vertical

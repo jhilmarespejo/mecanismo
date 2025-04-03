@@ -166,15 +166,15 @@
 
     <!-- Sección -->
     @if($esSeccion)
-        <h2 class="section">{{ $index + 1 }}. {{ $pregunta->BCP_pregunta }}</h2>
+        <h2 class="section">{{ $pregunta->BCP_pregunta }}</h2>
     <!-- Subsección -->
     @elseif($esSubSeccion)
-        <h3 class="subsection">{{ $index + 1 }}. {{ $pregunta->BCP_pregunta }}</h3>
+        <h3 class="subsection">{{ $pregunta->BCP_pregunta }}</h3>
     <!-- Pregunta -->
     @else
         <div class="question">
             <p>
-                <span class="number-prefix">{{ $index + 1 }}.</span> 
+                {{-- <span class="number-prefix">{{ $index + 1 }}.</span>  --}}
                 <strong>{{ $pregunta->BCP_pregunta }}</strong>
             </p>
 
