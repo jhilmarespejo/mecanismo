@@ -413,6 +413,7 @@ $(document).ready(function() {
     function ensamblarDatos() {
         let arrayPreguntas = [];
         let preguntasExistentes = [];
+        let contador = 0;
         
         // Depuración - verificar qué elementos hay en el DOM
         console.log("Elementos en el contenedor:", $('#contenedor_pregunta_seleccionada .card').length);
@@ -436,13 +437,44 @@ $(document).ready(function() {
                 
                 // Si no está en la lista de preguntas a eliminar, la agregamos
                 if (!preguntasEliminar.includes(rbfId)) {
-                    let obj = {
-                        BCP_id: bcpId,
-                        RBF_id: rbfId,
-                        RBF_orden: index + 1
-                    };
-                    preguntasExistentes.push(obj);
-                    console.log("Pregunta existente agregada:", obj);
+                    // Incrementar contador solo para preguntas reales (no secciones/subsecciones)
+                    let tipoRespuesta = $(this).find('input[name="tipoRespuesta[]"]').val();
+                    if (tipoRespuesta !== 'Sección' && tipoRespuesta !== 'Subsección') {
+                        contador++;
+                        
+                        // Actualizar el número visible en la interfaz
+                        $(this).find('.numero-pregunta').text(contador);
+                        
+                        // Obtener el texto de la pregunta sin el número
+                        let textoPregunta = $(this).find('input.pregunta').val() || "";
+                        textoPregunta = textoPregunta.trim();
+                        
+                        // Eliminar cualquier número existente al inicio
+                        textoPregunta = textoPregunta.replace(/^\d+\.\s*/, '');
+                        
+                        // Crear un nuevo texto con el número actualizado
+                        let nuevaPreguntaTexto = contador + '. ' + textoPregunta;
+                        
+                        // Actualizar el texto visible en la interfaz (opcional)
+                        $(this).find('input.pregunta').val(textoPregunta);
+                        
+                        let obj = {
+                            BCP_id: bcpId,
+                            RBF_id: rbfId,
+                            RBF_orden: index + 1,
+                            BCP_pregunta: nuevaPreguntaTexto // Añadir el texto actualizado de la pregunta
+                        };
+                        preguntasExistentes.push(obj);
+                        console.log("Pregunta existente agregada:", obj);
+                    } else {
+                        // Para secciones y subsecciones, mantener el orden pero sin incrementar contador
+                        let obj = {
+                            BCP_id: bcpId,
+                            RBF_id: rbfId,
+                            RBF_orden: index + 1
+                        };
+                        preguntasExistentes.push(obj);
+                    }
                 } else {
                     console.log("Pregunta marcada para eliminar - ignorada:", rbfId);
                 }
@@ -454,10 +486,21 @@ $(document).ready(function() {
                 let idPregunta = elemId.split('_')[2];
                 let obj = {};
                 
+                // Incrementar contador para preguntas reales
+                contador++;
+                
+                // Actualizar el número visible en la interfaz
+                $(this).find('.numero-pregunta').text(contador);
+                
                 // Texto de la pregunta
                 let textoPregunta = $(this).find('input.pregunta').val() || "";
-                let numeroPregunta = $(this).find('.numero-pregunta').text() || "";
-                obj.BCP_pregunta = `${numeroPregunta}. ${textoPregunta.trim()}`;
+                textoPregunta = textoPregunta.trim();
+                
+                // Eliminar cualquier número existente al inicio
+                textoPregunta = textoPregunta.replace(/^\d+\.\s*/, '');
+                
+                // Crear el texto con la numeración correcta
+                obj.BCP_pregunta = `${contador}. ${textoPregunta}`;
                 
                 // Tipo de respuesta
                 obj.BCP_tipoRespuesta = $(this).find('input[name="tipoRespuesta[]"]').val() || "";

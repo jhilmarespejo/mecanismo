@@ -344,11 +344,18 @@ class FormularioController extends Controller
                 
                 if (is_array($preguntas)) {
                     foreach ($preguntas as $pregunta) {
-                        // 1. Si la pregunta tiene un BCP_id, significa que ya existe - actualizamos su orden
+                        // 1. Si la pregunta tiene un BCP_id, significa que ya existe - actualizamos su orden y texto si es necesario
                         if (isset($pregunta['BCP_id']) && !empty($pregunta['BCP_id'])) {
+                            // Actualizar el orden en la tabla de relaciones
                             ModPreguntasFormulario::where('FK_FRM_id', $id)
                                 ->where('FK_BCP_id', $pregunta['BCP_id'])
                                 ->update(['RBF_orden' => $pregunta['RBF_orden']]);
+                            
+                            // Si hay texto de pregunta, actualizar la pregunta en banco_preguntas
+                            if (array_key_exists('BCP_pregunta', $pregunta)) {
+                                ModBancoPregunta::where('BCP_id', $pregunta['BCP_id'])
+                                    ->update(['BCP_pregunta' => $pregunta['BCP_pregunta']]);
+                            }
                         } 
                         // 2. Si no tiene BCP_id, es una pregunta nueva - la creamos
                         else {
@@ -384,14 +391,13 @@ class FormularioController extends Controller
             DB::rollback();
             
             // Registrar el error en logs
-            // Log::error('Error al actualizar formulario: ' . $e->getMessage());
-            // Log::error($e->getTraceAsString());
+            \Log::error('Error al actualizar formulario: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
             
             return redirect()->route('formulario.editar', $id)
                             ->with('error', 'Error al actualizar el formulario: ' . $e->getMessage());
         }
     }
-    
 }
     
     // public function nuevo(Request $request){
