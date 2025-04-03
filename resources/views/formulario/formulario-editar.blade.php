@@ -20,6 +20,18 @@
     
 <!-- Contenedor principal -->
 <div class="col-lg-12 mb-4">
+    <div class="card shadow mb-4">
+        <div class="card-header text-white bg-primary d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-journal-text"></i> {{ $formulario->FRM_titulo }}</h3>
+            <!-- Botón para imprimir -->
+            <a href="{{ route('formulario.imprimirFormulario', $formulario->FRM_id) }}" target="_blank" class="btn text-shadow btn-info text-white text-shadow">
+                <i class="bi bi-printer"></i> Imprimir en PDF
+            </a>
+            <a href="{{ route('formulario.verFormularioCreado', $formulario->FRM_id) }}" class="btn text-shadow btn-info text-white text-shadow">
+                <i class="bi bi-pencil-square"></i> Ver formulario
+            </a>
+        </div>
+    </div>
     <div class="p-4 position-relative">
         <!-- Título y breadcrumbs -->
         @include('layouts.breadcrumbs', $breadcrumbs)
