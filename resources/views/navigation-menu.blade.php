@@ -1,7 +1,3 @@
-
-
-
-
 <div class="container">
     <style>
         /* Mostrar dropdown en hover */
@@ -10,12 +6,15 @@
             margin-top: 0; /* Evita el salto en el efecto */
         }
     </style>
+@auth
+    
     <nav id="nav1" class="navbar navbar-expand-md navbar-secondary border-bottom sticky-top bg-secondary ">
         <div class="container text-light">
             <!-- Logo -->
             <span class="navbar-brandx col" href="/">
                 <x-jet-application-mark width="36" />
             </span>
+            
             @isset( Auth::user()->rol )
                 <button class="navbar-toggler text-light text-shadow btn btn-ligth" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <i class="bi bi-menu-button-wide-fill"></i>
@@ -28,7 +27,6 @@
                             <x-jet-nav-link href="{{ route('panel') }}" class="text-light text-shadow" :active="request()->routeIs('panel')">
                                 {{ __('Inicio') }}
                             </x-jet-nav-link>
-    
                                 @if( Auth::user()->rol == 'Administrador' )
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuIndicadores" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -41,18 +39,29 @@
     
                                         </ul>
                                     </li>
-                                    <li class="nav-item">
+                                    {{-- <li class="nav-item">
                                         <a class="nav-link  text-light text-shadow" aria-current="page" href="/formularios">Formularios </a>
-                                    </li>@endif
+                                    </li> --}}
+                                @endif
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuVistas" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Visitas
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="menuVistas">
+                                        <li><a class="dropdown-item"  href="/visita/resumen">Resumen de visitas</a></li>
+                                        <li><a class="dropdown-item" href="/formularios">Formularios</a></li>
+                                    </ul>
+                                </li>
                                     
-                                    @endif
-                                    <li class="nav-item">
+                                    {{-- <li class="nav-item">
                                         <a class="nav-link  text-light text-shadow" aria-current="page" href="/visita/resumen">Visitas</a>
-                                    </li>
+                                    </li> --}}
+
+                                    
                                     <li class="nav-item">
                                         <a class="nav-link text-light text-shadow" href="/recomendacionesEstatales">Recomendaciones</a>
                                     </li>
-                                    @if( Auth::user()->rol == 'Administrador' )
+                                @if( Auth::user()->rol == 'Administrador' )
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             Administración
@@ -70,7 +79,8 @@
                                             <li><a class="dropdown-item" href="/">Tipos de Lugares de detención</a></li> --}}
                                         </ul>
                                     </li>
-                                    @endif
+                                @endif
+
                                     {{-- <li class="nav-item">
                                         <a class="nav-link  text-light text-shadow" aria-current="page" href="/categorias">Categorías</a>
                                     </li>
@@ -78,7 +88,8 @@
                                     <li class="nav-item">
                                         <a class="nav-link  text-light text-shadow" aria-current="page" href="/cuestionario">Cuestionarios </a>
                                     </li> --}}
-                                    @if( Auth::user()->rol == 'Administrador' )
+
+                                @if( Auth::user()->rol == 'Administrador' )
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                           Usuarios
@@ -88,19 +99,10 @@
                                           <li><a class="dropdown-item" href="/users/list">Verificar usuarios</a></li>
                                         </ul>
                                     </li>
+                                @endif
     
                                    
-                                    {{--<li class="nav-item">
-                                        <a class="nav-link " aria-current="page" href="/interoperabilidad">* </a>
-                                    </li>--}}
-                                    {{-- @else --}}
-    
-                                {{-- <li class="nav-item">
-                                    <a class="nav-link " aria-current="page" href="/reportes">Reportes</a>
-                                </li> --}}
-                                {{-- <li>
-                                    <a href="#" id="refresh">###</a>
-                                </li> --}}
+                                  
                         </ul>
     
     
@@ -202,6 +204,10 @@
         
         </div>
     </nav>
-    
+@else
+    <script>
+        window.location.href = "{{ route('login') }}";
+    </script>
+@endauth
 </div>
 

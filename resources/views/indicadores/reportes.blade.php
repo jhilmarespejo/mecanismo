@@ -5,6 +5,9 @@
 <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/draggable-points.js"></script>
 
 <style>
   
@@ -29,7 +32,7 @@
     <div class="row g-4">
         <!-- Categorías -->
         <div class="col-12 col-md-4">
-            <div class="select-card card text-dark bg-light mb-3">
+            <div class="select-card card text-dark bg-light mb-1">
                 <div class="card-header fs-5 text-center">
                     Categoría:
                 </div>
@@ -94,9 +97,25 @@
             .grafico-container {
                 flex-grow: 1;
             }
+            .controls {
+                text-align: center;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 5px;
+                margin: 10px 0;
+            }
+
+            .controls button {
+                margin: 0 10px;
+            }
+            
+            .controls input[type="range"] {
+                vertical-align: middle;
+                margin: 0 10px;
+            }
       </style>
       
-    <div class="container row g-4 mt-4"  >
+    <div class="container row g-4 mt-1"  >
         <!-- Gráfico Estadístico del INDICADOR seleccionado -->
         <div class="col-12 col-md-6 indicadores"> <!-- Ocupa 8 columnas en pantallas medianas y más grandes, 12 en móviles -->
             <div id="graficoIndicadores" style="display: none;" class="card">
@@ -113,19 +132,294 @@
                 <div id="graficoParametro" class="grafico-container"  ></div>
             </div>
         </div>
+        <!-- Gráfico Estadístico del PARAMETRO seleccionado cuando este corresponde a una lista de centros penitenciarios -->
+        <div class="col-12 col-md-12 listaCentros"> <!-- Ocupa 4 columnas en pantallas medianas y más grandes, 12 en móviles -->
+            <div id="graficoListaCentros" style="display: none;" class="card">
+                <h3 id="tituloListaCentros" class="mb-1"></h3>
+                <!-- Asegúrate de que el div interno tenga un id único -->
+                <div id="graficoListaCentro" class="grafico-container"  ></div>
+            </div>
+        </div>
     </div>
 </div>
 <!-- Script para manejar la lógica de los combobox -->
 <script>
     let chart = null;
+    
+    function actualizarGraficoCentrosPorAnio(data, nombreParametro) {
+    // Procesamos los datos para el formato requerido
+    let allData = {};
+    let centros = new Set();
+    let years = data.map(item => item.HIN_gestion);
+    
+    // Extraer años y datos
+    data.forEach(item => {
+        if (item.HIN_respuesta) {
+            try {
+                let respuestas = JSON.parse(item.HIN_respuesta);
+                Object.entries(respuestas).forEach(([centro, poblacion]) => {
+                    centros.add(centro);
+                    if (!allData[centro]) {
+                        allData[centro] = {};
+                    }
+                    allData[centro][item.HIN_gestion] = parseInt(poblacion) || null;
+                });
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+            }
+        }
+    });
 
-    function actualizarGraficoParametros(parametroPorAnyo, nombreParametro) {
+    // Obtener la cantidad de centros únicos y ajustar el contenedor
+    const cantidadCentros = centros.size;
+    const graficoListaCentrosDiv = document.getElementById('graficoListaCentros');
+    const parentContainer = graficoListaCentrosDiv.parentElement;
+    
+    // Remover clases previas de columnas
+    parentContainer.classList.remove('col-12', 'col-md-6', 'col-md-12');
+    
+    // Ajustar el ancho según la cantidad de centros
+    if (cantidadCentros <= 4) {
+        parentContainer.classList.add('col-12', 'col-md-6');
+    } else {
+        parentContainer.classList.add('col-12', 'col-md-12');
+    }
+
+    // Ajustar la altura del gráfico según la cantidad de centros
+    const chartHeight = Math.max(500, cantidadCentros * 40);
+
+    // Convertir datos al formato necesario para la carrera de barras
+    let chartData = [];
+    let colorMap = {};
+    let colorIndex = 0;
+    centros.forEach(centro => {
+        // Asignar un color fijo a cada centro
+        colorMap[centro] = Highcharts.getOptions().colors[colorIndex % 20];
+        colorIndex++;
+        years.forEach(year => {
+            chartData.push({
+                name: centro,
+                y: allData[centro]?.[year] ?? null,
+                year: year
+            });
+        });
+    });
+
+    // Eliminar controles existentes si los hay
+    const existingControls = graficoListaCentrosDiv.querySelector('.controls');
+    if (existingControls) {
+        existingControls.remove();
+    }
+
+    // Crear nuevos controles
+    const controls = document.createElement('div');
+    controls.className = 'controls mb-1';
+    controls.innerHTML = `
+        <button id="play-pause" class="btn btn-primary">
+            <i class="bi bi-play-fill"></i> Iniciar
+        </button>
+        <input type="range" min="0" max="${years.length - 1}" value="0" id="year-range" style="width: 200px">
+        <span id="year-label">${years[0]}</span>
+    `;
+    
+    // Insertamos los controles al inicio del contenedor del gráfico
+    graficoListaCentrosDiv.insertBefore(controls, graficoListaCentrosDiv.firstChild);
+
+    // Configuración del gráfico
+    const chart = Highcharts.chart('graficoListaCentro', {
+        chart: {
+            type: 'column',
+            animation: {
+                duration: 500
+            },
+            height: 400
+        },
+        title: {
+            text: nombreParametro,
+            align: 'center'
+        },
+        subtitle: {
+            text: 'Gestión: <b>' + years[0] + '</b>',
+            align: 'center',          // Centra el texto
+            style: {
+                fontSize: '18px'      // Tamaño de fuente más grande
+            },
+            useHTML: true            // Permite usar HTML en el texto
+        },
+        xAxis: {
+            type: 'category',
+            labels: {
+                style: {
+                    fontSize: '11px'
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Población'
+            }
+        },
+        series: [{
+            name: 'Población',
+            data: [],
+            dataLabels: {
+                enabled: true,
+                formatter: function() {
+                    if (this.y === null || this.y === undefined) {
+                        return '⚠️ Sin datos';
+                    }
+                    return this.y;
+                }
+            }
+        }],
+        plotOptions: {
+            series: {
+                animation: false,
+                groupPadding: 0,
+                pointPadding: cantidadCentros > 10 ? 0.05 : 0.1,
+                borderWidth: 0,
+                colorByPoint: true,
+                dataSorting: {
+                    enabled: true,
+                    matchByName: true
+                },
+                type: 'bar'
+            }
+        },
+        colors: [
+            '#2f7ed8',   // Azul
+            '#0d6efd',   // Azul primario
+            '#6610f2',   // Indigo
+            '#6f42c1',   // Púrpura
+            '#d63384',   // Rosa
+            '#dc3545',   // Rojo
+            '#fd7e14',   // Naranja
+            '#ffc107',   // Amarillo
+            '#198754',   // Verde
+            '#20c997',   // Verde azulado
+            '#0dcaf0',   // Cyan
+            '#0d6efd',   // Azul claro
+            '#6f42c1',   // Violeta
+            '#d63384',   // Rosa oscuro
+            '#dc3545',   // Rojo brillante
+            '#fd7e14',   // Naranja brillante
+            '#ffc107',   // Amarillo brillante
+            '#198754',   // Verde oscuro
+            '#20c997',   // Turquesa
+            '#0dcaf0'    // Celeste
+        ],
+        tooltip: {
+            formatter: function() {
+                if (this.y === null || this.y === undefined) {
+                    return `<b>${this.point.name}</b><br>Sin datos reportados`;
+                }
+                return `<b>${this.point.name}</b><br>Población: ${this.y}`;
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        credits: {
+            enabled: false
+        },
+        exporting: {
+            enabled: true
+        }
+    });
+
+    // Variables para la animación
+    let currentYear = 0;
+    const yearTotal = years.length;
+    let playing = false;
+
+    // Función para actualizar los datos
+    function updateData(year) {
+        const yearData = chartData
+            .filter(row => row.year === years[year])
+            .map(row => ({
+                name: row.name,
+                y: row.y,
+                color: row.y === null ? '#ff9999' : colorMap[row.name]
+            }));
+
+        chart.series[0].setData(yearData);
+        chart.setTitle(null, { 
+            text: 'Gestión: <b>' + years[year] + '</b>',
+            align: 'center',
+            style: {
+                fontSize: '18px'
+            },
+            useHTML: true
+        });
+    }
+    
+    // Event listeners para los controles
+    document.getElementById('play-pause').addEventListener('click', function() {
+        if (playing) {
+            playing = false;
+            this.innerHTML = '<i class="bi bi-play-fill"></i> Reproducir';
+        } else {
+            // Si la animación terminó (estamos en el último año), reiniciar desde el principio
+            if (currentYear >= yearTotal - 1) {
+                currentYear = 0;
+                document.getElementById('year-range').value = currentYear;
+                document.getElementById('year-label').textContent = years[currentYear];
+                updateData(currentYear);
+            }
+            playing = true;
+            this.innerHTML = '<i class="bi bi-pause-fill"></i> Pausar';
+            play();
+        }
+    });
+
+    document.getElementById('year-range').addEventListener('input', function() {
+        currentYear = parseInt(this.value, 10);
+        updateData(currentYear);
+        document.getElementById('year-label').textContent = years[currentYear];
+    });
+
+    // Función para reproducir la animación
+    function play() {
+        if (!playing) return;
+
+        // Si ya terminó la animación, reiniciar desde el primer año
+        if (currentYear >= yearTotal - 1) {
+            currentYear = 0;
+            document.getElementById('year-range').value = currentYear;
+            document.getElementById('year-label').textContent = years[currentYear];
+            updateData(currentYear);
+            playing = false;
+            document.getElementById('play-pause').innerHTML = '<i class="bi bi-play-fill"></i> Reproducir';
+            return;
+        }
+
+        currentYear++;
+        document.getElementById('year-range').value = currentYear;
+        document.getElementById('year-label').textContent = years[currentYear];
+        updateData(currentYear);
+        setTimeout(play, 2000);
+    }
+    
+    // Inicializar con el primer año
+    updateData(0);
+    $('#graficoIndicadores').hide();
+    $('#graficoParametros').hide();
+    $('#graficoListaCentros').show();
+
+    // Enfocar el gráfico
+    graficoListaCentrosDiv.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center'
+    });
+}
+
+    function actualizarGraficoParametroSiNo(parametroPorAnio, nombreParametro) {
         const categorias = [];
         const resultados = [];
         
-        console.log(parametroPorAnyo);
-        Object.keys(parametroPorAnyo).sort().forEach(year => {
-            const item = parametroPorAnyo[year];
+        // console.log(parametroPorAnio);
+        Object.keys(parametroPorAnio).sort().forEach(year => {
+            const item = parametroPorAnio[year];
             categorias.push(parseInt(year));
 
             // Verificamos exactamente los valores de HIN_respuesta
@@ -222,16 +516,14 @@
         });
 
         $('#graficoParametros').show();
+        $('#graficoListaCentros').hide();
     }
         
-    
-        
-    
-    function actualizarGraficoIndicador(indicadorPorAnyo, nombreIndicador) {
+    function actualizarGraficoIndicador(indicadorPorAnio, nombreIndicador) {
         const categorias = [];
         const resultados = [];
         
-        indicadorPorAnyo.forEach(function(item) {
+        indicadorPorAnio.forEach(function(item) {
             categorias.push(item.gestion);
             resultados.push(parseFloat(item.resultado_final));
         });
@@ -304,6 +596,7 @@
         // Actualizamos el título y mostramos el contenedor
         // $('#tituloIndicador').text(nombreIndicador);
         $('#graficoIndicadores').show();
+        $('#graficoListaCentros').hide();
     }
 
     $(document).ready(function () {
@@ -354,11 +647,11 @@
                                 );
                             });
                         }
-
+                        
                         // Actualizamos el gráfico con los nuevos datos
-                        if (response.indicadorPorAnyo && response.indicadorPorAnyo.length > 0) {
-                            // console.log(response.indicadorPorAnyo);
-                            actualizarGraficoIndicador(response.indicadorPorAnyo, nombreIndicador);
+                        if (response.indicadorPorAnio && response.indicadorPorAnio.length > 0) {
+                            // console.log(response.indicadorPorAnio);
+                            actualizarGraficoIndicador(response.indicadorPorAnio, nombreIndicador);
                             // Mover la pantalla para enfocar en el div graficoIndicador
                             document.getElementById('graficoIndicador').scrollIntoView({ behavior: 'smooth' });
                         }
@@ -383,9 +676,15 @@
                         parametro_id: parametroId 
                     },
                     success: function (response) {
-                        if (response.parametroPorAnyo) {
-                            actualizarGraficoParametros(response.parametroPorAnyo, nombreParametro);
+                        if (response.parametroPorAnioSiNo) {
+                            actualizarGraficoParametroSiNo(response.parametroPorAnioSiNo, nombreParametro);
                         }
+                        if (response.listaCentrosPorAnio) {
+                            // console.log('Lista Centros Penitenciarios');
+                            // console.log(response.listaCentrosPorAnio);
+                            actualizarGraficoCentrosPorAnio(response.listaCentrosPorAnio, nombreParametro);
+                        }
+                        
                     },
                     error: function (xhr, status, error) {
                         console.error("Error al obtener resultados:", error);
@@ -395,6 +694,4 @@
         });
     });
 </script>
-
-
 @endsection

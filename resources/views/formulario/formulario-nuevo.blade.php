@@ -1,4 +1,4 @@
-{{-- FORMULARIO PARA CREAR NUEVO CUESTIONARIO --}}
+{{-- FORMULARIO PARA CREAR NUEVO CUESTIONARIO formulario-nuevo.php  --}}
 @extends('layouts.app')
 @section('title', 'Formularios')
 
@@ -72,7 +72,6 @@
                         value=""
                     />
                 </div>
-                
                 
                 
 

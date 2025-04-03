@@ -91,8 +91,6 @@ class IndicadorController extends Controller
         
         return view('indicadores.panel', compact('categorias', 'breadcrumbs', 'gestion'));
     }
-    
-    
     // Guarda los datos que se actualizan en los indicadores
     public function guardar(Request $request) {
         // dump($request->all());exit;
@@ -168,7 +166,7 @@ class IndicadorController extends Controller
             ['name' => 'Reportes', 'url' => ''],
         ];
         $gestiones = [2024, 2025, 2026, 2027, 2028];
-        $promediosPorAnyo = [];
+        $promediosPorAnio = [];
 
         // (CATEGORIAS) Si la petición es para obtener los indicadores de una categoría
             if ($request->has('categoria_id')) {
@@ -200,28 +198,28 @@ class IndicadorController extends Controller
                     ->orderBy('IND_orden', 'asc')
                     ->get();
                 
-                $indicadorPorAnyo = $this->indicadorAnualSiNo($request->indicador_indicador, $gestiones);
-                // if (empty($indicadorPorAnyo)) {
+                $indicadorPorAnio = $this->indicadorAnualSiNo($request->indicador_indicador, $gestiones);
+                // if (empty($indicadorPorAnio)) {
                 //     return response()->json(['error' => 'No se encontraron datos para este indicador'], 404);
                 // }
-                // dump($indicadorPorAnyo);
+                // dump($indicadorPorAnio);
                 
             
-                return response()->json(['parametros' => $parametros, 'indicadorPorAnyo' => $indicadorPorAnyo]);
+                return response()->json(['parametros' => $parametros, 'indicadorPorAnio' => $indicadorPorAnio]);
             }
 
         // (PARAMETROS) Si la petición es para obtener los parámetros de un indicador
             if ($request->has('parametro_id')) {
-                $parametroPorAnyo = $this->parametroAnualSiNo($request->input('parametro_id'), $gestiones);
+                $parametroPorAnio = $this->parametroAnualSiNo($request->input('parametro_id'), $gestiones);
 
-                if ($parametroPorAnyo->count() > 0) {
+                if ($parametroPorAnio->count() > 0) {
                     // Hay resultados SI/No
-                    return response()->json(['parametroPorAnyo' => $parametroPorAnyo]);
+                    return response()->json(['parametroPorAnioSiNo' => $parametroPorAnio]);
                 } else {
                     // Consultar resultados tipo Lista centros penitenciarios
-                    $parametroPorAnyoListaCentrosP = $this->parametroAnualListaCentrosP($request->input('parametro_id'), $gestiones);
-                    return response()->json(['listaCentrosPorAnyo' => $parametroPorAnyoListaCentrosP]);
-                    dump($parametroPorAnyoListaCentrosP->toArray());exit;
+                    $parametroPorAnioListaCentrosP = $this->parametroAnualListaCentrosP($request->input('parametro_id'), $gestiones);
+                    return response()->json(['listaCentrosPorAnio' => $parametroPorAnioListaCentrosP]);
+                    //dump($parametroPorAnioListaCentrosP->toArray());exit;
                     
                     //return response()->json(['message' => 'No se encontraron resultados.']);
                 }
@@ -231,7 +229,7 @@ class IndicadorController extends Controller
                 ->groupBy('IND_categoria')
                 ->orderByRaw('MIN("IND_orden") ASC')
                 ->pluck('IND_categoria');
-            return view('indicadores.reportes', compact('categorias', 'promediosPorAnyo', 'breadcrumbs'));
+            return view('indicadores.reportes', compact('categorias', 'promediosPorAnio', 'breadcrumbs'));
     }
     
     private function indicadorAnualSiNo($indicador, $gestiones) {
@@ -278,7 +276,7 @@ class IndicadorController extends Controller
             return $results;
         } else {  
             // Si  Hay resultados, Generar una colección con valores predeterminados para cada gestión
-            $parametroPorAnyo = collect($gestiones)->mapWithKeys(function ($year) use ($results, $indicadorId) {
+            $parametroPorAnio = collect($gestiones)->mapWithKeys(function ($year) use ($results, $indicadorId) {
                 $response = $results->get($year); // Buscar el resultado del año actual
                 
                 return [
@@ -290,11 +288,11 @@ class IndicadorController extends Controller
                     ]
                 ];
             });
-            return $parametroPorAnyo;
+            return $parametroPorAnio;
         }
         
         
-        // dump($parametroPorAnyo); // Para depuración, puedes removerlo si ya no es necesario
+        // dump($parametroPorAnio); // Para depuración, puedes removerlo si ya no es necesario
         // exit;
     }
     
@@ -314,7 +312,7 @@ class IndicadorController extends Controller
                  ->on('y.hin_gestion', '=', 'historial_indicadores.HIN_gestion');
         })
         ->where('indicadores.IND_id', $indicadorId)
-        ->where('indicadores.IND_tipo_repuesta', 'Lista centros penitenciarios')
+        //->where('indicadores.IND_tipo_repuesta', 'Lista centros penitenciarios')
         ->orderBy('y.hin_gestion')
         ->get();
         return $results;

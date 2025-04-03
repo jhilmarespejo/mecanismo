@@ -206,39 +206,90 @@
 
         });
 
-        var anyoConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
+        var anioConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
 
         // TODO: Mostrar mensaje de SweetAlert, descomentar esto cuando se implemente
         // Swal.fire({
         //     title: 'Actualización de Indicadores',
-        //     text: 'Esta página se prepara para actualizar indicadores de la gestión ' + anyoConsulta,
+        //     text: 'Esta página se prepara para actualizar indicadores de la gestión ' + anioConsulta,
         //     icon: 'info',
         //     confirmButtonText: 'Entendido',
         // });
         
         $('.guardarIndicadores').click(function() {
-                var id = $(this).data('id');
-            var form = $('#formularioIndicadores_' + id);
-            var respuesta = form.find('[name="respuesta"]:checked').val();
-            var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
-            
-            
-            // Validar campos vacíos
-            if (typeof respuesta === "undefined" || respuesta === "") {
-                // mostrar el mensaje de alerta de Bootstrap
-                $('#errorMessage_' + id).removeClass('d-none').fadeIn();
-                // Eliminar el mensaje de error después de 3 segundos (opcional)
-                setTimeout(function() {
-                    $('#errorMessage_' + id).fadeOut();
-                }, 3000);
+            var id = $(this).data('id');
+    var form = $('#formularioIndicadores_' + id);
+    var respuestaInput = form.find('[name="respuesta"]');
+    var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
+    var respuesta;
+    
+    // Función para mostrar mensajes de error
+    function mostrarError(id, mensaje) {
+        var errorDiv = $('#errorMessage_' + id);
+        errorDiv.html(mensaje)
+               .removeClass('d-none')
+               .fadeIn();
+               
+        setTimeout(function() {
+            errorDiv.fadeOut();
+        }, 3000);
+    }
+
+    // Obtener el valor según el tipo de input
+    if (respuestaInput.length > 0) {
+        // Obtener el tipo del primer input encontrado
+        var inputType = respuestaInput.first().attr('type');
+        
+        switch(inputType) {
+            case 'radio':
+                respuesta = form.find('[name="respuesta"]:checked').val();
+                break;
                 
-                return; // Detener el envío del formulario
-            }
+            case 'checkbox':
+                // Para checkbox, recolectar valores múltiples si están marcados
+                var checkboxValues = [];
+                form.find('[name="respuesta"]:checked').each(function() {
+                    checkboxValues.push($(this).val());
+                });
+                respuesta = checkboxValues.length > 0 ? checkboxValues : null;
+                break;
+                
+            case 'number':
+                respuesta = respuestaInput.val();
+                // Validación adicional para números
+                if (respuesta !== "" && !$.isNumeric(respuesta)) {
+                    mostrarError(id, 'Por favor, ingrese un valor numérico válido');
+                    return;
+                }
+                break;
+                
+            case 'text':
+            case 'textarea':
+            default:
+                respuesta = respuestaInput.val();
+                break;
+        }
+    }
+    
+    // Validación general
+    if (inputType === 'checkbox') {
+        // Para checkbox, verificar si al menos uno está marcado
+        if (!respuesta || respuesta.length === 0) {
+            mostrarError(id, 'Por favor, seleccione al menos una opción');
+            return;
+        }
+    } else {
+        // Para otros tipos de inputs
+        if (typeof respuesta === "undefined" || respuesta === "" || respuesta === null) {
+            mostrarError(id, 'Por favor, complete este campo');
+            return;
+        }
+    }
            // Mostrar el overlay 
            $('#overlay').show();
             
             var formData = form.serialize();
-            formData += '&anio_consulta=' + encodeURIComponent(anyoConsulta); // Agrega anio_consulta
+            formData += '&anio_consulta=' + encodeURIComponent(anioConsulta); // Agrega anio_consulta
 
             
             $.ajax({

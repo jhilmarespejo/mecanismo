@@ -41,10 +41,12 @@
                             </h5>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
-                            <a class="btn btn-light" href="/formulario/{{ $formulario->FRM_id }}"><i class="bi bi-eye"></i> Ver formulario</a>
-                            {{-- <button class="btn btn-light">
-                                <i class="bi bi-plus-circle"></i> Asignar
-                            </button> --}}
+                            <a class="btn btn-light" href="{{ route('formulario.verFormularioCreado', $formulario->FRM_id) }}">
+                                <i class="bi bi-eye"></i> Ver formulario
+                            </a>
+                            <a class="btn btn-primary" href="{{ route('formulario.editar', $formulario->FRM_id) }}">
+                                <i class="bi bi-pencil-square"></i> Editar formulario
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -56,7 +58,6 @@
 
 <script>
     $(document).ready(function() {
-
         // Detectar la escritura del usuario en el campo de búsqueda
         $('#titulo').on('keyup', function() {
             var titulo = $(this).val();

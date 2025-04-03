@@ -61,6 +61,11 @@ Route::post('formulario/store', [FormularioController::class, 'store'])->name('f
 Route::get('/formulario/{id}', [FormularioController::class, 'verFormularioCreado'])->name('formulario.verFormularioCreado')->middleware('auth');
 Route::get('formulario/imprimir/{id}', [FormularioController::class, 'imprimirFormulario'])->name('formulario.imprimirFormulario');
 
+// Rutas para editar formulario
+Route::get('/formulario/editar/{id}', [FormularioController::class, 'editar'])->name('formulario.editar');
+Route::put('/formulario/actualizar/{id}', [FormularioController::class, 'actualizar'])->name('formulario.actualizar');
+
+
 
 // Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
 // INDEX

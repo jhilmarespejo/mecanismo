@@ -142,7 +142,7 @@ class FormularioController extends Controller
             dump('panel' );
             return redirect()->route('panel');
         }
-
+        
         $VIS_tipo = $VIS_tipo->VIS_tipo;
         // dump( $grupo_formularios );//exit;
         $colorVisita = CustomController::colorTipoVisita( $VIS_tipo );
@@ -239,14 +239,37 @@ class FormularioController extends Controller
             ->orderBy('r_bpreguntas_formularios.RBF_orden')
             ->orderBy('r_bpreguntas_formularios.RBF_id')
             ->get();
+        
+        // Añadir información para el encabezado
+        $encabezado = [
+            'titulo' => 'Encabezado principal',
+            'logo' => public_path('images/logo.png') // Ruta del logo (asegúrate de que exista)
+        ];
     
-        // Cargar la vista para el PDF
-        $pdf = Pdf::loadView('formulario.formulario-imprimirFormulario', compact('formulario', 'preguntas'))
-                  ->setPaper('a4', 'portrait'); // Formato A4 vertical
+        // Configurar opciones del PDF
+        $options = [
+            'margin-top' => '30mm', // Margen superior para el encabezado
+            'margin-bottom' => '15mm',
+            'margin-left' => '10mm',
+            'margin-right' => '10mm',
+            'footer-font-size' => 8,
+            'footer-left' => 'Página [page] de [topage]',
+            'footer-right' => 'Fecha: ' . date('d/m/Y')
+        ];
+    
+        // Cargar la vista para el PDF con tamaño de papel configurable
+        // Puedes usar 'letter' para carta o 'legal' para oficio
+        $pdf = Pdf::loadView(
+            'formulario.formulario-imprimirFormulario', 
+            compact('formulario', 'preguntas', 'encabezado')
+        )
+        ->setPaper('letter', 'portrait')
+        ->setOptions($options);
     
         // Descargar o visualizar el PDF
-        return $pdf->stream('Formulario_' . $formulario->FRM_id . '.pdf'); // Para visualizar en el navegador
+        return $pdf->stream('Formulario_' . $formulario->FRM_id . '.pdf');
     }
+    
     public function nuevo(){
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -255,8 +278,116 @@ class FormularioController extends Controller
         ];
         return view('formulario.formulario-nuevo', compact('breadcrumbs'));
     }
+
+    // PARA EDICION DE FORMULARIOS
+    public function editar($id)
+    {
+        // Obtener el formulario
+        $formulario = ModFormulario::findOrFail($id);
+        
+        // Obtener las preguntas asociadas al formulario con sus relaciones
+        $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
+            ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+            ->orderBy('r_bpreguntas_formularios.RBF_orden')
+            ->orderBy('r_bpreguntas_formularios.RBF_id')
+            ->get();
+        
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Formularios', 'url' => route('formularios.index')],
+            ['name' => 'Editar Formulario', 'url' => ''],
+        ];
+        
+        return view('formulario.formulario-editar', compact('formulario', 'preguntas', 'breadcrumbs'));
+    }
+        
+
+    public function actualizar(Request $request, $id)
+    {
+        // Iniciar la transacción
+        DB::beginTransaction();
+        
+        try {
+            $datos = $request->all();
+            
+            // Actualizar el formulario
+            $formulario = ModFormulario::findOrFail($id);
+            $formulario->FRM_titulo = $datos['FRM_titulo'];
+            $formulario->FRM_tipo = $datos['FRM_tipo'];
+            $formulario->updatedBy = Auth::id();
+            $formulario->updatedAt = now();
+            $formulario->save();
+            
+            // Si hay preguntas para eliminar
+            if (isset($datos['preguntasEliminar']) && !empty($datos['preguntasEliminar'])) {
+                $preguntasEliminar = json_decode($datos['preguntasEliminar'], true);
+                if (is_array($preguntasEliminar)) {
+                    foreach ($preguntasEliminar as $rbfId) {
+                        // Buscar la relación pregunta-formulario
+                        $relacion = ModPreguntasFormulario::where('RBF_id', $rbfId)->first();
+                        if ($relacion) {
+                            // Eliminar la relación
+                            $relacion->delete();
+                        }
+                    }
+                }
+            }
+            
+            // Procesar preguntas (existentes y nuevas)
+            if (isset($datos['listaPreguntasJSON']) && !empty($datos['listaPreguntasJSON'])) {
+                $preguntas = json_decode($datos['listaPreguntasJSON'], true);
+                
+                if (is_array($preguntas)) {
+                    foreach ($preguntas as $pregunta) {
+                        // 1. Si la pregunta tiene un BCP_id, significa que ya existe - actualizamos su orden
+                        if (isset($pregunta['BCP_id']) && !empty($pregunta['BCP_id'])) {
+                            ModPreguntasFormulario::where('FK_FRM_id', $id)
+                                ->where('FK_BCP_id', $pregunta['BCP_id'])
+                                ->update(['RBF_orden' => $pregunta['RBF_orden']]);
+                        } 
+                        // 2. Si no tiene BCP_id, es una pregunta nueva - la creamos
+                        else {
+                            // Verificar que tengamos todos los datos necesarios
+                            if (isset($pregunta['BCP_pregunta']) && isset($pregunta['BCP_tipoRespuesta'])) {
+                                $nuevaPregunta = ModBancoPregunta::create([
+                                    'BCP_pregunta' => $pregunta['BCP_pregunta'],
+                                    'BCP_tipoRespuesta' => $pregunta['BCP_tipoRespuesta'],
+                                    'BCP_opciones' => $pregunta['BCP_opciones'] ?? null,
+                                    'BCP_complemento' => $pregunta['BCP_complemento'] ?? null,
+                                    'FK_CAT_id' => 1, // Categoría por defecto
+                                ]);
+                                
+                                // Relacionar la pregunta con el formulario
+                                ModPreguntasFormulario::create([
+                                    'FK_FRM_id' => $id,
+                                    'FK_BCP_id' => $nuevaPregunta->BCP_id,
+                                    'RBF_orden' => $pregunta['RBF_orden'] ?? 1
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Confirmar la transacción
+            DB::commit();
+            
+            return redirect()->route('formulario.verFormularioCreado', $id)
+                            ->with('success', 'Formulario actualizado correctamente.');
+        } catch (\Exception $e) {
+            // Revertir cambios en caso de error
+            DB::rollback();
+            
+            // Registrar el error en logs
+            // Log::error('Error al actualizar formulario: ' . $e->getMessage());
+            // Log::error($e->getTraceAsString());
+            
+            return redirect()->route('formulario.editar', $id)
+                            ->with('error', 'Error al actualizar el formulario: ' . $e->getMessage());
+        }
+    }
     
-    
+}
     
     // public function nuevo(Request $request){
     //     // dump($request->all());exit;
@@ -485,7 +616,4 @@ class FormularioController extends Controller
     //     return view('formulario.verFormularioCreado', compact('formulario', 'preguntas'));
     // }
     
-        
-    
-
-}
+//}

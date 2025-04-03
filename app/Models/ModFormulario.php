@@ -23,13 +23,16 @@ class ModFormulario extends Model
     protected static function boot() {
         parent::boot();
         static::creating(function ($model) {
-            // $model->user = Auth::id();
+            $model->createdBy = Auth::id();
             $model->createdAt = now();
         });
         static::updating(function ($model) {
-            // $model->upatedBy = Auth::id();
+            $model->updatedBy = Auth::id();
             $model->updatedAt = now();
         });
-        
+        // static::deleting(function ($model) {
+        //     $model->deletedBy = Auth::id();
+        //     $model->deletedAt = now();
+        // });
     }
 }

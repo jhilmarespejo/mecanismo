@@ -27,8 +27,11 @@
         <div class="card-header text-white bg-primary d-flex justify-content-between align-items-center">
             <h3 class="mb-0"><i class="bi bi-journal-text"></i> {{ $formulario->FRM_titulo }}</h3>
             <!-- Botón para imprimir -->
-            <a href="{{ route('formulario.imprimirFormulario', $formulario->FRM_id) }}" target="_blank" class="btn text-shadow btn-info text-white">
+            <a href="{{ route('formulario.imprimirFormulario', $formulario->FRM_id) }}" target="_blank" class="btn text-shadow btn-info text-white text-shadow">
                 <i class="bi bi-printer"></i> Imprimir en PDF
+            </a>
+            <a href="{{ route('formulario.editar', $formulario->FRM_id) }}" class="btn text-shadow btn-info text-white text-shadow">
+                <i class="bi bi-pencil-square"></i> Editar formulario
             </a>
         </div>
     </div>
