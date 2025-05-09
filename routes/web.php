@@ -159,6 +159,14 @@ Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita
 
 
 
+// La ruta existente para guardar acta de visita
+Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
+
+// Nueva ruta para guardar documentos del establecimiento
+Route::post('visita/guardarDocumento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+
+
+
 // INFORME DE VISITAS
 Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
 

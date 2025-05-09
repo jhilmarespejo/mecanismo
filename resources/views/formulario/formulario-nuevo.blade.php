@@ -137,7 +137,7 @@
     
     $(document).ready(function () {
         
-
+        
         $('#formularioPrincipal').on('submit', function(e) {
             if (!validarFormulario()) {
                 e.preventDefault(); // Detiene el envío del formulario si hay errores
@@ -178,30 +178,32 @@
 
         // Función para agregar Sección o Subsección
         function agregarSeccion(nivel, tipo) {
+            var claseSubseccion = (tipo === 'Subsección') ? 'ms-3' : '';
+            
             var seccionHtml = `
-                <div class="card mb-1 bg-light shadow-sm" id="seccion_${nivel}">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <!-- Input editable para el nombre (aquí va tu "1.1", etc.) -->
-                        <input type="text" class="form-control fw-bold text-primary border-0 bg-light" 
-                            name="pregunta[]" 
-                            value="${nivel}. ${tipo} ..."  
-                            placeholder="Escribe el nombre aquí..." 
-                            style="font-size: 1.2rem;">
+                    <div class="card mb-1 bg-light shadow-sm ${claseSubseccion}" id="seccion_${nivel}">
+                        <div class="card-header d-flex justify-content-between align-items-center ">
+                            <!-- Input editable para el nombre (aquí va tu "1.1", etc.) -->
+                            <input type="text" class="form-control fw-bold text-primary border-0 bg-light py-0 w-75" 
+                                name="pregunta[]" 
+                                value="${nivel}. ${tipo} ..."  
+                                placeholder="Escribe el nombre aquí..." 
+                                style="font-size: 1.2rem;">
+                            
+                            <!-- Botón para eliminar -->
+                            <button type="button" class="btn btn-danger btn-sm eliminar-seccion ms-3" data-id="${nivel}">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </div>
                         
-                        <!-- Botón para eliminar -->
-                        <button type="button" class="btn btn-danger btn-sm eliminar-seccion" data-id="${nivel}">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </button>
+                        <!-- Inputs ocultos -->
+                        <input type="hidden" name="tipoRespuesta[]" value="${tipo}">
+                        <input type="hidden" name="RBF_orden[]" value="${contadorPreguntasNuevas}">
                     </div>
-                    
-                    <!-- Inputs ocultos -->
-                    <input type="hidden" name="tipoRespuesta[]" value="${tipo}">
-                    <!-- AQUI pone lo que sea (nivel), luego se sobreescribe con número correlativo -->
-                    <input type="hidden" name="RBF_orden[]" value="${contadorPreguntasNuevas}">
-                </div>
-            `;
+                `;
+            
             $('#contenedor_pregunta_seleccionada').append(seccionHtml);
-
+            
             // Opcional: forzar la actualización para reenumerar de inmediato
             //actualizarOrdenEnDOM();
         }
@@ -210,12 +212,33 @@
         $(document).on('click', '.eliminar-seccion', function () {
             var id = $(this).data('id').toString();
             var escapedId = id.replace(/\./g, '\\.');
-            
-            if (confirm(`¿Seguro que deseas eliminar la sección ${id}?`)) {
-                $(`#seccion_${escapedId}`).remove();
-            }
-            actualizarContadoresSecciones();
+
+            Swal.fire({
+                title: `¿Estás seguro?`,
+                text: `Vas a eliminar esta sección. Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(`#seccion_${escapedId}`).remove();
+                    actualizarContadoresSecciones();
+                    ///Swal.fire('Eliminado', `esta sección ha sido eliminada.`, 'success');
+                }
+            });
         });
+        // $(document).on('click', '.eliminar-seccion', function () {
+        //     var id = $(this).data('id').toString();
+        //     var escapedId = id.replace(/\./g, '\\.');
+            
+        //     if (confirm(`¿Seguro que deseas eliminar la sección ${id}?`)) {
+        //         $(`#seccion_${escapedId}`).remove();
+        //     }
+        //     actualizarContadoresSecciones();
+        // });
 
         // Función para actualizar contadores después de eliminar
         function actualizarContadoresSecciones() {
@@ -280,7 +303,7 @@
         function agregarNuevaPregunta() {
             contadorPreguntasNuevas++;
             var pregunta = `
-                <div class="card mb-2 ms-4" id="card_pregunta_${contadorPreguntasNuevas}">
+                <div class="card mb-2 ms-5" id="card_pregunta_${contadorPreguntasNuevas}">
                     <div class="card-header d-flex align-items-center">
                         <span class="numero-pregunta me-2 d-flex justify-content-center align-items-center rounded-circle border shadow-sm"
                             name="RBF_orden[]"
@@ -295,7 +318,7 @@
                             name="pregunta[]" 
                         />
                     </div>
-                    <div class="card-body">
+                    <div class="card-body py-0">
                         <!-- Botones de tipo respuesta -->
                         <div class="btn-group d-flex tipo-respuesta">
                             <button type="button" class="col btn btn-outline-secondary btn-tipo-respuesta" id="btn_varias_${contadorPreguntasNuevas}">
@@ -310,14 +333,13 @@
                             <button type="button" class="col btn btn-outline-secondary btn-tipo-respuesta" id="btn_numero_${contadorPreguntasNuevas}">
                                 <i class="bi bi-123"></i> Numérico
                             </button>
+                            <button type="button" class="col btn btn-outline-danger eliminar-pregunta " style=""
+                                    id="eliminar_pregunta_${contadorPreguntasNuevas}" data-id="${contadorPreguntasNuevas}">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
                         </div>
                     </div>
-                    <div class="card-footer text-end">
-                        <button type="button" class="btn btn-warning btn-sm eliminar-pregunta box-shadow" 
-                                id="eliminar_pregunta_${contadorPreguntasNuevas}" data-id="${contadorPreguntasNuevas}">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </button>
-                    </div>
+                    
                 </div>`;
             $('#contenedor_pregunta_seleccionada').append(pregunta);
             reenumerarPreguntasVisuales();
@@ -476,16 +498,39 @@
 
     // Evento para eliminar una pregunta completa
     $(document).on('click', '.eliminar-pregunta', function () {
-        var idPregunta = $(this).data('id');
-        var numeroPregunta = $(`#card_pregunta_${idPregunta} .numero-pregunta`).text().trim();
-        
-        if (confirm(`¿Estás seguro de que deseas eliminar la pregunta número ${numeroPregunta}?`)) {
-            $(`#card_pregunta_${idPregunta}`).fadeOut(300, function () {
-                $(this).remove();
+            var idPregunta = $(this).data('id');
+            var numeroPregunta = $(`#card_pregunta_${idPregunta} .numero-pregunta`).text().trim();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `Vas a eliminar la pregunta número ${numeroPregunta}. Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(`#card_pregunta_${idPregunta}`).fadeOut(300, function () {
+                        $(this).remove();
+                        reenumerarPreguntasVisuales();
+                    });
+                    Swal.fire('Eliminado', `La pregunta número ${numeroPregunta} ha sido eliminada.`, 'success');
+                }
             });
-        }
-        reenumerarPreguntasVisuales();
-    });
+        });
+    // $(document).on('click', '.eliminar-pregunta', function () {
+    //     var idPregunta = $(this).data('id');
+    //     var numeroPregunta = $(`#card_pregunta_${idPregunta} .numero-pregunta`).text().trim();
+        
+    //     if (confirm(`¿Estás seguro de que deseas eliminar la pregunta número ${numeroPregunta}?`)) {
+    //         $(`#card_pregunta_${idPregunta}`).fadeOut(300, function () {
+    //             $(this).remove();
+    //         });
+    //     }
+    //     reenumerarPreguntasVisuales();
+    // });
     function ensamblarDatos() {
         let arrayPreguntas = [];
         

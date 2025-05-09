@@ -33,6 +33,8 @@
             <option value="2024" {{ $anioActual == '2024' ? 'selected' : '' }}>2024</option>
             <option value="2025" {{ $anioActual == '2025' ? 'selected' : '' }}>2025</option>
             <option value="2026" {{ $anioActual == '2026' ? 'selected' : '' }}>2026</option>
+            <option value="2027" {{ $anioActual == '2027' ? 'selected' : '' }}>2027</option>
+            <option value="2028" {{ $anioActual == '2028' ? 'selected' : '' }}>2028</option>
         </select>
     </form>
 </div>
