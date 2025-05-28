@@ -146,6 +146,9 @@ Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'a
     Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
     Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
 
+    //edicion de la ficha
+    
+
 // REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
@@ -158,13 +161,12 @@ Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'i
 Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 
 
-
-// La ruta existente para guardar acta de visita
-Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
-
 // Nueva ruta para guardar documentos del establecimiento
-Route::post('visita/guardarDocumento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+// Route::post('visita/guardarDocumento               ', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+Route::post('visita/guardarDocumentoEstablecimiento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
 
+Route::get('visita/editarFichaEstablecimiento/{id}', [VisitaController::class, 'editarFichaEstablecimiento'])->name('visita.editarFichaEstablecimiento')->middleware('auth');
+Route::put('visita/actualizarFichaEstablecimiento/{id}', [VisitaController::class, 'actualizarFichaEstablecimiento'])->name('visita.actualizarFichaEstablecimiento')->middleware('auth');
 
 
 // INFORME DE VISITAS

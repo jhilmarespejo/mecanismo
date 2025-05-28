@@ -73,6 +73,73 @@
         border-radius: 50%;
         background-color: #4b6cb7;
     }
+
+    /* Estilos para el modal de edición */
+    .section-header {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin: 20px 0 15px 0;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 1.1em;
+    }
+
+    .section-header:first-of-type {
+        margin-top: 0;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 6px;
+        font-size: 0.9em;
+    }
+
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .form-control:focus {
+        border-color: #4b6cb7;
+        box-shadow: 0 0 0 0.2rem rgba(75, 108, 183, 0.25);
+    }
+
+    .readonly-info {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        padding: 10px 12px;
+        border-radius: 6px;
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.9em;
+    }
+
+    .required {
+        color: #dc3545;
+    }
+
+    /* Estilo para errores de validación */
+    .is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.8em;
+        color: #dc3545;
+    }
 </style>
 
 <div class="container mt-3 p-0 bg-white">
@@ -86,6 +153,7 @@
                     <h3 class="mb-0">FICHA DEL ESTABLECIMIENTO</h3>
                 </button>
             </h2>
+            {{-- @dump($establecimiento) --}}
             <div id="collapseFicha" class="accordion-collapse collapse show" 
                  aria-labelledby="headingFicha" data-bs-parent="#accordionEstablecimiento">
                 <div class="accordion-body p-0">
@@ -107,12 +175,12 @@
                                     
                                     <div class="info-row">
                                         <span class="info-label">POBLACIÓN A LA QUE ATIENDE:</span>
-                                        <span>{{ $establecimiento->EINF_poblacion_atendida ?? 'No registrado' }}</span>
+                                        <span>{{ isset($establecimiento->EINF_poblacion_atendida) ? $establecimiento->EINF_poblacion_atendida : 'No registrado' }}</span>
                                     </div>
                                     
                                     <div class="info-row">
                                         <span class="info-label">CANTIDAD POBLACIÓN ACTUAL:</span>
-                                        <span>{{ $establecimiento->EINF_cantidad_actual_internos ?? 'No registrado' }}</span>
+                                        <span>{{ isset($establecimiento->EINF_cantidad_actual_internos) ? $establecimiento->EINF_cantidad_actual_internos : 'No registrado' }}</span>
                                     </div>
                                     
                                     <div class="info-row">
@@ -133,15 +201,15 @@
                                     <div class="info-row">
                                         <span class="info-label">NOMBRE DEL RESPONSABLE DEL CENTRO:</span>
                                         <span>{{ $responsable->EPER_nombre_responsable ?? 'No registrado' }}</span>
-                                        @if($responsable->EPER_grado_profesion)
+                                        @if(isset($responsable->EPER_grado_profesion) && $responsable->EPER_grado_profesion)
                                             <small class="text-muted d-block">{{ $responsable->EPER_grado_profesion }}</small>
                                         @endif
-                                        @if($responsable->EPER_telefono || $responsable->EPER_email)
+                                        @if((isset($responsable->EPER_telefono) && $responsable->EPER_telefono) || (isset($responsable->EPER_email) && $responsable->EPER_email))
                                             <small class="d-block">
-                                                @if($responsable->EPER_telefono)
+                                                @if(isset($responsable->EPER_telefono) && $responsable->EPER_telefono)
                                                     <i class="bi bi-telephone"></i> {{ $responsable->EPER_telefono }}
                                                 @endif
-                                                @if($responsable->EPER_email)
+                                                @if(isset($responsable->EPER_email) && $responsable->EPER_email)
                                                     <i class="bi bi-envelope ms-2"></i> {{ $responsable->EPER_email }}
                                                 @endif
                                             </small>
@@ -156,17 +224,17 @@
                                     
                                     <div class="info-row">
                                         <span class="info-label">SUPERFICIE DEL TERRENO:</span>
-                                        <span>{{ $establecimiento->EINF_superficie_terreno ? $establecimiento->EINF_superficie_terreno . ' m²' : 'No registrado' }}</span>
+                                        <span>{{ (isset($establecimiento->EINF_superficie_terreno) && $establecimiento->EINF_superficie_terreno) ? $establecimiento->EINF_superficie_terreno . ' m²' : 'No registrado' }}</span>
                                     </div>
                                     
                                     <div class="info-row">
                                         <span class="info-label">SUPERFICIE CONSTRUIDA:</span>
-                                        <span>{{ $establecimiento->EINF_superficie_construida ? $establecimiento->EINF_superficie_construida . ' m²' : 'No registrado' }}</span>
+                                        <span>{{ (isset($establecimiento->EINF_superficie_construida) && $establecimiento->EINF_superficie_construida) ? $establecimiento->EINF_superficie_construida . ' m²' : 'No registrado' }}</span>
                                     </div>
                                     
                                     <div class="info-row">
                                         <span class="info-label">DERECHO PROPIETARIO:</span>
-                                        <span>{{ $establecimiento->EINF_derecho_propietario ?? 'No registrado' }}</span>
+                                        <span>{{ isset($establecimiento->EINF_derecho_propietario) ? $establecimiento->EINF_derecho_propietario : 'No registrado' }}</span>
                                     </div>
                                     
                                     <div class="info-row">
@@ -176,7 +244,7 @@
                                     
                                     <div class="info-row">
                                         <span class="info-label">GESTIÓN:</span>
-                                        <span>{{ $establecimiento->EINF_gestion ?? date('Y') }}</span>
+                                        <span>{{ isset($establecimiento->EINF_gestion) ? $establecimiento->EINF_gestion : date('Y') }}</span>
                                     </div>
                                 </div>
                                 
@@ -205,7 +273,7 @@
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('reglamento')">
+                                                                onclick="prepararModal('reglamento')">  
                                                             <i class="bi bi-upload"></i> Subir documento
                                                         </button>
                                                     @endif
@@ -216,15 +284,12 @@
                                     
                                     <!-- Fotografía de la fachada -->
                                     <div class="documento-card">
-                                        
                                         <div class="row">
                                             <div class="col-3 text-center">
                                                 <i class="bi bi-image documento-icon"></i>
                                             </div>
                                             <div class="col-9">
                                                 <h5>Fotografía de la fachada</h5>
-                                                
-                                                
                                                 @if(isset($documentos['fachada']))
                                                     <button type="button" class="btn btn-sm btn-primary" 
                                                             data-bs-toggle="modal" data-bs-target="#modalVerFachada">
@@ -238,7 +303,7 @@
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('fachada')">
+                                                                onclick="prepararModal('fachada')" > 
                                                             <i class="bi bi-upload"></i> Subir imagen
                                                         </button>
                                                     @endif
@@ -271,7 +336,7 @@
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('licencia')">
+                                                                onclick="prepararModal('licencia')"> 
                                                             <i class="bi bi-upload"></i> Subir documento
                                                         </button>
                                                     @endif
@@ -281,12 +346,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="d-flex justify-content-center mb-3">
+                           <div class="d-flex justify-content-center mb-3">
                                 @if(Auth::user()->rol == 'Administrador')
-                                    <a href="{{ route('establecimientos.infoMostrar', $establecimiento->EST_id) }}" 
-                                       class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> Modificar ésta información
-                                    </a>
+                                    <button type="button" class="btn btn-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditarFichaEstablecimiento"
+                                        onclick="cargarDatosModal()">
+                                    <i class="bi bi-pencil-square"></i> Modificar ésta información
+                                </button>
                                 @endif
                             </div>
                         @else
@@ -298,7 +365,6 @@
                 </div>
             </div>
         </div>
-        
         <!-- Segundo acordeón: Historial de Visitas -->
         <div class="accordion-item">
             <h2 class="accordion-header" id="headingHistorial">
@@ -313,26 +379,29 @@
                     {{-- Se incluye una vista para agregar una nueva visita --}}
                     @if(Auth::user()->rol == 'Administrador' && isset($establecimiento))
                         <div class="text-center mb-4">
-                            @include('visita.visita-nuevo', ['EST_id' => $establecimiento->EST_id, 'EST_nombre' => $establecimiento->EST_nombre])
+                            @include('visita.visita-nuevo', ['EST_id' => $establecimiento->EST_id ?? '', 'EST_nombre' => $establecimiento->EST_nombre ?? ''])
                         </div>
                     @endif
                     
-                    @if(count($visitas) > 0)
+                    @if(isset($visitas) && count($visitas) > 0)
                         @foreach($visitas as $key => $visita)
-                            @if($visita->VIS_id)
+                            @if(isset($visita->VIS_id) && $visita->VIS_id)
                                 @php 
                                     $VIS_id = $visita->VIS_id;
                                     // Bloque para definir los colores por tipo de visita
-                                    if($visita->VIS_tipo == 'Visita en profundidad'){
-                                        $color = 'text-white bg-success';
-                                    } elseif($visita->VIS_tipo == 'Visita Temática') {
-                                        $color = 'text-white bg-danger';
-                                    } elseif($visita->VIS_tipo == 'Visita de seguimiento'){
-                                        $color = 'text-white bg-primary';
-                                    } elseif($visita->VIS_tipo == 'Visita reactiva'){
-                                        $color = 'text-white bg-info';
-                                    } elseif($visita->VIS_tipo == 'Visita Ad hoc'){
-                                        $color = 'text-white bg-warning';
+                                    $color = 'text-white bg-secondary'; // Color por defecto
+                                    if(isset($visita->VIS_tipo)) {
+                                        if($visita->VIS_tipo == 'Visita en profundidad'){
+                                            $color = 'text-white bg-success';
+                                        } elseif($visita->VIS_tipo == 'Visita Temática') {
+                                            $color = 'text-white bg-danger';
+                                        } elseif($visita->VIS_tipo == 'Visita de seguimiento'){
+                                            $color = 'text-white bg-primary';
+                                        } elseif($visita->VIS_tipo == 'Visita reactiva'){
+                                            $color = 'text-white bg-info';
+                                        } elseif($visita->VIS_tipo == 'Visita Ad hoc'){
+                                            $color = 'text-white bg-warning';
+                                        }
                                     }
                                 @endphp
                                 <!-- START timeline item -->
@@ -345,14 +414,14 @@
                                     </div>
                                     <div class="col-5 align-self-center text-end">
                                         <span class="text-shadow text-center alert {{$color}}">
-                                            {{ \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') }}
+                                            {{ isset($visita->VIS_fechas) ? \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') : 'Sin fecha' }}
                                         </span>
                                     </div>
                                     @endmobile
                                     @desktop
                                     <div class="col align-self-center text-end">
                                         <span class="text-end alert {{$color}}">
-                                            {{ \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') }}
+                                            {{ isset($visita->VIS_fechas) ? \Carbon\Carbon::parse($visita->VIS_fechas)->format('d-m-Y') : 'Sin fecha' }}
                                         </span>
                                     </div>
                                     <!-- timeline item center dot -->
@@ -375,7 +444,7 @@
                                             <div class="card-body {{$color}}">
                                                 <h4 class="card-title text-center text-shadow">
                                                     <b class="d-xss-none">{{ count($visitas)-$key }}. </b>
-                                                    {{$visita->VIS_tipo}}: {{ $visita->VIS_titulo}}
+                                                    {{ $visita->VIS_tipo ?? 'Visita' }}: {{ $visita->VIS_titulo ?? 'Sin título' }}
                                                 </h4>
                                                 <p class="card-text">
                                                     <ul class="list-group">
@@ -419,13 +488,13 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalSubirDocumentoLabel">Subir documento</h5>
+                <h5 class="modal-title" id="modalSubirDocumentoLabel">Subir documento </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('visita.guardarDocumento') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
-                    <input type="hidden" name="EST_id" value="{{ $establecimiento->EST_id }}">
+                    <input type="hidden" name="EST_id" value="{{ $establecimiento->EST_id ?? '' }}">
                     <input type="hidden" name="tipo_documento" id="tipo_documento">
                     
                     <div class="mb-3">
@@ -456,9 +525,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
-                @if($documentos['reglamento']->ARC_formatoArchivo == 'image')
+                @if(isset($documentos['reglamento']->ARC_formatoArchivo) && $documentos['reglamento']->ARC_formatoArchivo == 'image')
                     <img src="{{ asset($documentos['reglamento']->ARC_ruta) }}" class="img-fluid" alt="Reglamento del centro">
-                @elseif($documentos['reglamento']->ARC_extension == 'pdf')
+                @elseif(isset($documentos['reglamento']->ARC_extension) && $documentos['reglamento']->ARC_extension == 'pdf')
                     <div class="ratio ratio-16x9">
                         <iframe src="{{ asset($documentos['reglamento']->ARC_ruta) }}" allowfullscreen></iframe>
                     </div>
@@ -470,9 +539,11 @@
                 @endif
             </div>
             <div class="modal-footer">
-                <a href="{{ asset($documentos['reglamento']->ARC_ruta) }}" download class="btn btn-primary">
-                    <i class="bi bi-download"></i> Descargar
-                </a>
+                @if(isset($documentos['reglamento']->ARC_ruta))
+                    <a href="{{ asset($documentos['reglamento']->ARC_ruta) }}" download class="btn btn-primary">
+                        <i class="bi bi-download"></i> Descargar
+                    </a>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -489,9 +560,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
-                @if($documentos['fachada']->ARC_formatoArchivo == 'image')
+                @if(isset($documentos['fachada']->ARC_formatoArchivo) && $documentos['fachada']->ARC_formatoArchivo == 'image')
                     <img src="{{ asset($documentos['fachada']->ARC_ruta) }}" class="img-fluid" alt="Fachada del establecimiento">
-                @elseif($documentos['fachada']->ARC_extension == 'pdf')
+                @elseif(isset($documentos['fachada']->ARC_extension) && $documentos['fachada']->ARC_extension == 'pdf')
                     <div class="ratio ratio-16x9">
                         <iframe src="{{ asset($documentos['fachada']->ARC_ruta) }}" allowfullscreen></iframe>
                     </div>
@@ -503,9 +574,11 @@
                 @endif
             </div>
             <div class="modal-footer">
-                <a href="{{ asset($documentos['fachada']->ARC_ruta) }}" download class="btn btn-primary">
-                    <i class="bi bi-download"></i> Descargar
-                </a>
+                @if(isset($documentos['fachada']->ARC_ruta))
+                    <a href="{{ asset($documentos['fachada']->ARC_ruta) }}" download class="btn btn-primary">
+                        <i class="bi bi-download"></i> Descargar
+                    </a>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -522,9 +595,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-0">
-                @if($documentos['licencia']->ARC_formatoArchivo == 'image')
+                @if(isset($documentos['licencia']->ARC_formatoArchivo) && $documentos['licencia']->ARC_formatoArchivo == 'image')
                     <img src="{{ asset($documentos['licencia']->ARC_ruta) }}" class="img-fluid" alt="Licencia de funcionamiento">
-                @elseif($documentos['licencia']->ARC_extension == 'pdf')
+                @elseif(isset($documentos['licencia']->ARC_extension) && $documentos['licencia']->ARC_extension == 'pdf')
                     <div class="ratio ratio-16x9">
                         <iframe src="{{ asset($documentos['licencia']->ARC_ruta) }}" allowfullscreen></iframe>
                     </div>
@@ -536,9 +609,11 @@
                 @endif
             </div>
             <div class="modal-footer">
-                <a href="{{ asset($documentos['licencia']->ARC_ruta) }}" download class="btn btn-primary">
-                    <i class="bi bi-download"></i> Descargar
-                </a>
+                @if(isset($documentos['licencia']->ARC_ruta))
+                    <a href="{{ asset($documentos['licencia']->ARC_ruta) }}" download class="btn btn-primary">
+                        <i class="bi bi-download"></i> Descargar
+                    </a>
+                @endif
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -546,28 +621,296 @@
 </div>
 @endif
 
+{{-- Modal para editar la ficha del establecimiento --}}
+@if(Auth::user()->rol == 'Administrador' && isset($establecimiento))
+<div class="modal fade" id="modalEditarFichaEstablecimiento" tabindex="-1" aria-labelledby="modalEditarEstablecimientoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            @include('visita.editar-ficha-establecimiento')
+            
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="guardarEstablecimiento()">
+                    <i class="bi bi-check-lg me-2"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <script>
-    function prepararModal(tipo) {
-        document.getElementById('tipo_documento').value = tipo;
-        
-        // Actualizar el título del modal según el tipo de documento
-        let titulo = 'Subir documento';
-        let label = 'Seleccione el archivo';
-        
-        if (tipo === 'reglamento') {
-            titulo = 'Subir reglamento del centro';
-            label = 'Seleccione el archivo del reglamento';
-        } else if (tipo === 'licencia') {
-            titulo = 'Subir licencia de funcionamiento';
-            label = 'Seleccione el archivo de la licencia';
-        } else if (tipo === 'fachada') {
-            titulo = 'Subir fotografía de la fachada';
-            label = 'Seleccione la imagen de la fachada';
-        }
-        
-        document.getElementById('modalSubirDocumentoLabel').textContent = titulo;
-        document.getElementById('documento_label').textContent = label;
+// Función para guardar el establecimiento
+function guardarEstablecimiento() {
+    const form = document.getElementById('formEditarEstablecimiento');
+    if (!form) {
+        console.error('Formulario no encontrado');
+        return;
     }
+    
+    const formData = new FormData(form);
+    
+    // Agregar el token CSRF manualmente
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfToken) {
+        console.error('Token CSRF no encontrado');
+        return;
+    }
+    
+    // Mostrar loading
+    Swal.fire({
+        title: 'Guardando cambios...',
+        text: 'Por favor espere',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading()
+        }
+    });
+    
+    // Enviar formulario via AJAX
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken.content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'La información se actualizó correctamente',
+                confirmButtonColor: '#28a745'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cerrar modal y recargar página
+                    const modalElement = document.getElementById('modalEditarFichaEstablecimiento');
+                    if (modalElement) {
+                        const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                        modal.hide();
+                    }
+                    location.reload();
+                }
+            });
+        } else {
+            throw new Error(data.message || 'Error desconocido');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        
+        // Verificar si hay errores de validación
+        if (error.errors) {
+            let errorMessage = 'Por favor corrija los siguientes errores:\n';
+            Object.keys(error.errors).forEach(field => {
+                const fieldErrors = error.errors[field];
+                if (Array.isArray(fieldErrors)) {
+                    fieldErrors.forEach(errorText => {
+                        errorMessage += `• ${errorText}\n`;
+                    });
+                }
+                
+                // Marcar campo como inválido
+                const inputElement = document.getElementById(field);
+                const errorElement = document.getElementById(`error-${field}`);
+                
+                if (inputElement) {
+                    inputElement.classList.add('is-invalid');
+                }
+                
+                if (errorElement && Array.isArray(fieldErrors)) {
+                    errorElement.textContent = fieldErrors[0];
+                    errorElement.style.display = 'block';
+                }
+            });
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Errores de Validación',
+                text: errorMessage,
+                confirmButtonColor: '#dc3545'
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Ocurrió un error inesperado',
+                confirmButtonColor: '#dc3545'
+            });
+        }
+    });
+}
+
+function prepararModal(tipoDocumento) {
+    const tipoDocumentoElement = document.getElementById('tipo_documento');
+    const modalTitle = document.getElementById('modalSubirDocumentoLabel');
+    const documentoLabel = document.getElementById('documento_label');
+    const documentoInput = document.getElementById('documento');
+    
+    if (!tipoDocumentoElement || !modalTitle || !documentoLabel || !documentoInput) {
+        console.error('Elementos del modal no encontrados');
+        return;
+    }
+    
+    // Establecer el tipo de documento en el campo oculto
+    tipoDocumentoElement.value = tipoDocumento;
+    
+    // Cambiar el título del modal según el tipo
+    switch(tipoDocumento) {
+        case 'reglamento':
+            modalTitle.textContent = 'Subir Reglamento del Centro';
+            documentoLabel.textContent = 'Seleccione el archivo del reglamento (PDF recomendado)';
+            break;
+        case 'licencia':
+            modalTitle.textContent = 'Subir Licencia de Funcionamiento';
+            documentoLabel.textContent = 'Seleccione el archivo de la licencia (PDF o imagen)';
+            break;
+        case 'fachada':
+            modalTitle.textContent = 'Subir Fotografía de la Fachada';
+            documentoLabel.textContent = 'Seleccione la imagen de la fachada (JPG, PNG)';
+            break;
+    }
+    
+    // Limpiar el input file
+    documentoInput.value = '';
+}
+
+// Validación del formulario antes de enviar
+document.addEventListener('DOMContentLoaded', function() {
+    const formSubirDocumento = document.querySelector('#modalSubirDocumento form');
+    
+    if (formSubirDocumento) {
+        formSubirDocumento.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const documento = document.getElementById('documento');
+            const tipoDocumento = document.getElementById('tipo_documento');
+            
+            if (!documento || !tipoDocumento) {
+                console.error('Elementos del formulario no encontrados');
+                return;
+            }
+            
+            if (!documento.files.length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Archivo requerido',
+                    text: 'Por favor seleccione un archivo para subir',
+                    confirmButtonColor: '#4b6cb7'
+                });
+                return;
+            }
+            
+            // Validar tamaño del archivo (20MB máximo)
+            const maxSize = 20 * 1024 * 1024; // 20MB en bytes
+            if (documento.files[0].size > maxSize) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo muy grande',
+                    text: 'El archivo no debe superar los 20MB',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+            
+            // Validar tipo de archivo
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(documento.files[0].type)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Tipo de archivo no permitido',
+                    text: 'Solo se permiten archivos PDF, JPG, JPEG y PNG',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+            
+            // Mostrar loading
+            Swal.fire({
+                title: 'Subiendo documento...',
+                text: 'Por favor espere',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                }
+            });
+            
+            // Enviar el formulario
+            this.submit();
+        });
+    }
+
+    // Limpiar errores al escribir en los campos del modal de edición
+    const modalEditarElement = document.getElementById('modalEditarFichaEstablecimiento');
+    if (modalEditarElement) {
+        modalEditarElement.addEventListener('shown.bs.modal', function() {
+            const inputs = document.querySelectorAll('#formEditarEstablecimiento .form-control');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                    const errorElement = document.getElementById(`error-${this.id}`);
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                });
+                
+                // Efectos visuales
+                input.addEventListener('focus', function() {
+                    this.style.transform = 'scale(1.02)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    }
+    
+    // Mostrar mensajes de sesión con SweetAlert
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#28a745'
+        });
+    @endif
+    
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#dc3545'
+        });
+    @endif
+});
+
+function cargarDatosModal() {
+    // Limpiar errores previos cuando se abre el modal
+    const errorElements = document.querySelectorAll('.invalid-feedback');
+    const inputElements = document.querySelectorAll('.form-control');
+    
+    errorElements.forEach(el => {
+        if (el) el.style.display = 'none';
+    });
+    
+    inputElements.forEach(el => {
+        if (el) el.classList.remove('is-invalid');
+    });
+}
 </script>
 
 @endsection

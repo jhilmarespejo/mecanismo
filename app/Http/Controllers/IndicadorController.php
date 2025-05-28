@@ -38,6 +38,7 @@ class IndicadorController extends Controller
                 ->where('historial_indicadores.HIN_gestion', $gestion);
         })
         ->where('indicadores.IND_estado', '=', '1')
+        ->orderBy('indicadores.IND_orden', 'asc')
         ->orderBy('indicadores.IND_id', 'asc')
         ->get()
         ->toArray();
@@ -70,10 +71,11 @@ class IndicadorController extends Controller
             'historial_indicadores.HIN_informacion_complementaria'
         )
         ->leftJoin('historial_indicadores', function ($join) use ($gestion) { // Pasar $gestion aquí
-            $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
+            $join->on('indicadores.IND_id', 'historial_indicadores.FK_IND_id')
                 ->where('historial_indicadores.HIN_gestion', $gestion);
         })
-        ->where('indicadores.IND_estado', '=', '1')
+        ->where('indicadores.IND_estado', '1')
+        ->orderBy('indicadores.IND_orden', 'asc')
         ->orderBy('indicadores.IND_id', 'asc')
         ->get()
         ->toArray();

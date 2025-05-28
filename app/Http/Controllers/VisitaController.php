@@ -56,8 +56,8 @@ class VisitaController extends Controller{
 public function historial($id){
     $anioActual = date('Y'); // Obtiene el año actual
     
-    // Obtener información del establecimiento
-    $establecimiento = ModEstablecimiento::select(
+    // Obtener información básica del establecimiento (siempre existe)
+    $establecimientoBase = ModEstablecimiento::select(
         'establecimientos.EST_id',
         'establecimientos.EST_nombre',
         'establecimientos.EST_departamento',
@@ -66,39 +66,102 @@ public function historial($id){
         'establecimientos.EST_telefono_contacto',
         'establecimientos.EST_capacidad_creacion',
         'establecimientos.EST_anyo_funcionamiento',
-        'tipo_establecimientos.TES_tipo',
-        'establecimientos_info.EINF_poblacion_atendida',
-        'establecimientos_info.EINF_cantidad_actual_internos',
-        'establecimientos_info.EINF_superficie_terreno',
-        'establecimientos_info.EINF_superficie_construida',
-        'establecimientos_info.EINF_derecho_propietario',
-        'establecimientos_info.EINF_gestion'
+        'tipo_establecimientos.TES_tipo'
     )
     ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
-    ->leftJoin('establecimientos_info', function($join) use ($id) {
-        $join->on('establecimientos_info.FK_EST_id', '=', 'establecimientos.EST_id');
-    })
     ->where('establecimientos.EST_id', $id)
     ->first();
     
-    // Crear un objeto stdClass si no hay establecimiento
-    if (!$establecimiento) {
-        $establecimiento = new \stdClass();
+    // Si no existe el establecimiento, retornar error o redirigir
+    if (!$establecimientoBase) {
+        abort(404, 'Establecimiento no encontrado');
     }
     
-    // Establecer explícitamente el año actual para la gestión
-    $establecimiento->EINF_gestion = $anioActual;
+    // Obtener información adicional del establecimiento para el año actual
+    $establecimientoInfo = ModEstablecimientoInfo::select(
+        'EINF_poblacion_atendida',
+        'EINF_cantidad_actual_internos',
+        'EINF_superficie_terreno',
+        'EINF_superficie_construida',
+        'EINF_derecho_propietario',
+        'EINF_gestion'
+    )
+    ->where('FK_EST_id', $id)
+    ->where('EINF_gestion', $anioActual)
+    ->first();
     
-    // Obtener el responsable del establecimiento
+    // Si no hay info del año actual, buscar la más reciente
+    if (!$establecimientoInfo) {
+        $establecimientoInfo = ModEstablecimientoInfo::select(
+            'EINF_poblacion_atendida',
+            'EINF_cantidad_actual_internos',
+            'EINF_superficie_terreno',
+            'EINF_superficie_construida',
+            'EINF_derecho_propietario',
+            'EINF_gestion'
+        )
+        ->where('FK_EST_id', $id)
+        ->orderByDesc('EINF_gestion')
+        ->first();
+    }
+    
+    // CREAR EL OBJETO ESTABLECIMIENTO DE FORMA CORRECTA
+    $establecimiento = new \stdClass();
+    
+    // Asignar datos base (siempre existen)
+    $establecimiento->EST_id = $establecimientoBase->EST_id;
+    $establecimiento->EST_nombre = $establecimientoBase->EST_nombre;
+    $establecimiento->EST_departamento = $establecimientoBase->EST_departamento;
+    $establecimiento->EST_municipio = $establecimientoBase->EST_municipio;
+    $establecimiento->EST_direccion = $establecimientoBase->EST_direccion;
+    $establecimiento->EST_telefono_contacto = $establecimientoBase->EST_telefono_contacto;
+    $establecimiento->EST_capacidad_creacion = $establecimientoBase->EST_capacidad_creacion;
+    $establecimiento->EST_anyo_funcionamiento = $establecimientoBase->EST_anyo_funcionamiento;
+    $establecimiento->TES_tipo = $establecimientoBase->TES_tipo;
+    
+    // Asignar datos de información adicional (pueden ser null)
+    if ($establecimientoInfo) {
+        $establecimiento->EINF_poblacion_atendida = $establecimientoInfo->EINF_poblacion_atendida;
+        $establecimiento->EINF_cantidad_actual_internos = $establecimientoInfo->EINF_cantidad_actual_internos;
+        $establecimiento->EINF_superficie_terreno = $establecimientoInfo->EINF_superficie_terreno;
+        $establecimiento->EINF_superficie_construida = $establecimientoInfo->EINF_superficie_construida;
+        $establecimiento->EINF_derecho_propietario = $establecimientoInfo->EINF_derecho_propietario;
+        $establecimiento->EINF_gestion = $establecimientoInfo->EINF_gestion;
+    } else {
+        // Si no hay información adicional, asignar null
+        $establecimiento->EINF_poblacion_atendida = null;
+        $establecimiento->EINF_cantidad_actual_internos = null;
+        $establecimiento->EINF_superficie_terreno = null;
+        $establecimiento->EINF_superficie_construida = null;
+        $establecimiento->EINF_derecho_propietario = null;
+        $establecimiento->EINF_gestion = $anioActual; // Gestión actual por defecto
+    }
+    
+    // Obtener el responsable del establecimiento para el año actual
     $responsable = ModEstablecimientoPersonal::select(
         'EPER_nombre_responsable',
         'EPER_grado_profesion',
         'EPER_telefono',
-        'EPER_email'
+        'EPER_email',
+        'EPER_gestion'
     )
     ->where('FK_EST_id', $id)
-    ->orderByDesc('EPER_id')
+    ->where('EPER_gestion', $anioActual)
     ->first();
+    
+    // Si no hay responsable del año actual, buscar el más reciente
+    if (!$responsable) {
+        $responsable = ModEstablecimientoPersonal::select(
+            'EPER_nombre_responsable',
+            'EPER_grado_profesion',
+            'EPER_telefono',
+            'EPER_email',
+            'EPER_gestion'
+        )
+        ->where('FK_EST_id', $id)
+        ->orderByDesc('EPER_gestion')
+        ->first();
+    }
     
     // Obtener documentos del establecimiento (reglamento, licencia, foto fachada)
     $documentos = ModArchivo::select(
@@ -114,7 +177,7 @@ public function historial($id){
     ->get()
     ->keyBy('ARC_origen');
     
-    // Obtener visitas
+    // Obtener visitas 
     $visitas = ModVisita::from('visitas as v')
     ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo', 'e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
     ->rightJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
@@ -129,19 +192,15 @@ public function historial($id){
         session()->put('EST_nombre', $visitas->first()->EST_nombre);
         session()->put('TES_tipo', $visitas->first()->TES_tipo);
     } else {
-        // Obtener los datos del establecimiento directamente si no hay visitas
-        $estData = ModEstablecimiento::select('establecimientos.EST_id', 'establecimientos.EST_nombre', 'tipo_establecimientos.TES_tipo')
-            ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
-            ->where('establecimientos.EST_id', $id)
-            ->first();
-        
-        if ($estData) {
-            session()->put('EST_id', $estData->EST_id);
-            session()->put('EST_nombre', $estData->EST_nombre);
-            session()->put('TES_tipo', $estData->TES_tipo);
-        }
+        // Usar los datos del establecimiento base que ya tenemos
+        session()->put('EST_id', $establecimientoBase->EST_id);
+        session()->put('EST_nombre', $establecimientoBase->EST_nombre);
+        session()->put('TES_tipo', $establecimientoBase->TES_tipo);
     }
-
+    
+    // DEBUG: Temporalmente para verificar datos
+    // dd($establecimiento, $responsable);
+    
     return view('visita.visita-historial', compact('visitas', 'establecimiento', 'responsable', 'documentos', 'anioActual'));
 }
 
@@ -208,48 +267,87 @@ public function historial($id){
             'documento.max' => 'El archivo debe ser menor a 20Mb',
             'documento.mimes' => 'Puede subir archivos de imagen o PDF',
             'tipo_documento.required' => 'El tipo de documento es requerido',
-            'tipo_documento.in' => 'Tipo de documento no válido'
+            'tipo_documento.in' => 'Tipo de documento no válido',
+            'EST_id.required' => 'El establecimiento es requerido',
+            'EST_id.exists' => 'El establecimiento no existe'
         ]);
 
         DB::beginTransaction();
         try {
             $tipoArchivo = explode("/", $request->documento->getClientMimeType());
             $descripcion = '';
+            $carpeta = '';
             
             switch ($request->tipo_documento) {
                 case 'reglamento':
                     $descripcion = 'Reglamento del centro';
-                    $ruta = '/uploads/establecimientos/reglamentos';
+                    $carpeta = 'reglamentos';
                     break;
                 case 'licencia':
                     $descripcion = 'Licencia de funcionamiento';
-                    $ruta = '/uploads/establecimientos/licencias';
+                    $carpeta = 'licencias';
                     break;
                 case 'fachada':
                     $descripcion = 'Fotografía de fachada';
-                    $ruta = '/uploads/establecimientos/fachadas';
+                    $carpeta = 'fachadas';
                     break;
             }
             
+            // Verificar si ya existe un documento de este tipo para el establecimiento
+            $documentoExistente = ModArchivo::where('FK_EST_id', $request->EST_id)
+                ->where('ARC_origen', $request->tipo_documento)
+                ->first();
+                
+            if ($documentoExistente) {
+                // Eliminar el archivo anterior del sistema de archivos
+                if (Storage::exists($documentoExistente->ARC_ruta)) {
+                    Storage::delete($documentoExistente->ARC_ruta);
+                }
+                // También eliminar del public path si existe
+                $publicPath = public_path($documentoExistente->ARC_ruta);
+                if (file_exists($publicPath)) {
+                    unlink($publicPath);
+                }
+                // Eliminar registro de la base de datos
+                $documentoExistente->delete();
+            }
+            
+            // Generar nombre único para el archivo
+            $nombreArchivo = time() . '_' . $request->tipo_documento . '.' . $request->documento->extension();
+            
+            // Definir la ruta completa
+            $rutaCompleta = 'uploads/establecimientos/' . $carpeta . '/' . $nombreArchivo;
+            
             // Guardar datos del archivo en la tabla archivos
-            ModArchivo::create([
+            $archivo = ModArchivo::create([
                 'ARC_NombreOriginal' => $request->documento->getClientOriginalName(),
-                'ARC_ruta' => $request->documento->store($ruta),
+                'ARC_ruta' => $rutaCompleta,
                 'ARC_extension' => $request->documento->extension(),
                 'ARC_tamanio' => $request->documento->getSize(),
                 'ARC_descripcion' => $descripcion,
                 'ARC_formatoArchivo' => $tipoArchivo[0],
                 'FK_EST_id' => $request->EST_id,
-                'ARC_origen' => $request->tipo_documento
+                'ARC_origen' => $request->tipo_documento,
+                'estado' => 1
             ]);
 
+            // Crear el directorio si no existe
+            $directorio = public_path('uploads/establecimientos/' . $carpeta);
+            if (!file_exists($directorio)) {
+                mkdir($directorio, 0755, true);
+            }
+
+            // Guardar el archivo
             if($tipoArchivo[0] == 'image'){
+                // Redimensionar y guardar imagen
                 Image::make($request->documento)
-                ->resize(null, 600, function ($constraint) {
-                    $constraint->aspectRatio();
-                })->save(public_path($ruta).'/'.$request->documento->hashName());
+                    ->resize(1200, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    })->save(public_path($rutaCompleta), 80);
             } else {
-                $request->documento->move(public_path($ruta), $request->documento->hashName());
+                // Mover archivo PDF
+                $request->documento->move($directorio, $nombreArchivo);
             }
 
             DB::commit();
@@ -257,6 +355,7 @@ public function historial($id){
         }
         catch (\Exception $e) {
             DB::rollback();
+            // \Log::error('Error al guardar documento: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al guardar el documento: ' . $e->getMessage());
         }
     }
@@ -295,5 +394,262 @@ public function historial($id){
 
         $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
         return view('visita.visita-resumen', compact('totalVisitas', 'anioActual'));
+    }
+
+    /**
+     * Mostrar formulario de edición del establecimiento
+     */
+    public function editarFichaEstablecimiento($id)
+    {
+        $anioActual = date('Y');
+        
+        // Obtener información del establecimiento
+        $establecimiento = ModEstablecimiento::select(
+            'establecimientos.EST_id',
+            'establecimientos.EST_nombre',
+            'establecimientos.EST_departamento',
+            'establecimientos.EST_municipio',
+            'establecimientos.EST_direccion',
+            'establecimientos.EST_telefono_contacto',
+            'establecimientos.EST_capacidad_creacion',
+            'establecimientos.EST_anyo_funcionamiento',
+            'tipo_establecimientos.TES_tipo'
+        )
+        ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->where('establecimientos.EST_id', $id)
+        ->first();
+        
+        if (!$establecimiento) {
+            return redirect()->back()->with('error', 'Establecimiento no encontrado');
+        }
+        
+        // Obtener información adicional del establecimiento (del año actual o más reciente)
+        $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+            ->where('EINF_gestion', $anioActual)
+            ->first();
+
+        // dump($establecimientoInfo);exit;
+        // Si no hay info del año actual, buscar la más reciente o crear nueva
+        if (!$establecimientoInfo) {
+            $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+                ->orderByDesc('EINF_gestion')
+                ->first();
+                
+            if (!$establecimientoInfo) {
+                // Crear objeto vacío para el formulario
+                $establecimientoInfo = new \stdClass();
+                $establecimientoInfo->EINF_id = null;
+                $establecimientoInfo->EINF_poblacion_atendida = null;
+                $establecimientoInfo->EINF_cantidad_actual_internos = null;
+                $establecimientoInfo->EINF_superficie_terreno = null;
+                $establecimientoInfo->EINF_superficie_construida = null;
+                $establecimientoInfo->EINF_derecho_propietario = null;
+                $establecimientoInfo->EINF_gestion = $anioActual;
+            }
+        }
+        
+        // Obtener responsable del establecimiento (del año actual o más reciente)
+        $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+            ->where('EPER_gestion', $anioActual)
+            ->first();
+        
+        // Si no hay responsable del año actual, buscar el más reciente o crear nuevo
+        if (!$responsable) {
+            $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+                ->orderByDesc('EPER_gestion')
+                ->first();
+                
+            if (!$responsable) {
+                // Crear objeto vacío para el formulario
+                $responsable = new \stdClass();
+                $responsable->EPER_id = null;
+                $responsable->EPER_nombre_responsable = null;
+                $responsable->EPER_grado_profesion = null;
+                $responsable->EPER_telefono = null;
+                $responsable->EPER_email = null;
+                $responsable->EPER_gestion = $anioActual;
+            }
+        }
+        
+        return view('visita.editar-ficha-establecimiento', compact('establecimiento', 'establecimientoInfo', 'responsable', 'anioActual'));
+    }
+    
+    /**
+     * Actualizar información del establecimiento
+     */
+    public function actualizarFichaEstablecimiento(Request $request, $id)
+    {
+        // Validar datos
+        $validator = Validator::make($request->all(), [
+            'EST_departamento' => 'required|string|max:20',
+            'EST_municipio' => 'required|string|max:300',
+            'EST_direccion' => 'nullable|string|max:400',
+            'EST_telefono_contacto' => 'nullable|string|max:100',
+            'EST_capacidad_creacion' => 'nullable|string|max:300',
+            'EST_anyo_funcionamiento' => 'nullable|integer|min:1901|max:' . now()->year,
+            
+            'EINF_poblacion_atendida' => 'nullable|string|max:300',
+            'EINF_cantidad_actual_internos' => 'nullable|string|max:300',
+            // 'EINF_superficie_terreno' => 'nullable|numeric',
+            // 'EINF_superficie_construida' => 'nullable|numeric',
+
+            'EINF_superficie_terreno' => [
+                'nullable',
+                'required_with:EINF_superficie_construida',
+                'regex:/^\d+(\.\d{1,2})?$/',
+            ],
+
+            'EINF_superficie_construida' => [
+                'nullable',
+                'required_with:EINF_superficie_terreno',
+                'regex:/^\d+(\.\d{1,2})?$/',
+                'lte:EINF_superficie_terreno',
+            ],
+
+            
+            'EINF_derecho_propietario' => 'nullable|string|max:255',
+            'EPER_nombre_responsable' => 'nullable|string|max:200',
+            'EPER_grado_profesion' => 'nullable|string|max:150',
+            'EPER_telefono' => 'nullable|string|max:50',
+            'EPER_email' => 'nullable|email|max:100',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+            'string' => 'El campo :attribute debe ser texto.',
+            'max' => 'El campo :attribute no debe exceder :max caracteres.',
+            'numeric' => 'El campo :attribute debe ser un número.',
+            'email' => 'El campo :attribute debe ser un email válido.',
+
+            'EST_anyo_funcionamiento.integer' => 'El año de funcionamiento debe ser un número entero.',
+            'EST_anyo_funcionamiento.min' => 'El año de funcionamiento debe ser mayor a 1900.',
+            'EST_anyo_funcionamiento.max' => 'El año de funcionamiento no puede ser mayor al año actual.',
+
+            'EINF_superficie_terreno.numeric' => 'La superficie del terreno debe ser un valor numérico.',
+            'EINF_superficie_terreno.required_with' => 'La superficie del terreno es obligatoria si se proporciona la superficie construida.',
+            
+            'EINF_superficie_construida.numeric' => 'La superficie construida debe ser un valor numérico.',
+            'EINF_superficie_construida.required_with' => 'La superficie construida es obligatoria si se proporciona la superficie del terreno.',
+            'EINF_superficie_construida.lte' => 'La superficie construida no puede ser mayor que la superficie del terreno.',
+        ]);
+
+        // Si hay errores de validación, devolver respuesta JSON
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $anioActual = date('Y');
+            
+            // Verificar que el establecimiento existe
+            $establecimiento = ModEstablecimiento::find($id);
+            if (!$establecimiento) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Establecimiento no encontrado'
+                ], 404);
+            }
+            
+            // Actualizar tabla establecimientos
+            ModEstablecimiento::where('EST_id', $id)->update([
+                'EST_departamento' => $request->EST_departamento,
+                'EST_municipio' => $request->EST_municipio,
+                'EST_direccion' => $request->EST_direccion,
+                'EST_telefono_contacto' => $request->EST_telefono_contacto,
+                'EST_capacidad_creacion' => $request->EST_capacidad_creacion,
+                'EST_anyo_funcionamiento' => $request->EST_anyo_funcionamiento,
+            ]);
+            
+            // Actualizar o crear información del establecimiento para el año actual
+            $infoExistente = ModEstablecimientoInfo::where('FK_EST_id', $id)
+                ->where('EINF_gestion', $anioActual)
+                ->first();
+                
+            if ($infoExistente) {
+                // Actualizar registro existente
+                ModEstablecimientoInfo::where('EINF_id', $infoExistente->EINF_id)->update([
+                    'EINF_poblacion_atendida' => $request->EINF_poblacion_atendida,
+                    'EINF_cantidad_actual_internos' => $request->EINF_cantidad_actual_internos,
+                    'EINF_superficie_terreno' => $request->EINF_superficie_terreno,
+                    'EINF_superficie_construida' => $request->EINF_superficie_construida,
+                    'EINF_derecho_propietario' => $request->EINF_derecho_propietario,
+                ]);
+            } else {
+                // Crear nuevo registro
+                ModEstablecimientoInfo::create([
+                    'FK_EST_id' => $id,
+                    'EINF_poblacion_atendida' => $request->EINF_poblacion_atendida,
+                    'EINF_cantidad_actual_internos' => $request->EINF_cantidad_actual_internos,
+                    'EINF_superficie_terreno' => $request->EINF_superficie_terreno,
+                    'EINF_superficie_construida' => $request->EINF_superficie_construida,
+                    'EINF_derecho_propietario' => $request->EINF_derecho_propietario,
+                    'EINF_gestion' => $anioActual,
+                ]);
+            }
+            
+            // Actualizar o crear responsable del establecimiento para el año actual
+            $responsableExistente = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+                ->where('EPER_gestion', $anioActual)
+                ->first();
+                
+            if ($responsableExistente) {
+                // Actualizar registro existente
+                ModEstablecimientoPersonal::where('EPER_id', $responsableExistente->EPER_id)->update([
+                    'EPER_nombre_responsable' => $request->EPER_nombre_responsable,
+                    'EPER_grado_profesion' => $request->EPER_grado_profesion,
+                    'EPER_telefono' => $request->EPER_telefono,
+                    'EPER_email' => $request->EPER_email,
+                ]);
+            } else {
+                // Crear nuevo registro solo si hay datos del responsable
+                if ($request->EPER_nombre_responsable) {
+                    ModEstablecimientoPersonal::create([
+                        'FK_EST_id' => $id,
+                        'EPER_nombre_responsable' => $request->EPER_nombre_responsable,
+                        'EPER_grado_profesion' => $request->EPER_grado_profesion,
+                        'EPER_telefono' => $request->EPER_telefono,
+                        'EPER_email' => $request->EPER_email,
+                        'EPER_gestion' => $anioActual,
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
+            // Si es una petición AJAX, devolver respuesta JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Información actualizada correctamente'
+                ]);
+            }
+            
+            // Si es una petición normal, redirigir
+            return redirect()->route('visita.historial', $id)->with('success', 'Información actualizada correctamente');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Log del error para debugging
+            // \Log::error('Error al actualizar establecimiento: ' . $e->getMessage(), [
+            //     'establecimiento_id' => $id,
+            //     'request_data' => $request->all(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
+            
+            // Si es una petición AJAX, devolver respuesta JSON de error
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al actualizar la información: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            // Si es una petición normal, redirigir con error
+            return redirect()->back()->with('error', 'Error al actualizar la información: ' . $e->getMessage())->withInput();
+        }
     }
 }
