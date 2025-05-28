@@ -93,6 +93,8 @@ class IndicadorController extends Controller
         
         return view('indicadores.panel', compact('categorias', 'breadcrumbs', 'gestion'));
     }
+    
+    
     // Guarda los datos que se actualizan en los indicadores
     public function guardar(Request $request) {
         // dump($request->all());exit;

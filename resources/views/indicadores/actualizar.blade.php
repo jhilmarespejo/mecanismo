@@ -135,7 +135,7 @@
                                                                 </div>
                                                                 <input type="hidden" name="FK_IND_id" value="{{ $pregunta['IND_id'] }}">
                                                             
-                                                                <button type="button" class="btn btn-primary btn-sm guardarIndicadores box-shadow" data-id="{{ $pregunta['IND_id'] }}"><i class="bi bi-check2-circle"></i> Actualizar</button>
+                                                                <button type="button" class="btn btn-primary btn-sm guardarIndicadores box-shadow" data-id="{{ $pregunta['IND_id'] }}"><i class="bi bi-check2-circle"></i> Actualizar datos para el año {{ $gestion }}</button>
                                                             @endif
                                                             
                                                         </div>
@@ -150,7 +150,7 @@
                                                     @if ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
                                                             <br>
                                                         <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
-                                                            Insertar datos centros
+                                                            Insertar datos por centro
                                                         </button> <br>
                                                         {{-- @dump($pregunta['HIN_respuesta']) --}}
                                                         <!-- Incluir el modal -->
@@ -197,6 +197,34 @@
 
 <script>
     $(document).ready(function() {
+
+         // Función para actualizar el texto de todos los botones
+        function actualizarTextoBotones(anio) {
+            $('.guardarIndicadores').each(function() {
+                $(this).html('<i class="bi bi-check2-circle"></i> Actualizar datos para el año ' + anio);
+            });
+        }
+
+        // Actualizar botones al cargar la página
+        var anioInicial = $('#anio_consulta').val();
+        actualizarTextoBotones(anioInicial);
+
+        $('#anio_consulta').change(function() {
+            let selectedYear = $(this).val();
+            
+            // Actualizar el texto de todos los botones antes de redirigir
+            actualizarTextoBotones(selectedYear);
+            
+            // Redirige solo si el año cambia
+            window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
+        });
+
+        var anioConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
+        
+        
+        
+        
+
 
         $('#anio_consulta').change(function() {
             let selectedYear = $(this).val();
