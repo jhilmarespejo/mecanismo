@@ -8,84 +8,239 @@ use Illuminate\Support\Facades\DB;
 use App\Models\{ModEstablecimiento, ModIndicador, ModHistorialIndicador};
 use App\Http\Controllers\CustomController;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
+
 
 class IndicadorController extends Controller
 {
-    public function actualizar( Request $request ) {
-        DB::enableQueryLog();
-        //$gestion = date('Y');
-        /*$categorias = ModIndicador::select(
-            'indicadores.*',
-            'historial_indicadores.HIN_respuesta',
-            'historial_indicadores.HIN_gestion',
-            'historial_indicadores.HIN_informacion_complementaria'
+    // public function actualizar( Request $request ) {
+    //     DB::enableQueryLog();
+    //     //$gestion = date('Y');
+    //     /*$categorias = ModIndicador::select(
+    //         'indicadores.*',
+    //         'historial_indicadores.HIN_respuesta',
+    //         'historial_indicadores.HIN_gestion',
+    //         'historial_indicadores.HIN_informacion_complementaria'
             
-            )
-            ->leftJoin('historial_indicadores', 'indicadores.IND_id', 'historial_indicadores.FK_IND_id')
-            ->where('indicadores.IND_estado', '1')
-            ->where('historial_indicadores.HIN_gestion', $gestion)
-            ->orderBy('IND_id')->get()->toArray();*/
+    //         )
+    //         ->leftJoin('historial_indicadores', 'indicadores.IND_id', 'historial_indicadores.FK_IND_id')
+    //         ->where('indicadores.IND_estado', '1')
+    //         ->where('historial_indicadores.HIN_gestion', $gestion)
+    //         ->orderBy('IND_id')->get()->toArray();*/
+        
+    //     $gestion = $request->query('gestion', date('Y'));
+    //     $categorias = ModIndicador::select(
+    //         'indicadores.*',
+    //         'historial_indicadores.HIN_respuesta',
+    //         'historial_indicadores.HIN_gestion',
+    //         'historial_indicadores.HIN_informacion_complementaria'
+    //     )
+    //     ->leftJoin('historial_indicadores', function ($join) use ($gestion) { // Pasar $gestion aquí
+    //         $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
+    //             ->where('historial_indicadores.HIN_gestion', $gestion);
+    //     })
+    //     ->where('indicadores.IND_estado', '=', '1')
+    //     ->orderBy('indicadores.IND_orden', 'asc')
+    //     ->orderBy('indicadores.IND_id', 'asc')
+    //     ->get()
+    //     ->toArray();
+    //     $categorias = CustomController::organizarIndicadores( $categorias );
+    //     // dump($indicadores);exit;
+    //     $breadcrumbs = [
+    //         ['name' => 'Inicio', 'url' => route('panel')],
+    //         ['name' => 'Actualización de datos', 'url' => ''],
+    //     ];
+        
+    //     // $centrosPenitenciarios = ModEstablecimiento::select('EST_nombre','EST_departamento')->where('FK_TES_id', 1)->get()->toArray();
+    //     $centrosPenitenciarios = ModEstablecimiento::select('EST_id', 'EST_nombre', 'EST_departamento')
+    //     ->where('FK_TES_id', 1)
+    //     ->orderBy('EST_departamento') // Ordenar por departamento
+    //     ->get()
+    //     ->groupBy('EST_departamento'); // Agrupar por departamento
+
+        
+    //     $quries = DB::getQueryLog();
+    //     //dump ($quries);
+    //     return view('indicadores.actualizar', compact('categorias','breadcrumbs','gestion','centrosPenitenciarios'));
+    // }
+
+    public function actualizar(Request $request) {
+        // Prevenir timeouts en consultas largas
+        set_time_limit(120);
         
         $gestion = $request->query('gestion', date('Y'));
-        $categorias = ModIndicador::select(
-            'indicadores.*',
-            'historial_indicadores.HIN_respuesta',
-            'historial_indicadores.HIN_gestion',
-            'historial_indicadores.HIN_informacion_complementaria'
-        )
-        ->leftJoin('historial_indicadores', function ($join) use ($gestion) { // Pasar $gestion aquí
-            $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
-                ->where('historial_indicadores.HIN_gestion', $gestion);
-        })
-        ->where('indicadores.IND_estado', '=', '1')
-        ->orderBy('indicadores.IND_orden', 'asc')
-        ->orderBy('indicadores.IND_id', 'asc')
-        ->get()
-        ->toArray();
-        $categorias = CustomController::organizarIndicadores( $categorias );
-        // dump($indicadores);exit;
+        
+        // Usar cache similar para el panel
+        $cacheKey = "indicadores_actualizar_{$gestion}";
+        $categorias = Cache::remember($cacheKey, 300, function() use ($gestion) {
+            return ModIndicador::select(
+                'indicadores.*',
+                'historial_indicadores.HIN_respuesta',
+                'historial_indicadores.HIN_gestion',
+                'historial_indicadores.HIN_informacion_complementaria'
+            )
+            ->leftJoin('historial_indicadores', function ($join) use ($gestion) {
+                $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
+                    ->where('historial_indicadores.HIN_gestion', $gestion);
+            })
+            ->where('indicadores.IND_estado', '=', '1')
+            ->orderBy('indicadores.IND_orden', 'asc')
+            ->orderBy('indicadores.IND_id', 'asc')
+            ->get()
+            ->toArray();
+        });
+        
+        $categorias = CustomController::organizarIndicadores($categorias);
+        
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Actualización de datos', 'url' => ''],
         ];
         
-        // $centrosPenitenciarios = ModEstablecimiento::select('EST_nombre','EST_departamento')->where('FK_TES_id', 1)->get()->toArray();
-        $centrosPenitenciarios = ModEstablecimiento::select('EST_id', 'EST_nombre', 'EST_departamento')
-        ->where('FK_TES_id', 1)
-        ->orderBy('EST_departamento') // Ordenar por departamento
-        ->get()
-        ->groupBy('EST_departamento'); // Agrupar por departamento
-
+        // Centros penitenciarios (mantener como está)
+        $centrosPenitenciarios = Cache::remember('centros_penitenciarios', 3600, function() {
+            return ModEstablecimiento::select('EST_id', 'EST_nombre', 'EST_departamento')
+                ->where('FK_TES_id', 1)
+                ->orderBy('EST_departamento')
+                ->get()
+                ->groupBy('EST_departamento');
+        });
         
-        $quries = DB::getQueryLog();
-        //dump ($quries);
-        return view('indicadores.actualizar', compact('categorias','breadcrumbs','gestion','centrosPenitenciarios'));
+        // Cargar listas desde archivos JSON**
+        
+        // 1. Cargar lista de delitos dinámicos
+        $delitos = $this->cargarDelitos($gestion);
+        
+        // 2. Departamentos estáticos
+        $departamentos = [
+            'la_paz' => 'La Paz',
+            'santa_cruz' => 'Santa Cruz',
+            'cochabamba' => 'Cochabamba',
+            'oruro' => 'Oruro',
+            'potosi' => 'Potosí',
+            'chuquisaca' => 'Chuquisaca',
+            'tarija' => 'Tarija',
+            'beni' => 'Beni',
+            'pando' => 'Pando'
+        ];
+        
+        // 3. Sexo estático
+        $sexo = [
+            'femenino' => 'Femenino',
+            'masculino' => 'Masculino'
+        ];
+        
+        return view('indicadores.actualizar', compact(
+            'categorias', 
+            'breadcrumbs', 
+            'gestion', 
+            'centrosPenitenciarios',
+            'delitos',
+            'departamentos', 
+            'sexo'
+        ));
     }
 
-    public function panel(Request $request){
+    /**
+     * Cargar delitos desde archivo JSON
+     */
+    private function cargarDelitos($gestion)
+    {
+        try {
+            $filePath = storage_path("app/config/listas/delitos_{$gestion}.json");
+            
+            // Si no existe el archivo para la gestión actual, usar el año anterior
+            if (!file_exists($filePath)) {
+                $fallbackYear = $gestion - 1;
+                $fallbackPath = storage_path("app/config/listas/delitos/delitos_{$fallbackYear}.json");
+                
+                if (file_exists($fallbackPath)) {
+                    $filePath = $fallbackPath;
+                    //\Log::info("Usando delitos de {$fallbackYear} para {$gestion}");
+                } else {
+                    // Crear archivo por defecto
+                    $this->crearArchivoDelitosDefault($gestion);
+                    $filePath = storage_path("app/config/listas/delitos/delitos_{$gestion}.json");
+                }
+            }
+            
+            $content = file_get_contents($filePath);
+            $data = json_decode($content, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                //\Log::error("Error JSON delitos {$gestion}: " . json_last_error_msg());
+                return $this->getDelitosDefault();
+            }
+            
+            return $data;
+            
+        } catch (\Exception $e) {
+            //\Log::error("Error cargando delitos para {$gestion}: " . $e->getMessage());
+            return $this->getDelitosDefault();
+        }
+    }
+
+    // /**
+    //  * Crear archivo de delitos por defecto
+    //  */
+    // private function crearArchivoDelitosDefault($gestion)
+    // {
+    //     $defaultDelitos = $this->getDelitosDefault();
+    //     $dirPath = storage_path('app/config/listas/delitos');
+        
+    //     // Crear directorio si no existe
+    //     if (!is_dir($dirPath)) {
+    //         mkdir($dirPath, 0755, true);
+    //     }
+        
+    //     $filePath = "{$dirPath}/delitos_{$gestion}.json";
+    //     $jsonContent = json_encode($defaultDelitos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        
+    //     file_put_contents($filePath, $jsonContent);
+    //     \Log::info("Archivo de delitos creado para {$gestion}");
+    // }
+    
+    // /**
+    //  * Delitos por defecto
+    //  */
+    // private function getDelitosDefault()
+    // {
+    //     return [
+    //         'violencia_familiar' => 'Violencia familiar o doméstica',
+    //         'robo_sin_violencia' => 'Robo sin violencia',
+    //         'estafa_fraude' => 'Estafa o fraude',
+    //         'ciberdelitos' => 'Ciberdelitos (fraude informático, amenazas, grooming)',
+    //         'robo_con_violencia' => 'Robo con violencia',
+    //         'hurto' => 'Hurto',
+    //         'robo_autopartes' => 'Robo de autopartes'
+    //     ];
+    // }
+    
+    public function panel(Request $request) {
         $gestion = $request->query('gestion', date('Y'));
-        $categorias = ModIndicador::select(
-            'indicadores.*',
-            'historial_indicadores.HIN_respuesta',
-            'historial_indicadores.HIN_gestion',
-            'historial_indicadores.HIN_informacion_complementaria'
-        )
-        ->leftJoin('historial_indicadores', function ($join) use ($gestion) { // Pasar $gestion aquí
-            $join->on('indicadores.IND_id', 'historial_indicadores.FK_IND_id')
-                ->where('historial_indicadores.HIN_gestion', $gestion);
-        })
-        ->where('indicadores.IND_estado', '1')
-        ->orderBy('indicadores.IND_orden', 'asc')
-        ->orderBy('indicadores.IND_id', 'asc')
-        ->get()
-        ->toArray();
-        $queries = DB::getQueryLog();
-        // dump ($quries);exit;
         
+        // Usar cache similar para el panel
+        $cacheKey = "indicadores_panel_{$gestion}";
+        $categorias = Cache::remember($cacheKey, 300, function() use ($gestion) {
+            return ModIndicador::select(
+                'indicadores.*',
+                'historial_indicadores.HIN_respuesta',
+                'historial_indicadores.HIN_gestion',
+                'historial_indicadores.HIN_informacion_complementaria'
+            )
+            ->leftJoin('historial_indicadores', function ($join) use ($gestion) {
+                $join->on('indicadores.IND_id', 'historial_indicadores.FK_IND_id')
+                    ->where('historial_indicadores.HIN_gestion', $gestion);
+            })
+            ->where('indicadores.IND_estado', '1')
+            ->orderBy('indicadores.IND_orden', 'asc')
+            ->orderBy('indicadores.IND_id', 'asc')
+            ->get()
+            ->toArray();
+        });
         
-        $categorias = CustomController::organizarIndicadores( $categorias );
-        // dump($categorias);//    exit;
-       
+        $categorias = CustomController::organizarIndicadores($categorias);
+        
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Panel de datos', 'url' => ''],
@@ -93,61 +248,161 @@ class IndicadorController extends Controller
         
         return view('indicadores.panel', compact('categorias', 'breadcrumbs', 'gestion'));
     }
-    
-    
+        
     // Guarda los datos que se actualizan en los indicadores
+    // public function guardar(Request $request) {
+    //     // dump($request->all());exit;
+    //     try {
+    //         $validatedData = $request->validate([
+    //             'respuesta' => 'required|string',
+    //             'informacion_complementaria' => 'nullable|string',
+    //             'FK_IND_id' => 'required|integer',
+    //             'anio_consulta' => 'required',
+    //         ]);
+            
+    //         $respuesta = $validatedData['respuesta'];
+    //         // $informacionComplementaria = $request->informacion_complementaria;
+    //         $informacionComplementaria = $validatedData['informacion_complementaria'];
+    //         $indicadorId = $validatedData['FK_IND_id'];
+    //         $gestion = $validatedData['anio_consulta'];
+            
+    //         //dump($respuesta, $indicadorId, $gestion); exit;
+            
+    //         // Buscar si ya existe un registro con la misma respuesta y el mismo indicador
+    //         // $existingRecord = DB::table('historial_indicadores')
+    //         //     ->where('FK_IND_id', $indicadorId)
+    //         //     ->first();
+            
+    //         $existingRecord = DB::table('historial_indicadores')
+    //             ->where('FK_IND_id', $indicadorId)
+    //             ->where('HIN_gestion', $gestion)
+    //             ->first();
+            
+    //         if ($existingRecord) {
+    //             // Verificar si la gestión es la misma
+    //             if ($existingRecord->HIN_gestion == $gestion) {
+    //                 // Actualizar el registro existente
+    //                 DB::table('historial_indicadores')
+    //                     ->where('HIN_id', $existingRecord->HIN_id)
+    //                     ->update([
+    //                         'HIN_respuesta' => $respuesta,
+    //                         'HIN_informacion_complementaria' => $informacionComplementaria,
+    //                         'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
+    //                         'HIN_gestion' => $gestion,
+    //                     ]);
+    //             } else {
+    //                 // Insertar un nuevo registro con una gestión diferente
+    //                 DB::table('historial_indicadores')->insert([
+    //                     'HIN_respuesta' => $respuesta,
+    //                     'HIN_informacion_complementaria' => $informacionComplementaria,
+    //                     'FK_IND_id' => $indicadorId,
+    //                     'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
+    //                     'HIN_gestion' => $gestion,
+    //                 ]);
+    //             }
+    //         } else {
+    //             // Insertar un nuevo registro ya que no existe uno con la misma respuesta e indicador
+    //             DB::table('historial_indicadores')->insert([
+    //                 'HIN_respuesta' => $respuesta,
+    //                 'HIN_informacion_complementaria' => $informacionComplementaria,
+    //                 'FK_IND_id' => $indicadorId,
+    //                 'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
+    //                 'HIN_gestion' => $gestion,
+    //             ]);
+    //         }
+            
+    //         return response()->json(['success' => true, 'message' => 'Datos guardados correctamente.'], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error encontrado' => $e->getMessage()], 500);
+    //     }
+    // }
+    
+
+    
+    
+
     public function guardar(Request $request) {
-        // dump($request->all());exit;
+    try {
+        // Validación básica
+        $validatedData = $request->validate([
+            'respuesta' => 'required',
+            'informacion_complementaria' => 'nullable|string|max:500',
+            'FK_IND_id' => 'required|integer|exists:indicadores,IND_id',
+            'anio_consulta' => 'required|integer|min:2020|max:2030',
+        ], [
+            'respuesta.required' => 'La respuesta es obligatoria',
+            'FK_IND_id.exists' => 'El indicador especificado no existe',
+            'anio_consulta.min' => 'El año debe ser mayor a 2020',
+            'anio_consulta.max' => 'El año no puede ser mayor a 2030'
+        ]);
+        
+        $respuesta = $validatedData['respuesta'];
+        $informacionComplementaria = $validatedData['informacion_complementaria'];
+        $indicadorId = $validatedData['FK_IND_id'];
+        $gestion = $validatedData['anio_consulta'];
+        
+        // Obtener indicador
+        $indicador = ModIndicador::where('IND_id', $indicadorId)
+                                 ->where('IND_estado', '1')
+                                 ->first();
+                                 
+        if (!$indicador) {
+            return response()->json([
+                'error' => 'El indicador no existe o está inactivo'
+            ], 404);
+        }
+        
+        // Validaciones específicas por tipo
+        switch ($indicador->IND_tipo_repuesta) {
+            case 'Lista delitos':
+                $validationResult = $this->validateListaDelitos($respuesta);
+                if (!$validationResult['valid']) {
+                    return response()->json(['error' => $validationResult['message']], 400);
+                }
+                break;
+                
+            case 'Lista departamentos':
+                $validationResult = $this->validateListaDepartamentos($respuesta);
+                if (!$validationResult['valid']) {
+                    return response()->json(['error' => $validationResult['message']], 400);
+                }
+                break;
+                
+            case 'Lista sexo':
+                $validationResult = $this->validateListaSexo($respuesta);
+                if (!$validationResult['valid']) {
+                    return response()->json(['error' => $validationResult['message']], 400);
+                }
+                break;
+                
+            case 'Lista centros penitenciarios':
+                $validationResult = $this->validateListaCentros($respuesta);
+                if (!$validationResult['valid']) {
+                    return response()->json(['error' => $validationResult['message']], 400);
+                }
+                break;
+        }
+        
+        DB::beginTransaction();
+        
         try {
-            $validatedData = $request->validate([
-                'respuesta' => 'required|string',
-                'informacion_complementaria' => 'nullable|string',
-                'FK_IND_id' => 'required|integer',
-                'anio_consulta' => 'required',
-            ]);
-            
-            $respuesta = $validatedData['respuesta'];
-            // $informacionComplementaria = $request->informacion_complementaria;
-            $informacionComplementaria = $validatedData['informacion_complementaria'];
-            $indicadorId = $validatedData['FK_IND_id'];
-            $gestion = $validatedData['anio_consulta'];
-            
-            //dump($respuesta, $indicadorId, $gestion); exit;
-            
-            // Buscar si ya existe un registro con la misma respuesta y el mismo indicador
-            // $existingRecord = DB::table('historial_indicadores')
-            //     ->where('FK_IND_id', $indicadorId)
-            //     ->first();
-            
             $existingRecord = DB::table('historial_indicadores')
                 ->where('FK_IND_id', $indicadorId)
                 ->where('HIN_gestion', $gestion)
                 ->first();
             
             if ($existingRecord) {
-                // Verificar si la gestión es la misma
-                if ($existingRecord->HIN_gestion == $gestion) {
-                    // Actualizar el registro existente
-                    DB::table('historial_indicadores')
-                        ->where('HIN_id', $existingRecord->HIN_id)
-                        ->update([
-                            'HIN_respuesta' => $respuesta,
-                            'HIN_informacion_complementaria' => $informacionComplementaria,
-                            'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
-                            'HIN_gestion' => $gestion,
-                        ]);
-                } else {
-                    // Insertar un nuevo registro con una gestión diferente
-                    DB::table('historial_indicadores')->insert([
+                DB::table('historial_indicadores')
+                    ->where('HIN_id', $existingRecord->HIN_id)
+                    ->update([
                         'HIN_respuesta' => $respuesta,
                         'HIN_informacion_complementaria' => $informacionComplementaria,
-                        'FK_IND_id' => $indicadorId,
                         'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
                         'HIN_gestion' => $gestion,
                     ]);
-                }
+                    
+                $mensaje = 'Datos actualizados correctamente para ' . $indicador->IND_tipo_repuesta;
             } else {
-                // Insertar un nuevo registro ya que no existe uno con la misma respuesta e indicador
                 DB::table('historial_indicadores')->insert([
                     'HIN_respuesta' => $respuesta,
                     'HIN_informacion_complementaria' => $informacionComplementaria,
@@ -155,14 +410,135 @@ class IndicadorController extends Controller
                     'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
                     'HIN_gestion' => $gestion,
                 ]);
+                
+                $mensaje = 'Datos guardados correctamente para ' . $indicador->IND_tipo_repuesta;
             }
             
-            return response()->json(['success' => true, 'message' => 'Datos guardados correctamente.'], 200);
+            DB::commit();
+            
+            // Limpiar cache
+            Cache::forget("indicadores_actualizar_{$gestion}");
+            Cache::forget("indicadores_panel_{$gestion}");
+            
+            return response()->json([
+                'success' => true,
+                'message' => $mensaje,
+                'tipo' => $indicador->IND_tipo_repuesta
+            ], 200);
+            
         } catch (\Exception $e) {
-            return response()->json(['error encontrado' => $e->getMessage()], 500);
+            DB::rollback();
+            throw $e;
+        }
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'error' => 'Error de validación de datos',
+            'details' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        // \Log::error('Error en IndicadorController::guardar', [
+        //     'message' => $e->getMessage(),
+        //     'line' => $e->getLine(),
+        //     'file' => $e->getFile(),
+        //     'request_data' => $request->all()
+        // ]);
+        
+        return response()->json([
+            'error' => 'Error interno del servidor. Detalles: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+// Métodos de validación específicos
+private function validateListaDelitos($respuesta) {
+    $decodedResponse = json_decode($respuesta, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['valid' => false, 'message' => 'Formato de datos JSON inválido para delitos'];
+    }
+    
+    $validDelitos = [
+        'violencia_familiar', 
+        'robo_sin_violencia', 
+        'estafa_fraude', 
+        'ciberdelitos', 
+        'robo_con_violencia', 
+        'hurto', 
+        'robo_autopartes'
+    ];
+    
+    // Verificar que todos los delitos requeridos estén presentes
+    foreach ($validDelitos as $delito) {
+        if (!array_key_exists($delito, $decodedResponse)) {
+            return ['valid' => false, 'message' => 'Falta el delito: ' . $delito];
+        }
+        
+        $value = $decodedResponse[$delito];
+        if (!is_numeric($value) || $value < 0) {
+            return ['valid' => false, 'message' => 'El valor para ' . $delito . ' debe ser un número positivo o cero'];
         }
     }
     
+    return ['valid' => true];
+}
+
+private function validateListaDepartamentos($respuesta) {
+    $decodedResponse = json_decode($respuesta, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['valid' => false, 'message' => 'Formato de datos JSON inválido para departamentos'];
+    }
+    
+    $validDepartamentos = ['la_paz', 'santa_cruz', 'cochabamba', 'oruro', 'potosi', 'chuquisaca', 'tarija', 'beni', 'pando'];
+    
+    foreach ($decodedResponse as $key => $value) {
+        if (!in_array($key, $validDepartamentos)) {
+            return ['valid' => false, 'message' => 'Departamento inválido: ' . $key];
+        }
+        if (!is_numeric($value) || $value < 0) {
+            return ['valid' => false, 'message' => 'Los valores por departamentos deben ser números positivos o cero'];
+        }
+    }
+    
+    return ['valid' => true];
+}
+
+private function validateListaSexo($respuesta) {
+    $decodedResponse = json_decode($respuesta, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['valid' => false, 'message' => 'Formato de datos JSON inválido para sexo'];
+    }
+    
+    $validSexos = ['femenino', 'masculino'];
+    
+    foreach ($decodedResponse as $key => $value) {
+        if (!in_array($key, $validSexos)) {
+            return ['valid' => false, 'message' => 'Tipo de sexo inválido: ' . $key];
+        }
+        if (!is_numeric($value) || $value < 0) {
+            return ['valid' => false, 'message' => 'Los valores por sexo deben ser números positivos o cero'];
+        }
+    }
+    
+    return ['valid' => true];
+}
+
+private function validateListaCentros($respuesta) {
+    $decodedResponse = json_decode($respuesta, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return ['valid' => false, 'message' => 'Formato de datos JSON inválido para centros penitenciarios'];
+    }
+    
+    foreach ($decodedResponse as $key => $value) {
+        if (!is_numeric($value) || $value < 0) {
+            return ['valid' => false, 'message' => 'Los valores por centro deben ser números positivos o cero'];
+        }
+    }
+    
+    return ['valid' => true];
+}
+    
+    
+
     // Función tablero que maneja las peticiones
     public function reportes(Request $request) {
         $breadcrumbs = [
@@ -321,6 +697,17 @@ class IndicadorController extends Controller
         ->get();
         return $results;
     }
+
+    //////////////////////////////////////////////////////////
+
+
+    
+
+
+
+
+
+
     
     
 }

@@ -171,21 +171,18 @@
     </div>
     
     <script>
-        //document ready 
-
         $(document).ready(function() {
-            // Evento para cambiar dinámicamente el estado del botón
             $('#anyo_consulta').change(function() {
                 let selectedYear = $(this).val();
-                // toggleEditButton(selectedYear);
-                // Redirige solo si el año cambia
-                window.location.href = "{{ route('indicadores.panel') }}" + "?gestion=" + selectedYear;
+                if (selectedYear) {
+                    // Mostrar indicador de carga
+                    $('body').append('<div id="loading-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; justify-content:center; align-items:center; color:white; font-size:18px;">Cargando datos...</div>');
+                    
+                    // Redirigir con el año seleccionado
+                    window.location.href = "{{ route('indicadores.panel') }}?gestion=" + selectedYear;
+                }
             });
-        
         });
-        
-        
-        
     </script>
 
 

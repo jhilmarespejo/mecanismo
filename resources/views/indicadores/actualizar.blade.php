@@ -148,32 +148,37 @@
                                                         <hr>
                                                     </form>
                                                     @if ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
-                                                            <br>
-                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal">
-                                                            Insertar datos por centro
+                                                        <br>
+                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal_{{ $pregunta['IND_id'] }}">
+                                                            <i class="bi bi-building"></i> Insertar datos por centro - {{ $gestion }}
                                                         </button> <br>
-                                                        {{-- @dump($pregunta['HIN_respuesta']) --}}
-                                                        <!-- Incluir el modal -->
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'centros penitenciarios'])
-                                                    
+
                                                     @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista sexo')
-                                                    {{-- {{ $pregunta['IND_tipo_repuesta'] }} --}}
-                                                    <br>
-                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#listaSexoModal">
-                                                            Insertar datos
+                                                        <br>
+                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#listaSexoModal_{{ $pregunta['IND_id'] }}">
+                                                            <i class="bi bi-people"></i> Insertar datos por sexo - {{ $gestion }}
                                                         </button> <br>
-                                                        {{-- @dump($pregunta['HIN_respuesta']) --}}
-                                                        
-                                                        <!-- Incluir el modal -->
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista sexo'])
-                                                    
+
                                                     @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista delitos')
-                                                        Lista delitos
-                                                        @endif
+                                                        <br>
+                                                        <button type="button" class="btn btn-warning text-shadow" data-bs-toggle="modal" data-bs-target="#listaDelitosModal_{{ $pregunta['IND_id'] }}">
+                                                            <i class="bi bi-exclamation-triangle"></i> Insertar datos por delitos - {{ $gestion }}
+                                                        </button> <br>
+                                                        @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista delitos'])
+
+                                                    @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista departamentos')
+                                                        <br>
+                                                        <button type="button" class="btn btn-info text-shadow" data-bs-toggle="modal" data-bs-target="#listaDepartamentosModal_{{ $pregunta['IND_id'] }}">
+                                                            <i class="bi bi-geo-alt"></i> Insertar datos por departamentos - {{ $gestion }}
+                                                        </button> <br>
+                                                        @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista departamentos'])
+                                                    @endif
 
 
                                                 @endforeach
-
+                                                
                                                 <div id="mensajeConfirmacion" class="mt-3 alert alert-success d-none"></div>
                                             </div>
                                         </div>
@@ -190,15 +195,16 @@
     
     </div>
     
-    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;"> <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white;"> <span>Guardando datos...</span> </div> </div>
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); z-index:9999;"> <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:white;"> <span>Un momento por favor...</span> </div> </div>
 @endsection
 
 @section('js')
 
 <script>
+    let isSubmitting = false;
+    
     $(document).ready(function() {
-
-         // Función para actualizar el texto de todos los botones
+        // Función para actualizar el texto de todos los botones
         function actualizarTextoBotones(anio) {
             $('.guardarIndicadores').each(function() {
                 $(this).html('<i class="bi bi-check2-circle"></i> Actualizar datos para el año ' + anio);
@@ -207,163 +213,151 @@
 
         // Actualizar botones al cargar la página
         var anioInicial = $('#anio_consulta').val();
+        var anioConsulta = anioInicial; // Variable global para usar en AJAX
         actualizarTextoBotones(anioInicial);
 
-        $('#anio_consulta').change(function() {
+        // *** ÚNICO EVENT LISTENER PARA EL SELECT DE AÑO ***
+        $('#anio_consulta').off('change').on('change', function() {
+            // Prevenir múltiples ejecuciones
+            if (isSubmitting) {
+                console.log('Ya se está procesando un cambio de año');
+                return false;
+            }
+            
+            isSubmitting = true;
             let selectedYear = $(this).val();
             
-            // Actualizar el texto de todos los botones antes de redirigir
+            console.log('Cambiando a año:', selectedYear);
+            
+            // Mostrar overlay inmediatamente
+            $('#overlay').show();
+            
+            // Actualizar texto de botones
             actualizarTextoBotones(selectedYear);
             
-            // Redirige solo si el año cambia
-            window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
-        });
-
-        var anioConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
-        
-        
-        
-        
-
-
-        $('#anio_consulta').change(function() {
-            let selectedYear = $(this).val();
-            // Redirige solo si el año cambia
-            window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
+            // Deshabilitar el select temporalmente
+            $(this).prop('disabled', true);
             
-
-        });
-
-        var anioConsulta = $('#anio_consulta').val(); // Obtén el valor de anio_consulta
-
-        // TODO: Mostrar mensaje de SweetAlert, descomentar esto cuando se implemente
-        // Swal.fire({
-        //     title: 'Actualización de Indicadores',
-        //     text: 'Esta página se prepara para actualizar indicadores de la gestión ' + anioConsulta,
-        //     icon: 'info',
-        //     confirmButtonText: 'Entendido',
-        // });
-        
-        $('.guardarIndicadores').click(function() {
-            var id = $(this).data('id');
-        var form = $('#formularioIndicadores_' + id);
-        var respuestaInput = form.find('[name="respuesta"]');
-        var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
-        var respuesta;
-    
-        // Función para mostrar mensajes de error
-        function mostrarError(id, mensaje) {
-            var errorDiv = $('#errorMessage_' + id);
-            errorDiv.html(mensaje)
-                .removeClass('d-none')
-                .fadeIn();
-                
+            // Pequeño delay para asegurar que el overlay se muestre
             setTimeout(function() {
-                errorDiv.fadeOut();
-            }, 3000);
-        }
-    
-        // Obtener el valor según el tipo de input
-        if (respuestaInput.length > 0) {
-            // Obtener el tipo del primer input encontrado
-            var inputType = respuestaInput.first().attr('type');
+                // Redirigir
+                window.location.href = "{{ route('indicadores.actualizar') }}" + "?gestion=" + selectedYear;
+            }, 100);
+        });
+
+        // Event listener para guardar indicadores
+        $('.guardarIndicadores').off('click').on('click', function() {
+            if (isSubmitting) {
+                console.log('Sistema ocupado, esperando...');
+                return false;
+            }
             
-            switch(inputType) {
-                case 'radio':
-                    respuesta = form.find('[name="respuesta"]:checked').val();
-                    break;
+            var id = $(this).data('id');
+            var form = $('#formularioIndicadores_' + id);
+            var respuestaInput = form.find('[name="respuesta"]');
+            var informacionComplementaria = form.find('[name="informacion_complementaria"]').val();
+            var respuesta;
+        
+            // Función para mostrar mensajes de error
+            function mostrarError(id, mensaje) {
+                var errorDiv = $('#errorMessage_' + id);
+                errorDiv.html('<strong><i class="bi bi-exclamation-triangle"></i></strong> ' + mensaje)
+                    .removeClass('d-none')
+                    .fadeIn();
                     
-                case 'checkbox':
-                    // Para checkbox, recolectar valores múltiples si están marcados
-                    var checkboxValues = [];
-                    form.find('[name="respuesta"]:checked').each(function() {
-                        checkboxValues.push($(this).val());
-                    });
-                    respuesta = checkboxValues.length > 0 ? checkboxValues : null;
-                    break;
-                    
-                case 'number':
-                    respuesta = respuestaInput.val();
-                    // Validación adicional para números
-                    if (respuesta !== "" && !$.isNumeric(respuesta)) {
-                        mostrarError(id, 'Por favor, ingrese un valor numérico válido');
-                        return;
-                    }
-                    break;
-                    
-                case 'text':
-                case 'textarea':
-                default:
-                    respuesta = respuestaInput.val();
-                    break;
+                setTimeout(function() {
+                    errorDiv.fadeOut();
+                }, 3000);
             }
-        }
-    
-        // Validación general
-        if (inputType === 'checkbox') {
-            // Para checkbox, verificar si al menos uno está marcado
-            if (!respuesta || respuesta.length === 0) {
-                mostrarError(id, 'Por favor, seleccione al menos una opción');
-                return;
+
+            // Obtener el valor según el tipo de input
+            if (respuestaInput.length > 0) {
+                var inputType = respuestaInput.first().attr('type');
+                
+                switch(inputType) {
+                    case 'radio':
+                        respuesta = form.find('[name="respuesta"]:checked').val();
+                        break;
+                        
+                    case 'checkbox':
+                        var checkboxValues = [];
+                        form.find('[name="respuesta"]:checked').each(function() {
+                            checkboxValues.push($(this).val());
+                        });
+                        respuesta = checkboxValues.length > 0 ? checkboxValues : null;
+                        break;
+                        
+                    case 'number':
+                        respuesta = respuestaInput.val();
+                        if (respuesta !== "" && !$.isNumeric(respuesta)) {
+                            mostrarError(id, 'Por favor, ingrese un valor numérico válido');
+                            return;
+                        }
+                        break;
+                        
+                    case 'text':
+                    case 'textarea':
+                    default:
+                        respuesta = respuestaInput.val();
+                        break;
+                }
             }
-        } else {
-            // Para otros tipos de inputs
-            if (typeof respuesta === "undefined" || respuesta === "" || respuesta === null) {
-                mostrarError(id, 'Por favor, complete este campo');
-                return;
+
+            // Validación general
+            if (inputType === 'checkbox') {
+                if (!respuesta || respuesta.length === 0) {
+                    mostrarError(id, 'Por favor, seleccione al menos una opción');
+                    return;
+                }
+            } else {
+                if (typeof respuesta === "undefined" || respuesta === "" || respuesta === null) {
+                    mostrarError(id, 'Por favor, complete este campo');
+                    return;
+                }
             }
-        }
-           // Mostrar el overlay 
-           $('#overlay').show();
+
+            // Mostrar overlay
+            $('#overlay').show();
             
             var formData = form.serialize();
-            formData += '&anio_consulta=' + encodeURIComponent(anioConsulta); // Agrega anio_consulta
+            formData += '&anio_consulta=' + encodeURIComponent(anioConsulta);
 
-            
             $.ajax({
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
                 url: '{{ route("indicadores.guardar") }}',
                 type: 'POST',
                 data: formData,
+                timeout: 30000, // 30 segundos timeout
                 success: function(response) {
                     $('#mensajeConfirmacion_' + id).removeClass('d-none').html('<i class="bi bi-check2-circle"></i> Datos guardados correctamente.');
                     setTimeout(function() {
                         $('#mensajeConfirmacion_' + id).addClass('d-none').html('');
-                    }, 3000); // 3000 ms = 3 segundos
-                    // Desbloquear todos los botones y controles 
+                    }, 3000);
                     $('#overlay').hide();
                 },
                 error: function(xhr, status, error) {
                     console.error('Error al guardar los datos:', error);
-                    $('#mensajeConfirmacion_' + id).removeClass('d-none').addClass('alert-danger').html('Error al guardar los datos.');
+                    $('#mensajeConfirmacion_' + id).removeClass('d-none').addClass('alert-danger').html('<strong>Error:</strong> ' + (xhr.responseJSON?.message || 'Error al guardar los datos.'));
                     $('#overlay').hide();
                 }
             });
         });
 
-
         // Función para permitir desmarcar radio buttons
-        // Guarda el valor del radio button seleccionado actualmente
         var radioButtons = $('input[type="radio"]');
         var selectedValue = null;
 
-        // Añadir evento click a todos los radio buttons
-        radioButtons.click(function(event) {
-            // Si se hace clic en el mismo radio button que ya está seleccionado
+        radioButtons.off('click').on('click', function(event) {
             if (this.value === selectedValue) {
-                // Desmarca el radio button
                 this.checked = false;
                 selectedValue = null;
-                
-                // Evita el comportamiento predeterminado del navegador
                 event.preventDefault();
             } else {
-                // Actualiza el valor seleccionado
                 selectedValue = this.value;
             }
         });
 
-        // Capturar el valor seleccionado inicialmente (si existe)
+        // Capturar el valor seleccionado inicialmente
         radioButtons.each(function() {
             if (this.checked) {
                 selectedValue = this.value;
@@ -371,8 +365,59 @@
         });
     });
 
+    // Resetear flags cuando la página termine de cargar
+    $(window).on('load', function() {
+        isSubmitting = false;
+        $('#overlay').hide();
+        $('#anio_consulta').prop('disabled', false);
+        console.log('Página cargada completamente');
+    });
 
-    
+    // Manejo de errores de navegación
+    $(window).on('beforeunload', function() {
+        $('#overlay').show();
+    });
+
+    // Detectar si el usuario regresa con el botón atrás
+    $(window).on('pageshow', function(event) {
+        if (event.originalEvent.persisted) {
+            isSubmitting = false;
+            $('#overlay').hide();
+            $('#anio_consulta').prop('disabled', false);
+        }
+    });
+
+
+
+    // Función para actualizar los años en todos los botones dinámicamente
+        function actualizarAniosEnBotones(anio) {
+            // Actualizar botones de listas
+            $('button[data-bs-toggle="modal"]').each(function() {
+                let textoBoton = $(this).html();
+                // Reemplazar cualquier año existente (2024-2030) con el nuevo año
+                textoBoton = textoBoton.replace(/- \d{4}/g, '- ' + anio);
+                $(this).html(textoBoton);
+            });
+            
+            // Actualizar años en modales abiertos
+            $('.anio-actual strong').text(anio);
+        }
+
+        // Llamar la función cuando cambie el año
+        $('#anio_consulta').on('change', function() {
+            let selectedYear = $(this).val();
+            actualizarAniosEnBotones(selectedYear);
+        });
+
+        // Inicializar al cargar la página
+        $(document).ready(function() {
+            let anioInicial = $('#anio_consulta').val();
+            actualizarAniosEnBotones(anioInicial);
+        });
 </script>
+
+
+
+
 
 @endsection

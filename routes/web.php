@@ -226,9 +226,11 @@ Route::middleware('auth')->group(function () {
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
 
 
-
 // INTEROPERABILIDAD
 Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
 
 // MODULO DE EDUCACION
 Route::resource('educacion', EducacionController::class);
+
+
+
