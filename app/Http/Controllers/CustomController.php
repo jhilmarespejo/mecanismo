@@ -219,53 +219,72 @@ class CustomController extends Controller {
 
     }
 
-    //Agrupar las visitas por tipo y nombre
+    //Agrupar las visitas por tipo y nombre para el resumen de visitas
     public static function agruparPorTipoYNombre($datos)
     {
-        // // Agrupar por TES_tipo y EST_nombre
-        // // Devolver los resultados
-        // return $agrupadosPorTipoYNombre;
-        if( !count($datos) > 0 ){
-            return ['resultado'=>0, 'total_geneal' => 0];
+        // Verificar si hay datos
+        if (!$datos || $datos->count() === 0) {
+            return [
+                'resultado' => [], 
+                'total_general' => 0
+            ];
         }
-
+        
         $resultado = [];
+        $totalGeneral = 0;
 
         foreach ($datos as $item) {
             $tesTipo = $item->TES_tipo;
             $estNombre = $item->EST_nombre;
-            $totalGeneal= $item->total_general;
+            $totalGeneral = $item->total_general ?? 0; // Tomar el total general
             $EST_id = $item->EST_id;
-            $VIS_fechas = $item->VIS_fechas;
-
-            // Asegurarse de que la clave TES_tipo exista
-            if (!isset($resultado[$tesTipo])) {
-                $resultado[$tesTipo] = [
-                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento,
-                    'establecimientos' => [],
-                ];
-                // $resultado['total_general'] = $totalGeneal;
+            
+            // Formatear la fecha para mostrar
+            $fechaFormateada = $item->VIS_fechas;
+            if ($item->primera_fecha && $item->ultima_fecha && $item->primera_fecha !== $item->ultima_fecha) {
+                $fechaFormateada = date('d-m-Y', strtotime($item->primera_fecha)) . ' al ' . date('d-m-Y', strtotime($item->ultima_fecha));
+            } else {
+                $fechaFormateada = date('d-m-Y', strtotime($item->VIS_fechas));
             }
 
-            // Asegurarse de que la clave EST_nombre exista dentro de TES_tipo
+            // Inicializar el tipo de establecimiento si no existe
+            if (!isset($resultado[$tesTipo])) {
+                $resultado[$tesTipo] = [
+                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento ?? 0,
+                    'establecimientos' => []
+                ];
+            }
+
+            // Inicializar el establecimiento si no existe
             if (!isset($resultado[$tesTipo]['establecimientos'][$estNombre])) {
                 $resultado[$tesTipo]['establecimientos'][$estNombre] = [
-                    'total_establecimiento' => $item->total_establecimiento,
+                    'total_establecimiento' => $item->total_establecimiento ?? 0,
                     'EST_id' => $EST_id,
-
                     'visitas' => []
                 ];
             }
 
-            // Añadir la visita al arreglo correspondiente
+            // Añadir la visita al establecimiento correspondiente
             $resultado[$tesTipo]['establecimientos'][$estNombre]['visitas'][] = [
                 'VIS_tipo' => $item->VIS_tipo,
-                'total_tipo_visitas' => $item->total_tipo_visitas,
-                'VIS_fechas' => $VIS_fechas,
-
+                'total_tipo_visitas' => $item->total_tipo_visitas ?? 0,
+                'VIS_fechas' => $fechaFormateada
             ];
         }
-            return ['resultado'=>$resultado, 'total_geneal' => $totalGeneal];
+
+        // Ordenar las visitas dentro de cada establecimiento por tipo
+        foreach ($resultado as $tipoKey => &$tipo) {
+            foreach ($tipo['establecimientos'] as $estKey => &$establecimiento) {
+                usort($establecimiento['visitas'], function($a, $b) {
+                    return strcmp($a['VIS_tipo'], $b['VIS_tipo']);
+                });
+            }
+        }
+
+        return [
+            'resultado' => $resultado, 
+            'total_general' => $totalGeneral
+        ];
     }
 
     // Agrupa los indicadores por categorias

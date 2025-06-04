@@ -46,52 +46,38 @@ class VisitaController extends Controller{
     }
 
 
-/**
- * historial
- *
- * @param  mixed $id
- * @return void
- * Consulta para obtener el historial de las visitas realizadas al establecimiento
- */
-public function historial($id){
-    $anioActual = date('Y'); // Obtiene el año actual
-    
-    // Obtener información básica del establecimiento (siempre existe)
-    $establecimientoBase = ModEstablecimiento::select(
-        'establecimientos.EST_id',
-        'establecimientos.EST_nombre',
-        'establecimientos.EST_departamento',
-        'establecimientos.EST_municipio',
-        'establecimientos.EST_direccion',
-        'establecimientos.EST_telefono_contacto',
-        'establecimientos.EST_capacidad_creacion',
-        'establecimientos.EST_anyo_funcionamiento',
-        'tipo_establecimientos.TES_tipo'
-    )
-    ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
-    ->where('establecimientos.EST_id', $id)
-    ->first();
-    
-    // Si no existe el establecimiento, retornar error o redirigir
-    if (!$establecimientoBase) {
-        abort(404, 'Establecimiento no encontrado');
-    }
-    
-    // Obtener información adicional del establecimiento para el año actual
-    $establecimientoInfo = ModEstablecimientoInfo::select(
-        'EINF_poblacion_atendida',
-        'EINF_cantidad_actual_internos',
-        'EINF_superficie_terreno',
-        'EINF_superficie_construida',
-        'EINF_derecho_propietario',
-        'EINF_gestion'
-    )
-    ->where('FK_EST_id', $id)
-    ->where('EINF_gestion', $anioActual)
-    ->first();
-    
-    // Si no hay info del año actual, buscar la más reciente
-    if (!$establecimientoInfo) {
+    /**
+     * historial
+     *
+     * @param  mixed $id
+     * @return void
+     * Consulta para obtener el historial de las visitas realizadas al establecimiento
+     */
+    public function historial($id){
+        $anioActual = date('Y'); // Obtiene el año actual
+        
+        // Obtener información básica del establecimiento (siempre existe)
+        $establecimientoBase = ModEstablecimiento::select(
+            'establecimientos.EST_id',
+            'establecimientos.EST_nombre',
+            'establecimientos.EST_departamento',
+            'establecimientos.EST_municipio',
+            'establecimientos.EST_direccion',
+            'establecimientos.EST_telefono_contacto',
+            'establecimientos.EST_capacidad_creacion',
+            'establecimientos.EST_anyo_funcionamiento',
+            'tipo_establecimientos.TES_tipo'
+        )
+        ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->where('establecimientos.EST_id', $id)
+        ->first();
+        
+        // Si no existe el establecimiento, retornar error o redirigir
+        if (!$establecimientoBase) {
+            abort(404, 'Establecimiento no encontrado');
+        }
+        
+        // Obtener información adicional del establecimiento para el año actual
         $establecimientoInfo = ModEstablecimientoInfo::select(
             'EINF_poblacion_atendida',
             'EINF_cantidad_actual_internos',
@@ -101,56 +87,57 @@ public function historial($id){
             'EINF_gestion'
         )
         ->where('FK_EST_id', $id)
-        ->orderByDesc('EINF_gestion')
+        ->where('EINF_gestion', $anioActual)
         ->first();
-    }
-    
-    // CREAR EL OBJETO ESTABLECIMIENTO DE FORMA CORRECTA
-    $establecimiento = new \stdClass();
-    
-    // Asignar datos base (siempre existen)
-    $establecimiento->EST_id = $establecimientoBase->EST_id;
-    $establecimiento->EST_nombre = $establecimientoBase->EST_nombre;
-    $establecimiento->EST_departamento = $establecimientoBase->EST_departamento;
-    $establecimiento->EST_municipio = $establecimientoBase->EST_municipio;
-    $establecimiento->EST_direccion = $establecimientoBase->EST_direccion;
-    $establecimiento->EST_telefono_contacto = $establecimientoBase->EST_telefono_contacto;
-    $establecimiento->EST_capacidad_creacion = $establecimientoBase->EST_capacidad_creacion;
-    $establecimiento->EST_anyo_funcionamiento = $establecimientoBase->EST_anyo_funcionamiento;
-    $establecimiento->TES_tipo = $establecimientoBase->TES_tipo;
-    
-    // Asignar datos de información adicional (pueden ser null)
-    if ($establecimientoInfo) {
-        $establecimiento->EINF_poblacion_atendida = $establecimientoInfo->EINF_poblacion_atendida;
-        $establecimiento->EINF_cantidad_actual_internos = $establecimientoInfo->EINF_cantidad_actual_internos;
-        $establecimiento->EINF_superficie_terreno = $establecimientoInfo->EINF_superficie_terreno;
-        $establecimiento->EINF_superficie_construida = $establecimientoInfo->EINF_superficie_construida;
-        $establecimiento->EINF_derecho_propietario = $establecimientoInfo->EINF_derecho_propietario;
-        $establecimiento->EINF_gestion = $establecimientoInfo->EINF_gestion;
-    } else {
-        // Si no hay información adicional, asignar null
-        $establecimiento->EINF_poblacion_atendida = null;
-        $establecimiento->EINF_cantidad_actual_internos = null;
-        $establecimiento->EINF_superficie_terreno = null;
-        $establecimiento->EINF_superficie_construida = null;
-        $establecimiento->EINF_derecho_propietario = null;
-        $establecimiento->EINF_gestion = $anioActual; // Gestión actual por defecto
-    }
-    
-    // Obtener el responsable del establecimiento para el año actual
-    $responsable = ModEstablecimientoPersonal::select(
-        'EPER_nombre_responsable',
-        'EPER_grado_profesion',
-        'EPER_telefono',
-        'EPER_email',
-        'EPER_gestion'
-    )
-    ->where('FK_EST_id', $id)
-    ->where('EPER_gestion', $anioActual)
-    ->first();
-    
-    // Si no hay responsable del año actual, buscar el más reciente
-    if (!$responsable) {
+        
+        // Si no hay info del año actual, buscar la más reciente
+        if (!$establecimientoInfo) {
+            $establecimientoInfo = ModEstablecimientoInfo::select(
+                'EINF_poblacion_atendida',
+                'EINF_cantidad_actual_internos',
+                'EINF_superficie_terreno',
+                'EINF_superficie_construida',
+                'EINF_derecho_propietario',
+                'EINF_gestion'
+            )
+            ->where('FK_EST_id', $id)
+            ->orderByDesc('EINF_gestion')
+            ->first();
+        }
+        
+        // CREAR EL OBJETO ESTABLECIMIENTO DE FORMA CORRECTA
+        $establecimiento = new \stdClass();
+        
+        // Asignar datos base (siempre existen)
+        $establecimiento->EST_id = $establecimientoBase->EST_id;
+        $establecimiento->EST_nombre = $establecimientoBase->EST_nombre;
+        $establecimiento->EST_departamento = $establecimientoBase->EST_departamento;
+        $establecimiento->EST_municipio = $establecimientoBase->EST_municipio;
+        $establecimiento->EST_direccion = $establecimientoBase->EST_direccion;
+        $establecimiento->EST_telefono_contacto = $establecimientoBase->EST_telefono_contacto;
+        $establecimiento->EST_capacidad_creacion = $establecimientoBase->EST_capacidad_creacion;
+        $establecimiento->EST_anyo_funcionamiento = $establecimientoBase->EST_anyo_funcionamiento;
+        $establecimiento->TES_tipo = $establecimientoBase->TES_tipo;
+        
+        // Asignar datos de información adicional (pueden ser null)
+        if ($establecimientoInfo) {
+            $establecimiento->EINF_poblacion_atendida = $establecimientoInfo->EINF_poblacion_atendida;
+            $establecimiento->EINF_cantidad_actual_internos = $establecimientoInfo->EINF_cantidad_actual_internos;
+            $establecimiento->EINF_superficie_terreno = $establecimientoInfo->EINF_superficie_terreno;
+            $establecimiento->EINF_superficie_construida = $establecimientoInfo->EINF_superficie_construida;
+            $establecimiento->EINF_derecho_propietario = $establecimientoInfo->EINF_derecho_propietario;
+            $establecimiento->EINF_gestion = $establecimientoInfo->EINF_gestion;
+        } else {
+            // Si no hay información adicional, asignar null
+            $establecimiento->EINF_poblacion_atendida = null;
+            $establecimiento->EINF_cantidad_actual_internos = null;
+            $establecimiento->EINF_superficie_terreno = null;
+            $establecimiento->EINF_superficie_construida = null;
+            $establecimiento->EINF_derecho_propietario = null;
+            $establecimiento->EINF_gestion = $anioActual; // Gestión actual por defecto
+        }
+        
+        // Obtener el responsable del establecimiento para el año actual
         $responsable = ModEstablecimientoPersonal::select(
             'EPER_nombre_responsable',
             'EPER_grado_profesion',
@@ -159,51 +146,64 @@ public function historial($id){
             'EPER_gestion'
         )
         ->where('FK_EST_id', $id)
-        ->orderByDesc('EPER_gestion')
+        ->where('EPER_gestion', $anioActual)
         ->first();
-    }
-    
-    // Obtener documentos del establecimiento (reglamento, licencia, foto fachada)
-    $documentos = ModArchivo::select(
-        'ARC_id',
-        'ARC_descripcion',
-        'ARC_ruta',
-        'ARC_extension',
-        'ARC_formatoArchivo',
-        'ARC_origen'
-    )
-    ->where('FK_EST_id', $id)
-    ->whereIn('ARC_origen', ['reglamento', 'licencia', 'fachada'])
-    ->get()
-    ->keyBy('ARC_origen');
-    
-    // Obtener visitas 
-    $visitas = ModVisita::from('visitas as v')
-    ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo', 'e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
-    ->rightJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-    ->rightJoin('tipo_establecimientos as tes', 'tes.TES_id', 'e.FK_TES_id')
-    ->where('e.EST_id', $id)
-    ->orderBy('v.VIS_fechas', 'desc')
-    ->get();
+        
+        // Si no hay responsable del año actual, buscar el más reciente
+        if (!$responsable) {
+            $responsable = ModEstablecimientoPersonal::select(
+                'EPER_nombre_responsable',
+                'EPER_grado_profesion',
+                'EPER_telefono',
+                'EPER_email',
+                'EPER_gestion'
+            )
+            ->where('FK_EST_id', $id)
+            ->orderByDesc('EPER_gestion')
+            ->first();
+        }
+        
+        // Obtener documentos del establecimiento (reglamento, licencia, foto fachada)
+        $documentos = ModArchivo::select(
+            'ARC_id',
+            'ARC_descripcion',
+            'ARC_ruta',
+            'ARC_extension',
+            'ARC_formatoArchivo',
+            'ARC_origen'
+        )
+        ->where('FK_EST_id', $id)
+        ->whereIn('ARC_origen', ['reglamento', 'licencia', 'fachada'])
+        ->get()
+        ->keyBy('ARC_origen');
+        
+        // Obtener visitas 
+        $visitas = ModVisita::from('visitas as v')
+        ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo', 'e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
+        ->rightJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
+        ->rightJoin('tipo_establecimientos as tes', 'tes.TES_id', 'e.FK_TES_id')
+        ->where('e.EST_id', $id)
+        ->orderBy('v.VIS_fechas', 'desc')
+        ->get();
 
-    // Verificar si hay visitas antes de acceder al array
-    if ($visitas->count() > 0) {
-        session()->put('EST_id', $visitas->first()->EST_id);
-        session()->put('EST_nombre', $visitas->first()->EST_nombre);
-        session()->put('TES_tipo', $visitas->first()->TES_tipo);
-    } else {
-        // Usar los datos del establecimiento base que ya tenemos
-        session()->put('EST_id', $establecimientoBase->EST_id);
-        session()->put('EST_nombre', $establecimientoBase->EST_nombre);
-        session()->put('TES_tipo', $establecimientoBase->TES_tipo);
+        // Verificar si hay visitas antes de acceder al array
+        if ($visitas->count() > 0) {
+            session()->put('EST_id', $visitas->first()->EST_id);
+            session()->put('EST_nombre', $visitas->first()->EST_nombre);
+            session()->put('TES_tipo', $visitas->first()->TES_tipo);
+        } else {
+            // Usar los datos del establecimiento base que ya tenemos
+            session()->put('EST_id', $establecimientoBase->EST_id);
+            session()->put('EST_nombre', $establecimientoBase->EST_nombre);
+            session()->put('TES_tipo', $establecimientoBase->TES_tipo);
+        }
+        
+        // DEBUG: Temporalmente para verificar datos
+        // dd($establecimiento, $responsable);
+        
+        return view('visita.visita-historial', compact('visitas', 'establecimiento', 'responsable', 'documentos', 'anioActual'));
     }
-    
-    // DEBUG: Temporalmente para verificar datos
-    // dd($establecimiento, $responsable);
-    
-    return view('visita.visita-historial', compact('visitas', 'establecimiento', 'responsable', 'documentos', 'anioActual'));
-}
-
+        
     
     /*Vista para guardar nueva acta de Visita */
     public function actaVisita($VIS_id){
@@ -256,7 +256,7 @@ public function historial($id){
             exit ($e->getMessage());
         }
     }
-
+    
     public function guardarDocumentoEstablecimiento(Request $request){
         $request->validate([
             'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:20048',
@@ -359,43 +359,86 @@ public function historial($id){
             return redirect()->back()->with('error', 'Error al guardar el documento: ' . $e->getMessage());
         }
     }
-
+    
+    // Muestra un breve resumen de las visitas en la vista principal
     public function resumen(Request $request) {
-        $anioActual = 0;
-        if(is_null($request->anio_actual)){
-            $anioActual = date('Y');
-        } else {
-            $anioActual = $request->anio_actual;
-        }
-        DB::enableQueryLog();
-
-        $totalVisitas = DB::table('tipo_establecimientos as te')
-            ->select('te.TES_tipo', 'e.EST_nombre', 'v.VIS_tipo', 'e.EST_id','v.VIS_fechas',
-            DB::raw('COUNT(v."VIS_id") AS total_tipo_visitas'),
-            DB::raw('SUM(COUNT(v."VIS_id")) OVER(PARTITION BY te."TES_tipo") AS total_tipo_establecimiento'),
-            'total_establecimiento.total_establecimiento AS total_establecimiento')
-            ->join('establecimientos as e', 'e.FK_TES_id', 'te.TES_id')
-            ->join('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-            ->join(DB::raw('(SELECT e."EST_nombre",  COUNT(v."VIS_id") AS total_establecimiento
-                            FROM establecimientos e
-                            JOIN visitas v ON v."FK_EST_id" = e."EST_id"
-                            GROUP BY e."EST_nombre") total_establecimiento'),
-                    'total_establecimiento.EST_nombre', 'e.EST_nombre')
-            ->leftJoin(DB::raw('(SELECT COUNT(v."VIS_id") AS total_general
-                    FROM visitas v) total_general'), DB::raw('1'), '=', DB::raw('1'))
-            ->whereYear('v.VIS_fechas', $anioActual)
-            ->groupBy('te.TES_tipo', 'e.EST_nombre', 'e.EST_id', 'v.VIS_tipo', 'total_establecimiento.total_establecimiento', 'total_general.total_general', 'v.VIS_fechas')
-            ->orderBy('te.TES_tipo')
-            ->orderBy('e.EST_nombre')
-            ->orderBy('e.EST_id')
-            ->orderBy('v.VIS_tipo')
-            ->addSelect(DB::raw('total_general.total_general AS total_general'))
+        $anioActual = $request->input('anio_actual', date('Y'));
+        
+        // Usar Eloquent para evitar problemas de case-sensitivity
+        $visitas = ModVisita::select([
+                'visitas.VIS_id',
+                'visitas.VIS_tipo', 
+                'visitas.VIS_fechas',
+                'establecimientos.EST_id',
+                'establecimientos.EST_nombre',
+                'tipo_establecimientos.TES_tipo'
+            ])
+            ->join('establecimientos', 'visitas.FK_EST_id', '=', 'establecimientos.EST_id')
+            ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', '=', 'tipo_establecimientos.TES_id')
+            ->whereYear('visitas.VIS_fechas', $anioActual)
+            ->orderBy('tipo_establecimientos.TES_tipo')
+            ->orderBy('establecimientos.EST_nombre')
+            ->orderBy('visitas.VIS_tipo')
             ->get();
 
-        $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
-        return view('visita.visita-resumen', compact('totalVisitas', 'anioActual'));
+        if ($visitas->isEmpty()) {
+            $totalVisitasProcessed = [
+                'resultado' => [],
+                'total_general' => 0
+            ];
+        } else {
+            // Procesar datos usando Collections de Laravel
+            $visitasAgrupadas = $visitas->groupBy(['TES_tipo', 'EST_nombre', 'VIS_tipo']);
+            
+            $datosParaVista = collect();
+            
+            foreach ($visitasAgrupadas as $tipoEst => $establecimientos) {
+                foreach ($establecimientos as $nombreEst => $tiposVisita) {
+                    foreach ($tiposVisita as $tipoVisita => $visitasDelTipo) {
+                        $primerVisita = $visitasDelTipo->first();
+                        $ultimaVisita = $visitasDelTipo->last();
+                        
+                        $datosParaVista->push((object)[
+                            'TES_tipo' => $tipoEst,
+                            'EST_nombre' => $nombreEst,
+                            'EST_id' => $primerVisita->EST_id,
+                            'VIS_tipo' => $tipoVisita,
+                            'total_tipo_visitas' => $visitasDelTipo->count(),
+                            'primera_fecha' => $visitasDelTipo->min('VIS_fechas'),
+                            'ultima_fecha' => $visitasDelTipo->max('VIS_fechas'),
+                            'VIS_fechas' => $visitasDelTipo->min('VIS_fechas'),
+                            'total_general' => $visitas->count()
+                        ]);
+                    }
+                }
+            }
+            
+            // Calcular totales por tipo de establecimiento y establecimiento
+            $totalesPorTipo = $datosParaVista->groupBy('TES_tipo')
+                ->map(function($grupo) {
+                    return $grupo->sum('total_tipo_visitas');
+                });
+                
+            $totalesPorEstablecimiento = $datosParaVista->groupBy(['TES_tipo', 'EST_nombre'])
+                ->map(function($tipoGrupo) {
+                    return $tipoGrupo->map(function($estGrupo) {
+                        return $estGrupo->sum('total_tipo_visitas');
+                    });
+                });
+            
+            // Agregar totales a cada item
+            $datosParaVista = $datosParaVista->map(function($item) use ($totalesPorTipo, $totalesPorEstablecimiento) {
+                $item->total_tipo_establecimiento = $totalesPorTipo[$item->TES_tipo] ?? 0;
+                $item->total_establecimiento = $totalesPorEstablecimiento[$item->TES_tipo][$item->EST_nombre] ?? 0;
+                return $item;
+            });
+            
+            $totalVisitasProcessed = CustomController::agruparPorTipoYNombre($datosParaVista);
+        }
+        
+        return view('visita.visita-resumen', compact('totalVisitasProcessed', 'anioActual'));
     }
-
+    
     /**
      * Mostrar formulario de edición del establecimiento
      */
