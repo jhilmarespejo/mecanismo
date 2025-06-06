@@ -51,7 +51,7 @@
 
     .grafico-container {
         flex-grow: 1;
-        min-height: 400px;
+        min-height: 350px;
     }
 
     /* Controles para gráficos animados */

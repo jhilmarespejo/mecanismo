@@ -61,15 +61,15 @@
             {{-- boton para el plegar/desplegar el cuestionario --}}
             <legend class="text-primary fs-3 text-center" > Cuestionario</legend>
 
-            @desktop
+            {{-- @desktop --}}
                 <div class="form-switch fs-4">
                     <input class="form-check-input" type="checkbox" checked onclick="plegar_desplegar('frm_cuestionario')">
                 </div>
                 @include('includes.cuestionario_desktop')
-            @enddesktop
-            @mobile
+            {{-- @enddesktop --}}
+            {{-- @mobile
                 @include('includes.cuestionario_mobile')
-            @endmobile
+            @endmobile --}}
         </div>
 
         {{-- INCLUDE para Recomendaciones --}}
