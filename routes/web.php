@@ -203,7 +203,7 @@ Route::get('indicadores/resultados', [IndicadorController::class, 'obtenerResult
 
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');
 Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth')->name('asesoramientos.create');
-Route::post('/asesoramientos', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
+Route::post('/asesoramientos/store', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
 Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth')->name('asesoramientos.show');
 Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth')->name('asesoramientos.edit');
 Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth')->name('asesoramientos.update');
