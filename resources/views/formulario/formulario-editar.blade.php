@@ -135,7 +135,20 @@
                                 <!-- Mostrar el tipo de respuesta en forma adecuada según su tipo -->
                                 <div class="border-bottom pb-2 mb-3">
                                     {{-- <strong>Tipo de pregunta</strong> <span class="badge bg-primary">{{ $pregunta->BCP_tipoRespuesta }}</span> --}}
-                                    <span class="text-muted" style="font-size: 13px"><b>Tipo de respuesta: </b> {{ ($pregunta->BCP_tipoRespuesta == 'Respuesta corta' || $pregunta->BCP_tipoRespuesta == 'Respuesta larga')? 'Texto' : $pregunta->BCP_tipoRespuesta }}</span>
+                                    @php
+                                        $tipo = $pregunta->BCP_tipoRespuesta;
+
+                                        if ($tipo == 'Respuesta corta' || $tipo == 'Respuesta larga') {
+                                            $tipoFormateado = 'Texto';
+                                        } elseif ($tipo == 'Lista desplegable') {
+                                            $tipoFormateado = 'Única opción';
+                                        } else {
+                                            $tipoFormateado = $tipo;
+                                        }
+                                    @endphp
+                                    <span class="text-muted" style="font-size: 13px"><b>Tipo de respuesta: </b> {{ $tipoFormateado }}
+                                        
+                                    </span>
                                 </div>
                                 
                                 @if(strpos($pregunta->BCP_tipoRespuesta, 'Casilla') !== false)

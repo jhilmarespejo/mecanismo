@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Cuestionario')
+@section('title', 'Observaciones')
 @php
     $EST_id = session('EST_id');
     $TES_tipo = session('TES_tipo');
