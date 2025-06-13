@@ -344,25 +344,74 @@
         });
 
         // Función para permitir desmarcar radio buttons
-        var radioButtons = $('input[type="radio"]');
-        var selectedValue = null;
-
-        radioButtons.off('click').on('click', function(event) {
-            if (this.value === selectedValue) {
-                this.checked = false;
-                selectedValue = null;
-                event.preventDefault();
-            } else {
-                selectedValue = this.value;
+       // Manejar cada formulario de indicadores por separado
+        $('.formularioIndicadores').each(function() {
+            const $form = $(this);
+            const $radioButtons = $form.find('input[type="radio"][name="respuesta"]');
+            const indicadorId = $form.attr('id').split('_')[1]; // Extraer ID del indicador
+            
+            // Solo procesar si tiene radio buttons
+            if ($radioButtons.length === 0) return;
+            
+            // Crear contenedor para el botón "Quitar selección" si no existe
+            let $clearContainer = $form.find('.clear-selection-container');
+            if ($clearContainer.length === 0) {
+                $clearContainer = $('<div class="clear-selection-container mt-2 mb-2" style="display: none;"></div>');
+                $radioButtons.last().closest('.form-check').after($clearContainer);
             }
+            
+            // Crear botón "Quitar selección"
+            const $clearButton = $('<button type="button" class="btn btn-sm btn-outline-secondary">' +
+                                '<i class="bi bi-x-circle me-1"></i>Quitar selección</button>');
+            $clearContainer.empty().append($clearButton);
+            
+            // Función para mostrar/ocultar el botón "Quitar selección"
+            function toggleClearButton() {
+                const hasSelection = $radioButtons.is(':checked');
+                $clearContainer.toggle(hasSelection);
+            }
+            
+            // Función para limpiar selección
+            function clearSelection() {
+                $radioButtons.prop('checked', false);
+                toggleClearButton();
+            }
+            
+            // Event listeners
+            $radioButtons.off('click.clearSelection').on('click.clearSelection', function(event) {
+                const $this = $(this);
+                const currentValue = $this.val();
+                
+                // Si ya estaba seleccionado, desmarcarlo
+                if ($this.data('was-checked')) {
+                    clearSelection();
+                    event.preventDefault();
+                    return false;
+                }
+                
+                // Actualizar estado de todos los radio buttons del grupo
+                $radioButtons.each(function() {
+                    $(this).data('was-checked', this === $this[0]);
+                });
+                
+                toggleClearButton();
+            });
+            
+            // Evento del botón "Quitar selección"
+            $clearButton.off('click').on('click', function() {
+                clearSelection();
+            });
+            
+            // Inicializar estado
+            $radioButtons.each(function() {
+                $(this).data('was-checked', this.checked);
+            });
+            
+            // Mostrar botón si ya hay selección inicial
+            toggleClearButton();
         });
 
-        // Capturar el valor seleccionado inicialmente
-        radioButtons.each(function() {
-            if (this.checked) {
-                selectedValue = this.value;
-            }
-        });
+
     });
 
     // Resetear flags cuando la página termine de cargar

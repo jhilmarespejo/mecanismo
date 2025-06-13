@@ -62,7 +62,7 @@
 
 
                                 <a href="/cuestionario/duplicarCuestionario/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
-                                    <strong>Crear Nuevo formulario_ </strong>
+                                    <strong>Aplicar Nuevo formulario </strong>
                                 </a>
                                 
                                 @if (Auth::user()->rol == 'Administrador')

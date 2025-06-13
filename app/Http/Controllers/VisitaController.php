@@ -18,15 +18,45 @@ use PhpOffice\PhpWord\Style\ListItem;
 
 class VisitaController extends Controller{
     
+    // // Guardar datos de nueva visita
+    // public function guardarNuevaVisita( Request $request ) {
+        
+    //     $validator = Validator::make($request->all(), [
+    //         'VIS_tipo' => 'required',
+    //         'VIS_fechas' => 'required|date|after_or_equal:today',
+    //     ], [
+    //         'required' => 'El dato es requerido!',
+    //         'after_or_equal' => 'La fecha está en el pasado'
+    //     ]);
+
+    //     if ( $validator->fails() ){
+    //         return response()->json( [ 'errors' => $validator->errors() ] );
+    //     } else {
+    //         DB::beginTransaction();
+    //         try {
+    //             ModVisita::insert($request->except('_token'));
+    //             DB::commit();
+    //             // dump($request->except('_token'));exit;
+    //             //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
+    //         }catch (\Exception $e) {
+    //             DB::rollback();
+    //             exit ($e->getMessage());
+    //         }
+    //     }
+    // }
+
     // Guardar datos de nueva visita
     public function guardarNuevaVisita( Request $request ) {
         
         $validator = Validator::make($request->all(), [
             'VIS_tipo' => 'required',
             'VIS_fechas' => 'required|date|after_or_equal:today',
+            'VIS_fecha_fin' => 'required|date|after_or_equal:VIS_fechas',
         ], [
             'required' => 'El dato es requerido!',
-            'after_or_equal' => 'La fecha está en el pasado'
+            'VIS_fechas.after_or_equal' => 'La fecha de inicio no puede ser en el pasado',
+            'VIS_fecha_fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+            'date' => 'Formato de fecha inválido'
         ]);
 
         if ( $validator->fails() ){
@@ -36,11 +66,10 @@ class VisitaController extends Controller{
             try {
                 ModVisita::insert($request->except('_token'));
                 DB::commit();
-                // dump($request->except('_token'));exit;
-                //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
+                return response()->json([ "message" => "¡Datos almacenados con éxito!" ]);
             }catch (\Exception $e) {
                 DB::rollback();
-                exit ($e->getMessage());
+                return response()->json([ "error" => "Error al guardar: " . $e->getMessage() ], 500);
             }
         }
     }
