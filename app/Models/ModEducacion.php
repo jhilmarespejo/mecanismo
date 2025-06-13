@@ -11,7 +11,7 @@ class ModEducacion extends Model
     protected $table = 'educacion';
     use HasFactory;
 
-    protected $primaryKey = 'edu_id';
+    protected $primaryKey = 'EDU_id';
     public $incrementing = true;
 
 

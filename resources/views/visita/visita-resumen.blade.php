@@ -60,12 +60,20 @@
             </div>
         </div>
         
+        <!-- Estilo para flechas del accordion -->
+        <style>
+            .accordion-button::after {
+                background-color: #ffffff;
+                border-radius: 50%;
+                padding: 8px;
+            }
+        </style>
         <div class="accordion mt-3" id="accordionTipoEstablecimientos">
             @php $tipoE = 0; @endphp
             @foreach ($totalVisitasProcessed['resultado'] as $tipoEstablecimiento => $tipos)
             <div class="accordion-item mt-2 box-shadow">
                 <h2 class="accordion-header" id="heading_tipo_{{ $tipoE }}">
-                    <button class="accordion-button bg-secondary text-white p-3" 
+                    <button class="accordion-button bg-primary text-white p-3" 
                             type="button" 
                             data-bs-toggle="collapse" 
                             data-bs-target="#collapse_tipo_{{ $tipoE }}" 
@@ -96,7 +104,7 @@
                             @foreach ($tipos['establecimientos'] as $nombreEstablecimiento => $establecimiento)
                             <div class="accordion-item mt-1">
                                 <h2 class="accordion-header" id="heading_est_{{ $tipoE }}_{{ $e }}">
-                                    <button class="accordion-button collapsed p-2" 
+                                    <button class="accordion-button collapsed p-2 bg-light" 
                                             type="button" 
                                             data-bs-toggle="collapse" 
                                             data-bs-target="#collapse_est_{{ $tipoE }}_{{ $e }}" 

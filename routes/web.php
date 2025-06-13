@@ -222,9 +222,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/educacion/{id}', [EducacionController::class, 'update'])->name('educacion.update');
     Route::delete('/educacion/{id}', [EducacionController::class, 'destroy'])->name('educacion.destroy');
 });
+
+
 // AJUSTES
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
-
 
 // INTEROPERABILIDAD
 Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
@@ -233,4 +234,8 @@ Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->
 Route::resource('educacion', EducacionController::class);
 
 
+// // Alternativa usando resource route (más limpio)
+// Route::middleware('auth')->group(function () {
+//     Route::resource('educacion', EducacionController::class);
+// });
 
