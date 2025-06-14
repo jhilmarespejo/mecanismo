@@ -371,13 +371,14 @@
 
 {{-- BOTÓN FLOTANTE PARA AGREGAR FORMULARIOS (Solo Administradores) --}}
 @if(Auth::user()->rol == 'Administrador')
-    <div class="floating-action">
+    <div class="floating-action-discrete">
         <a href="/formulario/eleccion/{{ $VIS_id }}/{{ $VIS_tipo }}" 
-           class="btn btn-lg action-btn btn-responder rounded-circle"
+           class="btn btn-lg btn-success box-shadow w-50 text-shadow"
            data-bs-toggle="tooltip" 
            data-bs-placement="left" 
-           title="Asignar nuevo formulario">
-            <i class="bi bi-plus-lg"></i>
+           title="Adicionar formulario a esta visita">
+            <i class="bi bi-plus-circle me-2"></i>
+            <span class="btn-text">Agregar Formulario</span>
         </a>
     </div>
 @endif

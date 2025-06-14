@@ -3,70 +3,70 @@
 @endphp
 
 <style>
-.seccion-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px;
-    margin: 20px 0 10px 0;
-    border-radius: 8px;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.subseccion-header {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    padding: 12px;
-    margin: 15px 0 8px 0;
-    border-radius: 6px;
-    font-size: 1.1em;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.pregunta-container {
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-}
-
-.pregunta-container.respondida {
-    border-left-color: #28a745;
-}
-
-.pregunta-container.sin-responder {
-    border-left-color: #ffc107;
-}
-
-.pregunta-container.en-foco {
-    border-left-color: #007bff;
-    background-color: #f8f9fa;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.notificacion-guardado {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    min-width: 250px;
-}
-
-.progress-sidebar {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 60px;
-    z-index: 1040;
-}
-
-@media (max-width: 768px) {
-    .progress-sidebar {
-        display: none;
+    .seccion-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        margin: 20px 0 10px 0;
+        border-radius: 8px;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: left;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-}
+
+    .subseccion-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 12px;
+        margin: 15px 0 8px 25px;
+        border-radius: 6px;
+        font-size: 1.1em;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pregunta-container {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+    }
+
+    .pregunta-container.respondida {
+        border-left-color: #28a745;
+    }
+
+    .pregunta-container.sin-responder {
+        border-left-color: #ffc107;
+    }
+
+    .pregunta-container.en-foco {
+        border-left-color: #007bff;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .notificacion-guardado {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 250px;
+    }
+
+    .progress-sidebar {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 60px;
+        z-index: 1040;
+    }
+
+    @media (max-width: 768px) {
+        .progress-sidebar {
+            display: none;
+        }
+    }
 </style>
 
 <!-- Notificaciones flotantes -->
@@ -118,7 +118,7 @@
                 </li>
             @else
                 {{-- PREGUNTA NORMAL --}}
-                <li class="pregunta-container border-bottom py-3 hover p-2 elementos" 
+                <li class="pregunta-container border-bottom py-3 hover p-2 elementos ms-5" 
                     data-pregunta-id="{{ $pregunta_numero }}" 
                     data-rbf-id="{{ $item['RBF_id'] }}"
                     data-bcp-id="{{ $item['BCP_id'] }}"
@@ -157,13 +157,13 @@
                                     <div class="{{ ($item['BCP_tipoRespuesta'] == 'Casilla verificación') ? 'group-check' : 'group-radio' }}">
                                         @foreach($opcionesSC as $opcion)
                                             @if($item['BCP_tipoRespuesta'] == 'Casilla verificación')
-                                                <div class="col-auto d-flex mb-2">
+                                                <div class="col-auto d-flex mb-2 text-start">
                                                     <input {{ in_array($opcion, $respuestasSC) ? 'checked' : '' }} 
                                                            type='checkbox' name="RES_respuesta[]" value="{{ $opcion }}" 
                                                            class="me-2"> {{ $opcion }}
                                                 </div>
                                             @elseif(in_array($item['BCP_tipoRespuesta'], ['Afirmación', 'Lista desplegable']))
-                                                <div class="col-auto d-flex mb-2">
+                                                <div class="col-auto d-flex mb-2 text-start">
                                                     <input {{ ($item['RES_respuesta'] == $opcion) ? 'checked' : '' }} 
                                                            type='radio' name="RES_respuesta" value="{{ $opcion }}" 
                                                            class="me-2"> {{ $opcion }}
