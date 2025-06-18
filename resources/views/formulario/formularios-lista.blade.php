@@ -10,132 +10,132 @@
 @endphp
 
 <style>
-.formulario-card {
-    transition: all 0.3s ease;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+    .formulario-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-.formulario-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
+    .formulario-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
 
-.formulario-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px;
-    padding: 20px;
-    color: white;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.aplicacion-item {
-    transition: all 0.2s ease;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    background: #fff;
-}
-
-.aplicacion-item:hover {
-    border-color: #007bff;
-    background: #f8f9fa;
-}
-
-.aplicacion-completada {
-    border-color: #28a745;
-    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-}
-
-.aplicacion-pendiente {
-    border-color: #ffc107;
-    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-}
-
-/* .stats-badge {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 600;
-} */
-
-.action-btn {
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    padding: 8px 12px;
-    border: none;
-    font-weight: 500;
-}
-
-.action-btn:hover {
-    transform: scale(1.05);
-}
-
-.btn-responder {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-eliminar {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-    color: white;
-}
-
-.progress-ring {
-    width: 60px;
-    height: 60px;
-    transform: rotate(-90deg);
-}
-
-.progress-ring-circle {
-    stroke: #e9ecef;
-    stroke-width: 4;
-    fill: transparent;
-    r: 26;
-    cx: 30;
-    cy: 30;
-}
-
-.progress-ring-progress {
-    stroke: #28a745;
-    stroke-width: 4;
-    fill: transparent;
-    r: 26;
-    cx: 30;
-    cy: 30;
-    stroke-dasharray: 163.36;
-    stroke-dashoffset: 163.36;
-    transition: stroke-dashoffset 0.5s ease;
-}
-
-.header-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-}
-
-.floating-action {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-@media (max-width: 768px) {
-    .aplicacion-item {
+    .formulario-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        text-align: center;
         margin-bottom: 15px;
     }
-    
-    .floating-action {
-        bottom: 10px;
-        right: 10px;
+
+    .aplicacion-item {
+        transition: all 0.2s ease;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #fff;
     }
-}
+
+    .aplicacion-item:hover {
+        border-color: #007bff;
+        background: #f8f9fa;
+    }
+
+    .aplicacion-completada {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+
+    .aplicacion-pendiente {
+        border-color: #ffc107;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+
+    /* .stats-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+    } */
+
+    .action-btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        padding: 8px 12px;
+        border: none;
+        font-weight: 500;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-responder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-eliminar {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        color: white;
+    }
+
+    .progress-ring {
+        width: 60px;
+        height: 60px;
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        stroke: #e9ecef;
+        stroke-width: 4;
+        fill: transparent;
+        r: 26;
+        cx: 30;
+        cy: 30;
+    }
+
+    .progress-ring-progress {
+        stroke: #28a745;
+        stroke-width: 4;
+        fill: transparent;
+        r: 26;
+        cx: 30;
+        cy: 30;
+        stroke-dasharray: 163.36;
+        stroke-dashoffset: 163.36;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .floating-action {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    @media (max-width: 768px) {
+        .aplicacion-item {
+            margin-bottom: 15px;
+        }
+        
+        .floating-action {
+            bottom: 10px;
+            right: 10px;
+        }
+    }
 </style>
 
 {{-- SUB MENU --}}
@@ -258,7 +258,7 @@
                                 </div>
                             </div>
                             
-                            {{-- COLUMNA DERECHA: LISTA DE APLICACIONES --}}
+                            {{-- COLUMNA DERECHA: LISTA DE APLICACIONES DE FORMULARIOS --}}
                             <div class="col-lg-8 col-12">
                                 {{-- MENSAJE DE ALERTA PARA FORMULARIOS ÚNICOS --}}
                                 @if($aplicaciones[0]["FRM_tipo"] == '1' && session('warning'))
@@ -283,7 +283,6 @@
                                                 default => ''
                                             };
                                         @endphp
-                                        
                                         <div class="aplicacion-item {{ $claseEstado }} p-3">
                                             <div class="row align-items-center">
                                                 {{-- ÍCONO Y PROGRESO --}}

@@ -46,29 +46,52 @@ class CustomController extends Controller {
 
     public static function agruparRespuestasCerradas($arrayOriginal) {
         $nuevoArray = [];
+        
         foreach ($arrayOriginal as $elemento) {
+            // Convertir stdClass a array si es necesario
+            if (is_object($elemento)) {
+                $elemento = (array) $elemento;
+            }
+            
+            // Verificar que el elemento tenga las claves necesarias
+            if (!isset($elemento["CAT_categoria"]) || !isset($elemento["BCP_pregunta"])) {
+                continue; // Saltar elementos malformados
+            }
+            
             // Crear un nuevo elemento con las claves deseadas
             $nuevoElemento = [
-                "CAT_categoria" => $elemento["CAT_categoria"],
-                "BCP_pregunta" => $elemento["BCP_pregunta"],
-                "RBF_id" => $elemento["RBF_id"],
-                "RBF_orden" => $elemento["RBF_orden"],
-                "BCP_tipoRespuesta" => $elemento["BCP_tipoRespuesta"],
+                "CAT_categoria" => $elemento["CAT_categoria"] ?? 'Sin categoría',
+                "BCP_pregunta" => $elemento["BCP_pregunta"] ?? 'Sin pregunta',
+                "RBF_id" => $elemento["RBF_id"] ?? null,
+                "RBF_orden" => $elemento["RBF_orden"] ?? 0,
+                "BCP_tipoRespuesta" => $elemento["BCP_tipoRespuesta"] ?? 'Desconocido',
                 "respuestas" => []
             ];
-
-            // Filtrar las respuestas del elemento
-            $respuestas = array_filter($elemento, function ($key) {
-                return $key != "CAT_categoria" && $key != "BCP_pregunta" && $key != "RBF_id" && $key != "RBF_orden" && $key != "BCP_tipoRespuesta";
+            
+            // Filtrar las respuestas del elemento (excluir metadatos)
+            $clavesExcluidas = [
+                "CAT_categoria", "BCP_pregunta", "RBF_id", 
+                "RBF_orden", "BCP_tipoRespuesta"
+            ];
+            
+            $respuestas = array_filter($elemento, function ($key) use ($clavesExcluidas) {
+                return !in_array($key, $clavesExcluidas);
             }, ARRAY_FILTER_USE_KEY);
-
+            
+            // Limpiar respuestas vacías o nulas
+            $respuestas = array_filter($respuestas, function($valor) {
+                return $valor !== null && $valor !== '' && $valor !== 0;
+            });
+            
             // Agregar las respuestas al nuevo elemento
             $nuevoElemento["respuestas"] = $respuestas;
-
-            // Agregar el nuevo elemento al array final
-            $nuevoArray[] = $nuevoElemento;
+            
+            // Solo agregar si tiene respuestas válidas
+            if (!empty($respuestas)) {
+                $nuevoArray[] = $nuevoElemento;
+            }
         }
-
+        
         return $nuevoArray;
     }
 

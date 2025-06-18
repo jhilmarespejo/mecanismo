@@ -11,7 +11,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class FormularioController extends Controller
 {
-    // ========== FUNCIONES PRINCIPALES ACTIVAS ==========
     
     public function index() {
         $formularios = ModFormulario::all();
@@ -124,7 +123,7 @@ class FormularioController extends Controller
                                 AND respuestas_dadas.\"AGF_id\" = af.\"AGF_id\"
             
             WHERE af.\"FK_VIS_id\" = :vis_id
-            ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\"
+            ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\" DESC
         ", ['vis_id' => $VIS_id]);
 
         // Convertir a array para compatibilidad
