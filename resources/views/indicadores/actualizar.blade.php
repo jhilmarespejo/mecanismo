@@ -145,37 +145,37 @@
                                                             <strong><i class="bi bi-exclamation-triangle"></i></strong> Inserte una respuesta
                                                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                         </div>
-                                                        <hr>
+                                                        
                                                     </form>
                                                     @if ($pregunta['IND_tipo_repuesta'] == 'Lista centros penitenciarios')
                                                         <br>
-                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#centrosModal_{{ $pregunta['IND_id'] }}">
+                                                        <button type="button" class="btn btn-success text-shadow text-light" data-bs-toggle="modal" data-bs-target="#centrosModal_{{ $pregunta['IND_id'] }}">
                                                             <i class="bi bi-building"></i> Insertar datos por centro - {{ $gestion }}
                                                         </button> <br>
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'centros penitenciarios'])
 
                                                     @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista sexo')
                                                         <br>
-                                                        <button type="button" class="btn btn-success text-shadow" data-bs-toggle="modal" data-bs-target="#listaSexoModal_{{ $pregunta['IND_id'] }}">
+                                                        <button type="button" class="btn btn-success text-shadow text-light" data-bs-toggle="modal" data-bs-target="#listaSexoModal_{{ $pregunta['IND_id'] }}">
                                                             <i class="bi bi-people"></i> Insertar datos por sexo - {{ $gestion }}
                                                         </button> <br>
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista sexo'])
 
                                                     @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista delitos')
                                                         <br>
-                                                        <button type="button" class="btn btn-warning text-shadow" data-bs-toggle="modal" data-bs-target="#listaDelitosModal_{{ $pregunta['IND_id'] }}">
-                                                            <i class="bi bi-exclamation-triangle"></i> Insertar datos por delitos - {{ $gestion }}
+                                                        <button type="button" class="btn btn-success text-shadow text-light" data-bs-toggle="modal" data-bs-target="#listaDelitosModal_{{ $pregunta['IND_id'] }}">
+                                                            <i class="bi bi-view-list"></i> Insertar datos por delitos - {{ $gestion }}
                                                         </button> <br>
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista delitos'])
 
                                                     @elseif ($pregunta['IND_tipo_repuesta'] == 'Lista departamentos')
                                                         <br>
-                                                        <button type="button" class="btn btn-info text-shadow" data-bs-toggle="modal" data-bs-target="#listaDepartamentosModal_{{ $pregunta['IND_id'] }}">
+                                                        <button type="button" class="btn btn-success text-shadow text-light" data-bs-toggle="modal" data-bs-target="#listaDepartamentosModal_{{ $pregunta['IND_id'] }}">
                                                             <i class="bi bi-geo-alt"></i> Insertar datos por departamentos - {{ $gestion }}
                                                         </button> <br>
                                                         @include('indicadores.listas_modal', ['parametro' => $pregunta['IND_parametro'], 'tipo' => 'Lista departamentos'])
                                                     @endif
-
+                                                <hr>
 
                                                 @endforeach
                                                 
