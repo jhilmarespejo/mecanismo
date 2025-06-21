@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\{DB, Auth, Redirect, Validator, Session};
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\{VisitaController, CustomController};
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+
 
 class FormularioController extends Controller
 {
@@ -344,8 +346,8 @@ class FormularioController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             
-            \Log::error('Error al actualizar formulario: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Error al actualizar formulario: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             
             return redirect()->route('formulario.editar', $id)
                             ->with('error', 'Error al actualizar el formulario: ' . $e->getMessage());
