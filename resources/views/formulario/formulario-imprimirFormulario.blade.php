@@ -144,7 +144,7 @@
 <!-- Encabezado -->
 <div class="header">
     <img src="img/logo2.png" alt="Defensor del Pueblo" style="width:6%">
-    <div class="header-text">Defensoría del Pueblo - Mecanismo de Prevención de la tortura</div>
+    <div class="header-text">Defensoría del Pueblo - Mecanismo Nacional de Prevención de la Tortura</div>
 </div>
 
 <!-- Título -->
