@@ -61,6 +61,23 @@
     transform: translateX(-50%);
     z-index: 1100;
 }
+
+/* Estilos para campos obligatorios */
+.border-danger {
+    border: 2px solid #dc3545 !important;
+    transition: border 0.3s ease;
+}
+
+.card-pregunta.campo-requerido {
+    animation: shake 0.5s ease-in-out;
+    border: 2px solid #dc3545;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
 </style>
 
 <!-- Contenedor para notificaciones tipo toast -->
@@ -86,6 +103,7 @@
             Error al guardar la respuesta
         </div>
     </div>
+    
 </div>
 
 <div id="carousel_preguntas" class="carousel slide" data-bs-interval="false">
@@ -252,7 +270,7 @@
                         <ul>
                             <li>Asegúrese de que la información es correcta y confiable</li>
                             <li>Verifique las preguntas importantes</li>
-                            <li>Las respuestas vacías están permitidas si no aplican</li>
+                            <li>Todas las preguntas han sido respondidas</li>
                         </ul>
                     </div>
                     <div class="alert alert-light text-dark">
@@ -353,11 +371,15 @@ $(document).ready(function() {
         } else if (direccion === "btn_siguiente") {
             const $formActual = $(`#card_${preguntaActual} .frm-respuesta`);
             
-            // Validar si la pregunta actual necesita respuesta obligatoria
+            // CAMBIO: Validar si la pregunta actual necesita respuesta obligatoria
             if (esRespuestaObligatoria($formActual) && !tieneRespuesta($formActual)) {
-                mostrarConfirmacionContinuar(() => {
-                    avanzarPregunta($formActual);
-                });
+                // Mostrar notificación de error y NO avanzar
+                mostrarToast('error', 'Debe responder esta pregunta antes de continuar');
+                
+                // Efecto visual adicional
+                mostrarNotificacionCampoObligatorio();
+                
+                return; // CLAVE: No ejecuta avanzarPregunta()
             } else {
                 avanzarPregunta($formActual);
             }
@@ -424,24 +446,6 @@ $(document).ready(function() {
         });
     }
 
-    function mostrarConfirmacionContinuar(callback) {
-        Swal.fire({
-            title: 'Pregunta sin responder',
-            text: '¿Desea continuar sin responder esta pregunta?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, continuar',
-            cancelButtonText: 'No, responder ahora',
-            confirmButtonColor: '#ffc107',
-            cancelButtonColor: '#6c757d'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                callback();
-            }
-            // Si cancela, no hace nada (se queda en la pregunta actual)
-        });
-    }
-
     function tieneRespuesta($form) {
         let tiene = false;
         
@@ -467,9 +471,19 @@ $(document).ready(function() {
     }
 
     function esRespuestaObligatoria($form) {
-        // Determinar si una pregunta es crítica/obligatoria
-        // Por ahora, todas las preguntas permiten respuesta vacía
-        return false;
+        // CAMBIO: Ahora todas las preguntas son obligatorias
+        return true;
+    }
+
+    function mostrarNotificacionCampoObligatorio() {
+        // Agregar efecto visual al card actual para indicar que falta respuesta
+        const $cardActual = $(`#card_${preguntaActual}`);
+        $cardActual.addClass('border-danger');
+        
+        // Remover el efecto después de 3 segundos
+        setTimeout(() => {
+            $cardActual.removeClass('border-danger');
+        }, 3000);
     }
 
     function actualizarIconoEstado(preguntaNumero, estado) {
