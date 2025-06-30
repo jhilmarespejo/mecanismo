@@ -291,14 +291,7 @@ $(document).ready(function() {
         $(this).closest('.pregunta-container').addClass('en-foco');
     });
 
-    // Guardado automático mejorado
-    $(".frm-respuesta").on('focusout change', 'input, textarea, select', function(e) {
-        let $form = $(this).closest('.frm-respuesta');
-        let id = $form.attr('id').replace(/[^0-9]/g,'');
-        let preguntaNumero = $form.data('pregunta-numero');
-        
-        guardarRespuesta(id, preguntaNumero, $form);
-    });
+    
 
     // Botón confirmar con validación
     $("#btn_confirmacion").click(function(e) {
@@ -307,8 +300,32 @@ $(document).ready(function() {
         }
     });
 
-    function guardarRespuesta(id, preguntaNumero, $form) {
+    // Objeto para rastrear solicitudes en curso
+    const requestsInProgress = {};
+
+    // Guardado automático mejorado con protección contra duplicados
+    $(".frm-respuesta").on('focusout', 'input, textarea, select', function(e) {
+        let $form = $(this).closest('.frm-respuesta');
+        let id = $form.attr('id').replace(/[^0-9]/g,'');
+        let preguntaNumero = $form.data('pregunta-numero');
+        
+        // Usar una clave única para identificar la pregunta en curso
+        const requestKey = `${id}_${preguntaNumero}`;
+        
+        // Si ya hay una solicitud en curso para esta pregunta, no hacer nada
+        if (requestsInProgress[requestKey]) {
+            return;
+        }
+        
+        guardarRespuesta(id, preguntaNumero, $form, requestKey);
+    });
+    
+    // Función para guardar respuestas 
+    function guardarRespuesta(id, preguntaNumero, $form, requestKey) {
         let formData = new FormData($form[0]);
+        
+        // Marcar que hay una solicitud en curso para esta pregunta
+        requestsInProgress[requestKey] = true;
         
         $.ajax({
             async: true,
@@ -319,23 +336,60 @@ $(document).ready(function() {
             processData: false,
             beforeSend: function() {
                 mostrarNotificacion('info', `Guardando respuesta ${preguntaNumero}...`, 'loading');
+                $("form :input").prop("disabled", true);
+            
             },
             success: function(response) {
-                if (response.status === 'success') {
+                if (response.status === 'success' || response.status === 'updated') {
+                    $form.css("border", "");
+                    $form.find(".mensaje-error").remove();
+
                     mostrarNotificacion('success', response.message, 'check');
                     marcarPreguntaRespondida($form.closest('.pregunta-container'));
                     actualizarProgreso();
-                } else if (response.status === 'skip') {
-                    // Elemento informativo, no mostrar notificación
                 }
             },
             error: function(xhr) {
                 let message = 'Error al guardar la respuesta';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
+                
+                // Limpieza previa
+                $form.css("border", "");
+                $form.find(".mensaje-error").remove();
+
+                if (xhr.status === 422 && xhr.responseJSON?.errors) {
+                    const errors = xhr.responseJSON.errors;
+                    
+                    if (errors.RES_respuesta) {
+                        $form.css("border", "2px solid red");
+
+                        // 🔽 Insertar mensaje debajo del input RES_respuesta
+                        const $input = $form.find('[name="RES_respuesta"]');
+                        if ($input.length) {
+                            $(`<div class="mensaje-error" style="color: red; font-size: 14px; margin-top: 4px;">${errors.RES_respuesta[0]}</div>`)
+                                .insertAfter($input);
+                        } else {
+                            // Si no se encuentra el input, lo muestra debajo del form
+                            $form.append(`
+                                <div class="mensaje-error" style="color: red; margin-top: 8px;">
+                                    ${errors.RES_respuesta[0]}
+                                </div>
+                            `);
+                        }
+
+                        message = errors.RES_respuesta[0];
+                    }
+                } else if (xhr.responseJSON?.message) {
                     message = xhr.responseJSON.message;
                 }
+                
                 mostrarNotificacion('error', message, 'x-circle');
+            },
+
+            complete: function() {
+                $("form :input").prop("disabled", false);
+                delete requestsInProgress[requestKey];
             }
+        
         });
     }
 

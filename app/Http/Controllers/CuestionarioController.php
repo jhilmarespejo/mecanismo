@@ -512,99 +512,67 @@ public function resultadosCuestionario($FRM_id)
     /**
      * Guardado mejorado con mejor manejo de errores y notificaciones
      */
-    public function guardarRespuestasCuestionario(Request $request){
-        // Validar tipo de pregunta
-        if (in_array($request->RES_tipoRespuesta, ['Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta'])) {
-            return response()->json([
-                'status' => 'skip',
-                'message' => 'Elemento informativo, no requiere respuesta'
-            ]);
-        }
-
-        if ($request->RES_tipoRespuesta == 'Casilla verificación') {
-            $rpta = json_encode($request->RES_respuesta, JSON_UNESCAPED_UNICODE);
-            unset($request['RES_respuesta']);
-            $request->merge(['RES_respuesta' => $rpta]);
-        }
-
-        if ($request->RES_tipoRespuesta == 'Casilla verificación' && $request->RES_respuesta == 'null') {
-            $request->merge(['RES_respuesta' => null]);
-        }
-
-        DB::beginTransaction();
+    public function guardarRespuestasCuestionario(Request $request)
+    {
+        $validated = $request->validate([
+            'FK_RBF_id' => 'required|integer|exists:r_bpreguntas_formularios,RBF_id',
+            'FK_AGF_id' => 'required|string|exists:agrupador_formularios,AGF_id',
+            'RES_respuesta' => 'required',
+            'RES_complemento' => 'nullable',
+            'RES_tipoRespuesta' => 'required',
+            'RES_complementoRespuesta' => 'nullable',
+           
+        ],[
+            'RES_respuesta.required' => 'Debe ingresar una respuesta',
+        ]);
+        
         try {
-            $respuesta = ModRespuesta::select('RES_id','FK_AGF_id')
-                ->where('FK_RBF_id', $request->FK_RBF_id)
-                ->where('FK_AGF_id', $request->FK_AGF_id)
-                ->first();
+            // Bloqueo transaccional para evitar condiciones de carrera
+            return DB::transaction(function () use ($validated) {
+                // Usar lockForUpdate para bloquear el registro durante la transacción
+                $respuesta = ModRespuesta::where([
+                    'FK_RBF_id' => $validated['FK_RBF_id'],
+                    'FK_AGF_id' => $validated['FK_AGF_id']
+                ])->lockForUpdate()->first();
 
-            $response_data = [
-                'status' => 'success',
-                'message' => 'Respuesta guardada correctamente',
-                'has_files' => false
-            ];
-
-            // Insertar nueva respuesta
-            if (is_null($respuesta) && !is_null($request->RES_respuesta)) {
-                $resp = ModRespuesta::create($request->except('_token', 'ARC_descripcion'));
-                $resp_id = $resp->RES_id;
-            }
-            // Actualizar respuesta existente
-            elseif ($respuesta) {
-                ModRespuesta::where('FK_RBF_id', $request->FK_RBF_id)
-                    ->where('FK_AGF_id', $request->FK_AGF_id)
-                    ->update($request->except('_token', 'FK_FRM_id', 'ARC_descripcion'));
-                $resp_id = $respuesta['RES_id'];
-            }
-            // Respuesta vacía permitida
-            else {
-                $response_data['message'] = 'Respuesta vacía guardada';
-            }
-
-            // Manejo de archivos adjuntos
-            if ($request->file('RES_adjunto') && isset($resp_id)) {
-                $ARC_ids = [];
-                foreach ($request->file('RES_adjunto') as $archivo) {
-                    $tipoArchivo = explode("/", $archivo->getClientMimeType());
-
-                    $idArchivo = ModArchivo::create([
-                        'ARC_NombreOriginal' => $archivo->getClientOriginalName(),
-                        'ARC_ruta' => $archivo->store('/uploads/formularios'),
-                        'ARC_extension' => $archivo->extension(),
-                        'ARC_tamanio' => $archivo->getSize(),
-                        'ARC_descripcion' => $request->ARC_descripcion,
-                        'ARC_formatoArchivo' => $tipoArchivo[0]
-                    ]);
-
-                    $archivo->move(public_path('/uploads/formularios/'), $archivo->store(''));
-                    array_push($ARC_ids, $idArchivo->ARC_id);
+                if (!$respuesta) {
+                    $respuesta = new ModRespuesta();
                 }
 
-                if (count($ARC_ids) > 0) {
-                    $resp_archivos = array();
-                    foreach ($ARC_ids as $ARC_id) {
-                        array_push($resp_archivos, ['FK_ARC_id' => $ARC_id, 'FK_RES_id' => $resp_id]);
-                    }
-                    ModRespuestaArchivo::insert($resp_archivos);
-                    $response_data['has_files'] = true;
-                    $response_data['message'] = 'Respuesta y archivos guardados correctamente';
-                }
+                // Actualiza todos los campos necesarios
+                $respuesta->fill($validated);
+                $respuesta->save();
+
+                return response()->json([
+                    'status' => $respuesta->wasRecentlyCreated ? 'success' : 'updated',
+                    'message' => $respuesta->wasRecentlyCreated 
+                        ? 'Respuesta guardada correctamente' 
+                        : 'Respuesta actualizada correctamente'
+                ]);
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Capturar específicamente el error de violación de índice único
+            if (str_contains($e->getMessage(), 'duplicate key value violates unique constraint')) {
+                return response()->json([
+                    'status' => 'skip',
+                    'message' => 'La respuesta ya existe'
+                ]);
             }
-
-            DB::commit();
-            return response()->json($response_data);
-
-        } catch (\Exception $e) {
-            DB::rollback();
+            
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error al guardar la respuesta: ' . $e->getMessage()
+                'message' => 'Error al procesar la respuesta: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al procesar la respuesta: ' . $e->getMessage()
             ], 500);
         }
     }
 
 
-
+    
 
  
 
