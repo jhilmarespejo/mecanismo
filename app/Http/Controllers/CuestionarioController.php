@@ -526,6 +526,22 @@ public function resultadosCuestionario($FRM_id)
             'RES_respuesta.required' => 'Debe ingresar una respuesta',
         ]);
         
+        // cuando la respuesta es un array (pregunta tipo Casilla verificación), convierte a JSON para almacenarlo
+        if (is_array($validated['RES_respuesta'])) {
+            $resultado = [];
+
+            // Recorrer elementos del array original
+            foreach ($validated['RES_respuesta'] as $item) {
+                // Si el elemento es un array, combinarlo
+                if (is_array($item)) {
+                    $resultado = array_merge($resultado, $item);
+                } else {
+                    $resultado[] = $item;
+                }
+            }
+            
+             $validated['RES_respuesta'] = json_encode(array_values($validated['RES_respuesta']));
+        }
         try {
             // Bloqueo transaccional para evitar condiciones de carrera
             return DB::transaction(function () use ($validated) {
@@ -534,7 +550,7 @@ public function resultadosCuestionario($FRM_id)
                     'FK_RBF_id' => $validated['FK_RBF_id'],
                     'FK_AGF_id' => $validated['FK_AGF_id']
                 ])->lockForUpdate()->first();
-
+                
                 if (!$respuesta) {
                     $respuesta = new ModRespuesta();
                 }
