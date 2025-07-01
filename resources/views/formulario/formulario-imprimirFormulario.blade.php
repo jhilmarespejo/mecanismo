@@ -11,7 +11,7 @@
         }
         body {
             font-family: Arial, sans-serif;
-            font-size: 6px; /* Tamaño de letra pequeño como solicitado */
+            font-size: 9px; /* Tamaño de letra pequeño como solicitado */
             line-height: 1.2;
             margin: 0;
             padding: 0;
@@ -34,17 +34,17 @@
             left: 60px;
             top: 13px;
             font-weight: bold;
-            font-size: 9px;
+            font-size: 12px;
         }
         h1 {
             text-align: center;
-            font-size: 9px;
+            font-size: 12px;
             margin: 8px 0;
             text-transform: uppercase;
             font-weight: bold;
         }
         h2 {
-            font-size: 8px;
+            font-size: 11px;
             margin: 5px 0;
             text-transform: uppercase;
             page-break-after: avoid;
@@ -52,7 +52,7 @@
             padding-bottom: 2px;
         }
         h3 {
-            font-size: 7px;
+            font-size: 10px;
             margin: 4px 0;
             page-break-after: avoid;
             font-weight: bold;
@@ -81,7 +81,7 @@
         }
         .complement {
             font-style: italic;
-            font-size: 9px;
+            font-size: 12px;
             color: #555;
             margin-top: 1px;
             margin-left: 5px;
@@ -133,7 +133,7 @@
         .complemento {
             display: block;
             font-style: italic;
-            font-size: 9px;
+            font-size: 12px;
             color: #555;
             margin: 1px 0 2px 0;
         }
@@ -188,7 +188,9 @@
                                     @php $index = $fila * $opcionesPorFila + $col; @endphp
                                     @if($index < $opcionCount)
                                         <div class="option">
-                                            <span class="checkbox"></span> {{ $opciones[$index] }}
+                                            <span class="checkbox"></span> {{ $opciones[$index] ?? '' }}
+                                            
+                                        
                                         </div>
                                     @else
                                         <div class="option"></div>
