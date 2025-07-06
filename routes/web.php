@@ -7,8 +7,17 @@ use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-
 use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController,InformeVisitasController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
+use App\Http\Controllers\Auth\LoginController;
+
+// Resto de tu código...
+
+
+// Autenticación 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
 
 Route::post('/register', [RegisterController::class, 'store'])->name('register');
 
@@ -32,12 +41,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified'
-])->group(function () {
-    //Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
+// Route::middleware([
+//     'auth',
+//     config('jetstream.auth_session'),
+//     'verified'
+// ])->group(function () {
+//     //Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
+//     Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
+// });
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
 });
 

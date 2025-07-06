@@ -1,5 +1,5 @@
 @if (isset($breadcrumbs) && count($breadcrumbs))
-    <nav aria-label="breadcrumb" class="shadow-sm">
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             @foreach ($breadcrumbs as $breadcrumb)
                 @if ($loop->last)
@@ -12,7 +12,7 @@
             @endforeach
         </ol>
     </nav>
-    <hr>
+
     <style>
         .breadcrumb {
             background-color: #f8f9fa;

@@ -11,7 +11,7 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700" rel="stylesheet">
-
+        
         <!-- Styles -->
         {{-- <link rel=StyleSheet href="/bootstrap5/css/custom.css" type="text/css"> --}}
         <link rel=StyleSheet href="/bootstrap5/css/bootstrap.min.css" type="text/css">
@@ -24,7 +24,7 @@
 
         <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
         {{-- <script src="/js/forsw.js"></script> --}}
-        
+
         <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 
         {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css"> --}}
@@ -38,7 +38,7 @@
         {{-- service worker --}}
         {{-- <script src="/js/sw.js"></script> --}}
 
-        @livewireStyles
+        {{-- @livewireStyles --}}
         <!-- Scripts -->
         <script src="{{ mix('js/app.js') }}" defer></script>
 
@@ -46,7 +46,8 @@
     </head>
     <body class="font-sans antialiased bg-light bg-gradient">
         {{-- <x-jet-banner /> --}}
-        @livewire('navigation-menu')
+        {{-- @livewire('navigation-menu') --}}
+        @include('partials.navigation')
 
         <!-- Page Heading -->
         <!-- <header class="d-flex py-3 bg-white shadow-sm border-bottom"> -->
@@ -84,7 +85,16 @@
 
         @yield('js')
         @stack('modals')
-        @livewireScripts
+        {{-- @livewireScripts --}}
+        <script>
+            Livewire.on('success',(message)=>{
+                Swal.fire('¡Correcto!', message, 'success')
+            });
+            Livewire.on('danger',(message)=>{
+                Swal.fire('¡Error', message, 'error')
+            });
+        </script>
+        
 
         @stack('js')
         <script>

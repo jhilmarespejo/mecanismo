@@ -1,64 +1,47 @@
-<x-guest-layout>
-    <x-jet-authentication-card>
-        <x-slot name="logo">
-            <x-jet-authentication-card-logo />
-        </x-slot>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+                        
+                        @if($errors->any())
+                            <div class="alert alert-danger">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
 
-        <div class="card-body">
-
-            <x-jet-validation-errors class="mb-3 rounded-0" />
-
-            @if (session('status'))
-                <div class="alert alert-success mb-3 rounded-0" role="alert">
-                    {{ session('status') }}
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="mb-3">
-                    {{-- <x-jet-label value="{{ __('Email') }}" />
-                    <x-jet-input class="{{ $errors->has('email') ? 'is-invalid' : '' }}" type="email"
-                                 name="email" :value="old('email')" required />
-                    <x-jet-input-error for="email"></x-jet-input-error> --}}
-
-                    <x-jet-label for="auth" value="{{ __('Nombre de usuario') }}" />
-                    <x-jet-input id="auth" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autofocus />
-
-
-                </div>
-
-                <div class="mb-3">
-                    <x-jet-label value="{{ __('Password') }}" />
-
-                    <x-jet-input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" type="password"
-                                 name="password" required autocomplete="current-password" />
-                    <x-jet-input-error for="password"></x-jet-input-error>
-                </div>
-
-                <div class="mb-3">
-                    <div class="custom-control custom-checkbox">
-                        <x-jet-checkbox id="remember_me" name="remember" />
-                        <label class="custom-control-label" for="remember_me">
-                            {{ __('Recordar') }}
-                        </label>
+                        <form method="POST" action="{{ route('login') }}">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Usuario</label>
+                                <input type="text" class="form-control" id="username" name="username" required autofocus>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Ingresar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-
-                <div class="mb-0">
-                    <div class="d-flex justify-content-end align-items-baseline">
-                        {{-- @if (Route::has('register'))
-                            <a class="text-muted me-3" href="{{ route('register') }}">
-                                {{ __('Aún no está registrado?') }}
-                            </a>
-                        @endif --}}
-
-                        <x-jet-button>
-                            {{ __('Ingresar') }}
-                        </x-jet-button>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
-    </x-jet-authentication-card>
-</x-guest-layout>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
