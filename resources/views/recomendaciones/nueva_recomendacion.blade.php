@@ -50,19 +50,19 @@
                 </h2>
                 <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
                     <div class="accordion-body bg-light">
-                       <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> {{ $reco['REC_recomendacion'] }} </p>
-                       <p><i class="bi bi-calendar3 text-primary fs-5"></i> Fecha de la recomendación: <span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
+                       <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>Recomendación:</strong> {{ $reco['REC_recomendacion'] }} </p>
+                       <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la recomendación:</strong> <span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
                        <p>
                         @if ($reco['REC_cumplimiento'] == 0)
-                            <i class="bi bi-x-circle text-danger text-primary fs-5"></i> <span class="fw-bold text-danger ">Recomendacion no cumplida </span>
+                            <i class="bi bi-x-circle text-danger text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong>  <span class="fw-bold text-danger ">Recomendacion no cumplida </span>
                         @elseif ($reco['REC_cumplimiento'] == 1)
-                            <i class="bi bi-check-circle text-success text-primary fs-5"></i> <span class="fw-bold text-success ">Recomendacion cumplida </span>
+                            <i class="bi bi-check-circle text-success text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong>  <span class="fw-bold text-success ">Recomendacion cumplida </span>
                         @elseif ($reco['REC_cumplimiento'] == 2)
-                            <i class="bi bi-upload text-warning text-primary fs-5"></i> <span class="fw-bold text-warning ">Recomendacion parcialmente cumplida </span>
+                            <i class="bi bi-upload text-warning text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong>  <span class="fw-bold text-warning ">Recomendacion parcialmente cumplida </span>
                         @endif
                         </p>
-                        <p><i class="bi bi-person-check-fill text-primary fs-5"></i> Autoridad competente: <span class="fw-bold text-primary"> {{ $reco['REC_autoridad_competente'] }}</span></p>
-                        <p><i class="bi bi-file-richtext text-primary fs-5"></i> Archivos adjuntos:
+                        <p><i class="bi bi-person-check-fill text-primary fs-5"></i> <strong> Autoridad competente: </strong> <span class="fw-bold text-primary"> {{ $reco['REC_autoridad_competente'] }}</span></p>
+                        <p><i class="bi bi-file-richtext text-primary fs-5"></i> <strong>Archivos adjuntos: </strong>
                             @if (count($reco['archivos']) > 0 )
                                 @include('includes.archivos', ['archivos' => $reco['archivos'] ])
                             @else
@@ -71,10 +71,10 @@
                                 </div>
                             @endif
                         </p>
-
+                        
                         <hr>
                         <!-- Avances para esta recomendación -->
-                        <h6>PROGRESOS:</h6>
+                         <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> SEGUIMIENTO A LA RECOMENDACIÓN: </strong>
                         @foreach ($progresos as $p=>$progreso)
                             @if ($reco['REC_id'] == $p)
                                 {{-- @dump($progreso) --}}
@@ -84,13 +84,13 @@
                                     <div class="accordion-item">
                                       <h2 class="accordion-header" id="headingAvance{{$avance['SREC_id']}}">
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvance{{$avance['SREC_id']}}" aria-expanded="true" aria-controls="collapseAvance{{$avance['SREC_id']}}">
-                                          <i class="bi bi-calendar3 text-blue"></i><span class="fw-bold ms-4">13-04-2023</span>
+                                          <i class="bi bi-calendar3 text-blue"></i>  <strong>  Fecha de registro: </strong><span class="fw-bold ms-4">13-04-2023</span>
                                         </button>
                                       </h2>
                                       <div id="collapseAvance{{$avance['SREC_id']}}" class="accordion-collapse collapse" aria-labelledby="headingAvance{{$avance['SREC_id']}}" data-bs-parent="#accordionAvance_{{$reco['REC_id']}}">
                                         <div class="accordion-body">
-                                          <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> {{$avance['SREC_descripcion']}}</p>
-                                          <p><i class="bi bi-paperclip text-primary fs-5"></i> Archivos adjuntos:
+                                          <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong> Detalles sobre el progreso: </strong> {{$avance['SREC_descripcion']}}</p>
+                                          <p><i class="bi bi-paperclip text-primary fs-5"></i>  <strong> Archivos adjuntos: </strong>
 
                                             @if ( count($avance['archivos']) > 0 )
                                                 @include('includes.archivos', ['archivos' => $avance['archivos'] ])

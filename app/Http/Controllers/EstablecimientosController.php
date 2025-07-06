@@ -258,7 +258,8 @@ class EstablecimientosController extends Controller
         DB::enableQueryLog();
         $gestion = $request->query('gestion', date('Y'));
 
-        $infoAdicional = ModTipoEstablecimiento::from('tipo_establecimientos as te')->select('e.EST_nombre','e.EST_id', 'te.TES_tipo','ei.FK_EST_id','ei.EINF_cantidad_policias_varones','ei.EINF_cantidad_policias_mujeres','ei.EINF_cantidad_celdas_varones','ei.EINF_cantidad_celdas_mujeres','ei.EINF_normativa_interna','ei.EINF_formato_registro_aprehendidos','ei.EINF_cantidad_actual_internos','ei.EINF_poblacion_atendida','ei.EINF_rangos_edad_poblacion','ei.EINF_tipo_entidad','ei.EINF_tipo_administracion','ei.EINF_banyo_ppl','ei.EINF_telefono_ppl','ei.EINF_camaras_vigilancia','ei.EINF_ambientes_visita','ei.EINF_informacion_ddhh','ei.EINF_observaciones','ei.EINF_gestion')
+        $infoAdicional = ModTipoEstablecimiento::from('tipo_establecimientos as te')
+        ->select('e.EST_nombre','e.EST_id', 'te.TES_tipo','ei.FK_EST_id','ei.EINF_cantidad_policias_varones','ei.EINF_cantidad_policias_mujeres','ei.EINF_cantidad_celdas_varones','ei.EINF_cantidad_celdas_mujeres','ei.EINF_normativa_interna','ei.EINF_formato_registro_aprehendidos','ei.EINF_cantidad_actual_internos','ei.EINF_poblacion_atendida','ei.EINF_rangos_edad_poblacion','ei.EINF_tipo_entidad','ei.EINF_tipo_administracion','ei.EINF_banyo_ppl','ei.EINF_telefono_ppl','ei.EINF_camaras_vigilancia','ei.EINF_ambientes_visita','ei.EINF_informacion_ddhh','ei.EINF_observaciones','ei.EINF_gestion')
         ->leftJoin('establecimientos as e', 'e.FK_TES_id', '=', 'te.TES_id')
         ->leftJoin('establecimientos_info as ei', function ($join) use ($gestion) {
             $join->on('ei.FK_EST_id', '=', 'e.EST_id')
@@ -268,7 +269,7 @@ class EstablecimientosController extends Controller
         ->first();
 
         $quries = DB::getQueryLog();
-            // dump ($gestion);//exit;
+        //dump ($quries);exit;
 
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -276,7 +277,6 @@ class EstablecimientosController extends Controller
             ['name' => 'Información adicional', 'url' => '']
         ];
         return view('establecimientos.establecimientos-info-mostrar', compact('infoAdicional','gestion', 'breadcrumbs'));
-
     }
 
     public function infoActualizar(Request $request) {
@@ -324,7 +324,7 @@ class EstablecimientosController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             // return response()->json(['message' => 'Hubo un problema al actualizar la información.'], 500);
-            dd($e);
+            //dd($e);
             return response()->json(['message' => 'Hubo un problema al actualizar la información.'], 500);
         }
 
@@ -370,9 +370,8 @@ class EstablecimientosController extends Controller
             ['name' => 'Información sobre el personal', 'url' => '']
         ];
         return view('establecimientos.establecimientos-personal-mostrar', compact('infoPersonal','gestion', 'breadcrumbs'));
-
     }
-
+    
     public function personalActualizar(Request $request){
         $data = $request->validate([
             'personal.FK_EST_id' => 'required|exists:establecimientos,EST_id',

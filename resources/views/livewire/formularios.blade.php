@@ -1,7 +1,5 @@
 <div class="my-5 p-5 bg-withe">
 
-
-
   <div class="px-6 py-4 flex items-center">
 
     <div class="text-center" >

@@ -14,4 +14,9 @@ class ModIndicador extends Model
     public $timestamps = false;
 
     // Definir las relaciones si es necesario
+     // Definir la relación con historial_indicadores
+     public function historial()
+     {
+         return $this->hasMany(ModHistorialIndicador::class, 'FK_IND_id', 'IND_id');
+     }
 }

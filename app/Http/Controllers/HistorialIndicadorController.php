@@ -17,7 +17,7 @@ class HistorialIndicadorController extends Controller
 
     public function create()
     {   // Obtener todas las preguntas del indicador respectivo
-        $preguntas = ModIndicador::pluck('IND_pregunta', 'IND_id');
+        $preguntas = ModIndicador::pluck('IND_parametro', 'IND_id');
         return view('historial_indicadores.create', compact('preguntas'));
     }
 

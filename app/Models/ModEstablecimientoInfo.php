@@ -10,13 +10,13 @@ class ModEstablecimientoInfo extends Model
 {
     protected $table = 'establecimientos_info';
     use HasFactory;
-
+    
     protected $primaryKey = 'EINF_id';
     public $incrementing = true;
-
+    
     public $timestamps = false;
     protected $guarded = [];
-
+    
     protected static function boot() {
         parent::boot();
         static::creating(function ($model) {

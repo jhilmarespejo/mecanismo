@@ -43,22 +43,31 @@ Route::middleware([
 
 // FORMULARIO
 
+Route::get('/formularios', [FormularioController::class, 'index'])->name('formularios.index');
+Route::get('/formularios/filtrar', [FormularioController::class, 'filtrar'])->name('formularios.filtrar');
+
+
 Route::get('formulario/eleccion/{VIS_id}/{VIS_tipo}', [FormularioController::class, 'eleccion'])->name('formulario.index')->middleware('auth');
 /* Ruta para mostrar los formularios relacionados a la vista */
 
 Route::get('formulario/buscaFormularios/{VIS_id}', [FormularioController::class, 'buscaFormularios'])->name('formulario.buscaFormularios')->middleware('auth');
 
-Route::post('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
-Route::post('formulario/sugerenciasFormularios', [FormularioController::class, 'sugerenciasFormularios'])->name('formulario.sugerenciasFormularios')->middleware('auth');
+// Route::post('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
+Route::get('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
+Route::post('formulario/asignar', [FormularioController::class, 'asignar'])->name('formulario.asignar')->middleware('auth');
 
 Route::post('formulario/buscarPregunta', [FormularioController::class, 'buscarPregunta'])->name('formulario.buscarPregunta')->middleware('auth');
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
+Route::get('/formulario/{id}', [FormularioController::class, 'verFormularioCreado'])->name('formulario.verFormularioCreado')->middleware('auth');
+Route::get('formulario/imprimir/{id}', [FormularioController::class, 'imprimirFormulario'])->name('formulario.imprimirFormulario');
+
+// Rutas para editar formulario
+Route::get('/formulario/editar/{id}', [FormularioController::class, 'editar'])->name('formulario.editar');
+Route::put('/formulario/actualizar/{id}', [FormularioController::class, 'actualizar'])->name('formulario.actualizar');
+
+
 
 // Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
-
-
-
-
 // INDEX
 // Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
 
@@ -68,8 +77,8 @@ Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListas
 
 
 // LIVEWIRE
-Route::get('formularios', Formularios::class)->middleware('auth');
-Route::get('cuestionario', CuestionarioIndex::class);
+//Route::get('formularios', Formularios::class)->middleware('auth');
+//Route::get('cuestionario', CuestionarioIndex::class);
 // Route::get('establecimientos', Establecimientos::class);
 Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
 Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
@@ -109,7 +118,6 @@ Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesControl
 Route::get('/recomendacionesEstatales', [RecomendacionesController::class, 'recomendacionesEstatales'])->name('recomendaciones.recomendacionesEstatales')->middleware('auth');
 
 
-
 // CATEGORIAS
 Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
 Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta')->middleware('auth');
@@ -119,7 +127,6 @@ Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'gu
 
 
 // ESTABLECIMIENTOS
-
 Route::get('establecimientos/tipo', [EstablecimientosController::class, 'tipo'])->name('establecimientos')->middleware('auth');
 Route::post('establecimientos/listarSegunTipo', [EstablecimientosController::class, 'listarSegunTipo'])->name('establecimientos.listarSegunTipo')->middleware('auth');
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.listaguardarNuevoEstablecimientorPorTipo')->middleware('auth');
@@ -130,7 +137,7 @@ Route::get('establecimientos/mostrar/{id}', [EstablecimientosController::class, 
 Route::get('establecimientos/crear', [EstablecimientosController::class, 'crear'])->name('establecimientos.crear');
 Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'almacenar'])->name('establecimientos.almacenar');
 
-    // estanblecimientos_info
+    // establecimientos_info
     Route::get('establecimientos/infoMostrar/{EST_id}', [EstablecimientosController::class, 'infoMostrar'])->name('establecimientos.infoMostrar');
     Route::post('establecimientos/infoActualizar', [EstablecimientosController::class, 'infoActualizar'])->name('establecimientos.infoActualizar');
 
@@ -138,6 +145,9 @@ Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'a
     // estanblecimientos_personal
     Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
     Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
+
+    //edicion de la ficha
+    
 
 // REPORTES
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
@@ -150,6 +160,13 @@ Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVi
 Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
 Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 
+
+// Nueva ruta para guardar documentos del establecimiento
+// Route::post('visita/guardarDocumento               ', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+Route::post('visita/guardarDocumentoEstablecimiento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+
+Route::get('visita/editarFichaEstablecimiento/{id}', [VisitaController::class, 'editarFichaEstablecimiento'])->name('visita.editarFichaEstablecimiento')->middleware('auth');
+Route::put('visita/actualizarFichaEstablecimiento/{id}', [VisitaController::class, 'actualizarFichaEstablecimiento'])->name('visita.actualizarFichaEstablecimiento')->middleware('auth');
 
 
 // INFORME DE VISITAS
@@ -171,14 +188,22 @@ Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('
 
 //----MODULO DE INDICADORES --------------------------
 
-Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth');
-Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth');
-Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('guardar.indicadores');
+// Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
+//Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
+
+Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth')->name('indicadores.panel');
+Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
+Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
+Route::get('/indicadores/reportes', [IndicadorController::class, 'reportes'])->name('indicadores.reportes');
+Route::get('indicadores/resultados', [IndicadorController::class, 'obtenerResultados'])->name('indicadores.resultados');
+
+
+
 // ---- MÓDULO DE ASESORAMIENTO ----------
 
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');
 Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth')->name('asesoramientos.create');
-Route::post('/asesoramientos', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
+Route::post('/asesoramientos/store', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
 Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth')->name('asesoramientos.show');
 Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth')->name('asesoramientos.edit');
 Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth')->name('asesoramientos.update');
@@ -197,13 +222,20 @@ Route::middleware('auth')->group(function () {
     Route::put('/educacion/{id}', [EducacionController::class, 'update'])->name('educacion.update');
     Route::delete('/educacion/{id}', [EducacionController::class, 'destroy'])->name('educacion.destroy');
 });
+
+
 // AJUSTES
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
-
-
 
 // INTEROPERABILIDAD
 Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
 
 // MODULO DE EDUCACION
 Route::resource('educacion', EducacionController::class);
+
+
+// // Alternativa usando resource route (más limpio)
+// Route::middleware('auth')->group(function () {
+//     Route::resource('educacion', EducacionController::class);
+// });
+

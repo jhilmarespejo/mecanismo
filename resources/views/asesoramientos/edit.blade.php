@@ -16,6 +16,19 @@
 
             <div class="card-body">
                 <div class="mb-3">
+                    <label for="FK_MAN_id" class="form-label">Mandato:</label>
+                    <select id="FK_MAN_id" name="FK_MAN_id" class="form-select">
+                        @foreach ($mandatos as $mandato)
+                            <option value="{{ $mandato->MAN_id }}" {{ old('FK_MAN_id', $asesoramiento->FK_MAN_id) == $mandato->MAN_id ? 'selected' : '' }}>
+                                {{ $mandato->MAN_mandato }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('FK_MAN_id')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="mb-3">
                     <label for="ASE_actividad" class="form-label">Actividad:</label>
                     <input type="text" id="ASE_actividad" name="ASE_actividad" class="form-control" value="{{ old('ASE_actividad', $asesoramiento->ASE_actividad) }}">
                     @error('ASE_actividad')
@@ -29,26 +42,14 @@
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="mb-3">
+                {{-- <div class="mb-3">
                     <label for="ASE_recomendacion" class="form-label">Recomendación:</label>
                     <input type="text" id="ASE_recomendacion" name="ASE_recomendacion" class="form-control" value="{{ old('ASE_recomendacion', $asesoramiento->ASE_recomendacion) }}">
                     @error('ASE_recomendacion')
                         <div class="text-danger">{{ $message }}</div>
                     @enderror
                 </div>
-                <div class="mb-3">
-                    <label for="FK_MAN_id" class="form-label">Mandato:</label>
-                    <select id="FK_MAN_id" name="FK_MAN_id" class="form-select">
-                        @foreach ($mandatos as $mandato)
-                            <option value="{{ $mandato->MAN_id }}" {{ old('FK_MAN_id', $asesoramiento->FK_MAN_id) == $mandato->MAN_id ? 'selected' : '' }}>
-                                {{ $mandato->MAN_mandato }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('FK_MAN_id')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
-                </div>
+                 --}}
             </div>
 
             <div class="card-footer text-center">

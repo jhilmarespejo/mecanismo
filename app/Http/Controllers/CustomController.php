@@ -46,29 +46,52 @@ class CustomController extends Controller {
 
     public static function agruparRespuestasCerradas($arrayOriginal) {
         $nuevoArray = [];
+        
         foreach ($arrayOriginal as $elemento) {
+            // Convertir stdClass a array si es necesario
+            if (is_object($elemento)) {
+                $elemento = (array) $elemento;
+            }
+            
+            // Verificar que el elemento tenga las claves necesarias
+            if (!isset($elemento["CAT_categoria"]) || !isset($elemento["BCP_pregunta"])) {
+                continue; // Saltar elementos malformados
+            }
+            
             // Crear un nuevo elemento con las claves deseadas
             $nuevoElemento = [
-                "CAT_categoria" => $elemento["CAT_categoria"],
-                "BCP_pregunta" => $elemento["BCP_pregunta"],
-                "RBF_id" => $elemento["RBF_id"],
-                "RBF_orden" => $elemento["RBF_orden"],
-                "BCP_tipoRespuesta" => $elemento["BCP_tipoRespuesta"],
+                "CAT_categoria" => $elemento["CAT_categoria"] ?? 'Sin categoría',
+                "BCP_pregunta" => $elemento["BCP_pregunta"] ?? 'Sin pregunta',
+                "RBF_id" => $elemento["RBF_id"] ?? null,
+                "RBF_orden" => $elemento["RBF_orden"] ?? 0,
+                "BCP_tipoRespuesta" => $elemento["BCP_tipoRespuesta"] ?? 'Desconocido',
                 "respuestas" => []
             ];
-
-            // Filtrar las respuestas del elemento
-            $respuestas = array_filter($elemento, function ($key) {
-                return $key != "CAT_categoria" && $key != "BCP_pregunta" && $key != "RBF_id" && $key != "RBF_orden" && $key != "BCP_tipoRespuesta";
+            
+            // Filtrar las respuestas del elemento (excluir metadatos)
+            $clavesExcluidas = [
+                "CAT_categoria", "BCP_pregunta", "RBF_id", 
+                "RBF_orden", "BCP_tipoRespuesta"
+            ];
+            
+            $respuestas = array_filter($elemento, function ($key) use ($clavesExcluidas) {
+                return !in_array($key, $clavesExcluidas);
             }, ARRAY_FILTER_USE_KEY);
-
+            
+            // Limpiar respuestas vacías o nulas
+            $respuestas = array_filter($respuestas, function($valor) {
+                return $valor !== null && $valor !== '' && $valor !== 0;
+            });
+            
             // Agregar las respuestas al nuevo elemento
             $nuevoElemento["respuestas"] = $respuestas;
-
-            // Agregar el nuevo elemento al array final
-            $nuevoArray[] = $nuevoElemento;
+            
+            // Solo agregar si tiene respuestas válidas
+            if (!empty($respuestas)) {
+                $nuevoArray[] = $nuevoElemento;
+            }
         }
-
+        
         return $nuevoArray;
     }
 
@@ -219,53 +242,72 @@ class CustomController extends Controller {
 
     }
 
-    //Agrupar las visitas por tipo y nombre
+    //Agrupar las visitas por tipo y nombre para el resumen de visitas
     public static function agruparPorTipoYNombre($datos)
     {
-        // // Agrupar por TES_tipo y EST_nombre
-        // // Devolver los resultados
-        // return $agrupadosPorTipoYNombre;
-        if( !count($datos) > 0 ){
-            return ['resultado'=>0, 'total_geneal' => 0];
+        // Verificar si hay datos
+        if (!$datos || $datos->count() === 0) {
+            return [
+                'resultado' => [], 
+                'total_general' => 0
+            ];
         }
-
+        
         $resultado = [];
+        $totalGeneral = 0;
 
         foreach ($datos as $item) {
             $tesTipo = $item->TES_tipo;
             $estNombre = $item->EST_nombre;
-            $totalGeneal= $item->total_general;
+            $totalGeneral = $item->total_general ?? 0; // Tomar el total general
             $EST_id = $item->EST_id;
-            $VIS_fechas = $item->VIS_fechas;
-
-            // Asegurarse de que la clave TES_tipo exista
-            if (!isset($resultado[$tesTipo])) {
-                $resultado[$tesTipo] = [
-                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento,
-                    'establecimientos' => [],
-                ];
-                // $resultado['total_general'] = $totalGeneal;
+            
+            // Formatear la fecha para mostrar
+            $fechaFormateada = $item->VIS_fechas;
+            if ($item->primera_fecha && $item->ultima_fecha && $item->primera_fecha !== $item->ultima_fecha) {
+                $fechaFormateada = date('d-m-Y', strtotime($item->primera_fecha)) . ' al ' . date('d-m-Y', strtotime($item->ultima_fecha));
+            } else {
+                $fechaFormateada = date('d-m-Y', strtotime($item->VIS_fechas));
             }
 
-            // Asegurarse de que la clave EST_nombre exista dentro de TES_tipo
+            // Inicializar el tipo de establecimiento si no existe
+            if (!isset($resultado[$tesTipo])) {
+                $resultado[$tesTipo] = [
+                    'total_tipo_establecimiento' => $item->total_tipo_establecimiento ?? 0,
+                    'establecimientos' => []
+                ];
+            }
+
+            // Inicializar el establecimiento si no existe
             if (!isset($resultado[$tesTipo]['establecimientos'][$estNombre])) {
                 $resultado[$tesTipo]['establecimientos'][$estNombre] = [
-                    'total_establecimiento' => $item->total_establecimiento,
+                    'total_establecimiento' => $item->total_establecimiento ?? 0,
                     'EST_id' => $EST_id,
-
                     'visitas' => []
                 ];
             }
 
-            // Añadir la visita al arreglo correspondiente
+            // Añadir la visita al establecimiento correspondiente
             $resultado[$tesTipo]['establecimientos'][$estNombre]['visitas'][] = [
                 'VIS_tipo' => $item->VIS_tipo,
-                'total_tipo_visitas' => $item->total_tipo_visitas,
-                'VIS_fechas' => $VIS_fechas,
-
+                'total_tipo_visitas' => $item->total_tipo_visitas ?? 0,
+                'VIS_fechas' => $fechaFormateada
             ];
         }
-            return ['resultado'=>$resultado, 'total_geneal' => $totalGeneal];
+
+        // Ordenar las visitas dentro de cada establecimiento por tipo
+        foreach ($resultado as $tipoKey => &$tipo) {
+            foreach ($tipo['establecimientos'] as $estKey => &$establecimiento) {
+                usort($establecimiento['visitas'], function($a, $b) {
+                    return strcmp($a['VIS_tipo'], $b['VIS_tipo']);
+                });
+            }
+        }
+
+        return [
+            'resultado' => $resultado, 
+            'total_general' => $totalGeneral
+        ];
     }
 
     // Agrupa los indicadores por categorias
@@ -292,5 +334,52 @@ class CustomController extends Controller {
 
         return $result;
     }
+
+    public static function calcularPromedioIndicadores($resultados) {
+        $indicadores = [];
+        // dump($resultados);exit;
+        foreach ($resultados as $row) {
+            $gestion = $row->HIN_gestion;
+            $indicador = $row->IND_indicador;
+            $respuesta = trim(strtolower($row->HIN_respuesta)); // Normalizamos la respuesta
+    
+            // Inicializar estructura si no existe
+            if (!isset($indicadores[$indicador][$gestion])) {
+                $indicadores[$indicador][$gestion] = [
+                    'nombre' => $indicador,
+                    'gestion' => $gestion,
+                    'total_preguntas' => 0,
+                    'total_si' => 0
+                ];
+            }
+    
+            // Solo contar si la respuesta es válida (No consideramos 'Sin respuesta')
+            if ($respuesta === 'si' || $respuesta === 'no') {
+                $indicadores[$indicador][$gestion]['total_preguntas']++;
+                if ($respuesta === 'si') {
+                    $indicadores[$indicador][$gestion]['total_si']++;
+                }
+            }
+        }
+    
+        // Calcular el promedio final
+        $resultadoFinal = [];
+        foreach ($indicadores as $indicador => $gestiones) {
+            foreach ($gestiones as $gestion => $datos) {
+                $promedio = ($datos['total_preguntas'] > 0)
+                    ? round(($datos['total_si'] / $datos['total_preguntas']) * 100, 2)
+                    : 0; // Si no hay preguntas, el promedio es 0
+    
+                $resultadoFinal[] = [
+                    'indicador' => $datos['nombre'],
+                    'gestion' => $datos['gestion'],
+                    'resultado_final' => $promedio . '%'
+                ];
+            }
+        }
+    
+        return $resultadoFinal;
+    }
+    
 }
 

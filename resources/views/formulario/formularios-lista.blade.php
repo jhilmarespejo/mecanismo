@@ -1,247 +1,531 @@
-{{-- LISTA de los formularios aplicados a la visita seleccionada --}}
-
 @extends('layouts.app')
 @section('title', 'Formularios')
 
 @section('content')
 @php
     use Carbon\Carbon;
-@endphp
-@php
-// recuperar las variables de sesion
+    // Recuperar las variables de sesión
     $TES_tipo = session('TES_tipo');
     $EST_nombre = session('EST_nombre');
-
-
 @endphp
+
+<style>
+    .formulario-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .formulario-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .formulario-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .aplicacion-item {
+        transition: all 0.2s ease;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        background: #fff;
+    }
+
+    .aplicacion-item:hover {
+        border-color: #007bff;
+        background: #f8f9fa;
+    }
+
+    .aplicacion-completada {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+
+    .aplicacion-pendiente {
+        border-color: #ffc107;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+
+    /* .stats-badge {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+    } */
+
+    .action-btn {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        padding: 8px 12px;
+        border: none;
+        font-weight: 500;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-responder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-eliminar {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        color: white;
+    }
+
+    .progress-ring {
+        width: 60px;
+        height: 60px;
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        stroke: #e9ecef;
+        stroke-width: 4;
+        fill: transparent;
+        r: 26;
+        cx: 30;
+        cy: 30;
+    }
+
+    .progress-ring-progress {
+        stroke: #28a745;
+        stroke-width: 4;
+        fill: transparent;
+        r: 26;
+        cx: 30;
+        cy: 30;
+        stroke-dasharray: 163.36;
+        stroke-dashoffset: 163.36;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .header-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .floating-action {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    @media (max-width: 768px) {
+        .aplicacion-item {
+            margin-bottom: 15px;
+        }
+        
+        .floating-action {
+            bottom: 10px;
+            right: 10px;
+        }
+    }
+</style>
+
 {{-- SUB MENU --}}
-    <div class="btn-toolbar " role="toolbar" aria-label="Toolbar with button groups">
-        <div class="btn-group me-2 mt-4" role="group" aria-label="First group">
+<div class="btn-toolbar mb-4" role="toolbar">
+    <div class="btn-group" role="group">
+        <a href="javascript:history.back()" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-return-left me-2"></i>Página anterior
+        </a>
+    </div>
+</div>
 
-          <a href="javascript:history.back()" role="button" class="btn btn-primary text-white text-decoration-none"> <i class="bi bi-arrow-return-left"></i> Página anterior</a>
-
+{{-- ENCABEZADO PRINCIPAL --}}
+<div class="header-gradient">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h3 class="mb-2">
+                <i class="bi bi-clipboard-data me-2"></i>{{ $VIS_tipo }}
+            </h3>
+            <h4 class="mb-0">{{ $TES_tipo }} - {{ $EST_nombre }}</h4>
         </div>
-    </div><hr>
-
-    {{-- @dump($formulario) --}}
-
-    <div class="card">
-
-        <div class="card-header {{$colorVisita}} text-white fs-5 text-center">
-            {{$VIS_tipo}} <br>
-            {{ $TES_tipo .' '. $EST_nombre }}
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-light text-dark fs-6">
+                <i class="bi bi-calendar-event me-1"></i>
+                {{ now()->format('d/m/Y') }}
+            </span>
         </div>
+    </div>
+</div>
 
-        <div class="card-body">
-            @if ( empty($grupo_formularios) )
-                <div class="alert alert-warning" role="alert">
-                    Aún no se asignaron formularios para esta visita <br>
-                    @if( Auth::user()->rol == 'Administrador' )
-                        <a href="/formulario/eleccion/{{$VIS_id}}/{{$VIS_tipo}}" class="text-light text-shadow box-shadow mt-3 p-2 btn btn-success btn-lg"> Crear formulario </a>
+{{-- CONTENIDO PRINCIPAL --}}
+<div class="row">
+    @if(empty($grupo_formularios))
+        {{-- ESTADO VACÍO --}}
+        <div class="col-12">
+            <div class="card border-warning formulario-card">
+                <div class="card-body text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-clipboard-x text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-warning mb-3">No hay formularios asignados</h4>
+                    <p class="text-muted mb-4">
+                        Aún no se han asignado formularios para esta visita.
+                    </p>
+                    
+                    @if(Auth::user()->rol == 'Administrador')
+                        <a href="/formulario/eleccion/{{ $VIS_id }}/{{ $VIS_tipo }}" 
+                           class="btn btn-lg action-btn btn-responder">
+                            <i class="bi bi-plus-circle me-2"></i>Asignar Formulario
+                        </a>
                     @endif
-
                 </div>
-
-            @else
-
-          <h5 class="card-title">Formularios:</h5>
-
-          {{-- @dump($errors->all()) --}}
-          @php  $aux=0; foreach ($grupo_formularios as $key => $formulario): @endphp
-            {{-- @dump($formulario[0]['FRM_id']) --}}
-
-                <div class="row">
-                    <div class="col-lg-4 col-12">
-                        <div class="card mb-3" style="max-width: 18rem;">
-                            <div class="card-header">{{ $key }}</div>
-
-                            <div class="card-body text-center">
-
-                                <img src="/img/{{$aux}}.png" class="img-fluid w-75" alt="Nuevo formulario">
-
-
-                                <a href="/cuestionario/duplicarCuestionario/{{$formulario[0]['FRM_id']}}/{{$VIS_id}}" class=" btn btn-success text-white text-shadow mt-2text-decoration-none box-shadow mt-1">
-                                    <strong>Crear Nuevo formulario</strong>
-                                </a>
-
-                                @if (Auth::user()->rol == 'Administrador')
-                                    <a href="/cuestionario/resultados/{{ $formulario[0]["FRM_id"] }}" class="mt-2 btn btn-primary text-white box-shadow text-shadow">
-                                        <i class="i bi-bar-chart-line"></i> Resultados
+            </div>
+        </div>
+    @else
+        {{-- LISTA DE FORMULARIOS --}}
+        @php $iconIndex = 0; @endphp
+        @foreach($grupo_formularios as $tituloFormulario => $aplicaciones)
+            <div class="col-12 mb-4">
+                <div class="card formulario-card">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="bi bi-file-earmark-text me-2"></i>{{ $tituloFormulario }}
+                                </h5>
+                            </div>
+                            <div class="col-auto">
+                                @if(Auth::user()->rol == 'Administrador')
+                                    <a href="/cuestionario/resultados/{{ $aplicaciones[0]['FRM_id'] }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-bar-chart-line me-1"></i>Resultados
                                     </a>
                                 @endif
-                                <p class="alert alert-info p-0 mt-2 " role="alert">Formularios aplicados: <b>{{count($formulario)}}</b></p>
-
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-lg-8 col-12">
-
-                        @foreach ($formulario as $item)
-                            {{-- @dump($item) --}}
-                            <?php/* if ( $resultado == $item["AGF_id"]){
-                                    $sombra = 'gren-shadow';
-                                    $lapiz = 'text-danger';
-                                }else{
-                                    $sombra = 'shadow';
-                                    $lapiz = 'text-primary';
-                                }*/
-                            ?>
-                            <div class="row border border-2 rounded m-1 p-0 align-items-center">
-                                <div class="col-1">
-                                    <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}" class="m-0 p-1 d-block text-decoration-none text-dark">
-                                    <i class="bi bi-file-earmark-ruled fs-5"></i></a>
+                    
+                    <div class="card-body">
+                        <div class="row">
+                            {{-- COLUMNA IZQUIERDA: INFORMACIÓN DEL FORMULARIO --}}
+                            <div class="col-lg-4 col-12 mb-3">
+                                <div class="formulario-icon">
+                                    <div class="mb-3">
+                                        <img src="/img/{{ $iconIndex % 5 }}.png" 
+                                             class="img-fluid" 
+                                             style="max-height: 80px; filter: brightness(0) invert(1);" 
+                                             alt="Icono formulario">
+                                    </div>
+                                    <h6 class="mb-2">{{ $tituloFormulario }}</h6>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="fw-bold fs-4">{{ $aplicaciones[0]['preguntas'] ?? 0 }}</div>
+                                            <small>Preguntas</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="fw-bold fs-4">{{ count($aplicaciones) }}</div>
+                                            <small>Aplicaciones</small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col m-0 p-0 fs-6">
-                                    @if ($item['AGF_id'] )
-                                        <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}" class="m-0 p-1 d-block text-decoration-none text-dark">
-                                            <p class="m-0">{{ mb_strimwidth($item["FRM_titulo"], 0, 40, '...', 'UTF-8') }}</p>
-                                            <p class="m-0 text-muted"><small>Creado: {{ Carbon::parse($item["createdAt"])->translatedFormat('d. M. Y H:i:s') }} | Código {{$item["AGF_id"]}}</small></p>
+                                
+                                {{-- BOTÓN NUEVO FORMULARIO --}}
+                                <div class="text-center">
+                                    @php
+                                        $puedeAplicar = $aplicaciones[0]['FRM_tipo'] == 'N' || 
+                                                       ($aplicaciones[0]['FRM_tipo'] == '1' && count($aplicaciones) == 0);
+                                    @endphp
+                                    
+                                    @if($puedeAplicar)
+                                        <a href="/cuestionario/duplicarCuestionario/{{ $aplicaciones[0]['FRM_id'] }}/{{ $VIS_id }}" 
+                                           class="btn btn-lg action-btn btn-responder w-100">
+                                            <i class="bi bi-plus-circle me-2"></i>Aplicar Nuevo
                                         </a>
+                                    @else
+                                        <div class="alert alert-info small mb-0">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Este formulario solo se puede aplicar una vez
+                                        </div>
                                     @endif
                                 </div>
-                                <div class="col m-0 p-0 fs-6">
-                                    <p class="m-0">Preguntas: {{$item["preguntas"]}}</p>
-                                    <p class="m-0">Respuestas: {{$item["respuestas"]}}</p>
-                                </div>
-
-                                <div class="col-1 fs-3 m-0 p-0">
-                                    <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pencil-square "></i></a>
-                                </div>
-                                @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
-                                    <div class="col-1 fs-3">
-                                        <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
-                                            @csrf
-                                            <input type="hidden" name="AGF_id" value="{{ $item["AGF_id"] }}">
-                                            <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-warning fs-3"></i></button>
-                                        </form>
+                            </div>
+                            
+                            {{-- COLUMNA DERECHA: LISTA DE APLICACIONES DE FORMULARIOS --}}
+                            <div class="col-lg-8 col-12">
+                                {{-- MENSAJE DE ALERTA PARA FORMULARIOS ÚNICOS --}}
+                                @if($aplicaciones[0]["FRM_tipo"] == '1' && session('warning'))
+                                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        {{ session('warning') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                     </div>
                                 @endif
-
-
-                            </div>
-
-                            {{-- @if ($item['AGF_id'] )
-                                <div class="col-auto d-flex card m-1 border-bottom m-0 p-0 " id="{{$item["AGF_id"]}}"  >
-                                    <div class="card-header p-0 ">
-                                        <ul class="list-group list-group-horizontal list-unstyled text-center">
-                                            <li class="p-0 m-0">
-
-                                                <span class="position-absolute top-20 start-50 translate-middle badge rounded-pill text-danger " style=" font-size: 1em; margin-top: 0.7rem">
-                                                    {{$item["AGF_id"]}}
-                                                </span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-body text-center p-0 m-0  ">
-                                    </div>
-                                    <div class="card-footer p-0">
-                                        <ul class="list-group list-group-horizontal list-unstyled ">
-
-                                            <li class="p-0 m-0">
-                                                <a href="/cuestionario/responder/{{$VIS_id}}/{{$item["FRM_id"]}}/{{$item["AGF_id"]}}"><i class="bi bi-pen-fill px-2 fs-5  $$$lapiz "></i></a>
-                                            </li>
-                                            @if ( $item["estado"] != 1 && Auth::user()->rol == 'Administrador' )
-                                                <li class="p-0 m-0">
-                                                    <form action="{{ route('cuestionario.eliminar') }}" method="Post" class=" frm-eliminar-cuestionario m-0 p-0">
-                                                        @csrf
-                                                        <input type="hidden" name="AGF_id" value="{{ $item["AGF_id"] }}">
-                                                        <button type=submit id="eliminar_formulario" class="btn p-0"><i class="bi bi-trash px-2 text-warning fs-5"></i></button>
-                                                    </form>
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    </div>
+                                
+                                {{-- LISTA DE APLICACIONES --}}
+                                <div class="aplicaciones-container">
+                                    @foreach($aplicaciones as $aplicacion)
+                                        @php
+                                            $porcentajeCompletitud = $aplicacion['preguntas'] > 0 
+                                                ? round(($aplicacion['respuestas'] / $aplicacion['preguntas']) * 100) 
+                                                : 0;
+                                            
+                                            $claseEstado = match(true) {
+                                                $porcentajeCompletitud >= 100 => 'aplicacion-completada',
+                                                $porcentajeCompletitud >= 50 => 'aplicacion-pendiente',
+                                                default => ''
+                                            };
+                                        @endphp
+                                        <div class="aplicacion-item {{ $claseEstado }} p-3">
+                                            <div class="row align-items-center">
+                                                {{-- ÍCONO Y PROGRESO --}}
+                                                <div class="col-auto">
+                                                    <div class="position-relative">
+                                                        <svg class="progress-ring">
+                                                            <circle class="progress-ring-circle"></circle>
+                                                            <circle class="progress-ring-progress" 
+                                                                    style="stroke-dashoffset: {{ 163.36 - (163.36 * $porcentajeCompletitud / 100) }};">
+                                                            </circle>
+                                                        </svg>
+                                                        <div class="position-absolute top-50 start-50 translate-middle">
+                                                            <i class="bi bi-file-earmark-ruled fs-4 text-primary"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {{-- INFORMACIÓN DE LA APLICACIÓN --}}
+                                                <div class="col">
+                                                    <div class="row">
+                                                        <div class="col-md-8">
+                                                            <h6 class="mb-1">
+                                                                {{ mb_strimwidth($aplicacion["FRM_titulo"], 0, 40, '...', 'UTF-8') }}
+                                                            </h6>
+                                                            <p class="text-muted small mb-2">
+                                                                <i class="bi bi-calendar me-1"></i>
+                                                                Creado: {{ Carbon::parse($aplicacion["createdAt"])->translatedFormat('d M. Y H:i') }}
+                                                                <span class="ms-2">
+                                                                    <i class="bi bi-hash me-1"></i>{{ $aplicacion["AGF_id"] }}
+                                                                </span>
+                                                            </p>
+                                                            <div class="d-flex gap-2 flex-wrap">
+                                                                <span class="badge bg-info text-shadow">
+                                                                    <i class="bi bi-question-circle me-1"></i>
+                                                                    {{ $aplicacion["preguntas"] }} preguntas
+                                                                </span>
+                                                                <span class="badge bg-primary text-shadow">
+                                                                    <i class="bi bi-check-circle me-1"></i>
+                                                                    {{ $aplicacion["respuestas"] }} respondidas
+                                                                </span>
+                                                                <span class="badge text-shadow {{ $porcentajeCompletitud >= 100 ? 'bg-success' : ($porcentajeCompletitud >= 50 ? 'bg-warning' : 'bg-secondary') }}">
+                                                                    {{ $porcentajeCompletitud }}% completo
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {{-- ACCIONES --}}
+                                                        <div class="col-md-4 text-md-end">
+                                                            <div class="btn-group-vertical w-100" role="group">
+                                                                <a href="/cuestionario/responder/{{ $VIS_id }}/{{ $aplicacion["FRM_id"] }}/{{ $aplicacion["AGF_id"] }}" 
+                                                                   class="btn action-btn btn-responder">
+                                                                    <i class="bi bi-pencil-square me-2"></i>
+                                                                    {{ $porcentajeCompletitud >= 100 ? 'Revisar' : 'Responder' }}
+                                                                </a>
+                                                                
+                                                                @if($aplicacion["estado"] != 1 && Auth::user()->rol == 'Administrador')
+                                                                    <form action="{{ route('cuestionario.eliminar') }}" 
+                                                                          method="POST" 
+                                                                          class="frm-eliminar-cuestionario mt-2"
+                                                                          onsubmit="return confirmarEliminacion(event)">
+                                                                        @csrf
+                                                                        <input type="hidden" name="AGF_id" value="{{ $aplicacion["AGF_id"] }}">
+                                                                        <button type="submit" class="btn action-btn btn-eliminar w-100">
+                                                                            <i class="bi bi-trash me-2"></i>Eliminar
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endif --}}
-                        @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr>
+            </div>
+            @php $iconIndex++; @endphp
+        @endforeach
+    @endif
+</div>
 
-            @php
-               $aux = ($aux + 1) % 5;
-                endforeach
-            @endphp
-          {{-- </ul> --}}
-          @endif
+{{-- BOTÓN FLOTANTE PARA AGREGAR FORMULARIOS (Solo Administradores) --}}
+@if(Auth::user()->rol == 'Administrador')
+    <div class="floating-action-discrete">
+        <a href="/formulario/eleccion/{{ $VIS_id }}/{{ $VIS_tipo }}" 
+           class="btn btn-lg btn-success box-shadow w-50 text-shadow"
+           data-bs-toggle="tooltip" 
+           data-bs-placement="left" 
+           title="Adicionar formulario a esta visita">
+            <i class="bi bi-plus-circle me-2"></i>
+            <span class="btn-text">Agregar Formulario</span>
+        </a>
+    </div>
+@endif
 
-
+{{-- MODAL DE ESTADÍSTICAS (Opcional) --}}
+<div class="modal fade" id="estadisticasModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-graph-up me-2"></i>Estadísticas del Formulario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="estadisticas-content">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-
+    </div>
+</div>
 
 @endsection
 
 @section('js')
-    {{-- @if (Session::has('success'))
-        <script>
-            Swal.fire(
-                '{{Session::get('success') }}',
-            )
-        </script>
-    @endif
-    @if(Session::has('warning'))
-        <script>
-            Swal.fire(
-                '{{Session::get('warning') }}',
-            )
-        </script>
-
-    @endif --}}
-<style>
-    .gren-shadow {
-  box-shadow: 4px 4px 4px #3d8bfd;}
-</style>
 <script>
-        // $(document).ready(function (){
-        //     $('html, body').animate({
-        //     }, 300);
-        // });
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
 
-    // $('.frm-duplicar-cuestionario').submit( function(e){
-    //     e.preventDefault();
+// Función para confirmar eliminación
+function confirmarEliminacion(event) {
+    event.preventDefault();
+    
+    Swal.fire({
+        title: '¿Eliminar cuestionario?',
+        text: 'Esta acción no se puede deshacer. Se perderán todas las respuestas.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            event.target.submit();
+        }
+    });
+    
+    return false;
+}
 
+// Auto-dismiss de alertas de warning
+setTimeout(function() {
+    let alertElement = document.querySelector('.alert-warning');
+    if (alertElement) {
+        let fadeEffect = setInterval(function() {
+            if (!alertElement.style.opacity) {
+                alertElement.style.opacity = 1;
+            }
+            if (alertElement.style.opacity > 0) {
+                alertElement.style.opacity -= 0.1;
+            } else {
+                clearInterval(fadeEffect);
+                alertElement.style.display = 'none';
+            }
+        }, 50);
+    }
+}, 5000);
 
-    //     // Swal.fire({
-    //     //     title: '¿Está seguro de duplicar?',
-    //     //     type: 'warning',
-    //     //     showCancelButton: true,
-    //     //     confirmButtonColor: '#3085d6',
-    //     //     cancelButtonColor: '#d33',
-    //     //     cancelButtonText: 'Cancelar',
-    //     //     confirmButtonText: 'Duplicar'
-    //     // }).then((result) => {
-    //     //     if (result.value) {
-    //     //         this.submit();
-    //     //     }
-    //     // });
-    // });
+// Función para cargar estadísticas (opcional)
+function cargarEstadisticas(formularioId) {
+    $('#estadisticasModal').modal('show');
+    
+    fetch(`/api/formularios/${formularioId}/estadisticas`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('estadisticas-content').innerHTML = `
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-primary">${data.total_aplicaciones || 0}</h3>
+                        <p class="text-muted">Total Aplicaciones</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-success">${data.completados || 0}</h3>
+                        <p class="text-muted">Completados</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-warning">${data.en_progreso || 0}</h3>
+                        <p class="text-muted">En Progreso</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-info">${Math.round(data.porcentaje_promedio || 0)}%</h3>
+                        <p class="text-muted">Promedio Completitud</p>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            document.getElementById('estadisticas-content').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error al cargar las estadísticas
+                </div>
+            `;
+        });
+}
 
-    // ELIMINAR EL FORMULARIO SELECCIONADO CON AJAX Y NO RECARGAR LA PAGINA, SI LA RESPUESTA AJAX ES CORRECTA SOLO ELIMINAR EL ELMENTO DEL DOOM
-    // $('.frm-eliminar-cuestionario').submit( function(e){
-    //     e.preventDefault();
-    //     // var form = $(this).parents('form');
-    //     Swal.fire({
-    //         title: '¿Está seguro de eliminar?',
-    //         type: 'warning',
-    //         showCancelButton: true,
-    //         confirmButtonColor: '#3085d6',
-    //         cancelButtonColor: '#d33',
-    //         cancelButtonText: 'Cancelar',
-    //         confirmButtonText: 'Eliminar'
-    //     }).then((result) => {
-    //         if (result.value) {
-    //             this.submit();
-    //             // Swal.fire('Eliminado', 'Elimando correctamente!', 'success');
-    //         }
-    //     });
-    // });
+// Efecto de hover mejorado para aplicaciones
+document.querySelectorAll('.aplicacion-item').forEach(item => {
+    item.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateX(5px)';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateX(0)';
+    });
+});
+
+// Contador animado para números
+function animateNumbers() {
+    document.querySelectorAll('.fw-bold.fs-4').forEach(element => {
+        const finalNumber = parseInt(element.textContent);
+        let currentNumber = 0;
+        const increment = Math.ceil(finalNumber / 20);
+        
+        const timer = setInterval(() => {
+            currentNumber += increment;
+            if (currentNumber >= finalNumber) {
+                currentNumber = finalNumber;
+                clearInterval(timer);
+            }
+            element.textContent = currentNumber;
+        }, 50);
+    });
+}
+
+// Ejecutar animación cuando la página esté lista
+document.addEventListener('DOMContentLoaded', animateNumbers);
 </script>
-
 @endsection
-
-
-
-
-

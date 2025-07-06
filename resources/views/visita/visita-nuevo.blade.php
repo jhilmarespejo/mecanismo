@@ -38,13 +38,41 @@
                         <small class="text-danger" id="VIS_titulo_err"></small>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label">Fecha de ingreso</label>
+                    {{-- <div class="mb-4">
+                        <label class="form-label">Fecha/s de ingreso</label>
                         <input class="form-control" type="date" name="VIS_fechas" max="100" min="0">
                         <small class="text-danger" id="VIS_fechas_err"></small>
+                    </div> --}}
+                    <div class="mb-4">
+                        <div class="row">
+                            <!-- Fecha de inicio -->
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de inicio de visita <span class="text-danger">*</span></label>
+                                <input class="form-control" type="date" name="VIS_fechas" id="VIS_fechas" required>
+                                <small class="text-danger" id="VIS_fechas_err"></small>
+                            </div>
+                            
+                            <!-- Fecha de fin -->
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha de fin de visita <span class="text-danger">*</span></label>
+                                <input class="form-control" type="date" name="VIS_fecha_fin" id="VIS_fecha_fin" required>
+                                <small class="text-danger" id="VIS_fecha_fin_err"></small>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje informativo debajo de ambas fechas -->
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle"></i> 
+                                    La fecha de fin debe ser igual o posterior a la fecha de inicio. 
+                                    Para visitas de un solo día, seleccione la misma fecha.
+                                </small>
+                            </div>
+                        </div>
                     </div>
 
-
+                
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-formulario-cancelar">Cancelar</button>
@@ -89,6 +117,68 @@
                     });
             });
         });
+
+
+
+        
+    // Validación de fechas 
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaInicio = document.getElementById('VIS_fechas');
+        const fechaFin = document.getElementById('VIS_fecha_fin');
+        const errorInicio = document.getElementById('VIS_fechas_err');
+        const errorFin = document.getElementById('VIS_fecha_fin_err');
+        
+        // Establecer fecha mínima como hoy
+        const today = new Date().toISOString().split('T')[0];
+        fechaInicio.min = today;
+        
+        function validarRangoFechas() {
+            // Limpiar errores previos
+            errorInicio.textContent = '';
+            errorFin.textContent = '';
+            
+            if (fechaInicio.value && fechaFin.value) {
+                const inicio = new Date(fechaInicio.value);
+                const fin = new Date(fechaFin.value);
+                
+                if (inicio > fin) {
+                    errorInicio.textContent = 'La fecha de inicio debe ser menor o igual a la fecha de fin';
+                    errorFin.textContent = 'La fecha de fin debe ser mayor o igual a la fecha de inicio';
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Cuando cambia la fecha de inicio
+        fechaInicio.addEventListener('change', function() {
+            // Establecer la fecha mínima del campo fin
+            fechaFin.min = this.value;
+            
+            // Si no hay fecha fin seleccionada, establecer la misma fecha
+            if (!fechaFin.value) {
+                fechaFin.value = this.value;
+            }
+            
+            validarRangoFechas();
+        });
+        
+        // Validación cuando cambia la fecha fin
+        fechaFin.addEventListener('change', function() {
+            validarRangoFechas();
+        });
+        
+        // Validación al enviar el formulario
+        const form = fechaInicio.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!validarRangoFechas()) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+    });
     </script>
 
 

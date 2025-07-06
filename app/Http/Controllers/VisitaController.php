@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta,ModArchivo, ModTipoEstablecimiento};
+use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta, ModArchivo, ModTipoEstablecimiento, ModEstablecimientoInfo, ModEstablecimientoPersonal};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Validator, Auth, Session, URL, Storage};
 
@@ -17,16 +17,46 @@ use PhpOffice\PhpWord\Style\ListItem;
 // use PhpOffice\PhpWord\Style\addTableStyle;
 
 class VisitaController extends Controller{
+    
+    // // Guardar datos de nueva visita
+    // public function guardarNuevaVisita( Request $request ) {
+        
+    //     $validator = Validator::make($request->all(), [
+    //         'VIS_tipo' => 'required',
+    //         'VIS_fechas' => 'required|date|after_or_equal:today',
+    //     ], [
+    //         'required' => 'El dato es requerido!',
+    //         'after_or_equal' => 'La fecha está en el pasado'
+    //     ]);
+
+    //     if ( $validator->fails() ){
+    //         return response()->json( [ 'errors' => $validator->errors() ] );
+    //     } else {
+    //         DB::beginTransaction();
+    //         try {
+    //             ModVisita::insert($request->except('_token'));
+    //             DB::commit();
+    //             // dump($request->except('_token'));exit;
+    //             //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
+    //         }catch (\Exception $e) {
+    //             DB::rollback();
+    //             exit ($e->getMessage());
+    //         }
+    //     }
+    // }
 
     // Guardar datos de nueva visita
     public function guardarNuevaVisita( Request $request ) {
-
+        
         $validator = Validator::make($request->all(), [
             'VIS_tipo' => 'required',
             'VIS_fechas' => 'required|date|after_or_equal:today',
+            'VIS_fecha_fin' => 'required|date|after_or_equal:VIS_fechas',
         ], [
             'required' => 'El dato es requerido!',
-            'after_or_equal' => 'La fecha está en el pasado'
+            'VIS_fechas.after_or_equal' => 'La fecha de inicio no puede ser en el pasado',
+            'VIS_fecha_fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+            'date' => 'Formato de fecha inválido'
         ]);
 
         if ( $validator->fails() ){
@@ -36,15 +66,13 @@ class VisitaController extends Controller{
             try {
                 ModVisita::insert($request->except('_token'));
                 DB::commit();
-                // dump($request->except('_token'));exit;
-                //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
+                return response()->json([ "message" => "¡Datos almacenados con éxito!" ]);
             }catch (\Exception $e) {
                 DB::rollback();
-                exit ($e->getMessage());
+                return response()->json([ "error" => "Error al guardar: " . $e->getMessage() ], 500);
             }
         }
     }
-
 
 
     /**
@@ -55,37 +83,167 @@ class VisitaController extends Controller{
      * Consulta para obtener el historial de las visitas realizadas al establecimiento
      */
     public function historial($id){
-
-        DB::enableQueryLog();
+        $anioActual = date('Y'); // Obtiene el año actual
+        
+        // Obtener información básica del establecimiento (siempre existe)
+        $establecimientoBase = ModEstablecimiento::select(
+            'establecimientos.EST_id',
+            'establecimientos.EST_nombre',
+            'establecimientos.EST_departamento',
+            'establecimientos.EST_municipio',
+            'establecimientos.EST_direccion',
+            'establecimientos.EST_telefono_contacto',
+            'establecimientos.EST_capacidad_creacion',
+            'establecimientos.EST_anyo_funcionamiento',
+            'tipo_establecimientos.TES_tipo'
+        )
+        ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->where('establecimientos.EST_id', $id)
+        ->first();
+        
+        // Si no existe el establecimiento, retornar error o redirigir
+        if (!$establecimientoBase) {
+            abort(404, 'Establecimiento no encontrado');
+        }
+        
+        // Obtener información adicional del establecimiento para el año actual
+        $establecimientoInfo = ModEstablecimientoInfo::select(
+            'EINF_poblacion_atendida',
+            'EINF_cantidad_actual_internos',
+            'EINF_superficie_terreno',
+            'EINF_superficie_construida',
+            'EINF_derecho_propietario',
+            'EINF_gestion'
+        )
+        ->where('FK_EST_id', $id)
+        ->where('EINF_gestion', $anioActual)
+        ->first();
+        
+        // Si no hay info del año actual, buscar la más reciente
+        if (!$establecimientoInfo) {
+            $establecimientoInfo = ModEstablecimientoInfo::select(
+                'EINF_poblacion_atendida',
+                'EINF_cantidad_actual_internos',
+                'EINF_superficie_terreno',
+                'EINF_superficie_construida',
+                'EINF_derecho_propietario',
+                'EINF_gestion'
+            )
+            ->where('FK_EST_id', $id)
+            ->orderByDesc('EINF_gestion')
+            ->first();
+        }
+        
+        // CREAR EL OBJETO ESTABLECIMIENTO DE FORMA CORRECTA
+        $establecimiento = new \stdClass();
+        
+        // Asignar datos base (siempre existen)
+        $establecimiento->EST_id = $establecimientoBase->EST_id;
+        $establecimiento->EST_nombre = $establecimientoBase->EST_nombre;
+        $establecimiento->EST_departamento = $establecimientoBase->EST_departamento;
+        $establecimiento->EST_municipio = $establecimientoBase->EST_municipio;
+        $establecimiento->EST_direccion = $establecimientoBase->EST_direccion;
+        $establecimiento->EST_telefono_contacto = $establecimientoBase->EST_telefono_contacto;
+        $establecimiento->EST_capacidad_creacion = $establecimientoBase->EST_capacidad_creacion;
+        $establecimiento->EST_anyo_funcionamiento = $establecimientoBase->EST_anyo_funcionamiento;
+        $establecimiento->TES_tipo = $establecimientoBase->TES_tipo;
+        
+        // Asignar datos de información adicional (pueden ser null)
+        if ($establecimientoInfo) {
+            $establecimiento->EINF_poblacion_atendida = $establecimientoInfo->EINF_poblacion_atendida;
+            $establecimiento->EINF_cantidad_actual_internos = $establecimientoInfo->EINF_cantidad_actual_internos;
+            $establecimiento->EINF_superficie_terreno = $establecimientoInfo->EINF_superficie_terreno;
+            $establecimiento->EINF_superficie_construida = $establecimientoInfo->EINF_superficie_construida;
+            $establecimiento->EINF_derecho_propietario = $establecimientoInfo->EINF_derecho_propietario;
+            $establecimiento->EINF_gestion = $establecimientoInfo->EINF_gestion;
+        } else {
+            // Si no hay información adicional, asignar null
+            $establecimiento->EINF_poblacion_atendida = null;
+            $establecimiento->EINF_cantidad_actual_internos = null;
+            $establecimiento->EINF_superficie_terreno = null;
+            $establecimiento->EINF_superficie_construida = null;
+            $establecimiento->EINF_derecho_propietario = null;
+            $establecimiento->EINF_gestion = $anioActual; // Gestión actual por defecto
+        }
+        
+        // Obtener el responsable del establecimiento para el año actual
+        $responsable = ModEstablecimientoPersonal::select(
+            'EPER_nombre_responsable',
+            'EPER_grado_profesion',
+            'EPER_telefono',
+            'EPER_email',
+            'EPER_gestion'
+        )
+        ->where('FK_EST_id', $id)
+        ->where('EPER_gestion', $anioActual)
+        ->first();
+        
+        // Si no hay responsable del año actual, buscar el más reciente
+        if (!$responsable) {
+            $responsable = ModEstablecimientoPersonal::select(
+                'EPER_nombre_responsable',
+                'EPER_grado_profesion',
+                'EPER_telefono',
+                'EPER_email',
+                'EPER_gestion'
+            )
+            ->where('FK_EST_id', $id)
+            ->orderByDesc('EPER_gestion')
+            ->first();
+        }
+        
+        // Obtener documentos del establecimiento (reglamento, licencia, foto fachada)
+        $documentos = ModArchivo::select(
+            'ARC_id',
+            'ARC_descripcion',
+            'ARC_ruta',
+            'ARC_extension',
+            'ARC_formatoArchivo',
+            'ARC_origen'
+        )
+        ->where('FK_EST_id', $id)
+        ->whereIn('ARC_origen', ['reglamento', 'licencia', 'fachada'])
+        ->get()
+        ->keyBy('ARC_origen');
+        
+        // Obtener visitas 
         $visitas = ModVisita::from('visitas as v')
-        ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo','e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
+        ->select('v.VIS_id', 'v.VIS_fechas', 'v.VIS_tipo', 'v.VIS_titulo', 'e.EST_nombre', 'e.EST_id', 'tes.TES_tipo')
         ->rightJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-        ->rightJoin('tipo_establecimientos as tes', 'tes.TES_id', 'e.FK_TES_id'  )
+        ->rightJoin('tipo_establecimientos as tes', 'tes.TES_id', 'e.FK_TES_id')
         ->where('e.EST_id', $id)
+        ->orderBy('v.VIS_fechas', 'desc')
         ->get();
-        // $quries = DB::getQueryLog();
-        // dump($visitas); exit;
 
-        session()->put('EST_id', $visitas->toArray()[0]['EST_id']);
-        session()->put('EST_nombre', $visitas->toArray()[0]['EST_nombre']);
-        session()->put('TES_tipo', $visitas->toArray()[0]['TES_tipo']);
-
-        return view('visita.visita-historial', compact('visitas'));
+        // Verificar si hay visitas antes de acceder al array
+        if ($visitas->count() > 0) {
+            session()->put('EST_id', $visitas->first()->EST_id);
+            session()->put('EST_nombre', $visitas->first()->EST_nombre);
+            session()->put('TES_tipo', $visitas->first()->TES_tipo);
+        } else {
+            // Usar los datos del establecimiento base que ya tenemos
+            session()->put('EST_id', $establecimientoBase->EST_id);
+            session()->put('EST_nombre', $establecimientoBase->EST_nombre);
+            session()->put('TES_tipo', $establecimientoBase->TES_tipo);
+        }
+        
+        // DEBUG: Temporalmente para verificar datos
+        // dd($establecimiento, $responsable);
+        
+        return view('visita.visita-historial', compact('visitas', 'establecimiento', 'responsable', 'documentos', 'anioActual'));
     }
-
+        
+    
     /*Vista para guardar nueva acta de Visita */
-    public function actaVisita( $VIS_id ){
+    public function actaVisita($VIS_id){
         $visita = ModArchivo::select('ARC_formatoArchivo', 'ARC_ruta', 'ARC_extension', 'FK_VIS_id')
         ->where('FK_VIS_id', $VIS_id)
         ->get()->toArray();
-        // dump( $visita); exit;
-
-
+        
         return view('visita.acta-visita', compact('VIS_id','visita'));
     }
 
-    public function guardarActaVisita( Request $request ){
-        // dump($request->all());exit;
+    public function guardarActaVisita(Request $request){
         $request->validate([
             'VIS_acta' => 'required|mimes:pdf,jpg,jpeg,png,xls,xlsx,ppt,pptx,doc,docx|max:20048',
         ], [
@@ -97,20 +255,27 @@ class VisitaController extends Controller{
         DB::beginTransaction();
         try {
             // Guardar el archivo en la tabla de archivos y en la carpeta actas
-            $tipoArchivo =  explode( "/", $request->VIS_acta->getClientMimeType() );
+            $tipoArchivo = explode("/", $request->VIS_acta->getClientMimeType());
             //Guarda datos del archivo en la tabla archivos
-            ModArchivo::create( [ 'ARC_NombreOriginal' => $request->VIS_acta->getClientOriginalName(),'ARC_ruta' => $request->VIS_acta->store('/uploads/actas'), 'ARC_extension' => $request->VIS_acta->extension(), 'ARC_tamanio' => $request->VIS_acta->getSize(), 'ARC_descripcion' =>  'Acta de visita', 'ARC_formatoArchivo' =>  $tipoArchivo[0], 'FK_VIS_id' => $request->VIS_id, 'ARC_origen' => 'acta'] );
+            ModArchivo::create([
+                'ARC_NombreOriginal' => $request->VIS_acta->getClientOriginalName(),
+                'ARC_ruta' => $request->VIS_acta->store('/uploads/actas'),
+                'ARC_extension' => $request->VIS_acta->extension(),
+                'ARC_tamanio' => $request->VIS_acta->getSize(),
+                'ARC_descripcion' => 'Acta de visita',
+                'ARC_formatoArchivo' => $tipoArchivo[0],
+                'FK_VIS_id' => $request->VIS_id,
+                'ARC_origen' => 'acta'
+            ]);
 
-
-            if( $tipoArchivo[0] == 'image'){
+            if($tipoArchivo[0] == 'image'){
                 Image::make($request->VIS_acta)
                 ->resize(null, 600, function ($constraint) {
                     $constraint->aspectRatio();
                 })->save(public_path('uploads/actas/').$request->VIS_acta->store(''));
             } else {
-                $request->VIS_acta->move( public_path('uploads/actas/'),$request->VIS_acta->store('') );
+                $request->VIS_acta->move(public_path('uploads/actas/'), $request->VIS_acta->store(''));
             }
-
 
             DB::commit();
             return redirect()->back()->with('success', 'Correcto');
@@ -120,263 +285,443 @@ class VisitaController extends Controller{
             exit ($e->getMessage());
         }
     }
+    
+    public function guardarDocumentoEstablecimiento(Request $request){
+        $request->validate([
+            'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:20048',
+            'tipo_documento' => 'required|in:reglamento,licencia,fachada',
+            'EST_id' => 'required|exists:establecimientos,EST_id'
+        ], [
+            'documento.required' => 'El archivo es necesario',
+            'documento.max' => 'El archivo debe ser menor a 20Mb',
+            'documento.mimes' => 'Puede subir archivos de imagen o PDF',
+            'tipo_documento.required' => 'El tipo de documento es requerido',
+            'tipo_documento.in' => 'Tipo de documento no válido',
+            'EST_id.required' => 'El establecimiento es requerido',
+            'EST_id.exists' => 'El establecimiento no existe'
+        ]);
 
-    public function resumen(Request $request) {
-        $anioActual=0;
-            if( is_null($request->anio_actual ) ){
-                $anioActual = date('Y');
-            } else {
-                $anioActual = $request->anio_actual;
+        DB::beginTransaction();
+        try {
+            $tipoArchivo = explode("/", $request->documento->getClientMimeType());
+            $descripcion = '';
+            $carpeta = '';
+            
+            switch ($request->tipo_documento) {
+                case 'reglamento':
+                    $descripcion = 'Reglamento del centro';
+                    $carpeta = 'reglamentos';
+                    break;
+                case 'licencia':
+                    $descripcion = 'Licencia de funcionamiento';
+                    $carpeta = 'licencias';
+                    break;
+                case 'fachada':
+                    $descripcion = 'Fotografía de fachada';
+                    $carpeta = 'fachadas';
+                    break;
             }
-            DB::enableQueryLog();
+            
+            // Verificar si ya existe un documento de este tipo para el establecimiento
+            $documentoExistente = ModArchivo::where('FK_EST_id', $request->EST_id)
+                ->where('ARC_origen', $request->tipo_documento)
+                ->first();
+                
+            if ($documentoExistente) {
+                // Eliminar el archivo anterior del sistema de archivos
+                if (Storage::exists($documentoExistente->ARC_ruta)) {
+                    Storage::delete($documentoExistente->ARC_ruta);
+                }
+                // También eliminar del public path si existe
+                $publicPath = public_path($documentoExistente->ARC_ruta);
+                if (file_exists($publicPath)) {
+                    unlink($publicPath);
+                }
+                // Eliminar registro de la base de datos
+                $documentoExistente->delete();
+            }
+            
+            // Generar nombre único para el archivo
+            $nombreArchivo = time() . '_' . $request->tipo_documento . '.' . $request->documento->extension();
+            
+            // Definir la ruta completa
+            $rutaCompleta = 'uploads/establecimientos/' . $carpeta . '/' . $nombreArchivo;
+            
+            // Guardar datos del archivo en la tabla archivos
+            $archivo = ModArchivo::create([
+                'ARC_NombreOriginal' => $request->documento->getClientOriginalName(),
+                'ARC_ruta' => $rutaCompleta,
+                'ARC_extension' => $request->documento->extension(),
+                'ARC_tamanio' => $request->documento->getSize(),
+                'ARC_descripcion' => $descripcion,
+                'ARC_formatoArchivo' => $tipoArchivo[0],
+                'FK_EST_id' => $request->EST_id,
+                'ARC_origen' => $request->tipo_documento,
+                'estado' => 1
+            ]);
 
-        $totalVisitas = DB::table('tipo_establecimientos as te')
-            ->select('te.TES_tipo', 'e.EST_nombre', 'v.VIS_tipo', 'e.EST_id','v.VIS_fechas',
-            DB::raw('COUNT(v."VIS_id") AS total_tipo_visitas'),
-            DB::raw('SUM(COUNT(v."VIS_id")) OVER(PARTITION BY te."TES_tipo") AS total_tipo_establecimiento'),
-            'total_establecimiento.total_establecimiento AS total_establecimiento')
-            ->join('establecimientos as e', 'e.FK_TES_id', 'te.TES_id')
-            ->join('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-            ->join(DB::raw('(SELECT e."EST_nombre",  COUNT(v."VIS_id") AS total_establecimiento
-                            FROM establecimientos e
-                            JOIN visitas v ON v."FK_EST_id" = e."EST_id"
-                            GROUP BY e."EST_nombre") total_establecimiento'),
-                    'total_establecimiento.EST_nombre', 'e.EST_nombre')
-            ->leftJoin(DB::raw('(SELECT COUNT(v."VIS_id") AS total_general
-                    FROM visitas v) total_general'), DB::raw('1'), '=', DB::raw('1'))
-            ->whereYear('v.VIS_fechas', $anioActual)
-            ->groupBy('te.TES_tipo', 'e.EST_nombre', 'e.EST_id', 'v.VIS_tipo', 'total_establecimiento.total_establecimiento', 'total_general.total_general', 'v.VIS_fechas')
-            ->orderBy('te.TES_tipo')
-            ->orderBy('e.EST_nombre')
-            ->orderBy('e.EST_id')
-            ->orderBy('v.VIS_tipo')
-            ->addSelect(DB::raw('total_general.total_general AS total_general'))
+            // Crear el directorio si no existe
+            $directorio = public_path('uploads/establecimientos/' . $carpeta);
+            if (!file_exists($directorio)) {
+                mkdir($directorio, 0755, true);
+            }
+
+            // Guardar el archivo
+            if($tipoArchivo[0] == 'image'){
+                // Redimensionar y guardar imagen
+                Image::make($request->documento)
+                    ->resize(1200, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    })->save(public_path($rutaCompleta), 80);
+            } else {
+                // Mover archivo PDF
+                $request->documento->move($directorio, $nombreArchivo);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Documento guardado correctamente');
+        }
+        catch (\Exception $e) {
+            DB::rollback();
+            // \Log::error('Error al guardar documento: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al guardar el documento: ' . $e->getMessage());
+        }
+    }
+    
+    // Muestra un breve resumen de las visitas en la vista principal
+    public function resumen(Request $request) {
+        $anioActual = $request->input('anio_actual', date('Y'));
+        
+        // Usar Eloquent para evitar problemas de case-sensitivity
+        $visitas = ModVisita::select([
+                'visitas.VIS_id',
+                'visitas.VIS_tipo', 
+                'visitas.VIS_fechas',
+                'establecimientos.EST_id',
+                'establecimientos.EST_nombre',
+                'tipo_establecimientos.TES_tipo'
+            ])
+            ->join('establecimientos', 'visitas.FK_EST_id', '=', 'establecimientos.EST_id')
+            ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', '=', 'tipo_establecimientos.TES_id')
+            ->whereYear('visitas.VIS_fechas', $anioActual)
+            ->orderBy('tipo_establecimientos.TES_tipo')
+            ->orderBy('establecimientos.EST_nombre')
+            ->orderBy('visitas.VIS_tipo')
             ->get();
 
-     
-            $totalVisitas = CustomController::agruparPorTipoYNombre($totalVisitas);
-        $quries = DB::getQueryLog();
-        // dump($totalVisitas); exit;
-        return view('visita.visita-resumen', compact('totalVisitas', 'anioActual'));
-
+        if ($visitas->isEmpty()) {
+            $totalVisitasProcessed = [
+                'resultado' => [],
+                'total_general' => 0
+            ];
+        } else {
+            // Procesar datos usando Collections de Laravel
+            $visitasAgrupadas = $visitas->groupBy(['TES_tipo', 'EST_nombre', 'VIS_tipo']);
+            
+            $datosParaVista = collect();
+            
+            foreach ($visitasAgrupadas as $tipoEst => $establecimientos) {
+                foreach ($establecimientos as $nombreEst => $tiposVisita) {
+                    foreach ($tiposVisita as $tipoVisita => $visitasDelTipo) {
+                        $primerVisita = $visitasDelTipo->first();
+                        $ultimaVisita = $visitasDelTipo->last();
+                        
+                        $datosParaVista->push((object)[
+                            'TES_tipo' => $tipoEst,
+                            'EST_nombre' => $nombreEst,
+                            'EST_id' => $primerVisita->EST_id,
+                            'VIS_tipo' => $tipoVisita,
+                            'total_tipo_visitas' => $visitasDelTipo->count(),
+                            'primera_fecha' => $visitasDelTipo->min('VIS_fechas'),
+                            'ultima_fecha' => $visitasDelTipo->max('VIS_fechas'),
+                            'VIS_fechas' => $visitasDelTipo->min('VIS_fechas'),
+                            'total_general' => $visitas->count()
+                        ]);
+                    }
+                }
+            }
+            
+            // Calcular totales por tipo de establecimiento y establecimiento
+            $totalesPorTipo = $datosParaVista->groupBy('TES_tipo')
+                ->map(function($grupo) {
+                    return $grupo->sum('total_tipo_visitas');
+                });
+                
+            $totalesPorEstablecimiento = $datosParaVista->groupBy(['TES_tipo', 'EST_nombre'])
+                ->map(function($tipoGrupo) {
+                    return $tipoGrupo->map(function($estGrupo) {
+                        return $estGrupo->sum('total_tipo_visitas');
+                    });
+                });
+            
+            // Agregar totales a cada item
+            $datosParaVista = $datosParaVista->map(function($item) use ($totalesPorTipo, $totalesPorEstablecimiento) {
+                $item->total_tipo_establecimiento = $totalesPorTipo[$item->TES_tipo] ?? 0;
+                $item->total_establecimiento = $totalesPorEstablecimiento[$item->TES_tipo][$item->EST_nombre] ?? 0;
+                return $item;
+            });
+            
+            $totalVisitasProcessed = CustomController::agruparPorTipoYNombre($datosParaVista);
+        }
+        
+        return view('visita.visita-resumen', compact('totalVisitasProcessed', 'anioActual'));
     }
+    
+    /**
+     * Mostrar formulario de edición del establecimiento
+     */
+    public function editarFichaEstablecimiento($id)
+    {
+        $anioActual = date('Y');
+        
+        // Obtener información del establecimiento
+        $establecimiento = ModEstablecimiento::select(
+            'establecimientos.EST_id',
+            'establecimientos.EST_nombre',
+            'establecimientos.EST_departamento',
+            'establecimientos.EST_municipio',
+            'establecimientos.EST_direccion',
+            'establecimientos.EST_telefono_contacto',
+            'establecimientos.EST_capacidad_creacion',
+            'establecimientos.EST_anyo_funcionamiento',
+            'tipo_establecimientos.TES_tipo'
+        )
+        ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
+        ->where('establecimientos.EST_id', $id)
+        ->first();
+        
+        if (!$establecimiento) {
+            return redirect()->back()->with('error', 'Establecimiento no encontrado');
+        }
+        
+        // Obtener información adicional del establecimiento (del año actual o más reciente)
+        $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+            ->where('EINF_gestion', $anioActual)
+            ->first();
 
+        // dump($establecimientoInfo);exit;
+        // Si no hay info del año actual, buscar la más reciente o crear nueva
+        if (!$establecimientoInfo) {
+            $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+                ->orderByDesc('EINF_gestion')
+                ->first();
+                
+            if (!$establecimientoInfo) {
+                // Crear objeto vacío para el formulario
+                $establecimientoInfo = new \stdClass();
+                $establecimientoInfo->EINF_id = null;
+                $establecimientoInfo->EINF_poblacion_atendida = null;
+                $establecimientoInfo->EINF_cantidad_actual_internos = null;
+                $establecimientoInfo->EINF_superficie_terreno = null;
+                $establecimientoInfo->EINF_superficie_construida = null;
+                $establecimientoInfo->EINF_derecho_propietario = null;
+                $establecimientoInfo->EINF_gestion = $anioActual;
+            }
+        }
+        
+        // Obtener responsable del establecimiento (del año actual o más reciente)
+        $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+            ->where('EPER_gestion', $anioActual)
+            ->first();
+        
+        // Si no hay responsable del año actual, buscar el más reciente o crear nuevo
+        if (!$responsable) {
+            $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+                ->orderByDesc('EPER_gestion')
+                ->first();
+                
+            if (!$responsable) {
+                // Crear objeto vacío para el formulario
+                $responsable = new \stdClass();
+                $responsable->EPER_id = null;
+                $responsable->EPER_nombre_responsable = null;
+                $responsable->EPER_grado_profesion = null;
+                $responsable->EPER_telefono = null;
+                $responsable->EPER_email = null;
+                $responsable->EPER_gestion = $anioActual;
+            }
+        }
+        
+        return view('visita.editar-ficha-establecimiento', compact('establecimiento', 'establecimientoInfo', 'responsable', 'anioActual'));
+    }
+    
+    /**
+     * Actualizar información del establecimiento
+     */
+    public function actualizarFichaEstablecimiento(Request $request, $id)
+    {
+        // Validar datos
+        $validator = Validator::make($request->all(), [
+            'EST_departamento' => 'required|string|max:20',
+            'EST_municipio' => 'required|string|max:300',
+            'EST_direccion' => 'nullable|string|max:400',
+            'EST_telefono_contacto' => 'nullable|string|max:100',
+            'EST_capacidad_creacion' => 'nullable|string|max:300',
+            'EST_anyo_funcionamiento' => 'nullable|integer|min:1901|max:' . now()->year,
+            
+            'EINF_poblacion_atendida' => 'nullable|string|max:300',
+            'EINF_cantidad_actual_internos' => 'nullable|string|max:300',
+            // 'EINF_superficie_terreno' => 'nullable|numeric',
+            // 'EINF_superficie_construida' => 'nullable|numeric',
 
-    // public function informeVisita( $VIS_id, $flag = null ){
-        //     // dump($VIS_id);exit;
+            'EINF_superficie_terreno' => [
+                'nullable',
+                'required_with:EINF_superficie_construida',
+                'regex:/^\d+(\.\d{1,2})?$/',
+            ],
 
-        //     /* DAtos para la el informe */
-        //     $datos = ModVisita::from('visitas as v')
-        //     ->distinct('f.FRM_titulo')
-        //     ->select('f.FRM_titulo','v.VIS_tipo', 'v.VIS_titulo', 'e.EST_nombre', 'te.TES_tipo', 'v.VIS_urlActa', 'v.VIS_fechas')
-        //     ->leftJoin('establecimientos as e', 'e.EST_id', 'v.FK_EST_id')
-        //     ->leftJoin('tipo_establecimiento as te', 'te.TES_id', 'e.FK_TES_id')
-        //     ->leftjoin('formularios as f', 'f.FK_VIS_id', 'v.VIS_id')
-        //     ->where('v.VIS_id', $VIS_id)
-        //     ->orderby('f.FRM_titulo')
-        //     ->get();
+            'EINF_superficie_construida' => [
+                'nullable',
+                'required_with:EINF_superficie_terreno',
+                'regex:/^\d+(\.\d{1,2})?$/',
+                'lte:EINF_superficie_terreno',
+            ],
 
-        //     DB::enableQueryLog();
+            
+            'EINF_derecho_propietario' => 'nullable|string|max:255',
+            'EPER_nombre_responsable' => 'nullable|string|max:200',
+            'EPER_grado_profesion' => 'nullable|string|max:150',
+            'EPER_telefono' => 'nullable|string|max:50',
+            'EPER_email' => 'nullable|email|max:100',
+        ], [
+            'required' => 'El campo :attribute es requerido.',
+            'string' => 'El campo :attribute debe ser texto.',
+            'max' => 'El campo :attribute no debe exceder :max caracteres.',
+            'numeric' => 'El campo :attribute debe ser un número.',
+            'email' => 'El campo :attribute debe ser un email válido.',
 
-        //     /* Datos para archivos adjuntos (IMAGENES) relacionados con la VISITA */
-        //     $imagenes = ModVisita::from('archivos as a')
-        //     ->select('a.ARC_ruta', 'a.ARC_tipoArchivo', 'a.ARC_descripcion', 'a.ARC_extension' )
-        //     ->leftJoin ('r_formularios_archivos as rfa', 'rfa.FK_ARC_id', 'a.ARC_id')
-        //     ->leftJoin ('formularios as f', 'f.FRM_id', 'rfa.FK_FRM_id')
-        //     ->where('f.FK_VIS_id', $VIS_id)
-        //     ->where('a.ARC_tipoArchivo', 'image')
-        //     ->get();
+            'EST_anyo_funcionamiento.integer' => 'El año de funcionamiento debe ser un número entero.',
+            'EST_anyo_funcionamiento.min' => 'El año de funcionamiento debe ser mayor a 1900.',
+            'EST_anyo_funcionamiento.max' => 'El año de funcionamiento no puede ser mayor al año actual.',
 
-        //     $referencia = $datos->toArray()[0]['VIS_tipo'] .' '. $datos->toArray()[0]['VIS_titulo'].':';
+            'EINF_superficie_terreno.numeric' => 'La superficie del terreno debe ser un valor numérico.',
+            'EINF_superficie_terreno.required_with' => 'La superficie del terreno es obligatoria si se proporciona la superficie construida.',
+            
+            'EINF_superficie_construida.numeric' => 'La superficie construida debe ser un valor numérico.',
+            'EINF_superficie_construida.required_with' => 'La superficie construida es obligatoria si se proporciona la superficie del terreno.',
+            'EINF_superficie_construida.lte' => 'La superficie construida no puede ser mayor que la superficie del terreno.',
+        ]);
 
-        //     // $quries = DB::getQueryLog();
+        // Si hay errores de validación, devolver respuesta JSON
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-        //     /* preguntas y respuestas para ANALISIS */
-        //     $preguntasAnalisis = $this->preguntasAnalisis( $VIS_id );
-        //     // dump($preg@untasAnalisis);exit;
-
-
-        //     /* Flag para descargar el informe */
-        //     if( $flag == 0){
-        //         return view('visita.informe-visita', compact('datos', 'referencia', 'imagenes', 'preguntasAnalisis', 'VIS_id'));
-        //     }
-        //     if( $flag == 1){
-        //         // **************************************************************************
-        //         $documento = new \PhpOffice\PhpWord\PhpWord();
-        //         $propiedades = $documento->getDocInfo();
-        //         $propiedades->setCreator("MNP-Bolivia");
-        //         $propiedades->setTitle("Informe de visita");
-        //         $documento->getSettings()->setThemeFontLang(new Language("ES-MX"));
-
-        //         /* --- ESTILOS  ------------ */
-        //         $documento->addTitleStyle(1, array('size' => 11, 'bold' => true, 'name' => 'Arial'));
-        //         $documento->addTitleStyle(2, array('size' => 10.5, 'bold' => true, 'name' => 'Arial'));
-        //         $bold = ['bold' => true, 'name' => 'Arial', 'size' => 11];
-        //         $arial11 = ['name' => 'Arial', 'size' => 11];
-        //         $estiloTabla = [
-        //             'borderColor' => 'ffffff',
-        //             'borderSize'  => 6,
-        //             'cellMargin'  => 50,
-        //         ];
-
-        //         /* --- imagen ------------ */
-
-        //         $seccion = $documento->addSection();
-        //         // $seccion->addImage();
-
-        //         $encabezado = $seccion->addHeader();
-        //         $encabezado->addImage(URL::to('')."/img/logoinforme.png", [
-        //             "width" => 100,
-        //             "alignment" => Jc::CENTER,
-        //         ]);
-
-        //         $seccion->addText('INFORME DE VISITA', 1, ['alignment' => 'center', 'lineHeight' => 1,'size'=>11]);
-        //         $seccion->addText('INF/DP/MNP/2023/...', 1, ['alignment' => 'center', 'lineHeight' => 1,'size'=>11]);
-        //         /* --- TABLA  ------------ */
-        //         // $seccion = $documento->addSection();
-
-
-        //         // Guardarlo para usarlo más tarde
-        //         $documento->addTableStyle("estilo1", $estiloTabla);
-
-        //         $tabla = $seccion->addTable("estilo1"); # Agregar tabla con el estilo que guardamos antes
-        //         $tabla->addRow(); # Agregar fila
-        //         $tabla->addCell()->addText("A:",$bold);
-        //         $tabla->addCell()->addText("... <w:br/> Delegado(a) Defensorial Departamental",  $arial11);
-        //         $tabla->addRow(); # Agregar fila
-        //         $tabla->addCell()->addText("De:",$bold);
-        //         $tabla->addCell()->addText(Auth::user()->name."<w:br/>...",  $arial11);
-        //         $tabla->addRow(); # Agregar fila
-        //         $tabla->addCell()->addText("REFERENCIA:",$bold);
-        //         $tabla->addCell()->addText( $referencia.' '.$datos->toArray()[0]['EST_nombre'].' - '.$datos->toArray()[0]['VIS_fechas'], $arial11);
-        //         $tabla->addRow(); # Agregar fila
-        //         $tabla->addCell()->addText("FECHA:",$bold);
-        //         $tabla->addCell()->addText(date('d-m-Y'),  $arial11);
-
-        //         $seccion->addLine(array('weight' => 1, 'width' => 450, 'height' => 0, 'color' => 000000));
-
-
-        //         $seccion->addTitle('1. ANTECEDENTES:', 1);
-
-        //         $seccion->addText("La Defensoría del Pueblo tiene un nuevo mandato como Mecanismo Nacional de Prevención de la Tortura del Estado Plurinacional de Bolivia (MNP), en cumplimiento de la Ley N° 1397 de 29 de septiembre de 2021 y el Protocolo Facultativo de la Convención Contra la Tortura y otros Tratos o Penas Crueles, Inhumanos o Degradantes, ratificado por Ley N° 3298 de 12 de diciembre de 2005.", $arial11, ["alignment" => Jc::BOTH]);
-        //         $seccion->addTextBreak(1);
-
-        //         $seccion->addTitle("2. DESARROLLO DE LA VISITA:", 1);
-        //         $seccion->addText("El 3 de marzo de 2023 la Delegación Defensorial realizó un ingreso simultáneo a centros penitenciarios a nivel nacional, visitando:", $arial11, ["alignment" => Jc::BOTH]);
-
-        //         $seccion->addText('* '. $datos->toArray()[0]['TES_tipo'].' de '. $datos->toArray()[0]['EST_nombre'], ['name' => 'Arial', 'size' => 13]);
-        //         $seccion->addTextBreak(1);
-
-        //         $seccion->addTitle("3. PROBLEMAS IDENTIFICADOS Y RECOMENDACIONES:",1);
-        //         $seccion->addText("El 3 de marzo de 2023 la Delegación Defensorial realizó un ingreso simultáneo a centros penitenciarios a nivel nacional, visitando:", $arial11, ["alignment" => Jc::BOTH]);
-
-        //         for ( $x = 0; $x < count($preguntasAnalisis); $x++ ){
-        //             $opciones = json_decode($preguntasAnalisis[$x]["RES_respuesta"], JSON_PRETTY_PRINT) ;
-
-        //             $seccion->addText($preguntasAnalisis[$x]["BCP_pregunta"], $arial11, ['indent' => 1]);
-
-        //             if ($preguntasAnalisis[$x]["RES_respuesta"]){
-        //                 if( json_last_error() ){
-        //                     $seccion->addText($preguntasAnalisis[$x]["RES_respuesta"], $arial11, ['indent' => 2]);
-        //                 }else {
-        //                     if ( is_numeric($opciones) ){
-        //                         $seccion->addText($opciones, $arial11, ['indent' => 2]);
-        //                     }else{
-        //                             for ($i = 0; $i < count($opciones); $i++){
-        //                             $seccion->addText($opciones[$i], $arial11, ['indent' => 2]);
-        //                             }
-        //                     }
-        //                 }
-        //             }
-        //             if ( $preguntasAnalisis[$x]["RES_complemento"] ){
-        //                 $seccion->addText($preguntasAnalisis[$x]["RES_complemento"],1, ['indent' => 2]);
-        //             }
-        //         }
-
-
-        //         if(  count($imagenes) > 0 ){
-        //             $seccion->addTitle("IMÁGENES DE RESPALDO:", 2, ['indent' => 1] );
-
-        //             foreach ( $imagenes as $k=>$imagen  ){
-        //                 $seccion->addImage(URL::to('')."/".$imagen->ARC_ruta, [
-        //                     "height" => 150,
-        //                     "alignment" => Jc::CENTER,
-        //                     ]
-        //                 );
-        //                 $seccion->addText('Imagen '.($k+1).'. '.$imagen->ARC_descripcion,1, ["alignment" => Jc::CENTER,] );
-        //             }
-
-        //         }
-        //         $seccion->addTextBreak(1);
-        //         $seccion->addTitle("4. RECOMENDACIONES:",1);
-        //         // $seccion->addOLEObject(URL::to('')."/uploads/actas/0DATOS.xlsx");
-
-        //         /* --- TABLA ------------ */
-
-
-        //         # Para que no diga que se abre en modo de compatibilidad
-        //         $documento->getCompatibility()->setOoxmlVersion(15);
-        //         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($documento, 'Word2007');
-        //         $objWriter->save('Informe de visita.docx');
-
-        //         return response()->download(public_path('Informe de visita.docx'));
-        //     }
-
-    // }
-
-    // public function preguntasAnalisis($VIS_id ){
-        //     /* *** Automatizar este proceso: */
-        //     /* Segun las preguntas seleccionadas se realizan las siguientes consultas */
-        //     /* Para la visita 1, que es la visita de pruebas se seleccionaron 2 formularios para evaluar respuestas y hacer el ananlisis en el informe de visita */
-
-        //     $frmIds = [];
-        //     $formularios = ['F-5. Muerte natural. Salud: Entrevista a personal de salud', 'F-2. Muerte violenta. Violencia: Entrevista a Jefe de Seguridad'];
-        //     /*Busca los FRM_id de los formularios del array, guarda los FRM_id en frmIds */
-        //     foreach($formularios as $k=>$formulario){
-        //         DB::enableQueryLog();
-        //         $form = ModFormulario::from ('formularios as f')
-        //         ->select('f.FRM_id')
-        //         ->where ( 'f.estado', 'completado' )
-        //         ->where ( 'f.FK_VIS_id', $VIS_id )
-        //         ->where ( 'f.FK_USER_id','>', 0 )
-        //         ->where ( 'f.FRM_titulo', $formulario )
-        //         ->first();
-        //         if($form){
-        //             array_push($frmIds, implode($form->toArray()));
-        //         }
-        //         // $quries = DB::getQueryLog();
-        //     }
-
-        //     $a = ModBancoPregunta::from ('banco_preguntas as bp')
-        //     ->select('bp.BCP_id', 'bp.BCP_pregunta', 'r.RES_respuesta', 'r.RES_complemento')
-        //     ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id','bp.BCP_id')
-        //     ->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
-        //     ->leftJoin ('formularios as f', 'rbf.FK_FRM_id', 'f.FRM_id')
-        //     ->whereIn ( 'f.FRM_id', $frmIds)
-        //     ->whereIn ( 'bp.BCP_id', [1878, 1880, 1967, 1966])
-        //     ->get()->toArray();
-
-        //     $b = ModBancoPregunta::from ('banco_preguntas as bp')
-        //     ->select( DB::raw('SUM( ("r"."RES_respuesta")::int ) as "muertes_naturales"'),)
-        //     ->leftJoin ('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
-        //     ->leftJoin ('respuestas as r', 'r.FK_RBF_id', 'rbf.RBF_id')
-        //     ->leftJoin ('formularios as f', 'f.FRM_id', 'rbf.FK_FRM_id')
-        //     ->whereIn ( 'bp.BCP_id', [2006,2007,2008,2009,2010,2011,2012] )
-        //     ->where ( 'f.estado', 'completado')
-        //     ->where ('f.FK_VIS_id', $VIS_id)
-        //     ->get()->toArray();
-
-        //     array_push($a, ["BCP_id" => null,
-        //     "BCP_pregunta" => "Muertes naturales",
-        //     "RES_respuesta" => implode($b[0]),
-        //     "RES_complemento" => null]);
-        //     return( $a );
-    // }
-
-    /* Esta función devuelve un color, el cual es asignado de acuerdo al tipo de visita  */
-
-
-
+        DB::beginTransaction();
+        try {
+            $anioActual = date('Y');
+            
+            // Verificar que el establecimiento existe
+            $establecimiento = ModEstablecimiento::find($id);
+            if (!$establecimiento) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Establecimiento no encontrado'
+                ], 404);
+            }
+            
+            // Actualizar tabla establecimientos
+            ModEstablecimiento::where('EST_id', $id)->update([
+                'EST_departamento' => $request->EST_departamento,
+                'EST_municipio' => $request->EST_municipio,
+                'EST_direccion' => $request->EST_direccion,
+                'EST_telefono_contacto' => $request->EST_telefono_contacto,
+                'EST_capacidad_creacion' => $request->EST_capacidad_creacion,
+                'EST_anyo_funcionamiento' => $request->EST_anyo_funcionamiento,
+            ]);
+            
+            // Actualizar o crear información del establecimiento para el año actual
+            $infoExistente = ModEstablecimientoInfo::where('FK_EST_id', $id)
+                ->where('EINF_gestion', $anioActual)
+                ->first();
+                
+            if ($infoExistente) {
+                // Actualizar registro existente
+                ModEstablecimientoInfo::where('EINF_id', $infoExistente->EINF_id)->update([
+                    'EINF_poblacion_atendida' => $request->EINF_poblacion_atendida,
+                    'EINF_cantidad_actual_internos' => $request->EINF_cantidad_actual_internos,
+                    'EINF_superficie_terreno' => $request->EINF_superficie_terreno,
+                    'EINF_superficie_construida' => $request->EINF_superficie_construida,
+                    'EINF_derecho_propietario' => $request->EINF_derecho_propietario,
+                ]);
+            } else {
+                // Crear nuevo registro
+                ModEstablecimientoInfo::create([
+                    'FK_EST_id' => $id,
+                    'EINF_poblacion_atendida' => $request->EINF_poblacion_atendida,
+                    'EINF_cantidad_actual_internos' => $request->EINF_cantidad_actual_internos,
+                    'EINF_superficie_terreno' => $request->EINF_superficie_terreno,
+                    'EINF_superficie_construida' => $request->EINF_superficie_construida,
+                    'EINF_derecho_propietario' => $request->EINF_derecho_propietario,
+                    'EINF_gestion' => $anioActual,
+                ]);
+            }
+            
+            // Actualizar o crear responsable del establecimiento para el año actual
+            $responsableExistente = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+                ->where('EPER_gestion', $anioActual)
+                ->first();
+                
+            if ($responsableExistente) {
+                // Actualizar registro existente
+                ModEstablecimientoPersonal::where('EPER_id', $responsableExistente->EPER_id)->update([
+                    'EPER_nombre_responsable' => $request->EPER_nombre_responsable,
+                    'EPER_grado_profesion' => $request->EPER_grado_profesion,
+                    'EPER_telefono' => $request->EPER_telefono,
+                    'EPER_email' => $request->EPER_email,
+                ]);
+            } else {
+                // Crear nuevo registro solo si hay datos del responsable
+                if ($request->EPER_nombre_responsable) {
+                    ModEstablecimientoPersonal::create([
+                        'FK_EST_id' => $id,
+                        'EPER_nombre_responsable' => $request->EPER_nombre_responsable,
+                        'EPER_grado_profesion' => $request->EPER_grado_profesion,
+                        'EPER_telefono' => $request->EPER_telefono,
+                        'EPER_email' => $request->EPER_email,
+                        'EPER_gestion' => $anioActual,
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
+            // Si es una petición AJAX, devolver respuesta JSON
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Información actualizada correctamente'
+                ]);
+            }
+            
+            // Si es una petición normal, redirigir
+            return redirect()->route('visita.historial', $id)->with('success', 'Información actualizada correctamente');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Log del error para debugging
+            // \Log::error('Error al actualizar establecimiento: ' . $e->getMessage(), [
+            //     'establecimiento_id' => $id,
+            //     'request_data' => $request->all(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
+            
+            // Si es una petición AJAX, devolver respuesta JSON de error
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al actualizar la información: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            // Si es una petición normal, redirigir con error
+            return redirect()->back()->with('error', 'Error al actualizar la información: ' . $e->getMessage())->withInput();
+        }
+    }
 }
-
-

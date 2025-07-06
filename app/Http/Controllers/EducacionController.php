@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\{ModEducacion};
-
+use Illuminate\Support\Facades\Storage;
 
 class EducacionController extends Controller
 {
-    // public function index(){
-    //     return view('educacion.index');
-    // }
-
     public function index(Request $request) {
         $anioActual = $request->anio_actual ?? date('Y');
 
@@ -19,8 +15,6 @@ class EducacionController extends Controller
         $educacions = ModEducacion::where('EDU_gestion', $anioActual)->get();
 
         // Consultas estadísticas
-
-        // Consulta para obtener la cantidad de beneficiarios por ciudad, incluyendo el total
         $beneficiariosPorCiudad = DB::table('educacion')
             ->select('EDU_ciudad', DB::raw('SUM("EDU_cantidad_beneficiarios") as total_beneficiarios'))
             ->where('EDU_gestion', $anioActual)
@@ -33,7 +27,6 @@ class EducacionController extends Controller
 
         $beneficiariosPorCiudad->push((object) ['EDU_ciudad' => 'Total', 'total_beneficiarios' => $totalBeneficiarios]);
 
-        // Consulta para obtener la cantidad de beneficiarios por tipo, incluyendo el total
         $beneficiariosPorTipo = DB::table('educacion')
             ->select('EDU_beneficiarios', DB::raw('SUM("EDU_cantidad_beneficiarios") as total_beneficiarios'))
             ->where('EDU_gestion', $anioActual)
@@ -46,7 +39,6 @@ class EducacionController extends Controller
 
         $beneficiariosPorTipo->push((object) ['EDU_beneficiarios' => 'Total', 'total_beneficiarios' => $totalBeneficiariosPorTipo]);
 
-        // Consulta para obtener la cantidad de temas por ciudad, incluyendo el total
         $temasPorCiudad = DB::table('educacion')
             ->select('EDU_ciudad', DB::raw('COUNT(DISTINCT "EDU_tema") as total_temas'))
             ->where('EDU_gestion', $anioActual)
@@ -61,17 +53,11 @@ class EducacionController extends Controller
 
         $temasPorCiudad->push((object) ['EDU_ciudad' => 'Total', 'total_temas' => $totalTemasPorCiudad]);
 
-        // Obtener temas abordados y cantidad de beneficiarios
         $temasBeneficiarios = DB::table('educacion')
             ->select('EDU_tema', DB::raw('SUM("EDU_cantidad_beneficiarios") as cantidad_beneficiarios'))
             ->where('EDU_gestion', $anioActual)
             ->groupBy('EDU_tema')
             ->get();
-
-        // Agregar el total
-        $totalBeneficiarios = DB::table('educacion')
-            ->where('EDU_gestion', $anioActual)
-            ->sum("EDU_cantidad_beneficiarios");
 
         $temasBeneficiarios->push((object)[
             'EDU_tema' => 'Total',
@@ -86,7 +72,6 @@ class EducacionController extends Controller
         return view('educacion.index', compact('educacions', 'beneficiariosPorCiudad', 'beneficiariosPorTipo', 'temasPorCiudad', 'temasBeneficiarios', 'breadcrumbs', 'anioActual'));
     }
 
-
     public function create() {
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -96,68 +81,82 @@ class EducacionController extends Controller
         return view('educacion.create', compact('breadcrumbs'));
     }
 
-
-    // Guarda nuevo dato sobre actividades educativas
     public function store(Request $request) {
         // Validación de datos de entrada
         $request->validate([
             'edu_tema' => 'required|string|min:5|max:500',
             'edu_beneficiarios' => 'required|string|min:5|max:500',
-            'edu_cantidad_beneficiarios' => 'required|integer', // Cambiado a integer para coincidir con la tabla
-            'edu_medio_verificacion' => 'required|string|min:5|max:145',
-            'edu_ciudad' => 'required|string|min:5|max:145',
-            'edu_gestion' => 'required|integer', // Cambiado a integer para coincidir con la tabla
-            'edu_imagen_medio_verificacion' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30720', // 30 MB = 30720 KB
+            'edu_cantidad_beneficiarios' => 'required|integer|min:1',
+            'edu_medio_verificacion' => 'required|string|min:5|max:500',
+            'edu_ciudad' => 'required|string|min:3|max:145',
+            'edu_gestion' => 'required|integer|min:2020|max:2030',
+            'edu_fecha_inicio' => 'required|date|before_or_equal:edu_fecha_fin',
+            'edu_fecha_fin' => 'required|date|after_or_equal:edu_fecha_inicio',
+            'edu_imagen_medio_verificacion.*' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30720',
         ], [
-            'required' => 'El dato es requerido',
-            'edu_imagen_medio_verificacion.max' => '¡El archivo debe ser menor o igual a 30MB!',
-            'edu_imagen_medio_verificacion.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
-            'max' => 'Dato muy extenso',
-            'min' => 'Dato muy reducido',
+            'required' => 'El campo :attribute es requerido',
+            'edu_imagen_medio_verificacion.*.max' => '¡El archivo debe ser menor o igual a 30MB!',
+            'edu_imagen_medio_verificacion.*.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
+            'max' => 'El campo :attribute no debe exceder :max caracteres',
+            'min' => 'El campo :attribute debe tener al menos :min caracteres',
+            'edu_fecha_inicio.before_or_equal' => 'La fecha de inicio debe ser anterior o igual a la fecha de fin',
+            'edu_fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Crear una nueva instancia de ModEducacion
             $educacion = new ModEducacion();
-            $educacion->EDU_tema = $request->edu_tema; // Actualizado para reflejar la definición de la tabla
-            $educacion->EDU_beneficiarios = $request->edu_beneficiarios; // Actualizado
-            $educacion->EDU_cantidad_beneficiarios = $request->edu_cantidad_beneficiarios; // Actualizado
-            $educacion->EDU_medio_verificacion = $request->edu_medio_verificacion; // Actualizado
-            $educacion->EDU_ciudad = $request->edu_ciudad; // Actualizado
-            $educacion->EDU_gestion = $request->edu_gestion; // Actualizado
-        
-            // Manejo del archivo de imagen, si existe
+            $educacion->EDU_tema = $request->edu_tema;
+            $educacion->EDU_beneficiarios = $request->edu_beneficiarios;
+            $educacion->EDU_cantidad_beneficiarios = $request->edu_cantidad_beneficiarios;
+            $educacion->EDU_medio_verificacion = $request->edu_medio_verificacion;
+            $educacion->EDU_ciudad = $request->edu_ciudad;
+            $educacion->EDU_gestion = $request->edu_gestion;
+            $educacion->EDU_fecha_inicio = $request->edu_fecha_inicio;
+            $educacion->EDU_fecha_fin = $request->edu_fecha_fin;
+
+            // Manejo de múltiples archivos
             if ($request->hasFile('edu_imagen_medio_verificacion')) {
-                $educacion->EDU_imagen_medio_verificacion = $request->file('edu_imagen_medio_verificacion')->store('images/medio_verificacion', 'public');
+                $archivos = [];
+                foreach ($request->file('edu_imagen_medio_verificacion') as $archivo) {
+                    $path = $archivo->store('uploads/medio_verificacion', 'public');
+                    $archivos[] = $path;
+                }
+                $educacion->EDU_imagen_medio_verificacion = json_encode($archivos);
             }
 
-            // Guardar la nueva educación
             $educacion->save();
-
-            // Confirmar la transacción
             DB::commit();
 
-            return redirect()->route('educacion.index')->with('success', 'Los datos se han almacenado correctamente.');
+            return redirect()->route('educacion.index')->with('success', 'Actividad educativa creada exitosamente.');
         } catch (\Exception $e) {
-            // Revertir la transacción en caso de error
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Hubo un problema al guardar la información.']);
+            return redirect()->back()->withErrors(['error' => 'Hubo un problema al guardar la información: ' . $e->getMessage()])->withInput();
         }
     }
 
+    public function show($id) {
+        $educacion = ModEducacion::findOrFail($id);
+        
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Módulo educativo', 'url' => route('educacion.index')],
+            ['name' => 'Detalles de actividad', 'url' => ''],
+        ];
 
-    public function edit($edu_id)    {
-        $educacion = ModEducacion::select('*')->where('EDU_id', $edu_id)->first();
-        // dd($educacion->toArray());
-        // exit;
+        return view('educacion.show', compact('educacion', 'breadcrumbs'));
+    }
+
+    public function edit($edu_id) {
+        $educacion = ModEducacion::where('EDU_id', $edu_id)->firstOrFail();
+        
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Módulo educativo', 'url' => route('educacion.index')],
             ['name' => 'Edición de registro', 'url' => ''],
         ];
-        // dump($educacion->toArray());exit;
+        
         return view('educacion.edit', compact('educacion', 'breadcrumbs'));
     }
 
@@ -165,23 +164,28 @@ class EducacionController extends Controller
         $request->validate([
             'edu_tema' => 'required|string|min:5|max:500',
             'edu_beneficiarios' => 'required|string|min:5|max:500',
-            'edu_cantidad_beneficiarios' => 'required|integer', // Cambiado a integer para coincidir con la tabla
-            'edu_medio_verificacion' => 'required|string|min:5|max:145',
-            'edu_ciudad' => 'required|string|min:5|max:145',
-            'edu_gestion' => 'required|integer', // Cambiado a integer para coincidir con la tabla
-            'edu_imagen_medio_verificacion' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30720', // 30 MB = 30720 KB
+            'edu_cantidad_beneficiarios' => 'required|integer|min:1',
+            'edu_medio_verificacion' => 'required|string|min:5|max:500',
+            'edu_ciudad' => 'required|string|min:3|max:145',
+            'edu_gestion' => 'required|integer|min:2020|max:2030',
+            'edu_fecha_inicio' => 'required|date|before_or_equal:edu_fecha_fin',
+            'edu_fecha_fin' => 'required|date|after_or_equal:edu_fecha_inicio',
+            'edu_imagen_medio_verificacion.*' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30720',
         ], [
-            'required' => 'El dato es requerido',
-            'edu_imagen_medio_verificacion.max' => '¡El archivo debe ser menor o igual a 30MB!',
-            'edu_imagen_medio_verificacion.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
-            'max' => 'Dato muy extenso',
-            'min' => 'Dato muy reducido',
+            'required' => 'El campo :attribute es requerido',
+            'edu_imagen_medio_verificacion.*.max' => '¡El archivo debe ser menor o igual a 30MB!',
+            'edu_imagen_medio_verificacion.*.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
+            'max' => 'El campo :attribute no debe exceder :max caracteres',
+            'min' => 'El campo :attribute debe tener al menos :min caracteres',
+            'edu_fecha_inicio.before_or_equal' => 'La fecha de inicio debe ser anterior o igual a la fecha de fin',
+            'edu_fecha_fin.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio',
         ]);
 
         DB::beginTransaction();
 
         try {
-
+            $educacion = ModEducacion::findOrFail($id);
+            
             $updateData = [
                 'EDU_tema' => $request->input('edu_tema'),
                 'EDU_beneficiarios' => $request->input('edu_beneficiarios'),
@@ -189,35 +193,66 @@ class EducacionController extends Controller
                 'EDU_medio_verificacion' => $request->input('edu_medio_verificacion'),
                 'EDU_ciudad' => $request->input('edu_ciudad'),
                 'EDU_gestion' => $request->input('edu_gestion'),
+                'EDU_fecha_inicio' => $request->input('edu_fecha_inicio'),
+                'EDU_fecha_fin' => $request->input('edu_fecha_fin'),
             ];
 
-            // Verificar si hay un archivo nuevo y procesarlo
+            // Manejo de nuevos archivos
             if ($request->hasFile('edu_imagen_medio_verificacion')) {
-                $updateData['EDU_imagen_medio_verificacion'] = $request->file('edu_imagen_medio_verificacion')->store('images/medio_verificacion', 'public');
+                // Eliminar archivos anteriores si existen
+                if ($educacion->EDU_imagen_medio_verificacion) {
+                    $archivosAnteriores = json_decode($educacion->EDU_imagen_medio_verificacion, true);
+                    if (is_array($archivosAnteriores)) {
+                        foreach ($archivosAnteriores as $archivo) {
+                            Storage::disk('public')->delete($archivo);
+                        }
+                    } else {
+                        // Si es un string (formato anterior)
+                        Storage::disk('public')->delete($educacion->EDU_imagen_medio_verificacion);
+                    }
+                }
+
+                $archivos = [];
+                foreach ($request->file('edu_imagen_medio_verificacion') as $archivo) {
+                    $path = $archivo->store('uploads/medio_verificacion', 'public');
+                    $archivos[] = $path;
+                }
+                $updateData['EDU_imagen_medio_verificacion'] = json_encode($archivos);
             }
 
-            // Actualizar los datos en la base de datos
             DB::table('educacion')->where('EDU_id', $id)->update($updateData);
 
             DB::commit();
-            return redirect()->route('educacion.index')->with('success', 'Los datos se han actualizado correctamente.');
+            return redirect()->route('educacion.index')->with('success', 'Actividad educativa actualizada exitosamente.');
     
         } catch (\Exception $e) {
-            // Revertir la transacción en caso de error
-            dump($e);exit;      
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Hubo un problema al actualizar la información.']);
+            return redirect()->back()->withErrors(['error' => 'Hubo un problema al actualizar la información: ' . $e->getMessage()])->withInput();
         }
     }
 
-
-
-    public function destroy($id)
-    {
-        $educacion = ModEducacion::find($id);
-        $educacion->delete();
-        return redirect()->route('educacion.index');
+    public function destroy($id) {
+        try {
+            $educacion = ModEducacion::findOrFail($id);
+            
+            // Eliminar archivos asociados
+            if ($educacion->EDU_imagen_medio_verificacion) {
+                $archivos = json_decode($educacion->EDU_imagen_medio_verificacion, true);
+                if (is_array($archivos)) {
+                    foreach ($archivos as $archivo) {
+                        Storage::disk('public')->delete($archivo);
+                    }
+                } else {
+                    // Si es un string (formato anterior)
+                    Storage::disk('public')->delete($educacion->EDU_imagen_medio_verificacion);
+                }
+            }
+            
+            $educacion->delete();
+            
+            return redirect()->route('educacion.index')->with('success', 'Actividad educativa eliminada exitosamente.');
+        } catch (\Exception $e) {
+            return redirect()->route('educacion.index')->with('error', 'Error al eliminar la actividad: ' . $e->getMessage());
+        }
     }
-
 }
-
