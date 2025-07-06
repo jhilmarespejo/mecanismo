@@ -12,8 +12,11 @@ yarn-error.log
 /.vscode
 /vendor
 resources/views/welcome.blade.php
-/vendor
-/node_modules
 /storage/*.key
 /public/storage
 /bootstrap/cache
+
+/vendor/
+/node_modules/
+composer.lock
+
