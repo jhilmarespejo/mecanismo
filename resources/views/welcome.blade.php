@@ -26,10 +26,9 @@
                 @if (Route::has('login'))
                     <div class="">
                         @auth
-                            <a href="{{ url('/panel') }}" class="text-muted">Panel</a>
+                            <a href="{{ url('/panel') }}" class="text-shadow box-shadow btn btn-info">Panel</a>
                         @else
-                            <a href="{{ route('login') }}" class="text-muted">Ingresar</a>
-                            {{-- <a href="{{ route('acceso') }}" class="text-muted">Ingresar</a> --}}
+                            <a href="{{ route('login') }}" class="text-shadow box-shadow btn btn-info">Ingresar</a>
                         @endif
                     </div>
                 @endif
@@ -39,7 +38,7 @@
 
     <div class="container-fluid my-5 pt-5 px-5" >
         <p class=" text-center px-4 ">
-            <img class="img-fluid"  src="img/logoinicio.png" alt="Defensor del Pueblo" >
+            <img class="img-fluid w-50"  src="img/logoinicio.png" alt="Defensor del Pueblo" >
         </p>
     </div>
 </body>

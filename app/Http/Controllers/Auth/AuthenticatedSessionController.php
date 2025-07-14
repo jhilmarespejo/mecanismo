@@ -21,6 +21,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
     
+    // guarda los datos del usuario en la sesión en la tabla users 
     public function store(Request $request)
     {
         $request->validate([

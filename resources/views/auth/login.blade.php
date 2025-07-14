@@ -13,6 +13,9 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow">
                     <div class="card-body p-4">
+                         <p class=" text-center px-4 ">
+                            <img class="img-fluid "  src="img/logoinicio.png" alt="Defensor del Pueblo" >
+                        </p>
                         <h2 class="text-center mb-4">Iniciar Sesión</h2>
                         
                         @if($errors->any())

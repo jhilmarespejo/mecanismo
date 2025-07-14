@@ -14,12 +14,16 @@ use App\Http\Controllers\Auth\LoginController;
 
 
 // Autenticación 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+// Route::post('/login', [LoginController::class, 'login']);
+// Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
+});
 
 
-Route::post('/register', [RegisterController::class, 'store'])->name('register');
+// Route::post('/register', [RegisterController::class, 'store'])->name('register');
 
 
 // Rutas para el inicio de sesión
@@ -27,30 +31,13 @@ Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('lo
 Route::post('login', [AuthenticatedSessionController::class, 'store']);
 Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-
-
-// Route::view('/acceso', 'acceso')->name('acceso');
-// Route::view('/resgistro', 'resgistro')->name('registro');
-
-Route::get('acceso', [AccesoController::class, 'acceso'])->name('acceso');
-Route::post('iniciar', [AccesoController::class, 'iniciar'])->name('acceso.iniciar');
-Route::get('finalizar', [AccesoController::class, 'finalizar'])->name('acceso.finalizar');
+// Route::get('acceso', [AccesoController::class, 'acceso'])->name('acceso');
+// Route::post('iniciar', [AccesoController::class, 'iniciar'])->name('acceso.iniciar');
+// Route::get('finalizar', [AccesoController::class, 'finalizar'])->name('acceso.finalizar');
 
 /*------------------------------------------ */
 Route::get('/', function () {
-    return view('welcome');
-});
-
-// Route::middleware([
-//     'auth',
-//     config('jetstream.auth_session'),
-//     'verified'
-// ])->group(function () {
-//     //Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
-//     Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
-// });
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/panel', [IndexController::class, 'dashboard'])->name('panel');
+    return view('welcome');// muestra el logo de la defensoria
 });
 
 // FORMULARIO
@@ -79,19 +66,12 @@ Route::put('/formulario/actualizar/{id}', [FormularioController::class, 'actuali
 
 
 
-// Route::get('formulario/adjuntos/{est_id}/{frm_id?}', [FormularioController::class, 'adjuntosFormulario'])->name('formulario.adjuntos')->middleware('auth');
-// INDEX
-// Route::post('index/buscarIdForm', [IndexController::class, 'buscarIdFormulario'])->name('index.buscarIdForm')->middleware('auth');
 
 Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica')->middleware('auth');
 
 Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas')->middleware('auth');
 
 
-// LIVEWIRE
-//Route::get('formularios', Formularios::class)->middleware('auth');
-//Route::get('cuestionario', CuestionarioIndex::class);
-// Route::get('establecimientos', Establecimientos::class);
 Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
 Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
 
@@ -125,7 +105,6 @@ Route::get('recomendaciones/{VIS_id}', [RecomendacionesController::class, 'recom
 
 Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento')->middleware('auth');
 Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesController::class, 'guardarNuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
-// Route::post('recomendaciones/guardarNuevaRecomendacionEstatal', [RecomendacionesController::class, 'guardarNuevaRecomendacionEstatal'])->name('recomendaciones.nuevaEstatal')->middleware('auth');
 
 Route::get('/recomendacionesEstatales', [RecomendacionesController::class, 'recomendacionesEstatales'])->name('recomendaciones.recomendacionesEstatales')->middleware('auth');
 
@@ -173,8 +152,7 @@ Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'i
 Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 
 
-// Nueva ruta para guardar documentos del establecimiento
-// Route::post('visita/guardarDocumento               ', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
+
 Route::post('visita/guardarDocumentoEstablecimiento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
 
 Route::get('visita/editarFichaEstablecimiento/{id}', [VisitaController::class, 'editarFichaEstablecimiento'])->name('visita.editarFichaEstablecimiento')->middleware('auth');
@@ -185,18 +163,13 @@ Route::put('visita/actualizarFichaEstablecimiento/{id}', [VisitaController::clas
 Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
 
 
-// Route::get('visita/mostrarActa/{VIS_id}', [VisitaController::class, 'mostrarActa'])->name('visita.mostrarActa')->middleware('auth');
 
-// Route::get('/offline', function () {
-//     return view('modules/laravelpwa/offline');
-// });
+// // USERS
+// // verificar y editar usuarios
+//  Route::get('users/list', [UsersController::class, 'list'])->middleware('auth')->name('users.list');
 
-// USERS
-// verificar y editar usuarios
- Route::get('users/list', [UsersController::class, 'list'])->middleware('auth')->name('users.list');
-
- Route::delete('users/{id}', [UsersController::class, 'destroy'])->middleware('auth')->name('users.destroy');
- Route::post('users/changeState', [UsersController::class, 'changeState'])->middleware('auth')->name('users.changeState');
+//  Route::delete('users/{id}', [UsersController::class, 'destroy'])->middleware('auth')->name('users.destroy');
+//  Route::post('users/changeState', [UsersController::class, 'changeState'])->middleware('auth')->name('users.changeState');
 
 //----MODULO DE INDICADORES --------------------------
 
@@ -244,10 +217,3 @@ Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->
 
 // MODULO DE EDUCACION
 Route::resource('educacion', EducacionController::class);
-
-
-// // Alternativa usando resource route (más limpio)
-// Route::middleware('auth')->group(function () {
-//     Route::resource('educacion', EducacionController::class);
-// });
-

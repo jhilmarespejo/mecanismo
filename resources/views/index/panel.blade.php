@@ -57,7 +57,7 @@
                     <input type="text" id="input_establecimiento" class="form-control" placeholder="Buscar">
                 </div>
                 <div class="spinner-border text-primary text-center d-none mt-3" role="status" id="spiner-estab"></div>
-                <div id="establecimientos" class="mt-3"></div>
+                <div id="establecimientos" class="mt-3"></div> <!--Aqui se muestra la lista de establecimientos-->
             </div>
         </div>
         
@@ -77,13 +77,13 @@
     $(document).ready(function () {
         // Crear un mapa centrado en Bolivia
         var cantidades = <?php echo json_encode($establecimientosPorDepartamento); ?>;
-        var map = L.map('map').setView([-16.2902, -63.5887], 6);
+        var map = L.map('map').setView([-16.2902, -63.5887], 6); 
 
         // Agregar una capa de mapa base de OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-
+        
         // Cargar el archivo GeoJSON de los departamentos de Bolivia
         fetch('js/bo.json')
         .then(response => response.json())

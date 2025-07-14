@@ -14,57 +14,44 @@ use Illuminate\Support\Facades\Cache;
 
 class IndicadorController extends Controller
 {
-    // public function actualizar( Request $request ) {
-    //     DB::enableQueryLog();
-    //     //$gestion = date('Y');
-    //     /*$categorias = ModIndicador::select(
-    //         'indicadores.*',
-    //         'historial_indicadores.HIN_respuesta',
-    //         'historial_indicadores.HIN_gestion',
-    //         'historial_indicadores.HIN_informacion_complementaria'
-            
-    //         )
-    //         ->leftJoin('historial_indicadores', 'indicadores.IND_id', 'historial_indicadores.FK_IND_id')
-    //         ->where('indicadores.IND_estado', '1')
-    //         ->where('historial_indicadores.HIN_gestion', $gestion)
-    //         ->orderBy('IND_id')->get()->toArray();*/
-        
-    //     $gestion = $request->query('gestion', date('Y'));
-    //     $categorias = ModIndicador::select(
-    //         'indicadores.*',
-    //         'historial_indicadores.HIN_respuesta',
-    //         'historial_indicadores.HIN_gestion',
-    //         'historial_indicadores.HIN_informacion_complementaria'
-    //     )
-    //     ->leftJoin('historial_indicadores', function ($join) use ($gestion) { // Pasar $gestion aquí
-    //         $join->on('indicadores.IND_id', '=', 'historial_indicadores.FK_IND_id')
-    //             ->where('historial_indicadores.HIN_gestion', $gestion);
-    //     })
-    //     ->where('indicadores.IND_estado', '=', '1')
-    //     ->orderBy('indicadores.IND_orden', 'asc')
-    //     ->orderBy('indicadores.IND_id', 'asc')
-    //     ->get()
-    //     ->toArray();
-    //     $categorias = CustomController::organizarIndicadores( $categorias );
-    //     // dump($indicadores);exit;
-    //     $breadcrumbs = [
-    //         ['name' => 'Inicio', 'url' => route('panel')],
-    //         ['name' => 'Actualización de datos', 'url' => ''],
-    //     ];
-        
-    //     // $centrosPenitenciarios = ModEstablecimiento::select('EST_nombre','EST_departamento')->where('FK_TES_id', 1)->get()->toArray();
-    //     $centrosPenitenciarios = ModEstablecimiento::select('EST_id', 'EST_nombre', 'EST_departamento')
-    //     ->where('FK_TES_id', 1)
-    //     ->orderBy('EST_departamento') // Ordenar por departamento
-    //     ->get()
-    //     ->groupBy('EST_departamento'); // Agrupar por departamento
 
-        
-    //     $quries = DB::getQueryLog();
-    //     //dump ($quries);
-    //     return view('indicadores.actualizar', compact('categorias','breadcrumbs','gestion','centrosPenitenciarios'));
-    // }
 
+     // panel de verificacion de datos de indicadores
+    public function panel(Request $request) {
+        $gestion = $request->query('gestion', date('Y'));
+        
+        // Usar cache similar para el panel
+        $cacheKey = "indicadores_panel_{$gestion}";
+        $categorias = Cache::remember($cacheKey, 300, function() use ($gestion) {
+            return ModIndicador::select(
+                'indicadores.*',
+                'historial_indicadores.HIN_respuesta',
+                'historial_indicadores.HIN_gestion',
+                'historial_indicadores.HIN_informacion_complementaria'
+            )
+            ->leftJoin('historial_indicadores', function ($join) use ($gestion) {
+                $join->on('indicadores.IND_id', 'historial_indicadores.FK_IND_id')
+                    ->where('historial_indicadores.HIN_gestion', $gestion);
+            })
+            ->where('indicadores.IND_estado', '1')
+            ->orderBy('indicadores.IND_orden', 'asc')
+            ->orderBy('indicadores.IND_id', 'asc')
+            ->get()
+            ->toArray();
+        });
+        
+        $categorias = CustomController::organizarIndicadores($categorias);
+        
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Panel de datos', 'url' => ''],
+        ];
+        
+        return view('indicadores.panel', compact('categorias', 'breadcrumbs', 'gestion'));
+    }
+
+
+     // actualizar datos de indicadores
     public function actualizar(Request $request) {
         // Prevenir timeouts en consultas largas
         set_time_limit(120);
@@ -110,7 +97,7 @@ class IndicadorController extends Controller
         // Cargar listas desde archivos JSON**
         
         // 1. Cargar lista de delitos dinámicos
-        $delitos = $this->cargarDelitos($gestion);
+        $delitos = $this->cargarListaDelitos($gestion);
         
         // 2. Departamentos estáticos
         $departamentos = [
@@ -145,7 +132,7 @@ class IndicadorController extends Controller
     /**
      * Cargar delitos desde archivo JSON
      */
-    private function cargarDelitos($gestion)
+    private function cargarListaDelitos($gestion)
     {
         try {
             $filePath = storage_path("app/config/listas/delitos_{$gestion}.json");
@@ -170,169 +157,39 @@ class IndicadorController extends Controller
             
             if (json_last_error() !== JSON_ERROR_NONE) {
                 //\Log::error("Error JSON delitos {$gestion}: " . json_last_error_msg());
-                return $this->getDelitosDefault();
+                return $this->obtenerDelitosPordefecto();
             }
             
             return $data;
             
         } catch (\Exception $e) {
             //\Log::error("Error cargando delitos para {$gestion}: " . $e->getMessage());
-            return $this->getDelitosDefault();
+            return $this->obtenerDelitosPordefecto();
         }
     }
-
-
-
-
-
-
-
-    
-/**
- * Crear archivo de delitos por defecto
- * @param int $gestion Año para el cual crear el archivo
- */
-private function crearArchivoDelitosDefault($gestion)
-{
-    $defaultDelitos = $this->getDelitosDefault();
-    $dirPath = storage_path('app/config/listas');
-    
-    // Crear directorio si no existe
-    if (!is_dir($dirPath)) {
-        mkdir($dirPath, 0755, true);
-    }
-    
-    $filePath = "{$dirPath}/delitos_{$gestion}.json";
-    $jsonContent = json_encode($defaultDelitos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    
-    file_put_contents($filePath, $jsonContent);
-    Log::info("Archivo de delitos creado para {$gestion}");
-}
-
-/**
- * Obtener delitos por defecto
- * @return array Array con los delitos estándar
- */
-private function getDelitosDefault()
-{
-    return [
-        'violencia_familiar' => 'Violencia familiar o doméstica',
-        'robo_sin_violencia' => 'Robo sin violencia',
-        'estafa_fraude' => 'Estafa o fraude',
-        'ciberdelitos' => 'Ciberdelitos (fraude informático, amenazas, grooming)',
-        'robo_con_violencia' => 'Robo con violencia',
-        'hurto' => 'Hurto',
-        'robo_autopartes' => 'Robo de autopartes'
-    ];
-}
     
     
-    
-    public function panel(Request $request) {
-        $gestion = $request->query('gestion', date('Y'));
-        
-        // Usar cache similar para el panel
-        $cacheKey = "indicadores_panel_{$gestion}";
-        $categorias = Cache::remember($cacheKey, 300, function() use ($gestion) {
-            return ModIndicador::select(
-                'indicadores.*',
-                'historial_indicadores.HIN_respuesta',
-                'historial_indicadores.HIN_gestion',
-                'historial_indicadores.HIN_informacion_complementaria'
-            )
-            ->leftJoin('historial_indicadores', function ($join) use ($gestion) {
-                $join->on('indicadores.IND_id', 'historial_indicadores.FK_IND_id')
-                    ->where('historial_indicadores.HIN_gestion', $gestion);
-            })
-            ->where('indicadores.IND_estado', '1')
-            ->orderBy('indicadores.IND_orden', 'asc')
-            ->orderBy('indicadores.IND_id', 'asc')
-            ->get()
-            ->toArray();
-        });
-        
-        $categorias = CustomController::organizarIndicadores($categorias);
-        
-        $breadcrumbs = [
-            ['name' => 'Inicio', 'url' => route('panel')],
-            ['name' => 'Panel de datos', 'url' => ''],
+    // /**
+    //  * Obtener delitos por defecto
+    //  * @return array Array con los delitos estándar
+    //  */
+    private function obtenerDelitosPordefecto()
+    {
+        return [
+            'violencia_familiar' => 'Violencia familiar o doméstica',
+            'robo_sin_violencia' => 'Robo sin violencia',
+            'estafa_fraude' => 'Estafa o fraude',
+            'ciberdelitos' => 'Ciberdelitos (fraude informático, amenazas, grooming)',
+            'robo_con_violencia' => 'Robo con violencia',
+            'hurto' => 'Hurto',
+            'robo_autopartes' => 'Robo de autopartes'
         ];
-        
-        return view('indicadores.panel', compact('categorias', 'breadcrumbs', 'gestion'));
     }
+    
+    
+   
         
     // Guarda los datos que se actualizan en los indicadores
-    // public function guardar(Request $request) {
-    //     // dump($request->all());exit;
-    //     try {
-    //         $validatedData = $request->validate([
-    //             'respuesta' => 'required|string',
-    //             'informacion_complementaria' => 'nullable|string',
-    //             'FK_IND_id' => 'required|integer',
-    //             'anio_consulta' => 'required',
-    //         ]);
-            
-    //         $respuesta = $validatedData['respuesta'];
-    //         // $informacionComplementaria = $request->informacion_complementaria;
-    //         $informacionComplementaria = $validatedData['informacion_complementaria'];
-    //         $indicadorId = $validatedData['FK_IND_id'];
-    //         $gestion = $validatedData['anio_consulta'];
-            
-    //         //dump($respuesta, $indicadorId, $gestion); exit;
-            
-    //         // Buscar si ya existe un registro con la misma respuesta y el mismo indicador
-    //         // $existingRecord = DB::table('historial_indicadores')
-    //         //     ->where('FK_IND_id', $indicadorId)
-    //         //     ->first();
-            
-    //         $existingRecord = DB::table('historial_indicadores')
-    //             ->where('FK_IND_id', $indicadorId)
-    //             ->where('HIN_gestion', $gestion)
-    //             ->first();
-            
-    //         if ($existingRecord) {
-    //             // Verificar si la gestión es la misma
-    //             if ($existingRecord->HIN_gestion == $gestion) {
-    //                 // Actualizar el registro existente
-    //                 DB::table('historial_indicadores')
-    //                     ->where('HIN_id', $existingRecord->HIN_id)
-    //                     ->update([
-    //                         'HIN_respuesta' => $respuesta,
-    //                         'HIN_informacion_complementaria' => $informacionComplementaria,
-    //                         'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
-    //                         'HIN_gestion' => $gestion,
-    //                     ]);
-    //             } else {
-    //                 // Insertar un nuevo registro con una gestión diferente
-    //                 DB::table('historial_indicadores')->insert([
-    //                     'HIN_respuesta' => $respuesta,
-    //                     'HIN_informacion_complementaria' => $informacionComplementaria,
-    //                     'FK_IND_id' => $indicadorId,
-    //                     'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
-    //                     'HIN_gestion' => $gestion,
-    //                 ]);
-    //             }
-    //         } else {
-    //             // Insertar un nuevo registro ya que no existe uno con la misma respuesta e indicador
-    //             DB::table('historial_indicadores')->insert([
-    //                 'HIN_respuesta' => $respuesta,
-    //                 'HIN_informacion_complementaria' => $informacionComplementaria,
-    //                 'FK_IND_id' => $indicadorId,
-    //                 'HIN_fecha_respuesta' => Carbon::now()->format('Y-m-d'),
-    //                 'HIN_gestion' => $gestion,
-    //             ]);
-    //         }
-            
-    //         return response()->json(['success' => true, 'message' => 'Datos guardados correctamente.'], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error encontrado' => $e->getMessage()], 500);
-    //     }
-    // }
-    
-
-    
-    
-
     public function guardar(Request $request) {
         try {
             // Validación básica
@@ -572,10 +429,8 @@ private function getDelitosDefault()
         return ['valid' => true];
     }
             
-    
 
-
-    ///////////////////////////////////////////////////////////////////////////////
+    //----------    REPORTES  
      /**
      * Función principal de reportes que maneja las peticiones AJAX
      * Gestiona la carga de categorías, indicadores, parámetros y datos para gráficos
@@ -876,17 +731,5 @@ private function getDelitosDefault()
         ->get();
         return $results;
     }
-
-    //////////////////////////////////////////////////////////
-
-
-    
-
-
-
-
-
-
-    
     
 }
