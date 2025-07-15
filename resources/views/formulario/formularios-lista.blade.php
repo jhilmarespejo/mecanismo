@@ -166,6 +166,7 @@
 </div>
 
 {{-- CONTENIDO PRINCIPAL --}}
+{{-- @dump($grupo_formularios) --}}
 <div class="row">
     @if(empty($grupo_formularios))
         {{-- ESTADO VACÍO --}}

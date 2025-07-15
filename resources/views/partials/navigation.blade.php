@@ -19,7 +19,7 @@
                         </a>
                     </li>
 
-                    @if(Auth::user()->rol == 'Aministrador')
+                    @if(Auth::user()->rol == 'Administrador')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="menuIndicadores" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Indicadores
@@ -46,7 +46,7 @@
                         <a class="nav-link text-light text-shadow" href="/recomendacionesEstatales">Recomendaciones</a>
                     </li>
                     
-                    @if(Auth::user()->rol == 'Aministrador')
+                    @if(Auth::user()->rol == 'Administrador')
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-light text-shadow" href="#" id="meniInteroperabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Administración

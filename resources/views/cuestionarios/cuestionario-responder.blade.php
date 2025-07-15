@@ -109,7 +109,7 @@
             </div>
         </nav>
         @enddesktop
-
+        
         {{-- Encabezado principal --}}
         <div class="header-info text-center">
             <h2 class="mb-2">
@@ -290,24 +290,24 @@ $(document).ready(function() {
     @enddesktop
     
     // Manejo de errores global
-    $(document).ajaxError(function(event, xhr, settings, thrownError) {
-        console.error('Error AJAX:', {
-            url: settings.url,
-            status: xhr.status,
-            error: thrownError
-        });
+    // $(document).ajaxError(function(event, xhr, settings, thrownError) {
+    //     console.error('Error AJAX:', {
+    //         url: settings.url,
+    //         status: xhr.status,
+    //         error: thrownError
+    //     });
         
-        if (xhr.status === 419) {
-            Swal.fire({
-                title: 'Sesión expirada',
-                text: 'Su sesión ha expirado. Necesita volver a iniciar sesión.',
-                icon: 'warning',
-                confirmButtonText: 'Recargar página'
-            }).then(() => {
-                location.reload();
-            });
-        }
-    });
+    //     if (xhr.status === 419) {
+    //         Swal.fire({
+    //             title: 'Sesión expirada',
+    //             text: 'Su sesión ha expirado. Necesita volver a iniciar sesión.',
+    //             icon: 'warning',
+    //             confirmButtonText: 'Recargar página'
+    //         }).then(() => {
+    //             location.reload();
+    //         });
+    //     }
+    // });
 });
 
 function toggleCuestionario() {

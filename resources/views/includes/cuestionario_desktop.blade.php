@@ -302,23 +302,135 @@ $(document).ready(function() {
 
     // Objeto para rastrear solicitudes en curso
     const requestsInProgress = {};
+    
+    // // Guardado automático mejorado con protección contra duplicados
+            //     $(".frm-respuesta").on('mouseleave',  function(e) {
+            //         let $form = $(this).closest('.frm-respuesta');
+            //         let id = $form.attr('id').replace(/[^0-9]/g,'');
+            //         let preguntaNumero = $form.data('pregunta-numero');
+                    
+            //         // Usar una clave única para identificar la pregunta en curso
+            //         const requestKey = `${id}_${preguntaNumero}`;
+                    
+            //         // Si ya hay una solicitud en curso para esta pregunta, no hacer nada
+            //         if (requestsInProgress[requestKey]) {
+            //             return;
+            //         }
+                    
+            //         guardarRespuesta(id, preguntaNumero, $form, requestKey);
+            //     });
+    
 
-    // Guardado automático mejorado con protección contra duplicados
-    $(".frm-respuesta").on('focusout', 'input, textarea, select', function(e) {
-        let $form = $(this).closest('.frm-respuesta');
-        let id = $form.attr('id').replace(/[^0-9]/g,'');
-        let preguntaNumero = $form.data('pregunta-numero');
+
+
+    // // Objeto para almacenar valores iniciales (para comparación)
+    // let initialValues = {};
+    // // Objeto para timers de debounce
+    // let inputTimers = {};
+    
+    // // Función común para guardar respuestas
+    // function handleAnswerSave() {
+    //     let $form = $(this).closest('.frm-respuesta');
+    //     let id = $form.attr('id').replace(/[^0-9]/g,'');
+    //     let preguntaNumero = $form.data('pregunta-numero');
+    //     const requestKey = `${id}_${preguntaNumero}`;
         
-        // Usar una clave única para identificar la pregunta en curso
-        const requestKey = `${id}_${preguntaNumero}`;
+    //     if (requestsInProgress[requestKey]) return;
         
-        // Si ya hay una solicitud en curso para esta pregunta, no hacer nada
-        if (requestsInProgress[requestKey]) {
-            return;
+    //     guardarRespuesta(id, preguntaNumero, $form, requestKey);
+    // }
+    
+    // // 1. Para radios y checkboxes - cambio inmediato
+    // $(".frm-respuesta").on('change', 'input[type="radio"], input[type="checkbox"]', handleAnswerSave);
+    
+    // // 2. Para selects - cambio inmediato
+    // // $(".frm-respuesta").on('change', 'select', handleAnswerSave);
+    
+    // // 3. Para campos de texto/número - con debounce
+    // $(".frm-respuesta").on('input', 'input[type="text"], input[type="number"], textarea', function() {
+    //     const elementId = $(this).attr('id');
+    //     clearTimeout(inputTimers[elementId]);
+    //     inputTimers[elementId] = setTimeout(handleAnswerSave.bind(this), 950); //espera 950 milisegundos para guardar el texto
+    // });
+    
+    // // 4. Respaldo al perder foco (solo si hubo cambios)
+    // $(".frm-respuesta").on('focus', 'input, textarea, select', function() {
+    //     initialValues[this.name] = $(this).val();
+    // }).on('blur', 'input, textarea, select', function() {
+    //     if ($(this).val() !== initialValues[this.name]) {
+    //         handleAnswerSave.call(this);
+    //     }
+    // });
+
+
+
+
+    // Objeto para almacenar valores iniciales (para comparación)
+let initialValues = {};
+// Objeto para timers de debounce
+let inputTimers = {};
+
+// Función común para guardar respuestas
+function handleAnswerSave() {
+    let $form = $(this).closest('.frm-respuesta');
+    let id = $form.attr('id').replace(/[^0-9]/g,'');
+    let preguntaNumero = $form.data('pregunta-numero');
+    const requestKey = `${id}_${preguntaNumero}`;
+
+    if (requestsInProgress[requestKey]) return;
+
+    guardarRespuesta(id, preguntaNumero, $form, requestKey);
+}
+
+// 1. Para radios y checkboxes - cambio inmediato
+$(".frm-respuesta").on('change', 'input[type="radio"], input[type="checkbox"]', handleAnswerSave);
+
+// 2. Para selects - cambio inmediato
+// $(".frm-respuesta").on('change', 'select', handleAnswerSave);
+
+// 3. Para campos de texto/número - con debounce
+$(".frm-respuesta").on('input', 'input[type="text"], input[type="number"], textarea', function() {
+    const elementId = $(this).attr('id');
+    clearTimeout(inputTimers[elementId]);
+    inputTimers[elementId] = setTimeout(handleAnswerSave.bind(this), 1000); //espera 1 segundo para guardar el texto
+});
+
+// 4. Respaldo al perder foco (solo si hubo cambios)
+$(".frm-respuesta").on('focus', 'input, textarea, select', function() {
+    initialValues[this.name] = $(this).val();
+}).on('blur', 'input, textarea, select', function() {
+    if ($(this).val() !== initialValues[this.name]) {
+        handleAnswerSave.call(this);
+    }
+});
+
+// 5. Mouse leave si la pregunta no tiene respuesta
+$(".frm-respuesta").on('mouseleave', function() {
+    const $form = $(this);
+    let answered = false;
+
+    // Verifica si hay algún input con valor
+    $form.find('input, textarea, select').each(function() {
+        if (
+            ($(this).is(':radio') || $(this).is(':checkbox')) && $(this).is(':checked') ||
+            ($(this).is('input[type="text"]') || $(this).is('input[type="number"]') || $(this).is('textarea')) && $(this).val().trim() !== "" ||
+            ($(this).is('select') && $(this).val() !== null && $(this).val() !== "")
+        ) {
+            answered = true;
+            return false; // corta el each
         }
-        
-        guardarRespuesta(id, preguntaNumero, $form, requestKey);
     });
+
+    if (!answered) {
+        handleAnswerSave.call(this);
+    }
+});
+    
+
+
+            
+    
+
     
     // Función para guardar respuestas 
     function guardarRespuesta(id, preguntaNumero, $form, requestKey) {
@@ -353,7 +465,8 @@ $(document).ready(function() {
                 let message = 'Error al guardar la respuesta';
                 
                 // Limpieza previa
-                $form.css("border", "");
+                // $form.css("border", "");
+                $form.removeClass("border-danger");
                 $form.find(".mensaje-error").remove();
 
                 if (xhr.status === 422 && xhr.responseJSON?.errors) {
@@ -361,20 +474,31 @@ $(document).ready(function() {
                     
                     if (errors.RES_respuesta) {
                         $form.css("border", "2px solid red");
-
+                        $form.addClass("border-danger");
+                        
                         // 🔽 Insertar mensaje debajo del input RES_respuesta
-                        const $input = $form.find('[name="RES_respuesta"]');
-                        if ($input.length) {
-                            $(`<div class="mensaje-error" style="color: red; font-size: 14px; margin-top: 4px;">${errors.RES_respuesta[0]}</div>`)
-                                .insertAfter($input);
-                        } else {
-                            // Si no se encuentra el input, lo muestra debajo del form
-                            $form.append(`
-                                <div class="mensaje-error" style="color: red; margin-top: 8px;">
-                                    ${errors.RES_respuesta[0]}
+                        //const $input = $form.find('[name="RES_respuesta"]');
+                         $form.append(`
+                                <div class="mensaje-error mx-2 alert alert-danger m-0 p-0">
+                                    &#x26A0; ${errors.RES_respuesta[0]}
                                 </div>
                             `);
-                        }
+                        // if ($input.length) {
+                        //     // $(`<div class="mensaje-error mx-2 alert alert-danger m-0 p-0 " >${errors.RES_respuesta[0]}</div>`)
+                        //     //     .insertBefore($input);
+                        //     $form.append(`
+                        //         <div class="mensaje-error mx-2 alert alert-danger m-0 p-0">
+                        //             ${errors.RES_respuesta[0]}
+                        //         </div>
+                        //     `);
+                        // } else {
+                        //     // Si no se encuentra el input, lo muestra debajo del form
+                        //     $form.append(`
+                        //         <div class="mensaje-error mx-2 alert alert-danger m-0 p-0">
+                        //             ${errors.RES_respuesta[0]}
+                        //         </div>
+                        //     `);
+                        // }
 
                         message = errors.RES_respuesta[0];
                     }
