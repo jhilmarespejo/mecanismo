@@ -18,41 +18,18 @@ class ModRespuesta extends Model
     const UPDATED_AT = 'updatedAt';
     protected $guarded = [];
     
-
-    // protected static function boot() {
-    //     parent::boot();
-        
-    //     static::creating(function ($model) {
-    //         $model->createdBy = Auth::user()?->username;
-    //         $model->createdAt = now();
-    //     });
-        
-    //     static::updating(function ($model) {
-    //         $model->updatedBy = Auth::user()?->username;
-    //         $model->updatedAt = now();
-    //     });
-    
-        
-    // }
-
     protected static function boot() {
         parent::boot();
 
         static::creating(function ($model) {
             $user = Auth::user();
-            $model->createdBy = $user ? json_encode([
-                'id' => $user->id,
-                'username' => $user->username
-            ]) : null;
+            $model->createdBy = Auth::user()?->username;
             $model->createdAt = now();
         });
 
         static::updating(function ($model) {
             $user = Auth::user();
-            $model->updatedBy = $user ? json_encode([
-                'id' => $user->id,
-                'username' => $user->username
-            ]) : null;
+            $model->updatedBy = Auth::user()?->username;
             $model->updatedAt = now();
         });
         

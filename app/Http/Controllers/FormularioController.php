@@ -73,7 +73,7 @@ class FormularioController extends Controller
     }
 
     /**
-     * FUNCIÓN PRINCIPAL OPTIMIZADA - Corrige conteo de preguntas
+     * FUNCIÓN PRINCIPAL OPTIMIZADA - 
      */
     public function buscaFormularios( $VIS_id ){
         $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
