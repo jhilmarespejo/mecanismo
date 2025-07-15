@@ -22,14 +22,12 @@ class ModRespuesta extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $user = Auth::user();
-            $model->createdBy = Auth::user()?->username;
+            $model->createdBy = Auth::user()?->id;
             $model->createdAt = now();
         });
-
+        
         static::updating(function ($model) {
-            $user = Auth::user();
-            $model->updatedBy = Auth::user()?->username;
+            $model->updatedBy = Auth::user()?->id;
             $model->updatedAt = now();
         });
         
