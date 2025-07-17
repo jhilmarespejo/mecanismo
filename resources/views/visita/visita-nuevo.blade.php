@@ -65,7 +65,7 @@
                             <div class="col-12">
                                 <small class="text-muted">
                                     <i class="bi bi-info-circle"></i> 
-                                    La <b>fecha de fin de vista</b> debe ser igual o posterior a la <b>fecha de inicio de visita</b>. 
+                                    La fecha de fin debe ser igual o posterior a la fecha de inicio. 
                                     Para visitas de un solo día, seleccione la misma fecha.
                                 </small>
                             </div>

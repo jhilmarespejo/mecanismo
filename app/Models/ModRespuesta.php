@@ -20,7 +20,7 @@ class ModRespuesta extends Model
     
     protected static function boot() {
         parent::boot();
-        
+
         static::creating(function ($model) {
             $model->createdBy = Auth::user()?->id;
             $model->createdAt = now();

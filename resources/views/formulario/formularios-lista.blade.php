@@ -206,7 +206,7 @@
                             <div class="col-auto">
                                 @if(Auth::user()->rol == 'Administrador')
                                     <a href="/cuestionario/resultados/{{ $aplicaciones[0]['FRM_id'] }}" 
-                                       class="btn btn-lg btn-outline-primary">
+                                       class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-bar-chart-line me-1"></i>Resultados
                                     </a>
                                 @endif
@@ -369,7 +369,7 @@
     @endif
 </div>
 
-{{-- BOTÓN FLOTANTE PARA ASIGNAR NUEVO FORMULARIOS A LA VISITA (Solo Administradores) --}} 
+{{-- BOTÓN FLOTANTE PARA AGREGAR FORMULARIOS (Solo Administradores) --}}
 @if(Auth::user()->rol == 'Administrador')
     <div class="floating-action-discrete">
         <a href="/formulario/eleccion/{{ $VIS_id }}/{{ $VIS_tipo }}" 
@@ -378,11 +378,33 @@
            data-bs-placement="left" 
            title="Adicionar formulario a esta visita">
             <i class="bi bi-plus-circle me-2"></i>
-            <span class="btn-text">Asignar Formulario </span>
+            <span class="btn-text">Agregar Formulario</span>
         </a>
     </div>
 @endif
 
+{{-- MODAL DE ESTADÍSTICAS (Opcional) --}}
+<div class="modal fade" id="estadisticasModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-graph-up me-2"></i>Estadísticas del Formulario
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="estadisticas-content">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -437,7 +459,43 @@ setTimeout(function() {
     }
 }, 5000);
 
-
+// Función para cargar estadísticas (opcional)
+function cargarEstadisticas(formularioId) {
+    $('#estadisticasModal').modal('show');
+    
+    fetch(`/api/formularios/${formularioId}/estadisticas`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('estadisticas-content').innerHTML = `
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-primary">${data.total_aplicaciones || 0}</h3>
+                        <p class="text-muted">Total Aplicaciones</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-success">${data.completados || 0}</h3>
+                        <p class="text-muted">Completados</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-warning">${data.en_progreso || 0}</h3>
+                        <p class="text-muted">En Progreso</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h3 class="text-info">${Math.round(data.porcentaje_promedio || 0)}%</h3>
+                        <p class="text-muted">Promedio Completitud</p>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            document.getElementById('estadisticas-content').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error al cargar las estadísticas
+                </div>
+            `;
+        });
+}
 
 // Efecto de hover mejorado para aplicaciones
 document.querySelectorAll('.aplicacion-item').forEach(item => {

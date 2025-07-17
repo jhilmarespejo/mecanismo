@@ -39,7 +39,7 @@
                         <label class="form-label"><b>Seleccione una opción:</b></label>
                         <select class="form-select" name="opcion" id="opcion">
                             <option value="" selected>...</option>
-                            {{-- <option value="nuevo">Crear nuevo formulario</option> --}}
+                            <option value="nuevo">Crear nuevo formulario</option>
                             <option value="asignar">Asignar formulario a esta visita</option>
                         </select>
                         @error('opcion')
