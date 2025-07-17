@@ -81,51 +81,57 @@ class FormularioController extends Controller
         // CONSULTA OPTIMIZADA CON CONTEO CORRECTO DE PREGUNTAS
         $formularios = DB::select("
             SELECT 
-                f.\"FRM_id\",
-                f.\"FRM_titulo\",
-                f.\"FRM_tipo\",
-                af.\"FK_VIS_id\",
-                af.\"AGF_id\",
-                af.\"estado\",
-                af.\"createdAt\",
-                -- CONTEO CORRECTO: Solo preguntas reales (no secciones/subsecciones)
-                COALESCE(preguntas_reales.total_preguntas, 0) AS preguntas,
-                -- CONTEO DE RESPUESTAS DADAS
-                COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas
-            FROM formularios f
-            LEFT JOIN agrupador_formularios af ON af.\"FK_FRM_id\" = f.\"FRM_id\"
-            
-            -- Subquery para contar solo preguntas reales
-            LEFT JOIN (
-                SELECT 
-                    rbf.\"FK_FRM_id\",
-                    COUNT(*) as total_preguntas
-                FROM r_bpreguntas_formularios rbf
-                INNER JOIN banco_preguntas bp ON bp.\"BCP_id\" = rbf.\"FK_BCP_id\"
-                WHERE rbf.\"estado\" = 1 
-                AND bp.\"BCP_tipoRespuesta\" NOT IN ('Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta')
-                GROUP BY rbf.\"FK_FRM_id\"
-            ) preguntas_reales ON preguntas_reales.\"FK_FRM_id\" = f.\"FRM_id\"
-            
-            -- Subquery para contar respuestas dadas
-            LEFT JOIN (
-                SELECT 
-                    af_inner.\"FK_FRM_id\",
-                    af_inner.\"AGF_id\",
-                    COUNT(CASE 
-                        WHEN r.\"RES_respuesta\" IS NOT NULL 
-                        AND r.\"RES_respuesta\" != '' 
-                        AND r.\"RES_respuesta\" != 'null' 
-                        THEN 1 
-                    END) as total_respuestas
-                FROM agrupador_formularios af_inner
-                LEFT JOIN respuestas r ON r.\"FK_AGF_id\" = af_inner.\"AGF_id\"
-                GROUP BY af_inner.\"FK_FRM_id\", af_inner.\"AGF_id\"
-            ) respuestas_dadas ON respuestas_dadas.\"FK_FRM_id\" = f.\"FRM_id\" 
-                                AND respuestas_dadas.\"AGF_id\" = af.\"AGF_id\"
-            
-            WHERE af.\"FK_VIS_id\" = :vis_id
-            ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\" DESC
+    f.\"FRM_id\",
+    f.\"FRM_titulo\",
+    f.\"FRM_tipo\",
+    af.\"FK_VIS_id\",
+    af.\"AGF_id\",
+    af.\"estado\",
+    af.\"createdAt\",
+    -- Agregado el createdBy del agrupador_formularios
+    af.\"createdBy\" as \"AGF_createdBy\",
+    -- Agregado el username del usuario creador
+    u.\"username\" as \"USER_username\",
+    -- CONTEO CORRECTO: Solo preguntas reales (no secciones/subsecciones)
+    COALESCE(preguntas_reales.total_preguntas, 0) AS preguntas,
+    -- CONTEO DE RESPUESTAS DADAS
+    COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas
+FROM formularios f
+LEFT JOIN agrupador_formularios af ON af.\"FK_FRM_id\" = f.\"FRM_id\"
+-- Agregado JOIN con la tabla users para obtener el username
+LEFT JOIN users u ON u.\"id\" = af.\"createdBy\"
+
+-- Subquery para contar solo preguntas reales
+LEFT JOIN (
+    SELECT 
+        rbf.\"FK_FRM_id\",
+        COUNT(*) as total_preguntas
+    FROM r_bpreguntas_formularios rbf
+    INNER JOIN banco_preguntas bp ON bp.\"BCP_id\" = rbf.\"FK_BCP_id\"
+    WHERE rbf.\"estado\" = 1 
+    AND bp.\"BCP_tipoRespuesta\" NOT IN ('Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta')
+    GROUP BY rbf.\"FK_FRM_id\"
+) preguntas_reales ON preguntas_reales.\"FK_FRM_id\" = f.\"FRM_id\"
+
+-- Subquery para contar respuestas dadas
+LEFT JOIN (
+    SELECT 
+        af_inner.\"FK_FRM_id\",
+        af_inner.\"AGF_id\",
+        COUNT(CASE 
+            WHEN r.\"RES_respuesta\" IS NOT NULL 
+            AND r.\"RES_respuesta\" != '' 
+            AND r.\"RES_respuesta\" != 'null' 
+            THEN 1 
+        END) as total_respuestas
+    FROM agrupador_formularios af_inner
+    LEFT JOIN respuestas r ON r.\"FK_AGF_id\" = af_inner.\"AGF_id\"
+    GROUP BY af_inner.\"FK_FRM_id\", af_inner.\"AGF_id\"
+) respuestas_dadas ON respuestas_dadas.\"FK_FRM_id\" = f.\"FRM_id\" 
+                    AND respuestas_dadas.\"AGF_id\" = af.\"AGF_id\"
+
+WHERE af.\"FK_VIS_id\" = :vis_id
+ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\" DESC
         ", ['vis_id' => $VIS_id]);
 
         // Convertir a array para compatibilidad
