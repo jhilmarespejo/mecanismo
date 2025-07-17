@@ -327,10 +327,6 @@
                                                                 <span class="badge text-shadow {{ $porcentajeCompletitud >= 100 ? 'bg-success' : ($porcentajeCompletitud >= 50 ? 'bg-warning' : 'bg-secondary') }}">
                                                                     {{ $porcentajeCompletitud }}% completo
                                                                 </span>
-                                                                <span class="badge text-shadow bg-secondary ">
-                                                                    <i class="bi bi-person"></i>
-                                                                    {{ $aplicacion["USER_username"] }}
-                                                                </span>
                                                             </div>
                                                         </div>
                                                         

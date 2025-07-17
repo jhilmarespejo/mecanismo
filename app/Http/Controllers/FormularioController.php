@@ -85,66 +85,56 @@ class FormularioController extends Controller
      */
     public function buscaFormularios( $VIS_id ){
         $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
-        
-        // Obtener si es administrador o no
-        $es_administrador = Auth::user()->rol == 'Administrador';
-        $user_id = Auth::id();  
 
         // CONSULTA OPTIMIZADA CON CONTEO CORRECTO DE PREGUNTAS
         $formularios = DB::select("
             SELECT 
-            f.\"FRM_id\",
-            f.\"FRM_titulo\",
-            f.\"FRM_tipo\",
-            af.\"FK_VIS_id\",
-            af.\"AGF_id\",
-            af.\"estado\",
-            af.\"createdAt\",
-            af.\"createdBy\" as \"AGF_createdBy\",
-            u.\"username\" as \"USER_username\",
-            COALESCE(preguntas_reales.total_preguntas, 0) AS preguntas,
-            COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas
-        FROM formularios f
-        LEFT JOIN agrupador_formularios af ON af.\"FK_FRM_id\" = f.\"FRM_id\"
-        LEFT JOIN users u ON u.\"id\" = af.\"createdBy\"
-        LEFT JOIN (
-            SELECT 
-                rbf.\"FK_FRM_id\",
-                COUNT(*) as total_preguntas
-            FROM r_bpreguntas_formularios rbf
-            INNER JOIN banco_preguntas bp ON bp.\"BCP_id\" = rbf.\"FK_BCP_id\"
-            WHERE rbf.\"estado\" = 1 
-            AND bp.\"BCP_tipoRespuesta\" NOT IN ('Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta')
-            GROUP BY rbf.\"FK_FRM_id\"
-        ) preguntas_reales ON preguntas_reales.\"FK_FRM_id\" = f.\"FRM_id\"
-        LEFT JOIN (
-            SELECT 
-                af_inner.\"FK_FRM_id\",
-                af_inner.\"AGF_id\",
-                COUNT(CASE 
-                    WHEN r.\"RES_respuesta\" IS NOT NULL 
-                    AND r.\"RES_respuesta\" != '' 
-                    AND r.\"RES_respuesta\" != 'null' 
-                    THEN 1 
-                END) as total_respuestas
-            FROM agrupador_formularios af_inner
-            LEFT JOIN respuestas r ON r.\"FK_AGF_id\" = af_inner.\"AGF_id\"
-            GROUP BY af_inner.\"FK_FRM_id\", af_inner.\"AGF_id\"
-        ) respuestas_dadas ON respuestas_dadas.\"FK_FRM_id\" = f.\"FRM_id\" 
-                            AND respuestas_dadas.\"AGF_id\" = af.\"AGF_id\"
-        WHERE af.\"FK_VIS_id\" = :vis_id
-        AND (
-            :es_administrador = true 
-            OR 
-            af.\"createdBy\" = :user_id
-        )
-        ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\" DESC
-        ", [
-            'vis_id' => $VIS_id,
-            'es_administrador' => $es_administrador,
-            'user_id' => $user_id
-        
-        ]);
+                f.\"FRM_id\",
+                f.\"FRM_titulo\",
+                f.\"FRM_tipo\",
+                af.\"FK_VIS_id\",
+                af.\"AGF_id\",
+                af.\"estado\",
+                af.\"createdAt\",
+                -- CONTEO CORRECTO: Solo preguntas reales (no secciones/subsecciones)
+                COALESCE(preguntas_reales.total_preguntas, 0) AS preguntas,
+                -- CONTEO DE RESPUESTAS DADAS
+                COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas
+            FROM formularios f
+            LEFT JOIN agrupador_formularios af ON af.\"FK_FRM_id\" = f.\"FRM_id\"
+            
+            -- Subquery para contar solo preguntas reales
+            LEFT JOIN (
+                SELECT 
+                    rbf.\"FK_FRM_id\",
+                    COUNT(*) as total_preguntas
+                FROM r_bpreguntas_formularios rbf
+                INNER JOIN banco_preguntas bp ON bp.\"BCP_id\" = rbf.\"FK_BCP_id\"
+                WHERE rbf.\"estado\" = 1 
+                AND bp.\"BCP_tipoRespuesta\" NOT IN ('Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta')
+                GROUP BY rbf.\"FK_FRM_id\"
+            ) preguntas_reales ON preguntas_reales.\"FK_FRM_id\" = f.\"FRM_id\"
+            
+            -- Subquery para contar respuestas dadas
+            LEFT JOIN (
+                SELECT 
+                    af_inner.\"FK_FRM_id\",
+                    af_inner.\"AGF_id\",
+                    COUNT(CASE 
+                        WHEN r.\"RES_respuesta\" IS NOT NULL 
+                        AND r.\"RES_respuesta\" != '' 
+                        AND r.\"RES_respuesta\" != 'null' 
+                        THEN 1 
+                    END) as total_respuestas
+                FROM agrupador_formularios af_inner
+                LEFT JOIN respuestas r ON r.\"FK_AGF_id\" = af_inner.\"AGF_id\"
+                GROUP BY af_inner.\"FK_FRM_id\", af_inner.\"AGF_id\"
+            ) respuestas_dadas ON respuestas_dadas.\"FK_FRM_id\" = f.\"FRM_id\" 
+                                AND respuestas_dadas.\"AGF_id\" = af.\"AGF_id\"
+            
+            WHERE af.\"FK_VIS_id\" = :vis_id
+            ORDER BY f.\"FRM_titulo\", af.\"AGF_copia\" DESC
+        ", ['vis_id' => $VIS_id]);
 
         // Convertir a array para compatibilidad
         $formularios = array_map(function($item) {
