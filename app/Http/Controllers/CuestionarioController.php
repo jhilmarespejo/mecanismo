@@ -354,7 +354,7 @@ public function resultadosCuestionario($FRM_id)
     public function fn_duplicar_cuestionario( $nuevoFormulario ){
         DB::beginTransaction();
         try {
-            ModAgrupadorFormulario::insert( $nuevoFormulario );
+            ModAgrupadorFormulario::create($nuevoFormulario);
             $ultimoFRMid = DB::getPdo()->lastInsertId();
             DB::commit();
             return $ultimoFRMid;//redirect('/cuestionario/responder/'.$FRM_id.'/'.$ultimoFRMid);

@@ -87,32 +87,32 @@
         @stack('modals')
         {{-- @livewireScripts --}}
         <script>
-            Livewire.on('success',(message)=>{
-                Swal.fire('¡Correcto!', message, 'success')
-            });
-            Livewire.on('danger',(message)=>{
-                Swal.fire('¡Error', message, 'error')
-            });
+            // Livewire.on('success',(message)=>{
+            //     Swal.fire('¡Correcto!', message, 'success')
+            // });
+            // Livewire.on('danger',(message)=>{
+            //     Swal.fire('¡Error', message, 'error')
+            // });
         </script>
         
 
         @stack('js')
         <script>
-            $("#alert").fadeOut(3500);
-            Livewire.on('success',(message)=>{
-                Swal.fire(
-                 '¡Correcto!',
-                 message,
-                 'success'
-                )
-            });
-            Livewire.on('danger',(message)=>{
-                Swal.fire(
-                 '¡Error',
-                 message,
-                 'error'
-                )
-            });
+            // $("#alert").fadeOut(3500);
+            // Livewire.on('success',(message)=>{
+            //     Swal.fire(
+            //      '¡Correcto!',
+            //      message,
+            //      'success'
+            //     )
+            // });
+            // Livewire.on('danger',(message)=>{
+            //     Swal.fire(
+            //      '¡Error',
+            //      message,
+            //      'error'
+            //     )
+            // });
         </script>
     <style>
         .text-shadow{

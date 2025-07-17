@@ -13,23 +13,31 @@ class ModVisita extends Model{
     protected $primaryKey = 'VIS_id';
     public $incrementing = true;
     
-    public $timestamps = false;
+    // public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
     protected $guarded = [];
 
     protected static function boot() {
         parent::boot();
+        
         static::creating(function ($model) {
-            $model->createdBy = Auth::id();
+            $model->createdBy = Auth::user()?->id;
             $model->createdAt = now();
         });
+        
         static::updating(function ($model) {
-            $model->updatedBy = Auth::id();
+            $model->updatedBy = Auth::user()?->id;
             $model->updatedAt = now();
         });
+        
         // static::deleting(function ($model) {
-        //     $model->deletedBy = Auth::id();
+        //     $model->deletedBy = Auth::user()?->id;
         //     $model->deletedAt = now();
         // });
     }
+
+
+    
 }
 

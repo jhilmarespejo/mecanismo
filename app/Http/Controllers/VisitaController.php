@@ -64,7 +64,7 @@ class VisitaController extends Controller{
         } else {
             DB::beginTransaction();
             try {
-                ModVisita::insert($request->except('_token'));
+                ModVisita::create($request->except('_token'));
                 DB::commit();
                 return response()->json([ "message" => "¡Datos almacenados con éxito!" ]);
             }catch (\Exception $e) {
@@ -74,7 +74,7 @@ class VisitaController extends Controller{
         }
     }
 
-
+    
     /**
      * historial
      *

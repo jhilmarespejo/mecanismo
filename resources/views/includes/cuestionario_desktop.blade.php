@@ -405,26 +405,82 @@ $(".frm-respuesta").on('focus', 'input, textarea, select', function() {
 });
 
 // 5. Mouse leave si la pregunta no tiene respuesta
+// $(".frm-respuesta").on('mouseleave', function() {
+//     const $form = $(this);
+//     let answered = false;
+    
+//     // Verifica si hay algún input con valor
+//     $form.find('input, textarea, select').each(function() {
+//         if (
+//             ($(this).is(':radio') || $(this).is(':checkbox')) && $(this).is(':checked') ||
+//             ($(this).is('input[type="text"]') || $(this).is('input[type="number"]') || $(this).is('textarea')) && $(this).val().trim() !== "" ||
+//             ($(this).is('select') && $(this).val() !== null && $(this).val() !== "")
+//         ) {
+//             answered = true;
+//             return false; // corta el each
+//         }
+//     });
+    
+//     if (!answered) {
+//         handleAnswerSave.call(this);
+//     }
+// });
+    
+// 5. Mouse leave con validación de respuesta y notificación mejorada
 $(".frm-respuesta").on('mouseleave', function() {
     const $form = $(this);
-    let answered = false;
+    let hasInteraction = false;
+    let isAnswered = false;
 
-    // Verifica si hay algún input con valor
+    // Verificar si hubo interacción y si está respondida
     $form.find('input, textarea, select').each(function() {
+        const $element = $(this);
+        
+        // Detectar si hubo interacción
+        if ($element.is(':focus') || $element.val() !== "" || $element.is(':checked')) {
+            hasInteraction = true;
+        }
+        
+        // Verificar si está respondida
         if (
-            ($(this).is(':radio') || $(this).is(':checkbox')) && $(this).is(':checked') ||
-            ($(this).is('input[type="text"]') || $(this).is('input[type="number"]') || $(this).is('textarea')) && $(this).val().trim() !== "" ||
-            ($(this).is('select') && $(this).val() !== null && $(this).val() !== "")
+            ($element.is(':radio,:checkbox') && $element.is(':checked')) ||
+            ($element.is('input[type="text"], input[type="number"], textarea') && $element.val().trim() !== "") ||
+            ($element.is('select') && $element.val() !== null && $element.val() !== "")
         ) {
-            answered = true;
-            return false; // corta el each
+            isAnswered = true;
         }
     });
 
-    if (!answered) {
-        handleAnswerSave.call(this);
+    // Mostrar notificación solo si hubo interacción pero no está respondida
+    if (hasInteraction && !isAnswered) {
+        // Resaltar visualmente el formulario
+        $form.addClass('unanswered-warning');
+        
+        // Mostrar notificación no intrusiva (puedes cambiar a alert si prefieres)
+        // const notification = $(`<div class="unanswered-notification">Por favor responde esta pregunta</div>`);
+        $form.append(notification);
+        
+        // Eliminar la notificación después de 3 segundos
+        setTimeout(() => {
+            // $form.removeClass('unanswered-warning');
+            notification.fadeOut(300, () => notification.remove());
+        }, 3000);
+        
+        // Opcional: Enfocar el primer campo vacío
+        $form.find('input:not(:checked), textarea:empty, select:not(:selected)').first().focus();
     }
 });
+
+// Añadir estilos CSS para la notificación
+$('<style>')
+    .text(`
+        .unanswered-warning {
+            border: 1px solid #ff6b6b;
+            box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
+        }
+    `)
+    .appendTo('head');
     
 
 

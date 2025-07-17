@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{ModFormulario, ModFormularioArchivo, ModAdjunto, ModArchivo, ModPreguntasFormulario, ModVisita, ModBancoPregunta, };
+use App\Models\{ModFormulario, ModAgrupadorFormulario, ModAdjunto, ModArchivo, ModPreguntasFormulario, ModVisita, ModBancoPregunta, };
 use Illuminate\Support\Facades\{DB, Auth, Redirect, Validator, Session};
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\{VisitaController, CustomController};
@@ -48,6 +48,7 @@ class FormularioController extends Controller
     
     public function asignar(Request $request)
     {
+        // exit("sss");
         $validatedData = $request->validate([
             'TES_tipo' => 'required|string',
             'EST_nombre' => 'required|string',
@@ -58,12 +59,19 @@ class FormularioController extends Controller
         ]);
 
         try {
-            DB::table('agrupador_formularios')->insert([
-                'FK_FRM_id' => $validatedData['FRM_id'],
-                'FK_VIS_id' => $validatedData['VIS_id'],
-                'AGF_copia' => 1,
-                'estado' => '1',
+            // DB::table('agrupador_formularios')->insert([
+            //     'FK_FRM_id' => $validatedData['FRM_id'],
+            //     'FK_VIS_id' => $validatedData['VIS_id'],
+            //     'AGF_copia' => 1,
+            //     'estado' => '1',
+            // ]);
+            ModAgrupadorFormulario::create([
+                'FK_FRM_id'   => $validatedData['FRM_id'],
+                'FK_VIS_id'   => $validatedData['VIS_id'],
+                'AGF_copia'   => 1,
+                'estado'      => '1',
             ]);
+            
             
             return redirect()->route('formulario.buscaFormularios', ['VIS_id' => $validatedData['VIS_id']])
                             ->with('success', 'Formulario asignado correctamente a la visita.');
