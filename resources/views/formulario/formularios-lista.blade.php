@@ -233,7 +233,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="fw-bold fs-4">{{ count($aplicaciones) }}</div>
-                                            <small>Aplicaciones</small>
+                                            <small>{{ (count($aplicaciones) == 1)? 'vez':'veces' }} aplicado</small>
                                         </div>
                                     </div>
                                 </div>
@@ -270,99 +270,104 @@
                                     </div>
                                 @endif
                                 
-                                {{-- LISTA DE APLICACIONES --}}
-                                <div class="aplicaciones-container">
-                                    @foreach($aplicaciones as $aplicacion)
-                                        @php
-                                            $porcentajeCompletitud = $aplicacion['preguntas'] > 0 
-                                                ? round(($aplicacion['respuestas'] / $aplicacion['preguntas']) * 100) 
-                                                : 0;
-                                            
-                                            $claseEstado = match(true) {
-                                                $porcentajeCompletitud >= 100 => 'aplicacion-completada',
-                                                $porcentajeCompletitud >= 50 => 'aplicacion-pendiente',
-                                                default => ''
-                                            };
-                                        @endphp
-                                        <div class="aplicacion-item {{ $claseEstado }} p-3">
-                                            <div class="row align-items-center">
-                                                {{-- ÍCONO Y PROGRESO --}}
-                                                <div class="col-auto">
-                                                    <div class="position-relative">
-                                                        <svg class="progress-ring">
-                                                            <circle class="progress-ring-circle"></circle>
-                                                            <circle class="progress-ring-progress" 
-                                                                    style="stroke-dashoffset: {{ 163.36 - (163.36 * $porcentajeCompletitud / 100) }};">
-                                                            </circle>
-                                                        </svg>
-                                                        <div class="position-absolute top-50 start-50 translate-middle">
-                                                            <i class="bi bi-file-earmark-ruled fs-4 text-primary"></i>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                {{-- LISTA DE FORMULARIOS  APLICADOS --}}
+
+                                {{-- Si el usuario aun no tiene formularios aplicados no se muestra la lista porque no aun no corresponde --}} 
+                                @if ( $aplicaciones[0]['respuestas'] !== null )
+                                    <div class="aplicaciones-container">
+                                        @foreach($aplicaciones as $aplicacion)
+                                            @php
+                                                $porcentajeCompletitud = $aplicacion['preguntas'] > 0 
+                                                    ? round(($aplicacion['respuestas'] / $aplicacion['preguntas']) * 100) 
+                                                    : 0;
                                                 
-                                                {{-- INFORMACIÓN DE LA APLICACIÓN --}}
-                                                <div class="col">
-                                                    <div class="row">
-                                                        <div class="col-md-8">
-                                                            <h6 class="mb-1">
-                                                                {{ mb_strimwidth($aplicacion["FRM_titulo"], 0, 40, '...', 'UTF-8') }}
-                                                            </h6>
-                                                            <p class="text-muted small mb-2">
-                                                                <i class="bi bi-calendar me-1"></i>
-                                                                Creado: {{ Carbon::parse($aplicacion["createdAt"])->translatedFormat('d M. Y H:i') }}
-                                                                <span class="ms-2">
-                                                                    <i class="bi bi-hash me-1"></i>{{ $aplicacion["AGF_id"] }}
-                                                                </span>
-                                                            </p>
-                                                            <div class="d-flex gap-2 flex-wrap">
-                                                                <span class="badge bg-info text-shadow">
-                                                                    <i class="bi bi-question-circle me-1"></i>
-                                                                    {{ $aplicacion["preguntas"] }} preguntas
-                                                                </span>
-                                                                <span class="badge bg-primary text-shadow">
-                                                                    <i class="bi bi-check-circle me-1"></i>
-                                                                    {{ $aplicacion["respuestas"] }} respondidas
-                                                                </span>
-                                                                <span class="badge text-shadow {{ $porcentajeCompletitud >= 100 ? 'bg-success' : ($porcentajeCompletitud >= 50 ? 'bg-warning' : 'bg-secondary') }}">
-                                                                    {{ $porcentajeCompletitud }}% completo
-                                                                </span>
-                                                                <span class="badge text-shadow bg-secondary ">
-                                                                    <i class="bi bi-person"></i>
-                                                                    {{ $aplicacion["USER_username"] }}
-                                                                </span>
+                                                $claseEstado = match(true) {
+                                                    $porcentajeCompletitud >= 100 => 'aplicacion-completada',
+                                                    $porcentajeCompletitud >= 50 => 'aplicacion-pendiente',
+                                                    default => ''
+                                                };
+                                            @endphp
+                                            <div class="aplicacion-item {{ $claseEstado }} p-3">
+                                                <div class="row align-items-center">
+                                                    {{-- ÍCONO Y PROGRESO --}}
+                                                    <div class="col-auto">
+                                                        <div class="position-relative">
+                                                            <svg class="progress-ring">
+                                                                <circle class="progress-ring-circle"></circle>
+                                                                <circle class="progress-ring-progress" 
+                                                                        style="stroke-dashoffset: {{ 163.36 - (163.36 * $porcentajeCompletitud / 100) }};">
+                                                                </circle>
+                                                            </svg>
+                                                            <div class="position-absolute top-50 start-50 translate-middle">
+                                                                <i class="bi bi-file-earmark-ruled fs-4 text-primary"></i>
                                                             </div>
                                                         </div>
-                                                        
-                                                        {{-- ACCIONES --}}
-                                                        <div class="col-md-4 text-md-end">
-                                                            <div class="btn-group-vertical w-100" role="group">
-                                                                <a href="/cuestionario/responder/{{ $VIS_id }}/{{ $aplicacion["FRM_id"] }}/{{ $aplicacion["AGF_id"] }}" 
-                                                                   class="btn action-btn btn-responder">
-                                                                    <i class="bi bi-pencil-square me-2"></i>
-                                                                    {{ $porcentajeCompletitud >= 100 ? 'Revisar' : 'Responder' }}
-                                                                </a>
-                                                                
-                                                                @if($aplicacion["estado"] != 1 && Auth::user()->rol == 'Administrador')
-                                                                    <form action="{{ route('cuestionario.eliminar') }}" 
-                                                                          method="POST" 
-                                                                          class="frm-eliminar-cuestionario mt-2"
-                                                                          onsubmit="return confirmarEliminacion(event)">
-                                                                        @csrf
-                                                                        <input type="hidden" name="AGF_id" value="{{ $aplicacion["AGF_id"] }}">
-                                                                        <button type="submit" class="btn action-btn btn-eliminar w-100">
-                                                                            <i class="bi bi-trash me-2"></i>Eliminar
-                                                                        </button>
-                                                                    </form>
-                                                                @endif
+                                                    </div>
+                                                    
+                                                    {{-- INFORMACIÓN DE LA APLICACIÓN --}}
+                                                    <div class="col">
+                                                        <div class="row">
+                                                            <div class="col-md-8">
+                                                                <h6 class="mb-1">
+                                                                    {{ mb_strimwidth($aplicacion["FRM_titulo"], 0, 40, '...', 'UTF-8') }}
+                                                                </h6>
+                                                                <p class="text-muted small mb-2">
+                                                                    <i class="bi bi-calendar me-1"></i>
+                                                                    Creado: {{ Carbon::parse($aplicacion["createdAt"])->translatedFormat('d M. Y H:i') }}
+                                                                    <span class="ms-2">
+                                                                        <i class="bi bi-hash me-1"></i>{{ $aplicacion["AGF_id"] }}
+                                                                    </span>
+                                                                </p>
+                                                                <div class="d-flex gap-2 flex-wrap">
+                                                                    <span class="badge bg-info text-shadow">
+                                                                        <i class="bi bi-question-circle me-1"></i>
+                                                                        {{ $aplicacion["preguntas"] }} preguntas
+                                                                    </span>
+                                                                    <span class="badge bg-primary text-shadow">
+                                                                        <i class="bi bi-check-circle me-1"></i>
+                                                                        {{ $aplicacion["respuestas"] }} respondidas
+                                                                    </span>
+                                                                    <span class="badge text-shadow {{ $porcentajeCompletitud >= 100 ? 'bg-success' : ($porcentajeCompletitud >= 50 ? 'bg-warning' : 'bg-secondary') }}">
+                                                                        {{ $porcentajeCompletitud }}% completo
+                                                                    </span>
+                                                                    <span class="badge text-shadow bg-secondary ">
+                                                                        <i class="bi bi-person"></i>
+                                                                        {{ $aplicacion["USER_username"] }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {{-- ACCIONES --}}
+                                                            <div class="col-md-4 text-md-end">
+                                                                <div class="btn-group-vertical w-100" role="group">
+                                                                    <a href="/cuestionario/responder/{{ $VIS_id }}/{{ $aplicacion["FRM_id"] }}/{{ $aplicacion["AGF_id"] }}" 
+                                                                    class="btn action-btn btn-responder">
+                                                                        <i class="bi bi-pencil-square me-2"></i>
+                                                                        {{ $porcentajeCompletitud >= 100 ? 'Revisar' : 'Responder' }}
+                                                                    </a>
+                                                                    
+                                                                    @if($aplicacion["estado"] != 1 && Auth::user()->rol == 'Administrador')
+                                                                        <form action="{{ route('cuestionario.eliminar') }}" 
+                                                                            method="POST" 
+                                                                            class="frm-eliminar-cuestionario mt-2"
+                                                                            onsubmit="return confirmarEliminacion(event)">
+                                                                            @csrf
+                                                                            <input type="hidden" name="AGF_id" value="{{ $aplicacion["AGF_id"] }}">
+                                                                            <button type="submit" class="btn action-btn btn-eliminar w-100">
+                                                                                <i class="bi bi-trash me-2"></i>Eliminar
+                                                                            </button>
+                                                                        </form>
+                                                                    @endif
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforeach
-                                </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                               
                             </div>
                         </div>
                     </div>

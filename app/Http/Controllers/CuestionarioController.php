@@ -354,10 +354,14 @@ public function resultadosCuestionario($FRM_id)
     public function fn_duplicar_cuestionario( $nuevoFormulario ){
         DB::beginTransaction();
         try {
-            ModAgrupadorFormulario::insert( $nuevoFormulario );
-            $ultimoFRMid = DB::getPdo()->lastInsertId();
+            // ModAgrupadorFormulario::insert( $nuevoFormulario );
+            // $ultimoFRMid = DB::getPdo()->lastInsertId();
+            // DB::commit();
+            // return $ultimoFRMid;//redirect('/cuestionario/responder/'.$FRM_id.'/'.$ultimoFRMid);
+
+            $registro = ModAgrupadorFormulario::create($nuevoFormulario);
             DB::commit();
-            return $ultimoFRMid;//redirect('/cuestionario/responder/'.$FRM_id.'/'.$ultimoFRMid);
+            return $registro->id;
         }
         catch (\Exception $e) {
             DB::rollback();

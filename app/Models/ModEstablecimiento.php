@@ -15,20 +15,23 @@ class ModEstablecimiento extends Model
     public $incrementing = true;
 
 
-    public $timestamps = false;
+    // public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
     protected $guarded = [];
+    
     protected static function boot() {
         parent::boot();
         static::creating(function ($model) {
-            $model->createdBy = Auth::id();
+            $model->createdBy = Auth::user()?->id_usuario_dp;
             $model->createdAt = now();
         });
         static::updating(function ($model) {
-            $model->upatedBy = Auth::id();
+            $model->upatedBy = Auth::user()?->id_usuario_dp;
             $model->updatedAt = now();
         });
         // static::deleting(function ($model) {
-        //     $model->deletedBy = Auth::id();
+        //     $model->deletedBy = Auth::user()?->id_usuario_dp;
         //     $model->deletedAt = now();
         // });
     }

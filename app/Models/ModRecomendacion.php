@@ -14,22 +14,24 @@ class ModRecomendacion extends Model
     protected $primaryKey = 'REC_id';
     public $incrementing = true;
 
-    public $timestamps = false;
+    // public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
     protected $guarded = [];
 
     protected static function boot() {
         parent::boot();
         static::creating(function ($model) {
-            $model->createdBy = Auth::id();
+            $model->createdBy =Auth::user()?->id_usuario_dp;
             $model->createdAt = now();
         });
         static::updating(function ($model) {
-            $model->updatedBy = Auth::id();
+            $model->updatedBy =Auth::user()?->id_usuario_dp;
             $model->updatedAt = now();
         });
-        static::deleting(function ($model) {
-            $model->deletedBy = Auth::id();
-            $model->deletedAt = now();
-        });
+        // static::deleting(function ($model) {
+        //     $model->deletedBy =Auth::user()?->id_usuario_dp;
+        //     $model->deletedAt = now();
+        // });
     }
 }

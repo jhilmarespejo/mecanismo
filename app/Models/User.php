@@ -15,7 +15,8 @@ class User extends Authenticatable
         'cod_oficina',
         'nombre_oficina',
         'password',
-        'status'  // Añadir este campo
+        'status',
+        'id_usuario_dp',
     ];
     
     protected $hidden = [

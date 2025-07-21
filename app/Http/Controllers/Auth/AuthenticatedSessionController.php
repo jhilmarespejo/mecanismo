@@ -24,18 +24,29 @@ class AuthenticatedSessionController extends Controller
     // guarda los datos del usuario en la sesión en la tabla users 
     public function store(Request $request)
     {
-        $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        // $request->validate([
+        //     'username' => ['required', 'string'],
+        //     'password' => ['required', 'string'],
+        // ]);
         
-        if ($this->authService->authenticate($request->username, $request->password)) {
+        // if ($this->authService->authenticate($request->username, $request->password)) {
+        //     $request->session()->regenerate();
+        //     return redirect()->intended('/panel');
+        // }
+
+        // throw ValidationException::withMessages([
+        //     'username' => ['Las credenciales no coinciden con nuestros registros'],
+        // ]);
+
+        $resultado = $this->authService->authenticate($request->username, $request->password);
+
+        if ($resultado['success']) {
             $request->session()->regenerate();
             return redirect()->intended('/panel');
         }
 
         throw ValidationException::withMessages([
-            'username' => ['Las credenciales no coinciden con nuestros registros.'],
+            'username' => [$resultado['error'] ?? 'Error inesperado al autenticar'],
         ]);
     }
     
