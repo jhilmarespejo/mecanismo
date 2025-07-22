@@ -18,32 +18,85 @@ use PhpOffice\PhpWord\Style\ListItem;
 
 class VisitaController extends Controller{
     
-    // // Guardar datos de nueva visita
-    // public function guardarNuevaVisita( Request $request ) {
+     // Muestra un breve resumen de las visitas por año en la vista principal
+    public function resumen(Request $request) {
+        $anioActual = $request->input('anio_actual', date('Y'));
         
-    //     $validator = Validator::make($request->all(), [
-    //         'VIS_tipo' => 'required',
-    //         'VIS_fechas' => 'required|date|after_or_equal:today',
-    //     ], [
-    //         'required' => 'El dato es requerido!',
-    //         'after_or_equal' => 'La fecha está en el pasado'
-    //     ]);
+        // Usar Eloquent para evitar problemas de case-sensitivity
+        $visitas = ModVisita::select([
+                'visitas.VIS_id',
+                'visitas.VIS_tipo', 
+                'visitas.VIS_fechas',
+                'establecimientos.EST_id',
+                'establecimientos.EST_nombre',
+                'tipo_establecimientos.TES_tipo'
+            ])
+            ->join('establecimientos', 'visitas.FK_EST_id', '=', 'establecimientos.EST_id')
+            ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', '=', 'tipo_establecimientos.TES_id')
+            ->whereYear('visitas.VIS_fechas', $anioActual)
+            ->orderBy('tipo_establecimientos.TES_tipo')
+            ->orderBy('establecimientos.EST_nombre')
+            ->orderBy('visitas.VIS_tipo')
+            ->get();
 
-    //     if ( $validator->fails() ){
-    //         return response()->json( [ 'errors' => $validator->errors() ] );
-    //     } else {
-    //         DB::beginTransaction();
-    //         try {
-    //             ModVisita::insert($request->except('_token'));
-    //             DB::commit();
-    //             // dump($request->except('_token'));exit;
-    //             //return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
-    //         }catch (\Exception $e) {
-    //             DB::rollback();
-    //             exit ($e->getMessage());
-    //         }
-    //     }
-    // }
+        if ($visitas->isEmpty()) {
+            $totalVisitasProcessed = [
+                'resultado' => [],
+                'total_general' => 0
+            ];
+        } else {
+            // Procesar datos usando Collections de Laravel
+            $visitasAgrupadas = $visitas->groupBy(['TES_tipo', 'EST_nombre', 'VIS_tipo']);
+            
+            $datosParaVista = collect();
+            
+            foreach ($visitasAgrupadas as $tipoEst => $establecimientos) {
+                foreach ($establecimientos as $nombreEst => $tiposVisita) {
+                    foreach ($tiposVisita as $tipoVisita => $visitasDelTipo) {
+                        $primerVisita = $visitasDelTipo->first();
+                        $ultimaVisita = $visitasDelTipo->last();
+                        
+                        $datosParaVista->push((object)[
+                            'TES_tipo' => $tipoEst,
+                            'EST_nombre' => $nombreEst,
+                            'EST_id' => $primerVisita->EST_id,
+                            'VIS_tipo' => $tipoVisita,
+                            'total_tipo_visitas' => $visitasDelTipo->count(),
+                            'primera_fecha' => $visitasDelTipo->min('VIS_fechas'),
+                            'ultima_fecha' => $visitasDelTipo->max('VIS_fechas'),
+                            'VIS_fechas' => $visitasDelTipo->min('VIS_fechas'),
+                            'total_general' => $visitas->count()
+                        ]);
+                    }
+                }
+            }
+            
+            // Calcular totales por tipo de establecimiento y establecimiento
+            $totalesPorTipo = $datosParaVista->groupBy('TES_tipo')
+                ->map(function($grupo) {
+                    return $grupo->sum('total_tipo_visitas');
+                });
+                
+            $totalesPorEstablecimiento = $datosParaVista->groupBy(['TES_tipo', 'EST_nombre'])
+                ->map(function($tipoGrupo) {
+                    return $tipoGrupo->map(function($estGrupo) {
+                        return $estGrupo->sum('total_tipo_visitas');
+                    });
+                });
+            
+            // Agregar totales a cada item
+            $datosParaVista = $datosParaVista->map(function($item) use ($totalesPorTipo, $totalesPorEstablecimiento) {
+                $item->total_tipo_establecimiento = $totalesPorTipo[$item->TES_tipo] ?? 0;
+                $item->total_establecimiento = $totalesPorEstablecimiento[$item->TES_tipo][$item->EST_nombre] ?? 0;
+                return $item;
+            });
+            
+            $totalVisitasProcessed = CustomController::agruparPorTipoYNombre($datosParaVista);
+        }
+        
+        return view('visita.visita-resumen', compact('totalVisitasProcessed', 'anioActual'));
+    }
+    
 
     // Guardar datos de nueva visita
     public function guardarNuevaVisita( Request $request ) {
@@ -240,7 +293,18 @@ class VisitaController extends Controller{
         ->where('FK_VIS_id', $VIS_id)
         ->get()->toArray();
         
-        return view('visita.acta-visita', compact('VIS_id','visita'));
+         $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            ['name' => 'Lugares de detención', 'url' => route('establecimientos.index')],
+            ['name' => 'Información sobre el personal', 'url' => '']
+        ];
+        $breadcrumbs = [
+                ['name' => 'Inicio', 'url' => route('panel')],
+                ['name' => 'Historial de visitas', 'url' => url()->previous() ],
+                ['name' => 'Acta de visita', 'url' => ''],
+            ];
+        
+        return view('visita.acta-visita', compact('VIS_id','visita', 'breadcrumbs'));
     }
 
     public function guardarActaVisita(Request $request){
@@ -286,6 +350,10 @@ class VisitaController extends Controller{
         }
     }
     
+    /*
+     * Función para subir documentos de la ficha del establecimiento (reglamento, licencia, foto de la fachada)
+     */
+
     public function guardarDocumentoEstablecimiento(Request $request){
         $request->validate([
             'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:20048',
@@ -389,87 +457,10 @@ class VisitaController extends Controller{
         }
     }
     
-    // Muestra un breve resumen de las visitas en la vista principal
-    public function resumen(Request $request) {
-        $anioActual = $request->input('anio_actual', date('Y'));
-        
-        // Usar Eloquent para evitar problemas de case-sensitivity
-        $visitas = ModVisita::select([
-                'visitas.VIS_id',
-                'visitas.VIS_tipo', 
-                'visitas.VIS_fechas',
-                'establecimientos.EST_id',
-                'establecimientos.EST_nombre',
-                'tipo_establecimientos.TES_tipo'
-            ])
-            ->join('establecimientos', 'visitas.FK_EST_id', '=', 'establecimientos.EST_id')
-            ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', '=', 'tipo_establecimientos.TES_id')
-            ->whereYear('visitas.VIS_fechas', $anioActual)
-            ->orderBy('tipo_establecimientos.TES_tipo')
-            ->orderBy('establecimientos.EST_nombre')
-            ->orderBy('visitas.VIS_tipo')
-            ->get();
-
-        if ($visitas->isEmpty()) {
-            $totalVisitasProcessed = [
-                'resultado' => [],
-                'total_general' => 0
-            ];
-        } else {
-            // Procesar datos usando Collections de Laravel
-            $visitasAgrupadas = $visitas->groupBy(['TES_tipo', 'EST_nombre', 'VIS_tipo']);
-            
-            $datosParaVista = collect();
-            
-            foreach ($visitasAgrupadas as $tipoEst => $establecimientos) {
-                foreach ($establecimientos as $nombreEst => $tiposVisita) {
-                    foreach ($tiposVisita as $tipoVisita => $visitasDelTipo) {
-                        $primerVisita = $visitasDelTipo->first();
-                        $ultimaVisita = $visitasDelTipo->last();
-                        
-                        $datosParaVista->push((object)[
-                            'TES_tipo' => $tipoEst,
-                            'EST_nombre' => $nombreEst,
-                            'EST_id' => $primerVisita->EST_id,
-                            'VIS_tipo' => $tipoVisita,
-                            'total_tipo_visitas' => $visitasDelTipo->count(),
-                            'primera_fecha' => $visitasDelTipo->min('VIS_fechas'),
-                            'ultima_fecha' => $visitasDelTipo->max('VIS_fechas'),
-                            'VIS_fechas' => $visitasDelTipo->min('VIS_fechas'),
-                            'total_general' => $visitas->count()
-                        ]);
-                    }
-                }
-            }
-            
-            // Calcular totales por tipo de establecimiento y establecimiento
-            $totalesPorTipo = $datosParaVista->groupBy('TES_tipo')
-                ->map(function($grupo) {
-                    return $grupo->sum('total_tipo_visitas');
-                });
-                
-            $totalesPorEstablecimiento = $datosParaVista->groupBy(['TES_tipo', 'EST_nombre'])
-                ->map(function($tipoGrupo) {
-                    return $tipoGrupo->map(function($estGrupo) {
-                        return $estGrupo->sum('total_tipo_visitas');
-                    });
-                });
-            
-            // Agregar totales a cada item
-            $datosParaVista = $datosParaVista->map(function($item) use ($totalesPorTipo, $totalesPorEstablecimiento) {
-                $item->total_tipo_establecimiento = $totalesPorTipo[$item->TES_tipo] ?? 0;
-                $item->total_establecimiento = $totalesPorEstablecimiento[$item->TES_tipo][$item->EST_nombre] ?? 0;
-                return $item;
-            });
-            
-            $totalVisitasProcessed = CustomController::agruparPorTipoYNombre($datosParaVista);
-        }
-        
-        return view('visita.visita-resumen', compact('totalVisitasProcessed', 'anioActual'));
-    }
-    
+   
     /**
-     * Mostrar formulario de edición del establecimiento
+     * Mostrar formulario de edición del establecimiento, boton: "Modificar esta informacion"
+     * 
      */
     public function editarFichaEstablecimiento($id)
     {

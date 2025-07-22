@@ -5,7 +5,7 @@
 
 
 <div class="container p-4">
-
+    @include('layouts.breadcrumbs', $breadcrumbs)
     <h4 class="text-center">Acta de visita</h4>
 {{-- @php
     dump();exit;
@@ -24,12 +24,17 @@
     </div>
     @else
     <div class="card mb-3">
+       
         <div class="card-body">
             <form method="Post" action="/visita/guardarActaVisita" id="form_guarda_acta" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-3">
-                    <label for="formFile" class="form-label">Seleccione un archivo:</label>
-                    <input class="form-control" type="file" accept="image/*" capture="camera" name="VIS_acta" id="acta_visita" >
+                    <label for="formFile" class="form-label"> 
+                        <div class="alert alert-warning" role="alert">
+                            Seleccione un archivo PDF o IMAGEN para guardar
+                        </div>
+                    </label>
+                    <input class="form-control" type="file" accept="image/jpg, image/jpeg, image/png, application/pdf" capture="camera" name="VIS_acta" id="acta_visita" >
                     <small class="text-danger error" id="VIS_acta_err"></small>
                     <input type="hidden" name="VIS_id" value="{{$VIS_id}}">
                     @error('VIS_acta')
@@ -46,6 +51,7 @@
                     </span>
                 </div>
             </form>
+            
         </div>
     </div>
     @endif

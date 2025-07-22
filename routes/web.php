@@ -159,11 +159,6 @@ Route::get('visita/editarFichaEstablecimiento/{id}', [VisitaController::class, '
 Route::put('visita/actualizarFichaEstablecimiento/{id}', [VisitaController::class, 'actualizarFichaEstablecimiento'])->name('visita.actualizarFichaEstablecimiento')->middleware('auth');
 
 
-// INFORME DE VISITAS
-Route::get('informeVisitas', [InformeVisitasController::class, 'index'])->name('informeVisitas.index')->middleware('auth');
-
-
-
 // // USERS
 // // verificar y editar usuarios
 //  Route::get('users/list', [UsersController::class, 'list'])->middleware('auth')->name('users.list');
