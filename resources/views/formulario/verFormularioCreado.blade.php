@@ -110,28 +110,52 @@
                         @endphp
                         
                         <div class="row">
-                            @for ($col = 0; $col < $columnas; $col++)
-                                <div class="col-12 col-sm-6 col-md-4 mb-2"><!-- 3 columnas -->
-                                    @for ($fila = 0; $fila < $filas; $fila++)
-                                        @php
-                                            $index = $fila + ($col * $filas); // Cálculo del índice para distribución vertical
-                                        @endphp
-                                        @if($index < $totalOpciones)
-                                            <div class="form-check mt-1">
-                                                <input 
-                                                    class="form-check-input" 
-                                                    type="{{ $inputType }}" 
-                                                    name="{{ $name }}" 
-                                                    id="opcion_{{ $pregunta->BCP_id }}_{{ $index }}" 
-                                                    value="{{ $opciones[$index] }}">
-                                                <label class="form-check-label" for="opcion_{{ $pregunta->BCP_id }}_{{ $index }}">
-                                                    {{ $opciones[$index] }}
-                                                </label>
-                                            </div>
-                                        @endif
-                                    @endfor
+                            <!-- 
+                                Dividimos las opciones en columnas usando array_chunk().
+                                Esto permite distribuir las opciones de manera equitativa en las columnas especificadas.
+                            -->
+                            @php
+                                // array_chunk() divide el array $opciones en sub-arrays (columnas)
+                                // ceil(count($opciones) / $columnas) calcula cuántas opciones van en cada columna
+                                $opcionesPorColumna = array_chunk($opciones, ceil(count($opciones) / $columnas));
+                            @endphp
+
+                            <!-- Iteramos cada columna de opciones -->
+                            @foreach($opcionesPorColumna as $columnaOpciones)
+                                <!-- 
+                                    Cada columna ocupa:
+                                    - 12/12 espacio en móviles (col-12)
+                                    - 6/12 en tablets (col-sm-6)
+                                    - 4/12 en desktop (col-md-4)
+                                -->
+                                <div class="col-12 col-sm-6 col-md-4 mb-2">
+                                    
+                                    <!-- Iteramos cada opción dentro de la columna actual -->
+                                    @foreach($columnaOpciones as $key => $opcion)
+                                        <!-- Contenedor para cada opción (checkbox/radio + label) -->
+                                        <div class="form-check mt-1">
+                                            <!-- 
+                                                Input dinámico:
+                                                - Tipo depende de $inputType (checkbox para múltiple selección, radio para selección única)
+                                                - Name lleva [] si es checkbox para recibir array en backend
+                                                - ID y FOR usan BCP_id + key para ser únicos
+                                                - Value es el texto de la opción
+                                            -->
+                                            <input 
+                                                class="form-check-input" 
+                                                type="{{ $inputType }}" 
+                                                name="{{ $name }}" 
+                                                id="opcion_{{ $pregunta->BCP_id }}_{{ $key }}" 
+                                                value="{{ $opcion }}">
+                                            
+                                            <!-- Label asociado al input mediante ID -->
+                                            <label class="form-check-label" for="opcion_{{ $pregunta->BCP_id }}_{{ $key }}">
+                                                {{ $opcion }}
+                                            </label>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endfor
+                            @endforeach
                         </div>
                     @endif
                     

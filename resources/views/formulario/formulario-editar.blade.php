@@ -237,7 +237,7 @@
             <div class="d-flex justify-content-between align-items-center mt-4">
                 <!-- Botón para guardar formulario -->
                 <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-save"></i> Guardar Cambios
+                    <i class="bi bi-save"></i> Guardar cambios en este formulario
                 </button>
                 
                 <div class="d-flex gap-3">

@@ -25,7 +25,7 @@ class CuestionarioController extends Controller {
  * @param int $FRM_id ID del formulario
  * @return \Illuminate\View\View
  */
-public function resultadosCuestionario($FRM_id)
+public function resultadosCuestionario($FRM_id, $VIS_id)
 {
     // Verificar permisos de usuario
     if (Auth::user()->rol != 'Administrador') {
@@ -37,8 +37,10 @@ public function resultadosCuestionario($FRM_id)
         ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
         ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
         ->where('agf.FK_FRM_id', $FRM_id)
+        ->where('agf.FK_VIS_id', $VIS_id)   
         ->get()->toArray();
-
+    
+    
     // Verificar si existen aplicaciones del formulario
     $totalAplicaciones = count($copias);
     
@@ -311,14 +313,7 @@ public function resultadosCuestionario($FRM_id)
     ))->with('total', $totalAplicaciones); // Agregar $total para compatibilidad total con la vista
 }
     
-    /* Muestra en forma de tabla vertical solo las respuetas del formulario seleccionado */
-    // public function verCuestionario( $FRM_id ){
-    //     exit('this->preguntasRespuestas($FRM_id)');
-    //     // $elementos = $this->preguntasRespuestas($FRM_id);
-    //     // return view('cuestionarios.cuestionario-ver', compact( 'elementos', 'FRM_id' ));
-    // }
-
-
+    
     public function duplicarCuestionario( $FRM_id, $VIS_id ){
         /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
 
@@ -404,23 +399,23 @@ public function resultadosCuestionario($FRM_id)
     }
 
     //***VERIF */
-    public function buscarRecomendaciones( Request $request ){
-        // dump($request->except('_token'));exit;
-        $id = $request->id;
+    // public function buscarRecomendaciones( Request $request ){
+    //     // dump($request->except('_token'));exit;
+    //     $id = $request->id;
 
-        DB::enableQueryLog();
-        $recomendaciones = ModRecomendacion::select( 'recomendaciones.REC_id', 'recomendaciones.REC_recomendacion', 'recomendaciones.FK_FRM_id', 'archivos.ARC_ruta' )
-        ->leftJoin('r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
-        ->leftJoin('archivos', 'ra.FK_ARC_id', 'archivos.ARC_id')
-        ->where('recomendaciones.FK_FRM_id',  $request->id)
-        ->get();
+    //     DB::enableQueryLog();
+    //     $recomendaciones = ModRecomendacion::select( 'recomendaciones.REC_id', 'recomendaciones.REC_recomendacion', 'recomendaciones.FK_FRM_id', 'archivos.ARC_ruta' )
+    //     ->leftJoin('r_recomendaciones_archivos as ra', 'ra.FK_REC_id', 'recomendaciones.REC_id')
+    //     ->leftJoin('archivos', 'ra.FK_ARC_id', 'archivos.ARC_id')
+    //     ->where('recomendaciones.FK_FRM_id',  $request->id)
+    //     ->get();
 
-        // $quries = DB::getQueryLog();
-        // dump( $quries );
-        // exit;
+    //     // $quries = DB::getQueryLog();
+    //     // dump( $quries );
+    //     // exit;
 
-        return view('cuestionarios.cuestionario-responses', compact('recomendaciones', 'id'));
-    }
+    //     return view('cuestionarios.cuestionario-responses', compact('recomendaciones', 'id'));
+    // }
     
 
     /**
@@ -659,32 +654,32 @@ public function resultadosCuestionario($FRM_id)
     }
 
     /* Muestra los archivos adjuntos al cuestionario*/
-    public function adjuntosFormulario($est_id, $frm_id = null){
+    // public function adjuntosFormulario($est_id, $frm_id = null){
 
-        $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-        ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-        ->where('FRM_id', $frm_id)->first();
+    //     $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
+    //     ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
+    //     ->where('FRM_id', $frm_id)->first();
 
-        DB::enableQueryLog();
+    //     DB::enableQueryLog();
 
-        // $adj = ModAdjunto::from( 'adjuntos as ad' )
-        // ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
-        // ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
-        // ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-        // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-        // ->where ('f.FK_EST_id', $est_id);
+    //     // $adj = ModAdjunto::from( 'adjuntos as ad' )
+    //     // ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
+    //     // ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
+    //     // ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
+    //     // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
+    //     // ->where ('f.FK_EST_id', $est_id);
 
-        // if( $frm_id ){
-        //     $adjuntos = $adj->where ('ad.FK_FRM_id', $frm_id)->orderBy('ad.ADJ_id', 'desc')->get();
-        // }else{
-        //     $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
-        // }
+    //     // if( $frm_id ){
+    //     //     $adjuntos = $adj->where ('ad.FK_FRM_id', $frm_id)->orderBy('ad.ADJ_id', 'desc')->get();
+    //     // }else{
+    //     //     $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
+    //     // }
 
-        // $quries = DB::getQueryLog();
-        // dump($quries);
-        // exit;
-        return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
-    }
+    //     // $quries = DB::getQueryLog();
+    //     // dump($quries);
+    //     // exit;
+    //     return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
+    // }
 
 
      /**
@@ -704,28 +699,28 @@ public function resultadosCuestionario($FRM_id)
     //     $a=0;
     //     return view('cuestionarios.cuestionario-index', compact('a'));
     // }
-    public function buscarPreguntas( Request $request ){
-        $q = $request->q;
-        DB::enableQueryLog();
+    // public function buscarPreguntas( Request $request ){
+    //     $q = $request->q;
+    //     DB::enableQueryLog();
 
-        $preguntas = ModBancoPregunta::select(
-            'banco_preguntas.BCP_id',
-            'banco_preguntas.BCP_pregunta',
-            'banco_preguntas.FK_CAT_id as ID_categoria',
-            'categorias.CAT_categoria as categoria',
-            'subcategoria.CAT_categoria as subcategoria'
-        )
-        ->leftJoin('categorias', 'banco_preguntas.FK_CAT_id', '=', 'categorias.CAT_id')
-        ->leftJoin('categorias as subcategoria', 'categorias.FK_CAT_id', '=', 'subcategoria.CAT_id')
-        ->where('BCP_pregunta', 'ilike', '%'.$q . '%')->get();
+    //     $preguntas = ModBancoPregunta::select(
+    //         'banco_preguntas.BCP_id',
+    //         'banco_preguntas.BCP_pregunta',
+    //         'banco_preguntas.FK_CAT_id as ID_categoria',
+    //         'categorias.CAT_categoria as categoria',
+    //         'subcategoria.CAT_categoria as subcategoria'
+    //     )
+    //     ->leftJoin('categorias', 'banco_preguntas.FK_CAT_id', '=', 'categorias.CAT_id')
+    //     ->leftJoin('categorias as subcategoria', 'categorias.FK_CAT_id', '=', 'subcategoria.CAT_id')
+    //     ->where('BCP_pregunta', 'ilike', '%'.$q . '%')->get();
 
-        $quries = DB::getQueryLog();
-        // dump($quries);
-        // exit;
-        $preguntas = CustomController::ordenaPreguntasCategorias($preguntas->toArray());
+    //     $quries = DB::getQueryLog();
+    //     // dump($quries);
+    //     // exit;
+    //     $preguntas = CustomController::ordenaPreguntasCategorias($preguntas->toArray());
 
-        return response()->json($preguntas);
-    }
+    //     return response()->json($preguntas);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -733,31 +728,31 @@ public function resultadosCuestionario($FRM_id)
      * @return \Illuminate\Http\Response
      * Guarda la estructura del cuestionario construido en la funcion index
      *   */
-    public function guardaCuestionarioEditado( Request $request ){
-        // dump( $request->except('_token') );
-        // exit;
-        $a = array();
-        foreach ($request->except('_token') as $key => $value){
-            $columna = explode("_", $key);
+    // public function guardaCuestionarioEditado( Request $request ){
+    //     // dump( $request->except('_token') );
+    //     // exit;
+    //     $a = array();
+    //     foreach ($request->except('_token') as $key => $value){
+    //         $columna = explode("_", $key);
 
-            if($columna[1] == "preguntaId" ){
-                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $value ]);
-            }
-            if($columna[1] == "etiqueta" ){
-                // $bcpId = ModBancoPregunta::insert($p);
-                $pregunta = ModBancoPregunta::create([
-                    'BCP_pregunta' => $value,
-                    'FK_CAT_id' => '0',
-                ]);
-                array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $pregunta->BCP_id ]);
-            }
-        }
-    // dump( $a );
-    // exit;
-        if( ModCuestionario::insert($a) ){
-            return redirect()->route('cuestionario.imprimir', $request['FRM_id']);
-        }
-    }
+    //         if($columna[1] == "preguntaId" ){
+    //             array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $value ]);
+    //         }
+    //         if($columna[1] == "etiqueta" ){
+    //             // $bcpId = ModBancoPregunta::insert($p);
+    //             $pregunta = ModBancoPregunta::create([
+    //                 'BCP_pregunta' => $value,
+    //                 'FK_CAT_id' => '0',
+    //             ]);
+    //             array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $pregunta->BCP_id ]);
+    //         }
+    //     }
+    // // dump( $a );
+    // // exit;
+    //     if( ModCuestionario::insert($a) ){
+    //         return redirect()->route('cuestionario.imprimir', $request['FRM_id']);
+    //     }
+    // }
 
 
 

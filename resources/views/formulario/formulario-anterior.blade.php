@@ -44,13 +44,13 @@ FORMULARIO ANTERIOR
                     </a>
                 </li> --}}
                 {{-- <li class="nav-item p-1 px-3" id="btn_imprimir">
-                    <a class="text-decoration-none" href="/cuestionario/imprimir/{{ $FRM_id }}" >
+                    <a class="text-decoration-none" href="/formulario/imprimir/{{ $FRM_id }}" >
                         <i class="bi bi-printer"></i> Vista para imprimir formulario</span>
                     </a>
                 </li> --}}
                 {{-- <li class="nav-item p-1 px-3">
-                    <a class="text-decoration-none" href="/cuestionario/responder/{{ $FRM_id }}" >
-                        <i class="bi bi-ui-checks-grid"></i> Responder cuestionario
+                    <a class="text-decoration-none" href="/formulario/responder/{{ $FRM_id }}" >
+                        <i class="bi bi-ui-checks-grid"></i> Responder formulario
                     </a>
                 </li> --}}
                 {{-- <li class="nav-item p-1 px-3">

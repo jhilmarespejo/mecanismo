@@ -205,7 +205,7 @@
                             </div>
                             <div class="col-auto">
                                 @if(Auth::user()->rol == 'Administrador')
-                                    <a href="/cuestionario/resultados/{{ $aplicaciones[0]['FRM_id'] }}" 
+                                    <a href="/cuestionario/resultados/{{ $aplicaciones[0]['FRM_id'] }}/{{ $VIS_id }}" 
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-bar-chart-line me-1"></i>Resultados
                                     </a>
@@ -421,10 +421,41 @@
 <script>
 // Inicializar tooltips
 document.addEventListener('DOMContentLoaded', function() {
+    
+     const urlParams = new URLSearchParams(window.location.search);
+    const cuestionarioCompletado = urlParams.get('cuestionario_completado');
+    
+    if (cuestionarioCompletado) {
+        // Limpiar parámetro de la URL sin recargar
+        history.replaceState(null, null, window.location.pathname);
+        
+        // Forzar recarga de datos (puedes usar cualquiera de estas opciones)
+        
+        // Opción 1: Recarga simple
+        // location.reload();
+        
+        // Opción 2: Recarga con animación (recomendada)
+        Swal.fire({
+            title: 'Actualizando información',
+            html: 'El cuestionario se ha completado exitosamente. Actualizando datos...',
+            timer: 1500,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            willClose: () => {
+                location.reload();
+            }
+        });
+    }
+    
+
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+
+
 });
 
 // Función para confirmar eliminación

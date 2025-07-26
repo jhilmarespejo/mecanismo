@@ -43,7 +43,7 @@
                 </a>
             </li>
             {{-- <li class="nav-item p-1 px-3" id="btn_imprimir">
-                <a class="text-decoration-none" href="/cuestionario/imprimir/{{ $FRM_id }}" >
+                <a class="text-decoration-none" href="/formulario/imprimir/{{ $FRM_id }}" >
                     <i class="bi bi-printer"></i> Vista para imprimir formulario</span>
                 </a>
             </li> --}}

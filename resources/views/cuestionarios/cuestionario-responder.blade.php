@@ -80,7 +80,7 @@
             </div>
             <div class="col-auto">
                 <a class="btn btn-outline-primary btn-sm" 
-                   href="/cuestionario/imprimir/{{ $VIS_id }}/{{ $FRM_id }}/{{ $AGF_id }}" 
+                   href="/formulario/imprimir/{{ $FRM_id }}" 
                    target="_blank">
                     <i class="bi bi-printer"></i>
                 </a>
@@ -96,7 +96,7 @@
                         <i class="bi bi-arrow-left me-2"></i>Página anterior
                     </a>
                     <a class="btn btn-outline-primary" 
-                       href="/cuestionario/imprimir/{{ $VIS_id }}/{{ $FRM_id }}/{{ $AGF_id }}" 
+                       href="/formulario/imprimir/{{ $FRM_id }}" 
                        target="_blank">
                         <i class="bi bi-printer me-2"></i>Imprimir
                     </a>
@@ -163,7 +163,7 @@
                             @endif
                             <div class="col">
                                 <div class="h4 text-success mb-0" id="contador-respondidas">0</div>
-                                <small class="text-muted">Respondidas</small>
+                                <small class="text-muted">Preguntas respondidas</small>
                             </div>
                         </div>
                     </div>

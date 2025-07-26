@@ -7,7 +7,7 @@ use App\Http\Livewire\Establecimientos;
 use App\Http\Livewire\BancoPreguntasIndex;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController,InformeVisitasController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
+use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
 use App\Http\Controllers\Auth\LoginController;
 
 // Resto de tu código...
@@ -55,7 +55,7 @@ Route::get('formulario/buscaFormularios/{VIS_id}', [FormularioController::class,
 Route::get('formulario/nuevo', [FormularioController::class, 'nuevo'])->name('formulario.nuevo')->middleware('auth');
 Route::post('formulario/asignar', [FormularioController::class, 'asignar'])->name('formulario.asignar')->middleware('auth');
 
-Route::post('formulario/buscarPregunta', [FormularioController::class, 'buscarPregunta'])->name('formulario.buscarPregunta')->middleware('auth');
+// Route::post('formulario/buscarPregunta', [FormularioController::class, 'buscarPregunta'])->name('formulario.buscarPregunta')->middleware('auth');
 Route::post('formulario/store', [FormularioController::class, 'store'])->name('formulario.store')->middleware('auth');
 Route::get('/formulario/{id}', [FormularioController::class, 'verFormularioCreado'])->name('formulario.verFormularioCreado')->middleware('auth');
 Route::get('formulario/imprimir/{id}', [FormularioController::class, 'imprimirFormulario'])->name('formulario.imprimirFormulario');
@@ -67,7 +67,7 @@ Route::put('/formulario/actualizar/{id}', [FormularioController::class, 'actuali
 
 
 
-Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica')->middleware('auth');
+// Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica'])->name('index.busquedaDinamica')->middleware('auth');
 
 Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas')->middleware('auth');
 
@@ -82,13 +82,12 @@ Route::post('cuestionario/buscarPreguntas', [CuestionarioController::class, 'bus
 Route::post('cuestionario/guardaCuestionarioEditado', [CuestionarioController::class, 'store'])->name('cuestionario.guardaCuestionarioEditado')->middleware('auth');
 Route::post('cuestionario/buscarRecomendaciones', [CuestionarioController::class, 'buscarRecomendaciones'])->name('cuestionario.buscarRecomendaciones')->middleware('auth');
 
-Route::get('cuestionario/imprimir/{VIS_id}/{FRM_id}/{AGF_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
+// Route::get('cuestionario/imprimir/{VIS_id}/{FRM_id}/{AGF_id}', [CuestionarioController::class, 'imprimirCuestionario'])->name('cuestionario.imprimir')->middleware('auth');
 
 Route::get('cuestionario/duplicarCuestionario/{FRM_id}/{VIS_id}', [CuestionarioController::class, 'duplicarCuestionario'])->name('cuestionario.duplicarCuestionario')->middleware('auth');
 
 Route::get('cuestionario/responder/{VIS_id}/{FRM_id}/{AGF_copia}', [CuestionarioController::class, 'responderCuestionario'])->name('cuestionario.responder')->middleware('auth');
 
-Route::get('cuestionario/ver/{id}', [CuestionarioController::class, 'verCuestionario'])->name('cuestionario.ver')->middleware('auth');
 
 Route::post('cuestionario/eliminar', [CuestionarioController::class, 'eliminarCuestionario'])->name('cuestionario.eliminar')->middleware('auth');
 
@@ -96,7 +95,7 @@ Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioControlle
 
 Route::post('cuestionario/confirmaCuestionario/', [CuestionarioController::class, 'confirmaCuestionario'])->name('cuestionario.confirmaCuestionario')->middleware('auth');
 
-Route::get('cuestionario/resultados/{id}', [CuestionarioController::class, 'resultadosCuestionario'])->name('cuestionario.resultados')->middleware('auth');
+Route::get('cuestionario/resultados/{id}/{VIS_id}', [CuestionarioController::class, 'resultadosCuestionario'])->name('cuestionario.resultados')->middleware('auth');
 
 
 
@@ -148,7 +147,7 @@ Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNueva
 Route::get('visita/historial/{id}', [VisitaController::class, 'historial'])->name('visita.historial')->middleware('auth');
 Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita'])->name('visita.actaVisita')->middleware('auth');
 Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
-Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
+// Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
 Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 
 
@@ -175,7 +174,7 @@ Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middlew
 Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
 Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
 Route::get('/indicadores/reportes', [IndicadorController::class, 'reportes'])->name('indicadores.reportes');
-Route::get('indicadores/resultados', [IndicadorController::class, 'obtenerResultados'])->name('indicadores.resultados');
+// Route::get('indicadores/resultados', [IndicadorController::class, 'obtenerResultados'])->name('indicadores.resultados');
 
 
 

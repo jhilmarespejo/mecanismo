@@ -635,7 +635,7 @@ $(".frm-respuesta").on('mouseleave', function() {
                     confirmButtonText: 'Aceptar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.history.back();
+                        window.location.href = document.referrer + '?cuestionario_completado=' + FRM_id;
                     }
                 });
             },
