@@ -56,7 +56,7 @@
                                 
                                 <li><a class="dropdown-item" href="/asesoramientos">Módulo de Asesoramiento</a></li>
                                 <li><a class="dropdown-item" href="/educacion">Modulo Educativo</a></li>
-                                <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li>
+                                {{-- <li><a class="dropdown-item" href="/bancoDePreguntas">Banco de preguntas</a></li> --}}
                                 <li><a class="dropdown-item" href="/establecimientos/index">Lugares de detención</a></li>
                                 
                                 

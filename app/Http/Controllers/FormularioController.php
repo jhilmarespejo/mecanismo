@@ -13,7 +13,12 @@ use Illuminate\Support\Facades\Log;
 
 class FormularioController extends Controller
 {
+    /**
+     * MODULO CREACION Y ASIGNACION DE FORMULARIOS A VISITAS PROGRAMADAS
+    */
     
+    // Muestra la lista de formularios creados por el usuario
+    //  ruta: .../formularios
     public function index() {
         $formularios = ModFormulario::all();
         $breadcrumbs = [
@@ -22,7 +27,8 @@ class FormularioController extends Controller
         ];
         return view('formulario.index', compact('formularios', 'breadcrumbs'));
     }
-
+    
+    // Filtra los formularios por título
     public function filtrar(Request $request) {
         $titulo = $request->input('titulo');
 
@@ -32,7 +38,10 @@ class FormularioController extends Controller
 
         return view('formulario._formularios', compact('formularios'));
     }
-
+    
+    
+    // Viene del boton de "+ Asignar formulario" 
+    ////  ruta: .../formulario/buscaFormularios/8
     public function eleccion($VIS_id, $VIS_tipo){
         if( !session('TES_tipo') ){
             return redirect('panel');
@@ -45,7 +54,9 @@ class FormularioController extends Controller
             return redirect('panel');
         }
     }
+
     
+    // Función para asignar un formulario seleccionado de la lista de formulario a una visita programada (combobox: Seleccione un formulario:)
     public function asignar(Request $request)
     {
         $validatedData = $request->validate([
@@ -58,12 +69,6 @@ class FormularioController extends Controller
         ]);
 
         try {
-            // DB::table('agrupador_formularios')->insert([
-            //     'FK_FRM_id' => $validatedData['FRM_id'],
-            //     'FK_VIS_id' => $validatedData['VIS_id'],
-            //     'AGF_copia' => 1,
-            //     'estado' => '1',
-            // ]);
             ModAgrupadorFormulario::create([
                 'FK_FRM_id' => $validatedData['FRM_id'],
                 'FK_VIS_id' => $validatedData['VIS_id'],
@@ -78,10 +83,18 @@ class FormularioController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al asignar el formulario. Intente nuevamente.');
         }
     }
+    /**
+     * FIN DEL MODULO CREACION Y ASIGNACION DE FORMULARIOS A VISITAS PROGRAMADAS
+    */
+
+
 
     /**
-     * FUNCIÓN PRINCIPAL OPTIMIZADA - 
+     * MODULO DE LISTADO DE FORMULARIOS, PREGUNTAS Y RESPUESTAS.
      */
+    
+    // Función para buscar formularios por visita incluyendo cantidad de preguntas y respuestas por formulario
+    // ruta: .../formulario/buscaFormularios/8
     public function buscaFormularios( $VIS_id ){
         $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
         
@@ -199,21 +212,22 @@ class FormularioController extends Controller
         return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
     }
     
-    public function buscarPregunta(Request $request){
-        $preguntas = ModBancoPregunta::select(
-            'banco_preguntas.BCP_pregunta',
-            'banco_preguntas.BCP_tipoRespuesta',
-            'banco_preguntas.BCP_opciones',
-            'banco_preguntas.BCP_complemento',
-            'banco_preguntas.BCP_id'
-            )
-            ->where('banco_preguntas.BCP_pregunta', 'ilike', '%'.$request->pregunta.'%')
-            ->where('banco_preguntas.estado', 1)
-            ->orderBy('banco_preguntas.BCP_id')
-            ->get()->toArray();
+    // public function buscarPregunta(Request $request){
+    //     exit("buscar pregunta");
+    //     $preguntas = ModBancoPregunta::select(
+    //         'banco_preguntas.BCP_pregunta',
+    //         'banco_preguntas.BCP_tipoRespuesta',
+    //         'banco_preguntas.BCP_opciones',
+    //         'banco_preguntas.BCP_complemento',
+    //         'banco_preguntas.BCP_id'
+    //         )
+    //         ->where('banco_preguntas.BCP_pregunta', 'ilike', '%'.$request->pregunta.'%')
+    //         ->where('banco_preguntas.estado', 1)
+    //         ->orderBy('banco_preguntas.BCP_id')
+    //         ->get()->toArray();
             
-        return response()->json($preguntas);
-    }
+    //     return response()->json($preguntas);
+    // }
 
     public function store(Request $request)
     {

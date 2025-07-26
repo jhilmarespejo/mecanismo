@@ -72,8 +72,8 @@ Route::post('index/busquedaDinamica', [IndexController::class, 'busquedaDinamica
 Route::post('index/buscarListasCasillas', [IndexController::class, 'buscarListasCasillas'])->name('index.buscarListasCasillas')->middleware('auth');
 
 
-Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
-Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
+// Route::get('bancoDePreguntas', BancoPreguntasIndex::class)->middleware('auth');
+// Route::post('bancoDePreguntasEditar', BancoPreguntasIndex::class)->middleware('auth');
 
 // CUESTIONARIO
 Route::get('cuestionario', [CuestionarioController::class, 'index'])->name('cuestionario.index')->middleware('auth');
@@ -109,12 +109,12 @@ Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesControl
 Route::get('/recomendacionesEstatales', [RecomendacionesController::class, 'recomendacionesEstatales'])->name('recomendaciones.recomendacionesEstatales')->middleware('auth');
 
 
-// CATEGORIAS
-Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
-Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta')->middleware('auth');
-Route::post('categorias/buscarElementos', [CategoriasController::class, 'buscarElementos'])->name('categorias.buscarElementos')->middleware('auth');
-Route::get('categorias', [CategoriasController::class, 'index'])->name('categorias')->middleware('auth');
-Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'guardaNuevaCategoria'])->name('categorias.guardaNuevaCategoria')->middleware('auth');
+// // CATEGORIAS
+// Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
+// Route::post('categorias/buscarPregunta', [CategoriasController::class, 'buscarPregunta'])->name('categorias.buscarPregunta')->middleware('auth');
+// Route::post('categorias/buscarElementos', [CategoriasController::class, 'buscarElementos'])->name('categorias.buscarElementos')->middleware('auth');
+// Route::get('categorias', [CategoriasController::class, 'index'])->name('categorias')->middleware('auth');
+// Route::post('categorias/guardaNuevaCategoria', [CategoriasController::class, 'guardaNuevaCategoria'])->name('categorias.guardaNuevaCategoria')->middleware('auth');
 
 
 // ESTABLECIMIENTOS
