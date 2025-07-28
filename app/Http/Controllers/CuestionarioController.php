@@ -16,304 +16,304 @@ use App\Http\Controllers\{ CustomController};
 // use Psy\Command\WhereamiCommand;
 
 class CuestionarioController extends Controller {
-    
-
-
-/**
- * Muestra los resultados del cuestionario con estadísticas y gráficos corregidos
- * 
- * @param int $FRM_id ID del formulario
- * @return \Illuminate\View\View
- */
-public function resultadosCuestionario($FRM_id, $VIS_id)
-{
-    // Verificar permisos de usuario
-    if (Auth::user()->rol != 'Administrador') {
-        return redirect()->back()->with('warning', 'Usuario no autorizado para esta función');
-    }
-    
-    // =========================== OBTENER COPIAS DEL FORMULARIO ===========================
-    $copias = ModAgrupadorFormulario::from('agrupador_formularios as agf')
-        ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
-        ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
-        ->where('agf.FK_FRM_id', $FRM_id)
-        ->where('agf.FK_VIS_id', $VIS_id)   
-        ->get()->toArray();
-    
-    
-    // Verificar si existen aplicaciones del formulario
-    $totalAplicaciones = count($copias);
-    
-    if ($totalAplicaciones == 0) {
-        return view('cuestionarios.cuestionario-resultado', [
-            'resultados' => null,
-            'FRM_titulo' => 'Formulario sin aplicaciones',
-            'totalAplicaciones' => 0,
-            'total' => 0, // Para compatibilidad con vista anterior
-            'FRM_id' => $FRM_id,
-            'estadisticas' => [
-                'total_preguntas_reales' => 0,
-                'total_aplicaciones' => 0,
-                'aplicaciones_completas' => 0,
-                'aplicaciones_incompletas' => 0,
-                'porcentaje_completitud_general' => 0,
-                'porcentaje_aplicaciones_completas' => 0,
-                'total_respuestas_dadas' => 0,
-                'tipos_preguntas' => [],
-                'promedio_respuestas_por_aplicacion' => 0
-            ],
-            'VIS_id' => null
-        ]);
-    }
-
-    $FRM_titulo = $copias[0]['FRM_titulo'];
-
-    // =========================== OBTENER PREGUNTAS REALES DEL FORMULARIO ===========================
-    // Solo contar preguntas que requieren respuesta (excluir secciones, subsecciones, etiquetas)
-    $preguntasReales = ModBancoPregunta::from('banco_preguntas as bp')
-        ->select(
-            'bp.BCP_pregunta', 'bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 
-            'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 
-            'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria',
-            'c.FK_CAT_id', 'c2.CAT_categoria as categoria'
-        )
-        ->join('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
-        ->join('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
-        ->leftJoin('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
-        ->where('rbf.FK_FRM_id', $FRM_id)
-        ->whereNotIn('bp.BCP_tipoRespuesta', ['Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta'])
-        ->orderBy('rbf.RBF_orden')
-        ->orderBy('rbf.RBF_id')
-        ->get();
-
-    $totalPreguntasReales = $preguntasReales->count();
-
-    // =========================== CALCULAR COMPLETITUD POR APLICACIÓN ===========================
-    $aplicacionesCompletas = 0;
-    $aplicacionesIncompletas = 0;
-    $totalRespuestasDadas = 0;
-
-    foreach ($copias as $aplicacion) {
-        $agfId = $aplicacion['AGF_id'];
+    /**
+     * Muestra los resultados del cuestionario con estadísticas y gráficos corregidos
+     * 
+     * @param int $FRM_id ID del formulario
+     * @return \Illuminate\View\View
+     */
+    // Funcion para mostrar los resultados del cuestionario con graficos estadísticos 
+    // ruta: .../cuestionario/resultados/1281/8
+    public function resultadosCuestionario($FRM_id, $VIS_id)
+    {
+        // Verificar permisos de usuario
+        if (Auth::user()->rol != 'Administrador') {
+            return redirect()->back()->with('warning', 'Usuario no autorizado para esta función');
+        }
         
-        // Contar respuestas dadas para esta aplicación específica
-        $respuestasDadaEnAplicacion = DB::table('respuestas as r')
-            ->join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
-            ->join('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
-            ->where('r.FK_AGF_id', $agfId)
+        // =========================== OBTENER COPIAS DEL FORMULARIO ===========================
+        $copias = ModAgrupadorFormulario::from('agrupador_formularios as agf')
+            ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
+            ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
+            ->where('agf.FK_FRM_id', $FRM_id)
+            ->where('agf.FK_VIS_id', $VIS_id)   
+            ->get()->toArray();
+        
+        
+        // Verificar si existen aplicaciones del formulario
+        $totalAplicaciones = count($copias);
+        
+        if ($totalAplicaciones == 0) {
+            return view('cuestionarios.cuestionario-resultado', [
+                'resultados' => null,
+                'FRM_titulo' => 'Formulario sin aplicaciones',
+                'totalAplicaciones' => 0,
+                'total' => 0, // Para compatibilidad con vista anterior
+                'FRM_id' => $FRM_id,
+                'estadisticas' => [
+                    'total_preguntas_reales' => 0,
+                    'total_aplicaciones' => 0,
+                    'aplicaciones_completas' => 0,
+                    'aplicaciones_incompletas' => 0,
+                    'porcentaje_completitud_general' => 0,
+                    'porcentaje_aplicaciones_completas' => 0,
+                    'total_respuestas_dadas' => 0,
+                    'tipos_preguntas' => [],
+                    'promedio_respuestas_por_aplicacion' => 0
+                ],
+                'VIS_id' => null
+            ]);
+        }
+
+        $FRM_titulo = $copias[0]['FRM_titulo'];
+
+        // =========================== OBTENER PREGUNTAS REALES DEL FORMULARIO ===========================
+        // Solo contar preguntas que requieren respuesta (excluir secciones, subsecciones, etiquetas)
+        $preguntasReales = ModBancoPregunta::from('banco_preguntas as bp')
+            ->select(
+                'bp.BCP_pregunta', 'bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 
+                'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 
+                'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria',
+                'c.FK_CAT_id', 'c2.CAT_categoria as categoria'
+            )
+            ->join('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
+            ->join('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
+            ->leftJoin('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
             ->where('rbf.FK_FRM_id', $FRM_id)
             ->whereNotIn('bp.BCP_tipoRespuesta', ['Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta'])
-            ->whereNotNull('r.RES_respuesta')
-            ->where('r.RES_respuesta', '!=', '')
-            ->where('r.RES_respuesta', '!=', 'null')
-            ->count();
+            ->orderBy('rbf.RBF_orden')
+            ->orderBy('rbf.RBF_id')
+            ->get();
 
-        $totalRespuestasDadas += $respuestasDadaEnAplicacion;
+        $totalPreguntasReales = $preguntasReales->count();
 
-        // Determinar si la aplicación está completa
-        if ($respuestasDadaEnAplicacion >= $totalPreguntasReales) {
-            $aplicacionesCompletas++;
-        } else {
-            $aplicacionesIncompletas++;
-        }
-    }
+        // =========================== CALCULAR COMPLETITUD POR APLICACIÓN ===========================
+        $aplicacionesCompletas = 0;
+        $aplicacionesIncompletas = 0;
+        $totalRespuestasDadas = 0;
 
-    // =========================== CALCULAR PORCENTAJES ===========================
-    $porcentajeCompletitudGeneral = $totalAplicaciones > 0 && $totalPreguntasReales > 0 
-        ? round(($totalRespuestasDadas / ($totalAplicaciones * $totalPreguntasReales)) * 100, 1) 
-        : 0;
-
-    $porcentajeAplicacionesCompletas = $totalAplicaciones > 0 
-        ? round(($aplicacionesCompletas / $totalAplicaciones) * 100, 1) 
-        : 0;
-
-    // =========================== PROCESAR RESPUESTAS PARA MOSTRAR EN LA VISTA ===========================
-    // Obtener todas las preguntas (incluyendo secciones para la vista)
-    $todasLasPreguntas = ModBancoPregunta::from('banco_preguntas as bp')
-        ->select(
-            'bp.BCP_pregunta', 'bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 
-            'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 
-            'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria',
-            'c.FK_CAT_id', 'c2.CAT_categoria as categoria'
-        )
-        ->join('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
-        ->join('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
-        ->leftJoin('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
-        ->where('rbf.FK_FRM_id', $FRM_id)
-        ->orderBy('rbf.RBF_orden')
-        ->orderBy('rbf.RBF_id')
-        ->get();
-
-    // =========================== PROCESAR RESPUESTAS ABIERTAS ===========================
-    $respuestasAbiertas = ModRespuesta::from('respuestas as r')
-        ->select(
-            'c.CAT_categoria', 'bp.BCP_pregunta', 'r.RES_respuesta', 
-            'rbf.RBF_id', 'rbf.RBF_orden', 'r.FK_AGF_id', 'bp.BCP_tipoRespuesta'
-        )
-        ->rightJoin('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
-        ->leftJoin('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
-        ->leftJoin('categorias as c', 'c.CAT_id', 'bp.FK_CAT_id')
-        ->whereIn('bp.BCP_tipoRespuesta', ['Respuesta corta', 'Respuesta larga', 'Numeral'])
-        ->where('rbf.FK_FRM_id', $FRM_id)
-        ->groupBy(
-            'c.CAT_categoria', 'bp.BCP_pregunta', 'rbf.RBF_orden', 
-            'rbf.RBF_id', 'r.RES_respuesta', 'r.FK_AGF_id', 'bp.BCP_tipoRespuesta'
-        )
-        ->orderBy('rbf.RBF_orden')
-        ->orderBy('rbf.RBF_id')
-        ->get();
-
-    // =========================== PROCESAR RESPUESTAS CERRADAS ===========================
-    $respuestasAfirmacion = DB::select('
-        SELECT "c"."CAT_categoria", "bp"."BCP_pregunta", 
-               SUM(("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",
-               SUM(("r"."RES_respuesta" ilike \'%No%\')::int) as "No", 
-               "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta"  
-        FROM "respuestas" as "r"
-        RIGHT JOIN "r_bpreguntas_formularios" as "rbf" ON "rbf"."RBF_id" = "r"."FK_RBF_id"
-        LEFT JOIN "banco_preguntas" as "bp" ON "bp"."BCP_id" = "rbf"."FK_BCP_id"
-        LEFT JOIN "categorias" as "c" ON "c"."CAT_id" = "bp"."FK_CAT_id"
-        WHERE "bp"."BCP_tipoRespuesta" = \'Afirmación\' AND "rbf"."FK_FRM_id" = ?
-        GROUP BY "c"."CAT_categoria", "bp"."BCP_pregunta", "rbf"."RBF_orden", 
-                 "rbf"."RBF_id", "bp"."BCP_tipoRespuesta"
-        ORDER BY "rbf"."RBF_orden", "rbf"."RBF_id"
-    ', [$FRM_id]);
-
-    // CONVERTIR OBJETOS stdClass A ARRAYS
-    $arrayConteoRespAfir = array_map(function($obj) {
-        return (array) $obj;
-    }, $respuestasAfirmacion);
-
-    // =========================== PROCESAR CASILLAS Y LISTAS DESPLEGABLES ===========================
-    $arrayConteoRespCasVarif = [];
-
-    foreach ($todasLasPreguntas as $pregunta) {
-        if (in_array($pregunta->BCP_tipoRespuesta, ['Lista desplegable', 'Casilla verificación'])) {
+        foreach ($copias as $aplicacion) {
+            $agfId = $aplicacion['AGF_id'];
             
-            // Obtener opciones seleccionadas para esta pregunta
-            $opcionesSeleccionadas = DB::table('respuestas as r')
-                ->select('r.RES_respuesta')
+            // Contar respuestas dadas para esta aplicación específica
+            $respuestasDadaEnAplicacion = DB::table('respuestas as r')
                 ->join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
                 ->join('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+                ->where('r.FK_AGF_id', $agfId)
                 ->where('rbf.FK_FRM_id', $FRM_id)
-                ->where('rbf.FK_BCP_id', $pregunta->BCP_id)
+                ->whereNotIn('bp.BCP_tipoRespuesta', ['Sección', 'Subsección', 'Seccion', 'Subseccion', 'Etiqueta'])
                 ->whereNotNull('r.RES_respuesta')
-                ->groupBy('r.RES_respuesta')
-                ->get()->toArray();
+                ->where('r.RES_respuesta', '!=', '')
+                ->where('r.RES_respuesta', '!=', 'null')
+                ->count();
 
-            $outputArray = array_map(function ($item) {
-                return $item->RES_respuesta;
-            }, $opcionesSeleccionadas);
+            $totalRespuestasDadas += $respuestasDadaEnAplicacion;
 
-            if (!empty($outputArray)) {
-                $columnasOpciones = '';
+            // Determinar si la aplicación está completa
+            if ($respuestasDadaEnAplicacion >= $totalPreguntasReales) {
+                $aplicacionesCompletas++;
+            } else {
+                $aplicacionesIncompletas++;
+            }
+        }
+
+        // =========================== CALCULAR PORCENTAJES ===========================
+        $porcentajeCompletitudGeneral = $totalAplicaciones > 0 && $totalPreguntasReales > 0 
+            ? round(($totalRespuestasDadas / ($totalAplicaciones * $totalPreguntasReales)) * 100, 1) 
+            : 0;
+
+        $porcentajeAplicacionesCompletas = $totalAplicaciones > 0 
+            ? round(($aplicacionesCompletas / $totalAplicaciones) * 100, 1) 
+            : 0;
+
+        // =========================== PROCESAR RESPUESTAS PARA MOSTRAR EN LA VISTA ===========================
+        // Obtener todas las preguntas (incluyendo secciones para la vista)
+        $todasLasPreguntas = ModBancoPregunta::from('banco_preguntas as bp')
+            ->select(
+                'bp.BCP_pregunta', 'bp.BCP_complemento', 'rbf.RBF_id', 'bp.BCP_id', 
+                'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 
+                'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria',
+                'c.FK_CAT_id', 'c2.CAT_categoria as categoria'
+            )
+            ->join('r_bpreguntas_formularios as rbf', 'rbf.FK_BCP_id', 'bp.BCP_id')
+            ->join('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
+            ->leftJoin('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
+            ->where('rbf.FK_FRM_id', $FRM_id)
+            ->orderBy('rbf.RBF_orden')
+            ->orderBy('rbf.RBF_id')
+            ->get();
+
+        // =========================== PROCESAR RESPUESTAS ABIERTAS ===========================
+        $respuestasAbiertas = ModRespuesta::from('respuestas as r')
+            ->select(
+                'c.CAT_categoria', 'bp.BCP_pregunta', 'r.RES_respuesta', 
+                'rbf.RBF_id', 'rbf.RBF_orden', 'r.FK_AGF_id', 'bp.BCP_tipoRespuesta'
+            )
+            ->rightJoin('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
+            ->leftJoin('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+            ->leftJoin('categorias as c', 'c.CAT_id', 'bp.FK_CAT_id')
+            ->whereIn('bp.BCP_tipoRespuesta', ['Respuesta corta', 'Respuesta larga', 'Numeral'])
+            ->where('rbf.FK_FRM_id', $FRM_id)
+            ->groupBy(
+                'c.CAT_categoria', 'bp.BCP_pregunta', 'rbf.RBF_orden', 
+                'rbf.RBF_id', 'r.RES_respuesta', 'r.FK_AGF_id', 'bp.BCP_tipoRespuesta'
+            )
+            ->orderBy('rbf.RBF_orden')
+            ->orderBy('rbf.RBF_id')
+            ->get();
+
+        // =========================== PROCESAR RESPUESTAS CERRADAS ===========================
+        $respuestasAfirmacion = DB::select('
+            SELECT "c"."CAT_categoria", "bp"."BCP_pregunta", 
+                SUM(("r"."RES_respuesta" ilike \'%Si%\')::int) as "Si",
+                SUM(("r"."RES_respuesta" ilike \'%No%\')::int) as "No", 
+                "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta"  
+            FROM "respuestas" as "r"
+            RIGHT JOIN "r_bpreguntas_formularios" as "rbf" ON "rbf"."RBF_id" = "r"."FK_RBF_id"
+            LEFT JOIN "banco_preguntas" as "bp" ON "bp"."BCP_id" = "rbf"."FK_BCP_id"
+            LEFT JOIN "categorias" as "c" ON "c"."CAT_id" = "bp"."FK_CAT_id"
+            WHERE "bp"."BCP_tipoRespuesta" = \'Afirmación\' AND "rbf"."FK_FRM_id" = ?
+            GROUP BY "c"."CAT_categoria", "bp"."BCP_pregunta", "rbf"."RBF_orden", 
+                    "rbf"."RBF_id", "bp"."BCP_tipoRespuesta"
+            ORDER BY "rbf"."RBF_orden", "rbf"."RBF_id"
+        ', [$FRM_id]);
+
+        // CONVERTIR OBJETOS stdClass A ARRAYS
+        $arrayConteoRespAfir = array_map(function($obj) {
+            return (array) $obj;
+        }, $respuestasAfirmacion);
+
+        // =========================== PROCESAR CASILLAS Y LISTAS DESPLEGABLES ===========================
+        $arrayConteoRespCasVarif = [];
+
+        foreach ($todasLasPreguntas as $pregunta) {
+            if (in_array($pregunta->BCP_tipoRespuesta, ['Lista desplegable', 'Casilla verificación'])) {
                 
-                // Construir consulta SQL dinámica para contar opciones
-                foreach ($outputArray as $opcionPregunta) {
-                    if ($opcionPregunta == null) {
-                        $opcionPregunta = 'Sin respuesta';
+                // Obtener opciones seleccionadas para esta pregunta
+                $opcionesSeleccionadas = DB::table('respuestas as r')
+                    ->select('r.RES_respuesta')
+                    ->join('r_bpreguntas_formularios as rbf', 'rbf.RBF_id', 'r.FK_RBF_id')
+                    ->join('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
+                    ->where('rbf.FK_FRM_id', $FRM_id)
+                    ->where('rbf.FK_BCP_id', $pregunta->BCP_id)
+                    ->whereNotNull('r.RES_respuesta')
+                    ->groupBy('r.RES_respuesta')
+                    ->get()->toArray();
+
+                $outputArray = array_map(function ($item) {
+                    return $item->RES_respuesta;
+                }, $opcionesSeleccionadas);
+
+                if (!empty($outputArray)) {
+                    $columnasOpciones = '';
+                    
+                    // Construir consulta SQL dinámica para contar opciones
+                    foreach ($outputArray as $opcionPregunta) {
+                        if ($opcionPregunta == null) {
+                            $opcionPregunta = 'Sin respuesta';
+                        }
+                        $etiqueta = str_replace(['[', ']', '"'], '', $opcionPregunta);
+                        $columnasOpciones .= 'SUM(("r"."RES_respuesta" ilike \''.$opcionPregunta.'\')::int) as "'.str_replace(',', ' / ', $etiqueta).'",';
                     }
-                    $etiqueta = str_replace(['[', ']', '"'], '', $opcionPregunta);
-                    $columnasOpciones .= 'SUM(("r"."RES_respuesta" ilike \''.$opcionPregunta.'\')::int) as "'.str_replace(',', ' / ', $etiqueta).'",';
-                }
 
-                // Remover la última coma
-                $columnasOpciones = rtrim($columnasOpciones, ',');
+                    // Remover la última coma
+                    $columnasOpciones = rtrim($columnasOpciones, ',');
 
-                // Ejecutar consulta para esta pregunta específica
-                $respuestasCasillaVarif = DB::select('
-                    SELECT "c"."CAT_categoria", "bp"."BCP_pregunta", '.$columnasOpciones.', 
-                           "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta" 
-                    FROM "respuestas" as "r"  
-                    RIGHT JOIN "r_bpreguntas_formularios" as "rbf" ON "rbf"."RBF_id" = "r"."FK_RBF_id" 
-                    LEFT JOIN "banco_preguntas" as "bp" ON "bp"."BCP_id" = "rbf"."FK_BCP_id" 
-                    LEFT JOIN "categorias" as "c" ON "c"."CAT_id" = "bp"."FK_CAT_id" 
-                    WHERE "rbf"."FK_FRM_id" = ? AND "rbf"."FK_BCP_id" = ?
-                    GROUP BY "c"."CAT_categoria", "bp"."BCP_pregunta", "rbf"."RBF_orden", 
-                             "rbf"."RBF_id", "bp"."BCP_tipoRespuesta" 
-                    ORDER BY "rbf"."RBF_orden", "rbf"."RBF_id"
-                ', [$FRM_id, $pregunta->BCP_id]);
+                    // Ejecutar consulta para esta pregunta específica
+                    $respuestasCasillaVarif = DB::select('
+                        SELECT "c"."CAT_categoria", "bp"."BCP_pregunta", '.$columnasOpciones.', 
+                            "rbf"."RBF_id", "rbf"."RBF_orden", "bp"."BCP_tipoRespuesta" 
+                        FROM "respuestas" as "r"  
+                        RIGHT JOIN "r_bpreguntas_formularios" as "rbf" ON "rbf"."RBF_id" = "r"."FK_RBF_id" 
+                        LEFT JOIN "banco_preguntas" as "bp" ON "bp"."BCP_id" = "rbf"."FK_BCP_id" 
+                        LEFT JOIN "categorias" as "c" ON "c"."CAT_id" = "bp"."FK_CAT_id" 
+                        WHERE "rbf"."FK_FRM_id" = ? AND "rbf"."FK_BCP_id" = ?
+                        GROUP BY "c"."CAT_categoria", "bp"."BCP_pregunta", "rbf"."RBF_orden", 
+                                "rbf"."RBF_id", "bp"."BCP_tipoRespuesta" 
+                        ORDER BY "rbf"."RBF_orden", "rbf"."RBF_id"
+                    ', [$FRM_id, $pregunta->BCP_id]);
 
-                // CONVERTIR A ARRAY Y AGREGAR SI NO ESTÁ VACÍO
-                if (!empty($respuestasCasillaVarif)) {
-                    $arrayConteoRespCasVarif[] = (array) $respuestasCasillaVarif[0];
+                    // CONVERTIR A ARRAY Y AGREGAR SI NO ESTÁ VACÍO
+                    if (!empty($respuestasCasillaVarif)) {
+                        $arrayConteoRespCasVarif[] = (array) $respuestasCasillaVarif[0];
+                    }
                 }
             }
         }
-    }
 
-    // =========================== UNIR Y PROCESAR RESULTADOS ===========================
-    $resultados = array_merge($arrayConteoRespAfir, $arrayConteoRespCasVarif);
+        // =========================== UNIR Y PROCESAR RESULTADOS ===========================
+        $resultados = array_merge($arrayConteoRespAfir, $arrayConteoRespCasVarif);
 
-    // Filtrar elementos vacíos
-    $resultados = array_filter($resultados, function($item) {
-        return !empty($item) && isset($item['BCP_pregunta']);
-    });
+        // Filtrar elementos vacíos
+        $resultados = array_filter($resultados, function($item) {
+            return !empty($item) && isset($item['BCP_pregunta']);
+        });
 
-    // Agrupar respuestas cerradas
-    $resultados = CustomController::agruparRespuestasCerradas($resultados);
+        // Agrupar respuestas cerradas
+        $resultados = CustomController::agruparRespuestasCerradas($resultados);
 
-    // Agrupar respuestas abiertas
-    $arrayRespuestasAbiertas = CustomController::agruparRespuestasAbiertas(
-        json_decode(json_encode($respuestasAbiertas), true)
-    );
-    
-    // Combinar todos los resultados
-    $resultados = array_merge($resultados, $arrayRespuestasAbiertas);
+        // Agrupar respuestas abiertas
+        $arrayRespuestasAbiertas = CustomController::agruparRespuestasAbiertas(
+            json_decode(json_encode($respuestasAbiertas), true)
+        );
+        
+        // Combinar todos los resultados
+        $resultados = array_merge($resultados, $arrayRespuestasAbiertas);
 
-    // Ordenar por orden de pregunta
-    usort($resultados, [CustomController::class, 'ordernarRespuestas']);
+        // Ordenar por orden de pregunta
+        usort($resultados, [CustomController::class, 'ordernarRespuestas']);
 
-    // Agrupar por categorías
-    $resultados = CustomController::array_group($resultados, 'CAT_categoria');
+        // Agrupar por categorías
+        $resultados = CustomController::array_group($resultados, 'CAT_categoria');
 
-    // =========================== CALCULAR TIPOS DE PREGUNTAS ===========================
-    $tiposPreguntas = [];
-    foreach ($preguntasReales as $pregunta) {
-        $tipo = $pregunta->BCP_tipoRespuesta;
-        $tiposPreguntas[$tipo] = ($tiposPreguntas[$tipo] ?? 0) + 1;
-    }
-
-    // =========================== PREPARAR ESTADÍSTICAS CORREGIDAS PARA LA VISTA ===========================
-    $estadisticas = [
-        'total_preguntas_reales' => $totalPreguntasReales,
-        'total_aplicaciones' => $totalAplicaciones,
-        'aplicaciones_completas' => $aplicacionesCompletas,
-        'aplicaciones_incompletas' => $aplicacionesIncompletas,
-        'porcentaje_completitud_general' => $porcentajeCompletitudGeneral,
-        'porcentaje_aplicaciones_completas' => $porcentajeAplicacionesCompletas,
-        'total_respuestas_dadas' => $totalRespuestasDadas,
-        'tipos_preguntas' => $tiposPreguntas,
-        'promedio_respuestas_por_aplicacion' => $totalAplicaciones > 0 
-            ? round($totalRespuestasDadas / $totalAplicaciones, 1) 
-            : 0
-    ];
-
-    // =========================== OBTENER DATOS ADICIONALES PARA LA VISTA ===========================
-    // Obtener información de la visita (si está disponible)
-    $VIS_id = null;
-    if (session('VIS_id')) {
-        $VIS_id = session('VIS_id');
-    } else {
-        // Intentar obtener VIS_id desde la primera aplicación
-        $primeraAplicacion = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->first();
-        if ($primeraAplicacion) {
-            $VIS_id = $primeraAplicacion->FK_VIS_id;
+        // =========================== CALCULAR TIPOS DE PREGUNTAS ===========================
+        $tiposPreguntas = [];
+        foreach ($preguntasReales as $pregunta) {
+            $tipo = $pregunta->BCP_tipoRespuesta;
+            $tiposPreguntas[$tipo] = ($tiposPreguntas[$tipo] ?? 0) + 1;
         }
-    }
 
-    // =========================== RETORNAR VISTA CON TODOS LOS DATOS CORREGIDOS ===========================
-    return view('cuestionarios.cuestionario-resultado', compact(
-        'resultados',
-        'FRM_titulo', 
-        'totalAplicaciones',
-        'FRM_id',
-        'estadisticas',
-        'VIS_id'
-    ))->with('total', $totalAplicaciones); // Agregar $total para compatibilidad total con la vista
-}
+        // =========================== PREPARAR ESTADÍSTICAS CORREGIDAS PARA LA VISTA ===========================
+        $estadisticas = [
+            'total_preguntas_reales' => $totalPreguntasReales,
+            'total_aplicaciones' => $totalAplicaciones,
+            'aplicaciones_completas' => $aplicacionesCompletas,
+            'aplicaciones_incompletas' => $aplicacionesIncompletas,
+            'porcentaje_completitud_general' => $porcentajeCompletitudGeneral,
+            'porcentaje_aplicaciones_completas' => $porcentajeAplicacionesCompletas,
+            'total_respuestas_dadas' => $totalRespuestasDadas,
+            'tipos_preguntas' => $tiposPreguntas,
+            'promedio_respuestas_por_aplicacion' => $totalAplicaciones > 0 
+                ? round($totalRespuestasDadas / $totalAplicaciones, 1) 
+                : 0
+        ];
+
+        // =========================== OBTENER DATOS ADICIONALES PARA LA VISTA ===========================
+        // Obtener información de la visita (si está disponible)
+        $VIS_id = null;
+        if (session('VIS_id')) {
+            $VIS_id = session('VIS_id');
+        } else {
+            // Intentar obtener VIS_id desde la primera aplicación
+            $primeraAplicacion = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->first();
+            if ($primeraAplicacion) {
+                $VIS_id = $primeraAplicacion->FK_VIS_id;
+            }
+        }
+
+        // =========================== RETORNAR VISTA CON TODOS LOS DATOS CORREGIDOS ===========================
+        return view('cuestionarios.cuestionario-resultado', compact(
+            'resultados',
+            'FRM_titulo', 
+            'totalAplicaciones',
+            'FRM_id',
+            'estadisticas',
+            'VIS_id'
+        ))->with('total', $totalAplicaciones); // Agregar $total para compatibilidad total con la vista
+    }
     
-    
+    // Funcion para duplicar un formulario para luego ser aplicado.
+    // ruta: .../cuestionario/duplicarCuestionario/1281/8
     public function duplicarCuestionario( $FRM_id, $VIS_id ){
         /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */
 
@@ -342,7 +342,6 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
         }
     }
 
-
     /*  return > 0: se guardó el dato correctamente
         return -1: Error al guardar el dato
     */
@@ -365,7 +364,7 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
         }
     }
 
-    /* Elimina el cuestionario duplicado */
+    /* Elimina culquier cuestionario solo para usuarios administradores */
     public function eliminarCuestionario( Request $request ){
         if(Auth::user()->rol == 'Administrador' ){
 
@@ -389,14 +388,14 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
             }
         }
     }
+    
+    // public function preguntasRespuestas( $FRM_id, $AGF_copia){
 
-    public function preguntasRespuestas( $FRM_id, $AGF_copia){
-
-        // $quries = DB::getQueryLog();
-        // dump( $quries );
-        // exit;
-        // return $elementos;
-    }
+    //     // $quries = DB::getQueryLog();
+    //     // dump( $quries );
+    //     // exit;
+    //     // return $elementos;
+    // }
 
     //***VERIF */
     // public function buscarRecomendaciones( Request $request ){
@@ -419,7 +418,8 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
     
 
     /**
-     * Responder cuestionario con mejoras para manejo de secciones
+     * Funcion para responder determinado cuestionario
+     * ruta: .../cuestionario/responder/8/1281/798
      */
     public function responderCuestionario($VIS_id, $FRM_id, $AGF_id){
         DB::enableQueryLog();
@@ -509,7 +509,8 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
     }
 
     /**
-     * Guardado mejorado con mejor manejo de errores y notificaciones
+     * Funcion para guardar respuestas individuales de un cuestionario
+     * Funciona cuando se termina de responder una pre
      */
     public function guardarRespuestasCuestionario(Request $request)
     {
@@ -587,15 +588,9 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
     }
 
 
-    
 
- 
-
-
-    /* Confirma la finalizacion del cuestionario y muestra al usuario un mensaje de confirmación */
+    /* Confirma la finalizacion del cuestionario y muestra al usuario un mensaje de confirmación de haber terminado de responder el formualario */
     public function confirmaCuestionario( Request $request ){
-        // dump( $request->except('_token') ); exit;
-
         DB::beginTransaction();
         try {
             ModAgrupadorFormulario::where('FK_FRM_id', $request->FRM_id)
@@ -608,158 +603,9 @@ public function resultadosCuestionario($FRM_id, $VIS_id)
             exit ($e->getMessage());
         }
     }
-
-    /**
-     * Display the specified resource.
-     * @param  \App\Models\ModCuestionario  $cuestionario
-     * @return \Illuminate\Http\Response
-     * Muestra el formulario ya construido listo para imprimir
-     */
-    public function imprimirCuestionario($VIS_id, $FRM_id, $AGF_id){
-
-        /* Se consultan las preguntas, respuestas, categorias, formularios e instituciones del $FRM_id de Formulario dado  */
-        $elementos = ModFormulario::from('formularios as f')
-        ->select ('rbf.RBF_id', 'bp.BCP_id', 'bp.BCP_pregunta', 'bp.BCP_tipoRespuesta', 'bp.BCP_opciones', 'bp.BCP_complemento', 'bp.BCP_adjunto', 'bp.BCP_aclaracion', 'c.CAT_id as categoriaID', 'c.CAT_categoria as subcategoria', 'c.FK_CAT_id', 'c2.CAT_categoria as categoria', 'f.FRM_id', 'f.FRM_titulo', 'f.FRM_fecha', 'r.RES_respuesta', 'r.RES_complemento', 'r.RES_id', 'a.ARC_ruta', 'a.ARC_id',  'a.ARC_formatoArchivo',  'a.ARC_extension', 'a.ARC_descripcion', 'af.AGF_copia', 'af.AGF_id', 'rbf.RBF_orden', 'rbf.RBF_salto_FK_BCP_id' )
-        ->join ('agrupador_formularios as af', 'f.FRM_id', 'af.FK_FRM_id')
-        ->join ('r_bpreguntas_formularios as rbf', 'rbf.FK_FRM_id', 'f.FRM_id')
-        ->join ('banco_preguntas as bp', 'bp.BCP_id', 'rbf.FK_BCP_id')
-        ->join ('categorias as c', 'bp.FK_CAT_id', 'c.CAT_id')
-        ->leftjoin ('categorias as c2', 'c.FK_CAT_id', 'c2.CAT_id')
-        ->leftjoin('respuestas as r', function($join){
-            $join->on('r.FK_AGF_id', 'af.AGF_id')
-            ->on('rbf.RBF_id','=', 'r.FK_RBF_id');
-        })
-        ->leftjoin ('archivos as a', 'r.RES_id', 'a.FK_RES_id')
-        ->where ('rbf.FK_FRM_id', $FRM_id)
-        ->where('af.AGF_id', $AGF_id)
-        ->where('rbf.estado', 1)
-        // ->orderBy('c.CAT_id', 'asc')
-        // ->orderBy('bp.BCP_id', 'asc')
-        ->orderBy('rbf.RBF_orden', 'asc')
-        ->orderBy('rbf.RBF_id', 'asc')
-        ->get()->toArray();
-
-        // dump($elementos[0]['FRM_titulo']);exit;
-
-        // DB::enableQueryLog();
-        if ( count($elementos) > 0 ){
-            $EST_nombre =  session('EST_nombre');;
-            $FRM_titulo = $elementos[0]['FRM_titulo'];
-            $AGF_copia = $elementos[0]['AGF_copia'];
-            $elementos_categorias = CustomController::array_group( $elementos, 'subcategoria' );
-            return view('cuestionarios.cuestionario-imprimir', compact('elementos', 'elementos_categorias', 'FRM_id', 'FRM_titulo', 'EST_nombre','AGF_id', 'VIS_id'));
-        } else {
-            return view('cuestionarios.cuestionario-imprimir', compact('elementos'));
-        }
-    }
-
-    /* Muestra los archivos adjuntos al cuestionario*/
-    // public function adjuntosFormulario($est_id, $frm_id = null){
-
-    //     $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-    //     ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-    //     ->where('FRM_id', $frm_id)->first();
-
-    //     DB::enableQueryLog();
-
-    //     // $adj = ModAdjunto::from( 'adjuntos as ad' )
-    //     // ->select('ad.*', 'a.ARC_ruta', 'a.ARC_id', 'a.ARC_tipoArchivo', 'a.ARC_extension', 'a.ARC_descripcion', 'raa.FK_ADJ_id')
-    //     // ->leftjoin ('r_adjuntos_archivos as raa', 'ad.ADJ_id', 'raa.FK_ADJ_id')
-    //     // ->leftjoin ('archivos as a', 'raa.FK_ARC_id', 'a.ARC_id')
-    //     // ->leftjoin ('formularios as f', 'f.FRM_id', 'ad.FK_FRM_id')
-    //     // ->where ('f.FK_EST_id', $est_id);
-
-    //     // if( $frm_id ){
-    //     //     $adjuntos = $adj->where ('ad.FK_FRM_id', $frm_id)->orderBy('ad.ADJ_id', 'desc')->get();
-    //     // }else{
-    //     //     $adjuntos = $adj->orderBy('ad.ADJ_id', 'desc')->get();
-    //     // }
-
-    //     // $quries = DB::getQueryLog();
-    //     // dump($quries);
-    //     // exit;
-    //     return view('formulario.formularios-adjuntos', compact('formulario', 'adjuntos'));
-    // }
-
-
-     /**
-     * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
-     * Muestra el cuestionario VACÍO. DONDE se deben construir la estructura de categorias subcategorias y preguntas
-     * VERIF
-     */
-    // public function index( ){
-    //     // dump('index');exit;
-    //     // $formulario = ModFormulario::select('formularios.FRM_id', 'formularios.FRM_titulo', 'formularios.FRM_version', 'formularios.FRM_fecha', 'formularios.FK_EST_id', 'establecimientos.EST_nombre')
-    //     // ->leftJoin('establecimientos', 'establecimientos.EST_id', 'formularios.FK_EST_id' )
-    //     // ->where('FRM_id', $id)->first();
-
-    //     // $categorias = ModCategoria::select('CAT_id', 'CAT_categoria', 'FK_CAT_id')
-    //     // ->whereNull('FK_CAT_id')->get();
-    //     $a=0;
-    //     return view('cuestionarios.cuestionario-index', compact('a'));
-    // }
-    // public function buscarPreguntas( Request $request ){
-    //     $q = $request->q;
-    //     DB::enableQueryLog();
-
-    //     $preguntas = ModBancoPregunta::select(
-    //         'banco_preguntas.BCP_id',
-    //         'banco_preguntas.BCP_pregunta',
-    //         'banco_preguntas.FK_CAT_id as ID_categoria',
-    //         'categorias.CAT_categoria as categoria',
-    //         'subcategoria.CAT_categoria as subcategoria'
-    //     )
-    //     ->leftJoin('categorias', 'banco_preguntas.FK_CAT_id', '=', 'categorias.CAT_id')
-    //     ->leftJoin('categorias as subcategoria', 'categorias.FK_CAT_id', '=', 'subcategoria.CAT_id')
-    //     ->where('BCP_pregunta', 'ilike', '%'.$q . '%')->get();
-
-    //     $quries = DB::getQueryLog();
-    //     // dump($quries);
-    //     // exit;
-    //     $preguntas = CustomController::ordenaPreguntasCategorias($preguntas->toArray());
-
-    //     return response()->json($preguntas);
-    // }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     * Guarda la estructura del cuestionario construido en la funcion index
-     *   */
-    // public function guardaCuestionarioEditado( Request $request ){
-    //     // dump( $request->except('_token') );
-    //     // exit;
-    //     $a = array();
-    //     foreach ($request->except('_token') as $key => $value){
-    //         $columna = explode("_", $key);
-
-    //         if($columna[1] == "preguntaId" ){
-    //             array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $value ]);
-    //         }
-    //         if($columna[1] == "etiqueta" ){
-    //             // $bcpId = ModBancoPregunta::insert($p);
-    //             $pregunta = ModBancoPregunta::create([
-    //                 'BCP_pregunta' => $value,
-    //                 'FK_CAT_id' => '0',
-    //             ]);
-    //             array_push($a, [ 'FK_FRM_id' => $request['FRM_id'], 'FK_BCP_id'=> $pregunta->BCP_id ]);
-    //         }
-    //     }
-    // // dump( $a );
-    // // exit;
-    //     if( ModCuestionario::insert($a) ){
-    //         return redirect()->route('cuestionario.imprimir', $request['FRM_id']);
-    //     }
-    // }
-
-
-
-
-
-
-
+    
+  
+   
 
 
 }
