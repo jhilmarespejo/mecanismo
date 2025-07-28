@@ -52,6 +52,11 @@
         z-index: 1050;
         min-width: 250px;
     }
+    .notificacion-pregunta {
+        margin: 5px 0;
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
 
     .progress-sidebar {
         position: fixed;
@@ -250,7 +255,7 @@
         </div>
         <div class="col">
             <div class="alert alert-warning d-none" id="msg_vacios">
-                <i class="bi bi-exclamation-triangle"></i> ¡Existen campos sin responder!
+                <i class="bi bi-exclamation-triangle"></i> ¡Existen preguntas sin responder!
             </div>
         </div>
     </div>
@@ -302,134 +307,71 @@ $(document).ready(function() {
 
     // Objeto para rastrear solicitudes en curso
     const requestsInProgress = {};
-    
-    // // Guardado automático mejorado con protección contra duplicados
-            //     $(".frm-respuesta").on('mouseleave',  function(e) {
-            //         let $form = $(this).closest('.frm-respuesta');
-            //         let id = $form.attr('id').replace(/[^0-9]/g,'');
-            //         let preguntaNumero = $form.data('pregunta-numero');
-                    
-            //         // Usar una clave única para identificar la pregunta en curso
-            //         const requestKey = `${id}_${preguntaNumero}`;
-                    
-            //         // Si ya hay una solicitud en curso para esta pregunta, no hacer nada
-            //         if (requestsInProgress[requestKey]) {
-            //             return;
-            //         }
-                    
-            //         guardarRespuesta(id, preguntaNumero, $form, requestKey);
-            //     });
-    
-
-
-
-    // // Objeto para almacenar valores iniciales (para comparación)
-    // let initialValues = {};
-    // // Objeto para timers de debounce
-    // let inputTimers = {};
-    
-    // // Función común para guardar respuestas
-    // function handleAnswerSave() {
-    //     let $form = $(this).closest('.frm-respuesta');
-    //     let id = $form.attr('id').replace(/[^0-9]/g,'');
-    //     let preguntaNumero = $form.data('pregunta-numero');
-    //     const requestKey = `${id}_${preguntaNumero}`;
-        
-    //     if (requestsInProgress[requestKey]) return;
-        
-    //     guardarRespuesta(id, preguntaNumero, $form, requestKey);
-    // }
-    
-    // // 1. Para radios y checkboxes - cambio inmediato
-    // $(".frm-respuesta").on('change', 'input[type="radio"], input[type="checkbox"]', handleAnswerSave);
-    
-    // // 2. Para selects - cambio inmediato
-    // // $(".frm-respuesta").on('change', 'select', handleAnswerSave);
-    
-    // // 3. Para campos de texto/número - con debounce
-    // $(".frm-respuesta").on('input', 'input[type="text"], input[type="number"], textarea', function() {
-    //     const elementId = $(this).attr('id');
-    //     clearTimeout(inputTimers[elementId]);
-    //     inputTimers[elementId] = setTimeout(handleAnswerSave.bind(this), 950); //espera 950 milisegundos para guardar el texto
-    // });
-    
-    // // 4. Respaldo al perder foco (solo si hubo cambios)
-    // $(".frm-respuesta").on('focus', 'input, textarea, select', function() {
-    //     initialValues[this.name] = $(this).val();
-    // }).on('blur', 'input, textarea, select', function() {
-    //     if ($(this).val() !== initialValues[this.name]) {
-    //         handleAnswerSave.call(this);
-    //     }
-    // });
-
-
+   
 
 
     // Objeto para almacenar valores iniciales (para comparación)
-let initialValues = {};
-// Objeto para timers de debounce
-let inputTimers = {};
+    let initialValues = {};
+    // Objeto para timers de debounce
+    let inputTimers = {};
 
-// Función común para guardar respuestas
-function handleAnswerSave() {
-    let $form = $(this).closest('.frm-respuesta');
-    let id = $form.attr('id').replace(/[^0-9]/g,'');
-    let preguntaNumero = $form.data('pregunta-numero');
-    const requestKey = `${id}_${preguntaNumero}`;
+    // Función común para guardar respuestas
+    function handleAnswerSave() {
+        let $form = $(this).closest('.frm-respuesta');
+        let id = $form.attr('id').replace(/[^0-9]/g,'');
+        let preguntaNumero = $form.data('pregunta-numero');
+        const requestKey = `${id}_${preguntaNumero}`;
 
-    if (requestsInProgress[requestKey]) return;
+        if (requestsInProgress[requestKey]) return;
 
-    guardarRespuesta(id, preguntaNumero, $form, requestKey);
-}
-
-// 1. Para radios y checkboxes - cambio inmediato
-$(".frm-respuesta").on('change', 'input[type="radio"], input[type="checkbox"]', handleAnswerSave);
-
-// 2. Para selects - cambio inmediato
-// $(".frm-respuesta").on('change', 'select', handleAnswerSave);
-
-// 3. Para campos de texto/número - con debounce
-$(".frm-respuesta").on('input', 'input[type="text"], input[type="number"], textarea', function() {
-    const elementId = $(this).attr('id');
-    clearTimeout(inputTimers[elementId]);
-    inputTimers[elementId] = setTimeout(handleAnswerSave.bind(this), 1000); //espera 1 segundo para guardar el texto
-});
-
-// 4. Respaldo al perder foco (solo si hubo cambios)
-$(".frm-respuesta").on('focus', 'input, textarea, select', function() {
-    initialValues[this.name] = $(this).val();
-}).on('blur', 'input, textarea, select', function() {
-    if ($(this).val() !== initialValues[this.name]) {
-        handleAnswerSave.call(this);
+        guardarRespuesta(id, preguntaNumero, $form, requestKey);
     }
-});
 
-// 5. Mouse leave si la pregunta no tiene respuesta
-$(".frm-respuesta").on('mouseleave', function() {
-    const $form = $(this);
-    let answered = false;
+    // 1. Para radios y checkboxes - se guarda la respuesta inmediatamente al cambiar
+    $(".frm-respuesta").on('change', 'input[type="radio"], input[type="checkbox"]', handleAnswerSave);
 
-    // Verifica si hay algún input con valor
-    $form.find('input, textarea, select').each(function() {
-        if (
-            ($(this).is(':radio') || $(this).is(':checkbox')) && $(this).is(':checked') ||
-            ($(this).is('input[type="text"]') || $(this).is('input[type="number"]') || $(this).is('textarea')) && $(this).val().trim() !== "" ||
-            ($(this).is('select') && $(this).val() !== null && $(this).val() !== "")
-        ) {
-            answered = true;
-            return false; // corta el each
+    // 2. Para selects - cambio inmediato
+    // $(".frm-respuesta").on('change', 'select', handleAnswerSave);
+
+    // 3. Para campos de texto/número - con debounce- se guarda la respuesta inmediatamente 1 segundo despues de escribir
+    $(".frm-respuesta").on('input', 'input[type="text"], input[type="number"], textarea', function() {
+        const elementId = $(this).attr('id');
+        clearTimeout(inputTimers[elementId]);
+        inputTimers[elementId] = setTimeout(handleAnswerSave.bind(this), 1000); //espera 1 segundo para guardar el texto
+    });
+
+    // 4. Evento de Respaldo al perder foco (solo si hubo cambios)
+    $(".frm-respuesta").on('focus', 'input, textarea, select', function() {
+        initialValues[this.name] = $(this).val();
+    }).on('blur', 'input, textarea, select', function() {
+        if ($(this).val() !== initialValues[this.name]) {
+            handleAnswerSave.call(this);
         }
     });
 
-    if (!answered) {
-        handleAnswerSave.call(this);
-    }
-});
+    // 5. Mouse leave si la pregunta no tiene respuesta
+    // $(".frm-respuesta").on('mouseleave', function() {
+    //     const $form = $(this);
+    //     let answered = false;
+        
+    //     // Verifica si hay algún input con valor
+    //     $form.find('input, textarea, select').each(function() {
+    //         if (
+    //             ($(this).is(':radio') || $(this).is(':checkbox')) && $(this).is(':checked') ||
+    //             ($(this).is('input[type="text"]') || $(this).is('input[type="number"]') || $(this).is('textarea')) && $(this).val().trim() !== "" ||
+    //             ($(this).is('select') && $(this).val() !== null && $(this).val() !== "")
+    //         ) {
+    //             answered = true;
+    //             return false; // corta el each
+    //         }
+    //     });
+        
+    //     if (!answered) {
+    //         handleAnswerSave.call(this);
+    //     }
+    // });
     
 
-
-            
-    
 
     
     // Función para guardar respuestas 
@@ -438,6 +380,20 @@ $(".frm-respuesta").on('mouseleave', function() {
         
         // Marcar que hay una solicitud en curso para esta pregunta
         requestsInProgress[requestKey] = true;
+
+        // Verificar si hay contenido en los inputs antes de mostrar la notificación
+        let tieneContenido = false;
+        $form.find('input[type="text"], input[type="number"], textarea').each(function() {
+            if ($(this).val().trim() !== '') {
+                tieneContenido = true;
+                return false; // Salir del bucle early si encontramos contenido
+            }
+        });
+        
+        // Para radios y checkboxes
+        if (!tieneContenido) {
+            tieneContenido = $form.find('input[type="radio"]:checked, input[type="checkbox"]:checked').length > 0;
+        }
         
         $.ajax({
             async: true,
@@ -447,16 +403,21 @@ $(".frm-respuesta").on('mouseleave', function() {
             contentType: false,
             processData: false,
             beforeSend: function() {
-                mostrarNotificacion('info', `Guardando respuesta ${preguntaNumero}...`, 'loading');
+                // Mostrar notificación solo si hay contenido
+                if (tieneContenido) {
+                    mostrarNotificacion('info', `Guardando respuesta ${preguntaNumero}...`, 'loading', $form.closest('.pregunta-container'));
+                }
                 $("form :input").prop("disabled", true);
-            
             },
             success: function(response) {
                 if (response.status === 'success' || response.status === 'updated') {
                     $form.css("border", "");
                     $form.find(".mensaje-error").remove();
 
-                    mostrarNotificacion('success', response.message, 'check');
+                    // Mostrar notificación de éxito solo si había contenido
+                    if (tieneContenido) {
+                        mostrarNotificacion('success', response.message, 'check', $form.closest('.pregunta-container'));
+                    }
                     marcarPreguntaRespondida($form.closest('.pregunta-container'));
                     actualizarProgreso();
                 }
@@ -483,30 +444,11 @@ $(".frm-respuesta").on('mouseleave', function() {
                                     &#x26A0; ${errors.RES_respuesta[0]}
                                 </div>
                             `);
-                        // if ($input.length) {
-                        //     // $(`<div class="mensaje-error mx-2 alert alert-danger m-0 p-0 " >${errors.RES_respuesta[0]}</div>`)
-                        //     //     .insertBefore($input);
-                        //     $form.append(`
-                        //         <div class="mensaje-error mx-2 alert alert-danger m-0 p-0">
-                        //             ${errors.RES_respuesta[0]}
-                        //         </div>
-                        //     `);
-                        // } else {
-                        //     // Si no se encuentra el input, lo muestra debajo del form
-                        //     $form.append(`
-                        //         <div class="mensaje-error mx-2 alert alert-danger m-0 p-0">
-                        //             ${errors.RES_respuesta[0]}
-                        //         </div>
-                        //     `);
-                        // }
-
                         message = errors.RES_respuesta[0];
                     }
                 } else if (xhr.responseJSON?.message) {
                     message = xhr.responseJSON.message;
                 }
-                
-                mostrarNotificacion('error', message, 'x-circle');
             },
 
             complete: function() {
@@ -517,7 +459,8 @@ $(".frm-respuesta").on('mouseleave', function() {
         });
     }
 
-    function mostrarNotificacion(tipo, mensaje, icono) {
+    
+    function mostrarNotificacion(tipo, mensaje, icono, $formContainer) {
         const colores = {
             success: 'success',
             error: 'danger',
@@ -531,25 +474,34 @@ $(".frm-respuesta").on('mouseleave', function() {
             'x-circle': 'bi-x-circle',
             info: 'bi-info-circle'
         };
-
+        
+        // Eliminar notificaciones previas en este contenedor
+        $formContainer.find('.notificacion-pregunta').remove();
+        
+        // Crear la notificación
         const html = `
-            <div class="alert alert-${colores[tipo]} alert-dismissible fade show" role="alert">
+            <div class="notificacion-pregunta alert alert-${colores[tipo]} alert-dismissible fade show mt-2" role="alert">
                 <i class="bi ${iconos[icono]} me-2"></i>
                 ${mensaje}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
 
-        $('#notificaciones-container').html(html);
+        // Insertar la notificación debajo del formulario
+        $formContainer.append(html);
         
         // Auto-dismiss después de 3 segundos (excepto errores)
         if (tipo !== 'error') {
             setTimeout(() => {
-                $('#notificaciones-container .alert').alert('close');
+                $formContainer.find('.notificacion-pregunta').alert('close');
             }, 3000);
         }
     }
+        
+   
 
+    
+    
     function actualizarEstadoPreguntas() {
         $('.pregunta-container').each(function() {
             const $container = $(this);
@@ -561,29 +513,6 @@ $(".frm-respuesta").on('mouseleave', function() {
                 marcarPreguntaSinResponder($container);
             }
         });
-    }
-
-    function tieneRespuesta($form) {
-        let tieneRespuesta = false;
-        
-        // Verificar inputs de texto y number
-        $form.find('input.resp, textarea.resp').each(function() {
-            if ($(this).val().trim() !== '') {
-                tieneRespuesta = true;
-            }
-        });
-        
-        // Verificar radio buttons
-        if ($form.find('input[type="radio"]:checked').length > 0) {
-            tieneRespuesta = true;
-        }
-        
-        // Verificar checkboxes
-        if ($form.find('input[type="checkbox"]:checked').length > 0) {
-            tieneRespuesta = true;
-        }
-        
-        return tieneRespuesta;
     }
 
     function marcarPreguntaRespondida($container) {
@@ -602,10 +531,99 @@ $(".frm-respuesta").on('mouseleave', function() {
         $('#progress-text').text(`${preguntasRespondidas}/${totalPreguntas}`);
     }
 
-    function validarFormulario() {
-        const preguntasSinResponder = $('.pregunta-container.sin-responder').length;
+    // function tieneRespuesta($form) {
+    //     let tieneRespuesta = false;
         
-        if (preguntasSinResponder > 0) {
+    //     // Verificar inputs de texto y number
+    //     $form.find('input.resp, textarea.resp').each(function() {
+    //         if ($(this).val().trim() !== '') {
+    //             tieneRespuesta = true;
+    //         }
+    //     });
+        
+    //     // Verificar radio buttons
+    //     if ($form.find('input[type="radio"]:checked').length > 0) {
+    //         tieneRespuesta = true;
+    //     }
+        
+    //     // Verificar checkboxes
+    //     if ($form.find('input[type="checkbox"]:checked').length > 0) {
+    //         tieneRespuesta = true;
+    //     }
+        
+    //     return tieneRespuesta;
+    // }
+    
+
+    // function validarFormulario() {
+    //     const preguntasSinResponder = $('.pregunta-container.sin-responder').length;
+
+        
+    //     if (preguntasSinResponder > 0) {
+    //         console.log(preguntasSinResponder);
+    //         $('#msg_vacios').removeClass('d-none');
+    //         $('html,body').animate({
+    //             scrollTop: $('.pregunta-container.sin-responder').first().offset().top - 150
+    //         }, 'slow');
+    //         return false;
+    //     }
+        
+    //     $('#msg_vacios').addClass('d-none');
+    //     return true;
+    // }
+
+    // Función auxiliar para verificar si una pregunta tiene respuesta
+    function tieneRespuesta($form) {
+        // Verificar inputs de texto y textarea
+        if ($form.find('input[type="text"], input[type="number"], textarea').filter(function() {
+            return $(this).val().trim() !== '';
+        }).length > 0) {
+            return true;
+        }
+        
+        // Verificar radio buttons
+        if ($form.find('input[type="radio"]:checked').length > 0) {
+            return true;
+        }
+        
+        // Verificar checkboxes
+        if ($form.find('input[type="checkbox"]:checked').length > 0) {
+            return true;
+        }
+        
+        return false;
+    }
+    function validarFormulario() {
+        let todasRespondidas = true;
+        
+        // Reiniciamos el mensaje de vacíos
+        $('#msg_vacios').addClass('d-none');
+        
+        // Recorremos todas las preguntas
+        $('.pregunta-container').each(function() {
+            const $container = $(this);
+            const $form = $container.find('.frm-respuesta');
+            
+            if (!tieneRespuesta($form)) {
+                // Marcar como no respondida
+                marcarPreguntaSinResponder($container);
+                todasRespondidas = false;
+                
+                // Mostrar mensaje de error específico en la pregunta
+                $form.find('.mensaje-error').remove();
+                $form.append(`
+                    <div class="mensaje-error mx-2 alert alert-danger m-0 p-0 mt-2">
+                        &#x26A0; Esta pregunta es requerida
+                    </div>
+                `);
+            } else {
+                // Si tiene respuesta, marcamos como respondida
+                marcarPreguntaRespondida($container);
+                $form.find('.mensaje-error').remove();
+            }
+        });
+        
+        if (!todasRespondidas) {
             $('#msg_vacios').removeClass('d-none');
             $('html,body').animate({
                 scrollTop: $('.pregunta-container.sin-responder').first().offset().top - 150
@@ -613,7 +631,6 @@ $(".frm-respuesta").on('mouseleave', function() {
             return false;
         }
         
-        $('#msg_vacios').addClass('d-none');
         return true;
     }
 
@@ -640,20 +657,12 @@ $(".frm-respuesta").on('mouseleave', function() {
                 });
             },
             error: function() {
-                mostrarNotificacion('error', 'Error al confirmar el cuestionario', 'x-circle');
+                // mostrarNotificacion('error', 'Error al confirmar el cuestionario', 'x-circle');
+                mostrarNotificacion('error', `Error al confirmanr el cuestionario`, 'x-circle', $form.closest('.pregunta-container'));
                 $('#btn_confirmacion').prop('disabled', false).html('<i class="bi bi-check-circle me-2"></i>Confirmar datos');
             }
         });
     }
 });
 
-// CSS para animación de loading
-// .spin {
-//     animation: spin 1s linear infinite;
-// }
-
-// @keyframes spin {
-//     from { transform: rotate(0deg); }
-//     to { transform: rotate(360deg); }
-// }
 </script>

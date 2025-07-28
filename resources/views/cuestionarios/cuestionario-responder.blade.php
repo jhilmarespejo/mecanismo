@@ -212,7 +212,6 @@
                         <ul class="list-unstyled">
                             <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Las respuestas se guardan automáticamente</li>
                             <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Todas las preguntas se deben responder</li>
-                            <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Use la rueda del ratón para navegar entre preguntas</li>
                             <li class="mb-2"><i class="bi bi-check text-success me-2"></i>El progreso se muestra en la barra lateral</li>
                         </ul>
                     </div>
@@ -226,9 +225,7 @@
                     <div class="card-body">
                         <ul class="list-unstyled">
                             <li class="mb-2"><i class="bi bi-star text-warning me-2"></i>Lea cuidadosamente cada pregunta</li>
-                            <li class="mb-2"><i class="bi bi-star text-warning me-2"></i>Use las aclaraciones como guía</li>
-                            <li class="mb-2"><i class="bi bi-star text-warning me-2"></i>Confirme al finalizar todo el cuestionario</li>
-                            <li class="mb-2"><i class="bi bi-star text-warning me-2"></i> </li>
+                            <li class="mb-2"><i class="bi bi-star text-warning me-2"></i>Pulse el boton "Confirmar datos" al finalizar todo el cuestionario</li>
                         </ul>
                     </div>
                 </div>
