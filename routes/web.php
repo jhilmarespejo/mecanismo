@@ -1,10 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Livewire\Formularios;
-use App\Http\Livewire\CuestionarioIndex;
-use App\Http\Livewire\Establecimientos;
-use App\Http\Livewire\BancoPreguntasIndex;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
@@ -143,19 +139,19 @@ Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'a
 Route::get('reportes', [ReportesController::class, 'index'])->name('reportes');
 
 // VISITAS
-Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
+Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 Route::get('visita/historial/{id}', [VisitaController::class, 'historial'])->name('visita.historial')->middleware('auth');
 Route::get('visita/actaVisita/{VIS_id}', [VisitaController::class, 'actaVisita'])->name('visita.actaVisita')->middleware('auth');
+Route::post('visita/guardarNuevaVisita', [VisitaController::class, 'guardarNuevaVisita'])->name('visita.guardarNuevaVisita')->middleware('auth');
 Route::post('visita/guardarActaVisita', [VisitaController::class, 'guardarActaVisita'])->name('visita.guardarActaVisita')->middleware('auth');
 // Route::get('visita/informeVisita/{VIS_id}/{flag?}', [VisitaController::class, 'informeVisita'])->name('visita.informeVisita')->middleware('auth');
-Route::get('visita/resumen', [VisitaController::class, 'resumen'])->name('visita.resumen')->middleware('auth');
 
 
 
 Route::post('visita/guardarDocumentoEstablecimiento', [VisitaController::class, 'guardarDocumentoEstablecimiento'])->name('visita.guardarDocumento')->middleware('auth');
 
-Route::get('visita/editarFichaEstablecimiento/{id}', [VisitaController::class, 'editarFichaEstablecimiento'])->name('visita.editarFichaEstablecimiento')->middleware('auth');
-Route::put('visita/actualizarFichaEstablecimiento/{id}', [VisitaController::class, 'actualizarFichaEstablecimiento'])->name('visita.actualizarFichaEstablecimiento')->middleware('auth');
+Route::get('visita/editarFichaEstablecimiento/{EST_id}', [VisitaController::class, 'editarFichaEstablecimiento'])->name('visita.editarFichaEstablecimiento')->middleware('auth');
+Route::put('visita/actualizarFichaEstablecimiento/{EST_id}', [VisitaController::class, 'actualizarFichaEstablecimiento'])->name('visita.actualizarFichaEstablecimiento')->middleware('auth');
 
 
 // // USERS

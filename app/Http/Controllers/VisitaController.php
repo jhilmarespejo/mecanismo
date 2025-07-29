@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{ModVisita, ModFormulario, ModBancoPregunta, ModEstablecimiento, ModRespuesta, ModArchivo, ModTipoEstablecimiento, ModEstablecimientoInfo, ModEstablecimientoPersonal};
+use App\Models\{ModVisita, ModEstablecimiento, ModArchivo, ModEstablecimientoInfo, ModEstablecimientoPersonal};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{DB, Validator, Auth, Session, URL, Storage};
 
@@ -18,7 +18,9 @@ use PhpOffice\PhpWord\Style\ListItem;
 
 class VisitaController extends Controller{
     
-     // Muestra un breve resumen de las visitas por año en la vista principal
+    // Muestra un breve resumen de las visitas por año, visitas por tipo de lugar de detencion, por tipo de visita en la vista principal
+    // Metodo: GET
+    // ruta: .../visita/resumen
     public function resumen(Request $request) {
         $anioActual = $request->input('anio_actual', date('Y'));
         
@@ -98,7 +100,9 @@ class VisitaController extends Controller{
     }
     
 
-    // Guardar datos de nueva visita
+    // Guardar datos de nueva visita programada en determinado lugar de detencion y fecha
+    // Metodo: POST
+    // ruta: .../visita/guardarNuevaVisita
     public function guardarNuevaVisita( Request $request ) {
         
         $validator = Validator::make($request->all(), [
@@ -133,7 +137,9 @@ class VisitaController extends Controller{
      *
      * @param  mixed $id
      * @return void
-     * Consulta para obtener el historial de las visitas realizadas al establecimiento
+     * Consulta para obtener el historial de las visitas realizadas a determinado lugar de detencion
+     * ruta: .../visita/historial/11
+     * metodo: GET
      */
     public function historial($id){
         $anioActual = date('Y'); // Obtiene el año actual
@@ -287,7 +293,9 @@ class VisitaController extends Controller{
     }
         
     
-    /*Vista para guardar nueva acta de Visita */
+    /*Vista para guardar nueva acta de Visita como respaldo de la visita */
+    // Metodo: GET
+    // ruta: .../visita/actaVisita/8
     public function actaVisita($VIS_id){
         $visita = ModArchivo::select('ARC_formatoArchivo', 'ARC_ruta', 'ARC_extension', 'FK_VIS_id')
         ->where('FK_VIS_id', $VIS_id)
@@ -306,7 +314,10 @@ class VisitaController extends Controller{
         
         return view('visita.acta-visita', compact('VIS_id','visita', 'breadcrumbs'));
     }
-
+    
+    // Guardar acta de visita como respaldo de la visita maximo 20MB
+    // Metodo: POST 
+    // ruta: .../visita/guardarActaVisita 
     public function guardarActaVisita(Request $request){
         $request->validate([
             'VIS_acta' => 'required|mimes:pdf,jpg,jpeg,png,xls,xlsx,ppt,pptx,doc,docx|max:20048',
@@ -351,9 +362,10 @@ class VisitaController extends Controller{
     }
     
     /*
-     * Función para subir documentos de la ficha del establecimiento (reglamento, licencia, foto de la fachada)
+     * Función para subir documentos de la ficha del establecimiento como (reglamento, licencia, foto de la fachada)
+     * Metodo: POST
+     * ruta: .../visita/guardarDocumentoEstablecimiento
      */
-
     public function guardarDocumentoEstablecimiento(Request $request){
         $request->validate([
             'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:20048',
@@ -460,9 +472,10 @@ class VisitaController extends Controller{
    
     /**
      * Mostrar formulario de edición del establecimiento, boton: "Modificar esta informacion"
-     * 
+     * metodo: GET
+     * ruta: .../visita/editarFichaEstablecimiento/{id}
      */
-    public function editarFichaEstablecimiento($id)
+    public function editarFichaEstablecimiento($EST_id)
     {
         $anioActual = date('Y');
         
@@ -479,7 +492,7 @@ class VisitaController extends Controller{
             'tipo_establecimientos.TES_tipo'
         )
         ->join('tipo_establecimientos', 'tipo_establecimientos.TES_id', '=', 'establecimientos.FK_TES_id')
-        ->where('establecimientos.EST_id', $id)
+        ->where('establecimientos.EST_id', $EST_id)
         ->first();
         
         if (!$establecimiento) {
@@ -487,14 +500,14 @@ class VisitaController extends Controller{
         }
         
         // Obtener información adicional del establecimiento (del año actual o más reciente)
-        $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+        $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $EST_id)
             ->where('EINF_gestion', $anioActual)
             ->first();
 
         // dump($establecimientoInfo);exit;
         // Si no hay info del año actual, buscar la más reciente o crear nueva
         if (!$establecimientoInfo) {
-            $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $id)
+            $establecimientoInfo = ModEstablecimientoInfo::where('FK_EST_id', $EST_id)
                 ->orderByDesc('EINF_gestion')
                 ->first();
                 
@@ -512,13 +525,13 @@ class VisitaController extends Controller{
         }
         
         // Obtener responsable del establecimiento (del año actual o más reciente)
-        $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+        $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $EST_id)
             ->where('EPER_gestion', $anioActual)
             ->first();
         
         // Si no hay responsable del año actual, buscar el más reciente o crear nuevo
         if (!$responsable) {
-            $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+            $responsable = ModEstablecimientoPersonal::where('FK_EST_id', $EST_id)
                 ->orderByDesc('EPER_gestion')
                 ->first();
                 
@@ -538,9 +551,11 @@ class VisitaController extends Controller{
     }
     
     /**
-     * Actualizar información del establecimiento
+     * Guardar la inforación actualizada del establecimiento  seleccionado por el usuario
+     * metodo: PUT
+     * ruta: .../visita/actualizarFichaEstablecimiento/{EST_id}
      */
-    public function actualizarFichaEstablecimiento(Request $request, $id)
+    public function actualizarFichaEstablecimiento(Request $request, $EST_id)
     {
         // Validar datos
         $validator = Validator::make($request->all(), [
@@ -608,7 +623,7 @@ class VisitaController extends Controller{
             $anioActual = date('Y');
             
             // Verificar que el establecimiento existe
-            $establecimiento = ModEstablecimiento::find($id);
+            $establecimiento = ModEstablecimiento::find($EST_id);
             if (!$establecimiento) {
                 return response()->json([
                     'success' => false,
@@ -617,7 +632,7 @@ class VisitaController extends Controller{
             }
             
             // Actualizar tabla establecimientos
-            ModEstablecimiento::where('EST_id', $id)->update([
+            ModEstablecimiento::where('EST_id', $EST_id)->update([
                 'EST_departamento' => $request->EST_departamento,
                 'EST_municipio' => $request->EST_municipio,
                 'EST_direccion' => $request->EST_direccion,
@@ -627,7 +642,7 @@ class VisitaController extends Controller{
             ]);
             
             // Actualizar o crear información del establecimiento para el año actual
-            $infoExistente = ModEstablecimientoInfo::where('FK_EST_id', $id)
+            $infoExistente = ModEstablecimientoInfo::where('FK_EST_id', $EST_id)
                 ->where('EINF_gestion', $anioActual)
                 ->first();
                 
@@ -643,7 +658,7 @@ class VisitaController extends Controller{
             } else {
                 // Crear nuevo registro
                 ModEstablecimientoInfo::create([
-                    'FK_EST_id' => $id,
+                    'FK_EST_id' => $EST_id,
                     'EINF_poblacion_atendida' => $request->EINF_poblacion_atendida,
                     'EINF_cantidad_actual_internos' => $request->EINF_cantidad_actual_internos,
                     'EINF_superficie_terreno' => $request->EINF_superficie_terreno,
@@ -654,7 +669,7 @@ class VisitaController extends Controller{
             }
             
             // Actualizar o crear responsable del establecimiento para el año actual
-            $responsableExistente = ModEstablecimientoPersonal::where('FK_EST_id', $id)
+            $responsableExistente = ModEstablecimientoPersonal::where('FK_EST_id', $EST_id)
                 ->where('EPER_gestion', $anioActual)
                 ->first();
                 
@@ -670,7 +685,7 @@ class VisitaController extends Controller{
                 // Crear nuevo registro solo si hay datos del responsable
                 if ($request->EPER_nombre_responsable) {
                     ModEstablecimientoPersonal::create([
-                        'FK_EST_id' => $id,
+                        'FK_EST_id' => $EST_id,
                         'EPER_nombre_responsable' => $request->EPER_nombre_responsable,
                         'EPER_grado_profesion' => $request->EPER_grado_profesion,
                         'EPER_telefono' => $request->EPER_telefono,
@@ -691,7 +706,7 @@ class VisitaController extends Controller{
             }
             
             // Si es una petición normal, redirigir
-            return redirect()->route('visita.historial', $id)->with('success', 'Información actualizada correctamente');
+            return redirect()->route('visita.historial', $EST_id)->with('success', 'Información actualizada correctamente');
             
         } catch (\Exception $e) {
             DB::rollback();
