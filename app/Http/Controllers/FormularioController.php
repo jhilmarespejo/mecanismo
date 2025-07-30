@@ -18,7 +18,8 @@ class FormularioController extends Controller
     */
     
     // Muestra la lista de formularios creados por el usuario
-    //  ruta: .../formularios
+    // Metodo: GET
+    //  ruta: /formularios
     public function index() {
         $formularios = ModFormulario::all();
         $breadcrumbs = [
@@ -29,6 +30,8 @@ class FormularioController extends Controller
     }
     
     // Filtra los formularios por título
+    // Metodo: GET
+    // Ruta: /formularios/filtrar
     public function filtrar(Request $request) {
         $titulo = $request->input('titulo');
 
@@ -41,7 +44,8 @@ class FormularioController extends Controller
     
     
     // Viene del boton de "+ Asignar formulario" 
-    ////  ruta: .../formulario/buscaFormularios/8
+    // Metodo: GET
+    ////  ruta: formulario/eleccion/{VIS_id}/{VIS_tipo}
     public function eleccion($VIS_id, $VIS_tipo){
         if( !session('TES_tipo') ){
             return redirect('panel');
@@ -57,6 +61,8 @@ class FormularioController extends Controller
 
     
     // Función para asignar un formulario seleccionado de la lista de formulario a una visita programada (combobox: Seleccione un formulario:)
+    // Metodo: POST
+    // Ruta: /formulario/asignar
     public function asignar(Request $request)
     {
         $validatedData = $request->validate([
@@ -77,7 +83,7 @@ class FormularioController extends Controller
             ]);
             
             
-            return redirect()->route('formulario.buscaFormularios', ['VIS_id' => $validatedData['VIS_id']])
+            return redirect()->route('formulario.muestraFormulariosVista', ['VIS_id' => $validatedData['VIS_id']])
                             ->with('success', 'Formulario asignado correctamente a la visita.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Ocurrió un error al asignar el formulario. Intente nuevamente.');
@@ -85,7 +91,8 @@ class FormularioController extends Controller
     }
     
     // función para crear un nuevo formulario incuyendo N cantidad de preguntas
-    // ruta: .../formulario/nuevo
+    // Metodo: GET
+    // ruta: /formulario/nuevo
     public function nuevo(){
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -97,7 +104,8 @@ class FormularioController extends Controller
 
 
     // Función para guardar un nuevo formulario incluyendo N cantidad de preguntas
-    // ruta: .../formulario/nuevo
+    // Metodo: POST
+    // ruta: /formulario/nuevo
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -146,12 +154,13 @@ class FormularioController extends Controller
 
 
     // función para ver un formulario creado por el usuario
-    // ruta: .../formulario/1283
-    public function verFormularioCreado($id) {
-        $formulario = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_id', $id)->first();
+    // Metodo: GET
+    // ruta: /formulario/{id}
+    public function verFormularioCreado($FRM_id) {
+        $formulario = ModFormulario::select('FRM_id', 'FRM_titulo')->where('FRM_id', $FRM_id)->first();
         
         $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
-            ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+            ->where('r_bpreguntas_formularios.FK_FRM_id', $FRM_id)
             ->orderBy('r_bpreguntas_formularios.RBF_orden')
             ->orderBy('r_bpreguntas_formularios.RBF_id') 
             ->get();
@@ -166,13 +175,14 @@ class FormularioController extends Controller
     }
 
     // función para imprimir un formulario creado por el usuario
-    // ruta: .../formulario/imprimir/1283
-    public function imprimirFormulario($id, $tamano = 'carta')
+    // Método: GET
+    // ruta: formulario/imprimir/{id}
+    public function imprimirFormulario($FRM_id, $tamano = 'carta')
     {
-        $formulario = ModFormulario::findOrFail($id);
+        $formulario = ModFormulario::findOrFail($FRM_id);
         
         $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
-            ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+            ->where('r_bpreguntas_formularios.FK_FRM_id', $FRM_id)
             ->orderBy('r_bpreguntas_formularios.RBF_orden')
             ->orderBy('r_bpreguntas_formularios.RBF_id')
             ->get();
@@ -180,14 +190,14 @@ class FormularioController extends Controller
         $configPapel = $tamano === 'oficio' ? 'legal' : 'letter';
         
         $pdf = Pdf::loadView('formulario.formulario-imprimirFormulario', compact('formulario', 'preguntas', 'tamano'))
-                  ->setPaper($configPapel, 'portrait');
+                  ->setPaper($configPapel, 'portrait');// configura el tamaño del papel 
         
         $pdf->setOption('isPhpEnabled', true);
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setOption('defaultFont', 'DejaVu Sans');
         $pdf->setOption('chroot', public_path());
         
-        $nombreArchivo = 'Formulario_' . $id . '_' . str_replace(' ', '_', $formulario->FRM_titulo) . '.pdf';
+        $nombreArchivo = 'Formulario_' . $FRM_id . '_' . str_replace(' ', '_', $formulario->FRM_titulo) . '.pdf';
         
         return $pdf->stream($nombreArchivo);
     }
@@ -195,12 +205,12 @@ class FormularioController extends Controller
     
     // función que muestra la vista pra editar un formulario seleccionado por el usuario
     // ruta: .../formulario/1283/editar
-    public function editar($id)
+    public function editar($FRM_id)
     {
-        $formulario = ModFormulario::findOrFail($id);
+        $formulario = ModFormulario::findOrFail($FRM_id);
         
         $preguntas = ModBancoPregunta::join('r_bpreguntas_formularios', 'banco_preguntas.BCP_id', '=', 'r_bpreguntas_formularios.FK_BCP_id')
-            ->where('r_bpreguntas_formularios.FK_FRM_id', $id)
+            ->where('r_bpreguntas_formularios.FK_FRM_id', $FRM_id)
             ->orderBy('r_bpreguntas_formularios.RBF_orden')
             ->orderBy('r_bpreguntas_formularios.RBF_id')
             ->get();
@@ -217,14 +227,14 @@ class FormularioController extends Controller
 
     // función que guarda los datos editados de un formulario seleccionado por el usuario 
     // ruta: .../formulario/1283/editar
-    public function actualizar(Request $request, $id)
+    public function actualizar(Request $request, $FRM_id)
     {
         DB::beginTransaction();
         
         try {
             $datos = $request->all();
             
-            $formulario = ModFormulario::findOrFail($id);
+            $formulario = ModFormulario::findOrFail($FRM_id);
             $formulario->FRM_titulo = $datos['FRM_titulo'];
             $formulario->FRM_tipo = $datos['FRM_tipo'];
             $formulario->updatedBy = Auth::id();
@@ -249,7 +259,7 @@ class FormularioController extends Controller
                 if (is_array($preguntas)) {
                     foreach ($preguntas as $pregunta) {
                         if (isset($pregunta['BCP_id']) && !empty($pregunta['BCP_id'])) {
-                            ModPreguntasFormulario::where('FK_FRM_id', $id)
+                            ModPreguntasFormulario::where('FK_FRM_id', $FRM_id)
                                 ->where('FK_BCP_id', $pregunta['BCP_id'])
                                 ->update(['RBF_orden' => $pregunta['RBF_orden']]);
                             
@@ -268,7 +278,7 @@ class FormularioController extends Controller
                                 ]);
                                 
                                 ModPreguntasFormulario::create([
-                                    'FK_FRM_id' => $id,
+                                    'FK_FRM_id' => $FRM_id,
                                     'FK_BCP_id' => $nuevaPregunta->BCP_id,
                                     'RBF_orden' => $pregunta['RBF_orden'] ?? 1
                                 ]);
@@ -280,7 +290,7 @@ class FormularioController extends Controller
             
             DB::commit();
             
-            return redirect()->route('formulario.verFormularioCreado', $id)
+            return redirect()->route('formulario.verFormularioCreado', $FRM_id)
                             ->with('success', 'Formulario actualizado correctamente.');
         } catch (\Exception $e) {
             DB::rollback();
@@ -288,7 +298,7 @@ class FormularioController extends Controller
             Log::error('Error al actualizar formulario: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
             
-            return redirect()->route('formulario.editar', $id)
+            return redirect()->route('formulario.editar', $FRM_id)
                             ->with('error', 'Error al actualizar el formulario: ' . $e->getMessage());
         }
     }
@@ -303,10 +313,9 @@ class FormularioController extends Controller
     /**
      * MODULO DE LISTADO DE FORMULARIOS, PREGUNTAS Y RESPUESTAS.
      */
-    
     // Función para buscar formularios por visita incluyendo cantidad de preguntas y respuestas por formulario
-    // ruta: .../formulario/buscaFormularios/8
-    public function buscaFormularios( $VIS_id ){
+    // ruta: .../formulario/muestraFormulariosVista/8
+    public function muestraFormulariosVista( $VIS_id ){
         $VIS_tipo = ModVisita::select('VIS_tipo')->where('VIS_id', $VIS_id)->first();
         
         // CONSULTA OPTIMIZADA CON CONTEO CORRECTO DE PREGUNTAS
@@ -423,21 +432,5 @@ class FormularioController extends Controller
         return view('formulario.formularios-lista', compact('grupo_formularios', 'colorVisita', 'VIS_id', 'VIS_tipo'));
     }
     
-    // public function buscarPregunta(Request $request){
-    //     exit("buscar pregunta");
-    //     $preguntas = ModBancoPregunta::select(
-    //         'banco_preguntas.BCP_pregunta',
-    //         'banco_preguntas.BCP_tipoRespuesta',
-    //         'banco_preguntas.BCP_opciones',
-    //         'banco_preguntas.BCP_complemento',
-    //         'banco_preguntas.BCP_id'
-    //         )
-    //         ->where('banco_preguntas.BCP_pregunta', 'ilike', '%'.$request->pregunta.'%')
-    //         ->where('banco_preguntas.estado', 1)
-    //         ->orderBy('banco_preguntas.BCP_id')
-    //         ->get()->toArray();
-            
-    //     return response()->json($preguntas);
-    // }
     
 }

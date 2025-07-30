@@ -104,7 +104,7 @@
                                 <p class="card-text">
                                     <ul class="list-group">
                                         <li class="list-group-item border-0">
-                                            <a class="text-decoration-none" href="/formulario/buscaFormularios/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
+                                            <a class="text-decoration-none" href="/formulario/muestraFormulariosVista/{{$VIS_id}}"><i class="bi bi-database"></i> Formularios</a>
                                         </li>
                                         <li class="list-group-item border-0">
                                             <a class="text-decoration-none" href="/visita/actaVisita/{{$VIS_id}}">

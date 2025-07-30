@@ -336,9 +336,9 @@ class CuestionarioController extends Controller {
             $resultado = 0;
         }
         if ($resultado ==0) {
-            return redirect('/formulario/buscaFormularios/' . $VIS_id)->with('warning','Este formulario solo puede duplicarse una vez');
+            return redirect('/formulario/muestraFormulariosVista/' . $VIS_id)->with('warning','Este formulario solo puede duplicarse una vez');
         } else {
-            return redirect('/formulario/buscaFormularios/' . $VIS_id);
+            return redirect('/formulario/muestraFormulariosVista/' . $VIS_id);
         }
     }
 

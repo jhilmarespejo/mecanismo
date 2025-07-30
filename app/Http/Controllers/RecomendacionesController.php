@@ -10,11 +10,42 @@ use Intervention\Image\Facades\Image;
 use App\Http\Controllers\CustomController;
 
 class RecomendacionesController extends Controller{
-    /**
-     * Muesta una ventana donde se puede hacer seguimiento a las recomendaciones.
-     * Se puede observas los detalles de cada recomendacion
+   
+    // Funcion que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas recomendaciones PARA UNA VISITA
+    // metodo: GET
+    // ruta: .../recomendaciones/{VIS_id} 
+    public function recomendaciones( $VIS_id ){
+        DB::enableQueryLog();
+
+        $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
+        ->from('recomendaciones as r')
+        ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
+        ->where('r.FK_VIS_id', $VIS_id)
+        ->orderBy('r.REC_id', 'desc')
+        ->get()->toArray();
+
+        $progresos = ModSeguimientoRecomendacion::select('sr.SREC_id', 'sr.SREC_descripcion','sr.SREC_fecha_seguimiento', 'sr.FK_REC_id', 'sr.SREC_autoridad_competente',  'a.ARC_id', 'a.ARC_formatoArchivo', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.FK_SREC_id')
+        ->from('seguimiento_recomendaciones as sr')
+        ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
+        ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
+        ->where('r.FK_VIS_id', $VIS_id)
+        ->get()->toArray();
+
+
+        // $quries = DB::getQueryLog();
+
+        // $progresos = CustomController::array_group( $progresos, 'FK_REC_id' );
+        $progresos = CustomController::agruparSeguimientosImagenes( $progresos );
+        $recomendaciones = CustomController::agruparRecomendacionesImagenes( $recomendaciones);
+        return view('recomendaciones.recomendaciones', compact('recomendaciones', 'progresos', 'VIS_id'));
+    }
+    
+
+     /**
+     * Esta función guarda una nueva recomendación para una visita específica
      */
-    /* Guarda las recomendaciones uno a uno */
+    // metodo: POST
+    // ruta: recomendaciones/guardarNuevaRecomendacion
     public function guardarNuevaRecomendacion( Request $request ){
         $ids = [];
         // dump($request->except('_token'));exit;
@@ -41,9 +72,17 @@ class RecomendacionesController extends Controller{
                  /* Guarda la recomendacion enviada */
                 //Verificar si la recomendacion es para el Estado o para un establecimiento
                 if($request->VIS_estado){
-                    $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'REC_estado' => $request->VIS_estado, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                    $rec = ModRecomendacion::create( [
+                        'REC_recomendacion' => $request->REC_recomendacion, 
+                        'REC_estado' => $request->VIS_estado, 
+                        'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 
+                        'REC_autoridad_competente' => $request->REC_autoridad_competente] );
                 }elseif($request->VIS_id){
-                    $rec = ModRecomendacion::create( ['REC_recomendacion' => $request->REC_recomendacion, 'FK_VIS_id' => $request->VIS_id, 'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                    $rec = ModRecomendacion::create( [
+                        'REC_recomendacion' => $request->REC_recomendacion, 
+                        'FK_VIS_id' => $request->VIS_id, 
+                        'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 
+                        'REC_autoridad_competente' => $request->REC_autoridad_competente] );
                 }
 
 
@@ -83,43 +122,11 @@ class RecomendacionesController extends Controller{
             // exit;
         }
     }
+    
 
-
-    public function recomendaciones( $VIS_id ){
-        // $EST_id = Session::get('EST_id');
-        // $TES_tipo = Session::get('TES_tipo');
-        // $EST_nombre = Session::get('EST_nombre');
-
-        DB::enableQueryLog();
-
-        $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
-        ->from('recomendaciones as r')
-        ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
-        ->where('r.FK_VIS_id', $VIS_id)
-        ->orderBy('r.REC_id', 'desc')
-        ->get()->toArray();
-
-        $progresos = ModSeguimientoRecomendacion::select('sr.SREC_id', 'sr.SREC_descripcion','sr.SREC_fecha_seguimiento', 'sr.FK_REC_id', 'sr.SREC_autoridad_competente',  'a.ARC_id', 'a.ARC_formatoArchivo', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.FK_SREC_id')
-        ->from('seguimiento_recomendaciones as sr')
-        ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
-        ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
-        ->where('r.FK_VIS_id', $VIS_id)
-        ->get()->toArray();
-
-
-        // $quries = DB::getQueryLog();
-
-        // $progresos = CustomController::array_group( $progresos, 'FK_REC_id' );
-        $progresos = CustomController::agruparSeguimientosImagenes( $progresos );
-        $recomendaciones = CustomController::agruparRecomendacionesImagenes( $recomendaciones);
-
-        // dump($progresos);
-        // dump($recomendaciones);exit;
-        // dump($a);
-        // dump($archivosRec);//exit;
-        return view('recomendaciones.recomendaciones', compact('recomendaciones', 'progresos', 'VIS_id'));
-    }
-
+    // Para una recomendación de una visita específica es posible hacer un seguimiento de los avances realizados para cumplir con ésta, cada recomendación de visita podria tener una serie de avances, estos avances se guardan en la tabla seguimiento_recomendaciones
+    // metodo: POST
+    // ruta: recomendaciones/guardarCumplimientoRecomendaciones
     public function guardarCumplimientoRecomendaciones( Request $request ){
         // dump($request->except('_token'));exit;
         $validator = Validator::make( $request->all(), [
@@ -189,37 +196,37 @@ class RecomendacionesController extends Controller{
         }
     }
 
+
+    // Funcion que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una visita, son recomendaciones al gobierno boliviano y son provienen den informe anual del MNP
+    // metodo: GET
+    // ruta: .../recomendaciones/estatales
     public function recomendacionesEstatales(){
         DB::enableQueryLog();
-
+        
         $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
         ->from('recomendaciones as r')
         ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
         ->where('r.REC_estado', 'Si')
         ->orderBy('r.REC_id', 'desc')
         ->get()->toArray();
-
+        
         $progresos = ModSeguimientoRecomendacion::select('sr.SREC_id', 'sr.SREC_descripcion','sr.SREC_fecha_seguimiento', 'sr.FK_REC_id', 'sr.SREC_autoridad_competente',  'a.ARC_id', 'a.ARC_formatoArchivo', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.FK_SREC_id')
         ->from('seguimiento_recomendaciones as sr')
         ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
         ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
         ->where('r.REC_estado', "Si")
         ->get()->toArray();
-
+        
 
         // $quries = DB::getQueryLog();
-
+        
         $progresos = CustomController::agruparSeguimientosImagenes( $progresos );
         $recomendaciones = CustomController::agruparRecomendacionesImagenes( $recomendaciones);
-
+        
         // dump($recomendaciones, $progresos);exit;
-
+        
         return view('recomendaciones.recomendaciones-estatales', compact('progresos', 'recomendaciones'));
         //mostrar una ventana donde se realicen recomendaciones al estado
-    }
-
-    public function recomendacionesPorEstablecimiento(){
-        //mostrar un rating, por cantidad de recomendaciones dadas por establecimiento
     }
 
 }

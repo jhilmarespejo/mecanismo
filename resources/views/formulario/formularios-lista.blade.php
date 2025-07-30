@@ -387,7 +387,7 @@
            data-bs-placement="left" 
            title="Adicionar formulario a esta visita">
             <i class="bi bi-plus-circle me-2"></i>
-            <span class="btn-text">Asignar Formulario</span>
+            <span class="btn-text">Asignar Formulario a esta visita</span>
         </a>
     </div>
 @endif
