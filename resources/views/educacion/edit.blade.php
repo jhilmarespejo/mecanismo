@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 
-// Funciones para ver archivos
+// Funciónes para ver archivos
 function verImagen(src, nombre) {
     document.getElementById('modalImagenSrc').src = src;
     document.getElementById('modalImagenTitle').textContent = nombre;

@@ -11,7 +11,7 @@ use App\Http\Controllers\CustomController;
 
 class RecomendacionesController extends Controller{
    
-    // Funcion que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas recomendaciones PARA UNA VISITA
+    // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas recomendaciones PARA UNA VISITA
     // metodo: GET
     // ruta: .../recomendaciones/{VIS_id} 
     public function recomendaciones( $VIS_id ){
@@ -197,7 +197,7 @@ class RecomendacionesController extends Controller{
     }
 
 
-    // Funcion que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una visita, son recomendaciones al gobierno boliviano y son provienen den informe anual del MNP
+    // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una visita, son recomendaciones al gobierno boliviano y son provienen den informe anual del MNP
     // metodo: GET
     // ruta: .../recomendaciones/estatales
     public function recomendacionesEstatales(){

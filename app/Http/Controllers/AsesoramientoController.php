@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\DB;
 
 class AsesoramientoController extends Controller
 {
+    // Función para obtener los datos de la tabla asesoramientos y mostrarlos en la vista principal de este modulo
+    // Método: GET
+    // Ruta: /asesoramientos
     public function index(Request $request){
         $anioActual = date('Y');
         if( is_null($request->anio_actual ) ){
@@ -31,7 +34,10 @@ class AsesoramientoController extends Controller
 
         return view('asesoramientos.index', compact('asesoramientos', 'breadcrumbs', 'anioActual'));
     }
-
+    
+    // Función para mostrar el formulario de creación de registros en la vista principal de este módulo 
+    // Método: GET
+    // Ruta: /asesoramientos/create
     public function create() {
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -42,7 +48,10 @@ class AsesoramientoController extends Controller
         $mandatos = DB::table('mandatos')->get();
         return view('asesoramientos.create', compact('mandatos', 'breadcrumbs'));
     }
-
+    
+    // Función para almacenar los datos de un registro en la tabla asesoramientos
+    // Método: POST
+    // Ruta: /asesoramientos/store  
     public function store(Request $request) {
         // Definir las reglas de validación
         $request->validate([
@@ -82,12 +91,11 @@ class AsesoramientoController extends Controller
             return redirect()->back();
         }
     }
-
-    public function show($id) {
-        $asesoramiento = DB::table('asesoramientos')->where('ASE_id', $id)->first();
-        return view('asesoramientos.show', ['asesoramiento' => $asesoramiento]);
-    }
-
+    
+    
+    // Función para mostrar los datos de un registro en particular para hacer una edición de este registro
+    // Método: GET
+    // Ruta: /asesoramientos/{id}/edit
     public function edit($id) {
             $breadcrumbs = [
                 ['name' => 'Inicio', 'url' => route('panel')],
@@ -102,7 +110,9 @@ class AsesoramientoController extends Controller
         
     }
 
-
+    // Función para actualizar los datos de un registro en la tabla asesoramientos
+    // Método: PUT  
+    // Ruta: /asesoramientos/{id}   
     public function update(Request $request, $id) {
         DB::beginTransaction();
         try {

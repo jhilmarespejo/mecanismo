@@ -22,7 +22,7 @@ class CuestionarioController extends Controller {
      * @param int $FRM_id ID del formulario
      * @return \Illuminate\View\View
      */
-    // Funcion para mostrar los resultados del cuestionario con graficos estadísticos 
+    // Función para mostrar los resultados del cuestionario con graficos estadísticos 
     // ruta: .../cuestionario/resultados/1281/8
     public function resultadosCuestionario($FRM_id, $VIS_id)
     {
@@ -312,7 +312,7 @@ class CuestionarioController extends Controller {
         ))->with('total', $totalAplicaciones); // Agregar $total para compatibilidad total con la vista
     }
     
-    // Funcion para duplicar un formulario para luego ser aplicado.
+    // Función para duplicar un formulario para luego ser aplicado.
     // ruta: .../cuestionario/duplicarCuestionario/1281/8
     public function duplicarCuestionario( $FRM_id, $VIS_id ){
         /* Obtiene la cantidad de copias realizadas (maximo) de un formulario. AGF_copia de latabla que agrupador_formularios */

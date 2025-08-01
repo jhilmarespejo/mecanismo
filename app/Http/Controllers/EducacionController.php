@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 class EducacionController extends Controller
 {
+    // Función para obtener los datos de la tabla educacion y mostrarlos en la vista principal de este modulo
+    // Método: GET
+    // Ruta: /educacion
     public function index(Request $request) {
         $anioActual = $request->anio_actual ?? date('Y');
 
@@ -71,7 +74,10 @@ class EducacionController extends Controller
 
         return view('educacion.index', compact('educacions', 'beneficiariosPorCiudad', 'beneficiariosPorTipo', 'temasPorCiudad', 'temasBeneficiarios', 'breadcrumbs', 'anioActual'));
     }
-
+    
+    // Función para mostrar el formulario de creación de registros en la vista principal de este módulo 
+    // Método: GET  
+    // Ruta: /educacion/create
     public function create() {
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
@@ -80,7 +86,10 @@ class EducacionController extends Controller
         ];
         return view('educacion.create', compact('breadcrumbs'));
     }
-
+    
+    // Función para almacenar los datos creados de un registro en la tabla educacion
+    // Método: POST  
+    // Ruta: /educacion/store
     public function store(Request $request) {
         // Validación de datos de entrada
         $request->validate([
@@ -135,7 +144,10 @@ class EducacionController extends Controller
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al guardar la información: ' . $e->getMessage()])->withInput();
         }
     }
-
+    
+    // Función para mostrar al usuarui los datos de un registro en particular 
+    // Método: GET
+    // Ruta: /educacion/{id}
     public function show($id) {
         $educacion = ModEducacion::findOrFail($id);
         
@@ -147,7 +159,10 @@ class EducacionController extends Controller
 
         return view('educacion.show', compact('educacion', 'breadcrumbs'));
     }
-
+    
+    // Función para mostrar un formulario que ayuda al usuario  a editar los datos de un registro en la tabla educacion
+    // Método: GET
+    // Ruta: /educacion/{id}/edit
     public function edit($edu_id) {
         $educacion = ModEducacion::where('EDU_id', $edu_id)->firstOrFail();
         
@@ -159,7 +174,10 @@ class EducacionController extends Controller
         
         return view('educacion.edit', compact('educacion', 'breadcrumbs'));
     }
-
+    
+    // Función para actualizar los datos de un registro en la tabla educacion
+    // Método: PUT
+    // Ruta: /educacion/{id}
     public function update(Request $request, $id) {
         $request->validate([
             'edu_tema' => 'required|string|min:5|max:500',
@@ -219,7 +237,7 @@ class EducacionController extends Controller
                 }
                 $updateData['EDU_imagen_medio_verificacion'] = json_encode($archivos);
             }
-
+            
             DB::table('educacion')->where('EDU_id', $id)->update($updateData);
 
             DB::commit();
@@ -230,7 +248,10 @@ class EducacionController extends Controller
             return redirect()->back()->withErrors(['error' => 'Hubo un problema al actualizar la información: ' . $e->getMessage()])->withInput();
         }
     }
-
+    
+    // Función para eliminar un registro de la tabla educacion
+    // Método: DELETE       
+    // Ruta: /educacion/{id}
     public function destroy($id) {
         try {
             $educacion = ModEducacion::findOrFail($id);

@@ -11,82 +11,10 @@ use Illuminate\Support\Facades\Validator;
 class EstablecimientosController extends Controller
 {
 
-    // Retorna los tipos de establecimientos, cuando se presiona el boton "Nuevo establecimiento"
-    public function tipo( ){
-        $tipos_establecimiento = ModTipoEstablecimiento::select('TES_id', 'TES_tipo' )->get();
-        return response()->json($tipos_establecimiento);
-    }
-
-    /**
-     * guardarNuevoEstablecimiento
-     *
-     * @param  mixed $request
-     * @return void
-     * Guarda datos de nuevo establecimiento
-     */
-    public function guardarNuevoEstablecimiento(Request $request)  {
-        // dump($request->except('_token'));//exit;
-        $validator = Validator::make( $request->all(), [
-            'EST_nombre' => 'required',
-            'FK_TES_id' => 'required',
-            'EST_departamento' => 'required',
-            'EST_municipio' => 'required',
-        ], [
-            'required' => '¡El dato es requerido!',
-            'required_if' => '¡El dato es requerido!',
-        ]);
-
-        if ( $validator->fails() ){
-            return response()->json( [ 'errors' => $validator->errors() ] );
-        } else {
-            DB::beginTransaction();
-            try {
-                ModEstablecimiento::insert($request->except('_token'));
-                //GUARDAR DATOS
-                DB::commit();
-                return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
-                // return redirect('/categorias')->with('status', '¡Datos almacenados con exito!');
-
-            }catch (\Exception $e) {
-                DB::rollback();
-                exit ($e->getMessage());
-            }
-        }
-    }
-
-    // Listar los establecimiento por tipo, segun FK_TES_id de la tabla establecimientos, escogido en el mapa
-
-    public function listarSegunTipo(Request $request){
-        $TES_id = $request->TES_id;
-        $TES_tipo = $request->TES_tipo;
-        $EST_departamento = $request->EST_departamento;
-
-        DB::enableQueryLog();
-        $establecimientos = ModEstablecimiento::from('establecimientos as e')
-            ->select('e.EST_nombre','e.EST_id','e.EST_direccion','e.EST_municipio','e.EST_departamento','e.FK_TES_id',
-                DB::raw('COUNT(v."VIS_id") AS cantidad_visitas')
-            )
-            ->leftJoin('visitas as v', 'v.FK_EST_id', 'e.EST_id')
-            ->when($request->EST_nombre, function ($query) use ($request) {
-                return $query->where('e.EST_nombre', 'ilike', '%' . $request->EST_nombre . '%');
-            })
-            ->when(!$request->EST_nombre, function ($query) use ($TES_id, $EST_departamento) {
-                return $query->where('FK_TES_id', $TES_id)
-                            ->where('EST_departamento', 'ilike', '%' . $EST_departamento . '%');
-            })
-            ->groupBy('e.EST_nombre', 'e.EST_id', 'e.EST_direccion', 'e.EST_municipio', 'e.EST_departamento', 'e.FK_TES_id')
-            ->orderBy('EST_nombre')
-            ->get();
-
-            // $quries = DB::getQueryLog();
-            // dump ($quries);
-
-        return view('establecimientos.establecimientos-por-tipo', compact('establecimientos', 'TES_id', 'TES_tipo', 'EST_departamento'));
-        // dump($establecimientos);exit;
-    }
-
+    // Función para mostrar la vista principal de establecimientos incluyendo información estadistica con graficos
+    // Método: GET
+    // Ruta: /establecimientos
     public function index(Request $request){
-
         // 1. Distribución de Establecimientos por Tipo
         $distribucionPorTipo = ModEstablecimiento::select('tipo_establecimientos.TES_tipo', DB::raw('count("establecimientos"."EST_id") as total'))
         ->join('tipo_establecimientos', 'establecimientos.FK_TES_id', 'tipo_establecimientos.TES_id')
@@ -117,13 +45,6 @@ class EstablecimientosController extends Controller
         }
         // Agregar el total general como una serie adicional
         $totalGeneral = $establecimientosPorDepartamento->sum('total');
-        // $estabsPorDepartamento[] = [
-        //     'name' => 'Total General',
-        //     'y' => $totalGeneral,
-        //     'color' => '#FF6F61', // Un color destacado para el total general
-        //     'dataLabels' => ['enabled' => false] // Opcional: Ocultar las etiquetas de datos para el total general
-        // ];
-        
         $tipo_establecimientos = ModTipoEstablecimiento::select('TES_id', 'TES_tipo')->get();
 
         DB::enableQueryLog();
@@ -144,23 +65,16 @@ class EstablecimientosController extends Controller
 
         return view('establecimientos.establecimientos-index', compact('tipo_establecimientos', 'establecimientos','TES_id','estabsPorDepartamento', 'estabsPorTipo', 'totalGeneral', 'breadcrumbs'));
     }
-    public function mostrar($id) {
-        
+    
 
-        $establecimiento = ModEstablecimiento::select('EST_nombre', 'EST_departamento', 'EST_municipio', 'EST_direccion', 'EST_telefono_contacto', 'EST_anyo_funcionamiento', 'EST_capacidad_creacion')->findOrFail($id);
-
-        $info = ModEstablecimientoInfo::select('EINF_cantidad_policias_varones','EINF_cantidad_policias_mujeres','EINF_cantidad_celdas_varones','EINF_cantidad_celdas_mujeres','EINF_normativa_interna','EINF_formato_registro_aprehendidos','EINF_cantidad_actual_internos','EINF_poblacion_atendida','EINF_rangos_edad_poblacion','EINF_tipo_entidad','EINF_tipo_administracion','EINF_banyo_ppl','EINF_telefono_ppl','EINF_camaras_vigilancia','EINF_ambientes_visita','EINF_informacion_ddhh','EINF_observaciones','EINF_gestion')
-        ->where('FK_EST_id', $id)
-        ->where('EINF_gestion', date('Y'))->first();
-
-        $personal = ModEstablecimientoPersonal::select('EPER_nombre_responsable','EPER_grado_profesion','EPER_fecha_incorporacion','EPER_experiencia','EPER_telefono','EPER_email','EPER_gestion')
-        ->where('FK_EST_id', $id)
-        ->where('EPER_gestion', date('Y'))->get();
-
-        return response()->json(compact('establecimiento', 'info', 'personal'));
-    }
+    
+    
+    
+    // Función para mostrar el formulario de creación de nuevo registro de lugar de detencion
+    // Método: GET  
+    // Ruta: /establecimientos/mostrar/{id}
     public function crear() {   
-
+    
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Lugares de detención', 'url' => route('establecimientos.index')],
@@ -169,7 +83,80 @@ class EstablecimientosController extends Controller
         $tipos = ModTipoEstablecimiento::all(); // Obtén los tipos de establecimiento
         return view('establecimientos.establecimientos-crear', compact('tipos', 'breadcrumbs'));
     }
+    
+    /**
+     *
+     * @param  mixed $request
+     * @return void
+     * Guarda datos de nuevo establecimiento que proviene de la vista de creación
+     * Método: POST
+     * Ruta: /establecimientos/guardarNuevoEstablecimiento
+     */
+    public function guardarNuevoEstablecimiento(Request $request)  {
+        // dump($request->except('_token'));//exit;
+        $validator = Validator::make( $request->all(), [
+            'EST_nombre' => 'required',
+            'FK_TES_id' => 'required',
+            'EST_departamento' => 'required',
+            'EST_municipio' => 'required',
+        ], [
+            'required' => '¡El dato es requerido!',
+            'required_if' => '¡El dato es requerido!',
+        ]);
 
+        if ( $validator->fails() ){
+            return response()->json( [ 'errors' => $validator->errors() ] );
+        } else {
+            DB::beginTransaction();
+            try {
+                ModEstablecimiento::insert($request->except('_token'));
+                //GUARDAR DATOS
+                DB::commit();
+                return response()->json([ "message" => "¡Datos almacenados con exito!" ]);
+                // return redirect('/categorias')->with('status', '¡Datos almacenados con exito!');
+
+            }catch (\Exception $e) {
+                DB::rollback();
+                exit ($e->getMessage());
+            }
+        }
+    }
+    
+    // Listar los establecimiento por tipo, segun FK_TES_id de la tabla establecimientos, escogido en el mapa 
+    // Método: POST
+    // Ruta: /establecimientos/listarSegunTipo
+    public function listarSegunTipo(Request $request){
+        $TES_id = $request->TES_id;
+        $TES_tipo = $request->TES_tipo;
+        $EST_departamento = $request->EST_departamento;
+
+        DB::enableQueryLog();
+        $establecimientos = ModEstablecimiento::from('establecimientos as e')
+            ->select('e.EST_nombre','e.EST_id','e.EST_direccion','e.EST_municipio','e.EST_departamento','e.FK_TES_id',
+                DB::raw('COUNT(v."VIS_id") AS cantidad_visitas')
+            )
+            ->leftJoin('visitas as v', 'v.FK_EST_id', 'e.EST_id')
+            ->when($request->EST_nombre, function ($query) use ($request) {
+                return $query->where('e.EST_nombre', 'ilike', '%' . $request->EST_nombre . '%');
+            })
+            ->when(!$request->EST_nombre, function ($query) use ($TES_id, $EST_departamento) {
+                return $query->where('FK_TES_id', $TES_id)
+                            ->where('EST_departamento', 'ilike', '%' . $EST_departamento . '%');
+            })
+            ->groupBy('e.EST_nombre', 'e.EST_id', 'e.EST_direccion', 'e.EST_municipio', 'e.EST_departamento', 'e.FK_TES_id')
+            ->orderBy('EST_nombre')
+            ->get();
+
+            // $quries = DB::getQueryLog();
+            // dump ($quries);
+
+        return view('establecimientos.establecimientos-por-tipo', compact('establecimientos', 'TES_id', 'TES_tipo', 'EST_departamento'));
+        // dump($establecimientos);exit;
+    }
+
+    // Función para almacenar los datos de un registro en la tabla establecimientos
+    // Método: POST
+    // Ruta: /establecimientos/almacenar
     public function almacenar(Request $request){
         // dump( date('Y') );exit;
         $validated = $request->validate([
@@ -252,8 +239,10 @@ class EstablecimientosController extends Controller
             return redirect()->back()->withErrors(['error' => 'Ocurrió un error al guardar el establecimiento.'])->withInput();
         }
     }
-
-
+    
+    // Función para mostrar los datos datos de la información adicional que se encuentra en un lugar de detención seleccionado
+    // Método: GET
+    // Ruta: /establecimientos/infoMostrar/{EST_id}
     public function infoMostrar( Request $request, $EST_id){
         DB::enableQueryLog();
         $gestion = $request->query('gestion', date('Y'));
@@ -278,7 +267,10 @@ class EstablecimientosController extends Controller
         ];
         return view('establecimientos.establecimientos-info-mostrar', compact('infoAdicional','gestion', 'breadcrumbs'));
     }
-
+    
+    // Función para mostrar y actualizar(si correponde) los datos de un registro en la tabla establecimientos 
+    // Método: PUT  
+    // Ruta: /establecimientos/infoActualizar
     public function infoActualizar(Request $request) {
         $data = $request->validate([
             // Validación para información adicional
@@ -327,27 +319,11 @@ class EstablecimientosController extends Controller
             //dd($e);
             return response()->json(['message' => 'Hubo un problema al actualizar la información.'], 500);
         }
-
-
-        // $data = $request->info;
-        // $gestion = $data['info']['EINF_gestion'];
-
-        // $info = ModEstablecimientoInfo::where('FK_EST_id', $data['FK_EST_id'])
-        // ->where('EINF_gestion', $gestion)
-        // ->first();
-
-        // if ($info) {
-        //     $info->update($data);
-        //     return response()->json(['success' => true]);
-        // } else {
-        //     return response()->json(['success' => false], 404);
-        // }
-
-
-
     }
-
-
+    
+    // Función para mostrar los datos del personal que trabaja en un lugar de detención seleccionado
+    // Método: GET
+    // Ruta: /establecimientos/personalMostrar/{EST_id}
     public function personalMostrar( Request $request, $EST_id){
         DB::enableQueryLog();
         $gestion = $request->query('gestion', date('Y'));
@@ -372,6 +348,9 @@ class EstablecimientosController extends Controller
         return view('establecimientos.establecimientos-personal-mostrar', compact('infoPersonal','gestion', 'breadcrumbs'));
     }
     
+    // Función para actualizar los datos del personal que trabaja en un lugar de detención seleccionado
+    // Método: PUT
+    // Ruta: /establecimientos/personalActualizar
     public function personalActualizar(Request $request){
         $data = $request->validate([
             'personal.FK_EST_id' => 'required|exists:establecimientos,EST_id',
@@ -405,10 +384,22 @@ class EstablecimientosController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'Hubo un problema al actualizar la información.'], 500);
         }
-
+    
     }
 
-
-
+    // public function nuevoEstablecimiento($id) {
+    //     $establecimiento = ModEstablecimiento::select('EST_nombre', 'EST_departamento', 'EST_municipio', 'EST_direccion', 'EST_telefono_contacto', 'EST_anyo_funcionamiento', 'EST_capacidad_creacion')->findOrFail($id);
+    
+    //     $info = ModEstablecimientoInfo::select('EINF_cantidad_policias_varones','EINF_cantidad_policias_mujeres','EINF_cantidad_celdas_varones','EINF_cantidad_celdas_mujeres','EINF_normativa_interna','EINF_formato_registro_aprehendidos','EINF_cantidad_actual_internos','EINF_poblacion_atendida','EINF_rangos_edad_poblacion','EINF_tipo_entidad','EINF_tipo_administracion','EINF_banyo_ppl','EINF_telefono_ppl','EINF_camaras_vigilancia','EINF_ambientes_visita','EINF_informacion_ddhh','EINF_observaciones','EINF_gestion')
+    //     ->where('FK_EST_id', $id)
+    //     ->where('EINF_gestion', date('Y'))->first();
+    
+    //     $personal = ModEstablecimientoPersonal::select('EPER_nombre_responsable','EPER_grado_profesion','EPER_fecha_incorporacion','EPER_experiencia','EPER_telefono','EPER_email','EPER_gestion')
+    //     ->where('FK_EST_id', $id)
+    //     ->where('EPER_gestion', date('Y'))->get();
+    
+    //     return response()->json(compact('establecimiento', 'info', 'personal'));
+    // }
+    
 
 }

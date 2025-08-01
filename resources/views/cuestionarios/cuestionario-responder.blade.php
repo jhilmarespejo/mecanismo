@@ -373,7 +373,7 @@ function enviarConfirmacion(FRM_id) {
     });
 }
 
-// Funciones de utilidad para debugging
+// Funciónes de utilidad para debugging
 @if(config('app.debug'))
 function debugInfo() {
     console.log('=== DEBUG INFO ===');

@@ -66,14 +66,14 @@ $(document).ready(function(){
                 <div class="accordion-item mt-2 box-shadow">
                     <h2 class="accordion-header" id="heading{{$a}}">
                     <button class="fs-5 accordion-button bg-success text-white d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{$a}}" aria-expanded="false" aria-controls="collapse_{{$a}}">
-                        <i class="bi bi-journal-bookmark-fill"></i>
-                        {{$mandato}}
+                        <i class="bi bi-journal-bookmark-fill"></i>&nbsp;
+                         <strong> Mandato: </strong>{{$mandato}}
                         {{-- @dump(key($asesoramiento)) --}}
                     </button>
                     </h2>
                     <div id="collapse_{{$a}}" class="accordion-collapse collapse" aria-labelledby="heading{{$a}}" data-bs-parent="#accordionMandato">
                         <div class="accordion-body">
-                            <p class="alert alert-info mb-2"> {{key($asesoramiento)}}</p>
+                            <p class="alert alert-info mb-2"> {!! nl2br(e(key($asesoramiento))) !!} </p>
                             <div class="accordion-body">
                                 <fieldset id="archivos_0" class="hover border-start border-top px-2 mx-2" style="">
                                     <legend class="fs-6 float-none w-auto p-2">Actividades de asesoramiento <i class="fs-4 bi bi-activity text'primary"></i></legend>

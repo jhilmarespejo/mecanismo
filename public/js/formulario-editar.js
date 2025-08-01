@@ -172,7 +172,7 @@ $(document).ready(function() {
         }
     });
 
-    // Funciones auxiliares
+    // Funciónes auxiliares
     function agregarNuevaPregunta() {
         contadorPreguntasNuevas++;
         var pregunta = `

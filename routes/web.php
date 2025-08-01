@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\{CuestionarioController, CategoriasController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController, AccesoController, InteroperabilidadController, UsersController, AsesoramientoController, IndicadorController,HistorialIndicadorController, EducacionController};
+use App\Http\Controllers\{CuestionarioController, EstablecimientosController, IndexController, RecomendacionesController, FormularioController, ReportesController, VisitaController, AjustesController,   AsesoramientoController, IndicadorController, EducacionController};
 use App\Http\Controllers\Auth\LoginController;
 
 // Resto de tu código...
@@ -113,26 +113,25 @@ Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesControl
 */
 
 // ESTABLECIMIENTOS
-Route::get('establecimientos/tipo', [EstablecimientosController::class, 'tipo'])->name('establecimientos')->middleware('auth');
+// Route::get('establecimientos/tipo', [EstablecimientosController::class, 'tipo'])->name('establecimientos')->middleware('auth');
+Route::get('establecimientos/index', [EstablecimientosController::class, 'index'])->name('establecimientos.index')->middleware('auth');
 Route::post('establecimientos/listarSegunTipo', [EstablecimientosController::class, 'listarSegunTipo'])->name('establecimientos.listarSegunTipo')->middleware('auth');
 Route::post('establecimientos/guardarNuevoEstablecimiento', [EstablecimientosController::class, 'guardarNuevoEstablecimiento'])->name('establecimientos.listaguardarNuevoEstablecimientorPorTipo')->middleware('auth');
 
-Route::get('establecimientos/index', [EstablecimientosController::class, 'index'])->name('establecimientos.index')->middleware('auth');
-Route::get('establecimientos/mostrar/{id}', [EstablecimientosController::class, 'mostrar'])->name('establecimientos.mostrar');
+// Route::get('establecimientos/nuevoEstablecimiento/{id}', [EstablecimientosController::class, 'nuevoEstablecimiento'])->name('establecimientos.nuevoEstablecimiento');
 
 Route::get('establecimientos/crear', [EstablecimientosController::class, 'crear'])->name('establecimientos.crear');
 Route::post('establecimientos/almacenar', [EstablecimientosController::class, 'almacenar'])->name('establecimientos.almacenar');
 
-    // establecimientos_info
-    Route::get('establecimientos/infoMostrar/{EST_id}', [EstablecimientosController::class, 'infoMostrar'])->name('establecimientos.infoMostrar');
-    Route::post('establecimientos/infoActualizar', [EstablecimientosController::class, 'infoActualizar'])->name('establecimientos.infoActualizar');
+// establecimientos_info
+Route::get('establecimientos/infoMostrar/{EST_id}', [EstablecimientosController::class, 'infoMostrar'])->name('establecimientos.infoMostrar');
+Route::post('establecimientos/infoActualizar', [EstablecimientosController::class, 'infoActualizar'])->name('establecimientos.infoActualizar');
 
 
-    // estanblecimientos_personal
-    Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
-    Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
+// estanblecimientos_personal
+Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
+Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
 
-    //edicion de la ficha
     
 
 // REPORTES
@@ -159,10 +158,6 @@ Route::put('visita/actualizarFichaEstablecimiento/{EST_id}', [VisitaController::
 //  Route::post('users/changeState', [UsersController::class, 'changeState'])->middleware('auth')->name('users.changeState');
 
 //----MODULO DE INDICADORES --------------------------
-
-// Route::get('establecimientos/personalMostrar/{EST_id}', [EstablecimientosController::class, 'personalMostrar'])->name('establecimientos.personalMostrar');
-//Route::post('establecimientos/personalActualizar', [EstablecimientosController::class, 'personalActualizar'])->name('establecimientos.personalActualizar');
-
 Route::get('/indicadores/panel', [IndicadorController::class, 'panel'])->middleware('auth')->name('indicadores.panel');
 Route::get('/indicadores/actualizar', [IndicadorController::class, 'actualizar'])->middleware('auth')->name('indicadores.actualizar');;
 Route::post('/indicadores/guardar', [IndicadorController::class, 'guardar'])->middleware('auth')->name('indicadores.guardar');
@@ -176,13 +171,11 @@ Route::get('/indicadores/reportes', [IndicadorController::class, 'reportes'])->n
 Route::get('/asesoramientos', [AsesoramientoController::class, 'index'])->middleware('auth')->name('asesoramientos.index');
 Route::get('/asesoramientos/create', [AsesoramientoController::class, 'create'])->middleware('auth')->name('asesoramientos.create');
 Route::post('/asesoramientos/store', [AsesoramientoController::class, 'store'])->middleware('auth')->name('asesoramientos.store');
-Route::get('/asesoramientos/{id}', [AsesoramientoController::class, 'show'])->middleware('auth')->name('asesoramientos.show');
 Route::get('/asesoramientos/{id}/edit', [AsesoramientoController::class, 'edit'])->middleware('auth')->name('asesoramientos.edit');
 Route::put('/asesoramientos/{id}', [AsesoramientoController::class, 'update'])->middleware('auth')->name('asesoramientos.update');
 Route::delete('/asesoramientos/{id}', [AsesoramientoController::class, 'destroy'])->middleware('auth')->name('asesoramientos.destroy');
 
 //--------MODULO DE EDUCACION -------
-// Route::resource('educacion', EducacionController::class)->middleware('auth');
 
 Route::middleware('auth')->group(function () {
     Route::get('/educacion', [EducacionController::class, 'index'])->name('educacion.index');
@@ -200,7 +193,6 @@ Route::middleware('auth')->group(function () {
 Route::get('ajustes/{id}', [AjustesController::class, 'index'])->name('ajustes.index')->middleware('auth');
 
 // INTEROPERABILIDAD
-Route::get('interoperabilidad', [interoperabilidadController::class, 'index'])->name('interoperabilidad.index');//->middleware('auth');
 
 // MODULO DE EDUCACION
-Route::resource('educacion', EducacionController::class);
+// Route::resource('educacion', EducacionController::class);
