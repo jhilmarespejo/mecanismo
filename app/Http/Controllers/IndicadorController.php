@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Indicador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\{ModEstablecimiento, ModIndicador, ModHistorialIndicador};
+use App\Models\{ModEstablecimiento, ModIndicador};
 use App\Http\Controllers\CustomController;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
 
@@ -85,8 +84,8 @@ class IndicadorController extends Controller
             ['name' => 'Actualización de datos', 'url' => ''],
         ];
         
-        // Centros penitenciarios (mantener como está)
-        $centrosPenitenciarios = Cache::remember('centros_penitenciarios', 3600, function() {
+        // Centros penitenciarios
+        $centrosPenitenciarios = Cache::remember('centros_penitenciarios', 36, function() {
             return ModEstablecimiento::select('EST_id', 'EST_nombre', 'EST_departamento')
                 ->where('FK_TES_id', 1)
                 ->orderBy('EST_departamento')
@@ -191,6 +190,7 @@ class IndicadorController extends Controller
         
     // Guarda los datos que se actualizan en los indicadores
     public function guardar(Request $request) {
+        // dump($request->all());exit;
         try {
             // Validación básica
             $validatedData = $request->validate([

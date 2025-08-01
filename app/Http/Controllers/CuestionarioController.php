@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
 
-use function PHPUnit\Framework\isNull;
+use Carbon\Carbon;
 use App\Http\Controllers\{ CustomController};
 
 // use Psy\Command\WhereamiCommand;
@@ -24,7 +24,7 @@ class CuestionarioController extends Controller {
      */
     // Función para mostrar los resultados del cuestionario con graficos estadísticos 
     // ruta: .../cuestionario/resultados/1281/8
-    public function resultadosCuestionario($FRM_id, $VIS_id)
+    public function resultadosCuestionario($FRM_id/*, $VIS_id*/)
     {
         // Verificar permisos de usuario
         if (Auth::user()->rol != 'Administrador') {
@@ -36,7 +36,7 @@ class CuestionarioController extends Controller {
             ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
             ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
             ->where('agf.FK_FRM_id', $FRM_id)
-            ->where('agf.FK_VIS_id', $VIS_id)   
+            ->whereYear('agf.createdAt', Carbon::now()->year)
             ->get()->toArray();
         
         

@@ -69,7 +69,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-2"></i>Cancelar
                     </button>
-                    <button type="button" id="guardarListaSexo_{{ $pregunta['IND_id'] }}" class="btn btn-primary" data-id="{{ $pregunta['IND_id'] }}">
+                    <button type="button" id="guardarListaSexo_{{ $pregunta['IND_id'] }}" class="btn btn-success" data-id="{{ $pregunta['IND_id'] }}">
                         <i class="bi bi-save me-2"></i>Guardar datos por sexo
                     </button>
                 </div>
@@ -183,7 +183,7 @@
     <div class="modal fade" id="centrosModal_{{ $pregunta['IND_id'] }}" tabindex="-1" aria-labelledby="centrosModalLabel_{{ $pregunta['IND_id'] }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header bg-primary text-white">
                     <h4 class="modal-title" id="centrosModalLabel_{{ $pregunta['IND_id'] }}">
                         <i class="bi bi-building me-2"></i>{{ $parametro }}
                     </h4>
@@ -268,9 +268,14 @@
                 let centrosData = {};
                 let valid = true;
                 let errores = [];
-        
-                $('.centro-numero-' + preguntaId).each(function() {
-                    let input = $(this);
+                
+                $('.centro-numero_' + preguntaId).each(function() {
+                    let input = $(this);  
+
+                // $('.centro-numero-' + preguntaId).each(function() {
+                    // let input = $(this).find('input');
+                    console.log(input);
+                    // let input = $(this);
                     let centro = input.data('centro');
                     let numero = input.val().trim();
                     
@@ -361,7 +366,7 @@
     <div class="modal fade" id="listaDelitosModal_{{ $pregunta['IND_id'] }}" tabindex="-1" aria-labelledby="listaDelitosModalLabel_{{ $pregunta['IND_id'] }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
+                <div class="modal-header bg-primary text-white">
                     <h4 class="modal-title" id="listaDelitosModalLabel_{{ $pregunta['IND_id'] }}">
                         <i class="bi bi-exclamation-triangle me-2"></i>{{ $parametro }}
                     </h4>
@@ -457,7 +462,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-2"></i>Cancelar
                     </button>
-                    <button type="button" id="guardarListaDelitos_{{ $pregunta['IND_id'] }}" class="btn btn-warning">
+                    <button type="button" id="guardarListaDelitos_{{ $pregunta['IND_id'] }}" class="btn btn-success">
                         <i class="bi bi-save me-2"></i>Guardar datos de delitos
                     </button>
                 </div>
@@ -588,7 +593,7 @@
    <div class="modal fade" id="listaDepartamentosModal_{{ $pregunta['IND_id'] }}" tabindex="-1" aria-labelledby="listaDepartamentosModalLabel_{{ $pregunta['IND_id'] }}" aria-hidden="true">
        <div class="modal-dialog modal-dialog-scrollable modal-lg">
            <div class="modal-content">
-               <div class="modal-header bg-info text-white">
+               <div class="modal-header bg-primary text-white">
                    <h4 class="modal-title" id="listaDepartamentosModalLabel_{{ $pregunta['IND_id'] }}">
                        <i class="bi bi-geo-alt me-2"></i>{{ $parametro }}
                    </h4>
@@ -659,7 +664,7 @@
                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                        <i class="bi bi-x-lg me-2"></i>Cancelar
                    </button>
-                   <button type="button" id="guardarListaDepartamentos_{{ $pregunta['IND_id'] }}" class="btn btn-info">
+                   <button type="button" id="guardarListaDepartamentos_{{ $pregunta['IND_id'] }}" class="btn btn-success">
                        <i class="bi bi-save me-2"></i>Guardar datos por departamentos
                    </button>
                </div>
