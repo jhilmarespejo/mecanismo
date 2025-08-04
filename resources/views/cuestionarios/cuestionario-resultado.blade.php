@@ -88,7 +88,7 @@
             </div>
         </div>
     @else
-        <!-- =========================== ESTADÍSTICAS GENERALES CORREGIDAS =========================== -->
+        <!-- =========================== ESTADÍSTICAS GENERALES  =========================== -->
         <div class="row mb-4">
             @php
                 // Usar estadísticas calculadas en el controlador
@@ -226,31 +226,9 @@
             </div>
         </div>
 
-        <!-- =========================== NAVEGACIÓN POR CATEGORÍAS =========================== -->
-        {{-- <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="bi bi-list-ul me-2"></i>Navegación Rápida por Categorías
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2">
-                            @foreach ($resultados as $nombreCategoria => $preguntas)
-                                <a href="#categoria-{{ Str::slug($nombreCategoria) }}" 
-                                   class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-folder me-1"></i>{{ $nombreCategoria }}
-                                    <span class="badge bg-primary ms-1">{{ count($preguntas) }}</span>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> --}}
+       
 
-        <!-- =========================== RESULTADOS POR CATEGORÍA =========================== -->
+        <!-- =========================== RESULTADOS =========================== -->
         {{-- @dump($resultados) --}}
         @php $contadorCategoria = 1; @endphp
         @foreach ($resultados as $nombreCategoria => $preguntasCategoria)
@@ -424,41 +402,50 @@
                                                             aria-expanded="false">
                                                         <i class="bi bi-chat-dots me-2"></i>
                                                         Ver {{ isset($pregunta['respuestas']) ? count($pregunta['respuestas']) : 0 }} respuestas
+																												
                                                     </button>
                                                 </h2>
+																								<!-- @dump($pregunta)-->
                                                 <div id="collapse-{{ $contadorCategoria }}-{{ $contadorPregunta }}" 
                                                      class="accordion-collapse collapse" 
                                                      data-bs-parent="#accordion-{{ $contadorCategoria }}-{{ $contadorPregunta }}">
                                                     <div class="accordion-body">
-                                                        @if(isset($pregunta['respuestas']) && !empty($pregunta['respuestas']))
-                                                            <div class="list-group list-group-flush">
-                                                                @foreach ($pregunta['respuestas'] as $index => $respuestaAbierta)
-                                                                    <div class="list-group-item border-0 px-0">
-                                                                        @if(empty($respuestaAbierta['respuesta']))
-                                                                            <em class="text-muted">Sin respuesta</em>
-                                                                        @else
-                                                                            <div class="d-flex justify-content-between align-items-start">
-                                                                                <div class="flex-grow-1">
-                                                                                    <small class="text-muted">Respuesta {{ $index + 1 }}</small>
-                                                                                    <p class="mb-1">{{ $respuestaAbierta['respuesta'] }}</p>
-                                                                                </div>
-                                                                                <a href="/cuestionario/responder/{{ $VIS_id ?? '' }}/{{ $FRM_id }}/{{ $respuestaAbierta['FK_AGF_id'] ?? '' }}" 
-                                                                                   target="_blank" 
-                                                                                   class="btn btn-sm btn-outline-primary">
-                                                                                    <i class="bi bi-eye"></i>
-                                                                                </a>
-                                                                            </div>
-                                                                        @endif
-                                                                    </div>
-                                                                @endforeach
-                                                            </div>
-                                                        @else
-                                                            <div class="text-center text-muted py-3">
-                                                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                                                                <p class="mt-2">No hay respuestas disponibles</p>
-                                                            </div>
-                                                        @endif
-                                                    </div>
+																											@if(isset($pregunta['respuestas']) && !empty($pregunta['respuestas']))
+																													<div class="list-group list-group-flush">
+																															@foreach ($pregunta['respuestas'] as $index => $respuestaAbierta)
+																																	<div class="list-group-item border-0 px-0">
+																																			@php
+																																					$esNumeral = $pregunta['BCP_tipoRespuesta'] === 'Numeral';
+																																					$sinRespuesta = !$esNumeral 
+																																													? empty($respuestaAbierta['respuesta']) 
+																																													: !isset($respuestaAbierta['respuesta']);
+																																			@endphp
+
+																																			@if($sinRespuesta)
+																																					<em class="text-muted">Sin respuesta</em>
+																																			@else
+																																					<div class="d-flex justify-content-between align-items-start">
+																																							<div class="flex-grow-1">
+																																									<small class="text-muted">Respuesta {{ $index + 1 }}</small>
+																																									<p class="mb-1">{{ $respuestaAbierta['respuesta'] }} </p>
+																																							</div>
+																																							<a href="/cuestionario/responder/{{ $VIS_id ?? '' }}/{{ $FRM_id }}/{{ $respuestaAbierta['FK_AGF_id'] ?? '' }}" 
+																																								target="_blank" 
+																																								class="btn btn-sm btn-outline-primary">
+																																									<i class="bi bi-eye"></i>
+																																							</a>
+																																					</div>
+																																			@endif
+																																	</div>
+																															@endforeach
+																													</div>
+																											@else
+																													<div class="text-center text-muted py-3">
+																															<i class="bi bi-inbox" style="font-size: 2rem;"></i>
+																															<p class="mt-2">No hay respuestas disponibles</p>
+																													</div>
+																											@endif
+																									</div>
                                                 </div>
                                             </div>
                                         </div>
