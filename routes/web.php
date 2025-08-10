@@ -91,7 +91,8 @@ Route::post('cuestionario/guardarRespuestasCuestionario', [CuestionarioControlle
 
 Route::post('cuestionario/confirmaCuestionario/', [CuestionarioController::class, 'confirmaCuestionario'])->name('cuestionario.confirmaCuestionario')->middleware('auth');
 
-Route::get('cuestionario/resultados/{id}/{VIS_id}', [CuestionarioController::class, 'resultadosCuestionario'])->name('cuestionario.resultados')->middleware('auth');
+Route::get('cuestionario/resultadosGlobales/{id}', [CuestionarioController::class, 'resultadosGlobalesCuestionario'])->name('cuestionario.resultados')->middleware('auth');
+Route::get('cuestionario/resultadosVisita/{id}/{VIS_id}', [CuestionarioController::class, 'resultadosCuestionarioPorVisita'])->name('cuestionario.resultadosPorVisita')->middleware('auth');
 
 
 

@@ -42,9 +42,11 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
-                <div class="card-body text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
+                {{-- <div class="card-body text-center py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;"> --}}
+                <div class="card-body text-center py-5" style="background: {{ $resultadoGeneral == 1 ? 'linear-gradient(135deg, #46b74c 0%, #1a8d22 100%);' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%);' }} ; color: white; border-radius: 10px;">
                     <h1 class="display-6 mb-2">
-                        <i class="bi bi-bar-chart-line me-3"></i>Resultados del Cuestionario
+                        <i class="bi bi-bar-chart-line me-3"></i>
+                        {{ $resultadoGeneral == 1 ? 'Resultado General del Cuestionario' : 'Resultados del Cuestionario por Visita' }}
                     </h1>
                     <h2 class="h4 mb-2">{{ session('EST_nombre') }}</h2>
                     <h3 class="h5 mb-0 opacity-90">{{ $FRM_titulo }}</h3>

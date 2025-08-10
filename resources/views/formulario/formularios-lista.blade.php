@@ -205,9 +205,13 @@
                             </div>
                             <div class="col-auto">
                                 @if(Auth::user()->rol == 'Administrador')
-                                    <a href="/cuestionario/resultados/{{ $aplicaciones[0]['FRM_id'] }}/{{ $VIS_id }}" 
+                                    <a href="/cuestionario/resultadosVisita/{{ $aplicaciones[0]['FRM_id'] }}/{{ $VIS_id }}" 
                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-bar-chart-line me-1"></i>Resultados
+                                        <i class="bi bi-bar-chart-line me-1"></i>Resultados de ésta visita
+                                    </a>
+                                    <a href="/cuestionario/resultadosGlobales/{{ $aplicaciones[0]['FRM_id'] }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-bar-chart-steps"></i></i>Resultado GENERAL
                                     </a>
                                 @endif
                             </div>
