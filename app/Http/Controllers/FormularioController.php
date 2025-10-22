@@ -21,7 +21,8 @@ class FormularioController extends Controller
     // Metodo: GET
     //  ruta: /formularios
     public function index() {
-        $formularios = ModFormulario::all();
+        //$formularios = ModFormulario::all();
+        $formularios = ModFormulario::where('estado', 1)->get();
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
             ['name' => 'Formularios', 'url' => ''],
@@ -258,7 +259,7 @@ public function eliminar($FRM_id){
             if ($respuestasTotales > 0) {
                 $mensajeDetalle .= "• {$respuestasTotales} respuestas registradas en total\n\n<br/><br/>";
                 // descomentar si se quiere mostrar el detalle por instancia
-                
+
                 // $mensajeDetalle .= "Detalle de respuestas por instancia:\n<br/>";
                 // $mensajeDetalle .= implode("\n<br/>", $detalleRespuestas);
             }
