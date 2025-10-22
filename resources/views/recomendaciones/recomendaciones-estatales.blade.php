@@ -79,7 +79,7 @@
 
                         <hr>
                         <!-- Avances para esta recomendación -->
-                        <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> SEGUIMIENTO A LA RECOMENDACIÓN: </strong>
+                        <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> ACCIONES PARA EL CUMPLIMIENTO A LA RECOMENDACIÓN: </strong>
                         @foreach ($progresos as $p=>$progreso)
                             @if ($reco['REC_id'] == $p)
                                 {{-- @dump($progreso) --}}

@@ -58,6 +58,10 @@ Route::get('/formulario/imprimir/{FRM_id}', [FormularioController::class, 'impri
 
 // Rutas para editar formulario
 Route::get('/formulario/editar/{FRM_id}', [FormularioController::class, 'editar'])->name('formulario.editar');
+
+Route::delete('/formulario/{FRM_id}/eliminar', [FormularioController::class, 'eliminar'])
+    ->name('formulario.eliminar');
+// Route::get('/formulario/eliminar/{FRM_id}', [FormularioController::class, 'eliminar'])->name('formulario.eliminar');
 Route::put('/formulario/actualizar/{FRM_id}', [FormularioController::class, 'actualizar'])->name('formulario.actualizar');
 
 

@@ -41,11 +41,14 @@
                             </h5>
                         </div>
                         <div class="card-footer d-flex justify-content-between">
-                            <a class="btn btn-light" href="{{ route('formulario.verFormularioCreado', $formulario->FRM_id) }}">
-                                <i class="bi bi-eye"></i> Ver formulario
+                            <a class="btn btn-info" href="{{ route('formulario.verFormularioCreado', $formulario->FRM_id) }}">
+                                <i class="bi bi-eye"></i> Ver
                             </a>
                             <a class="btn btn-primary" href="{{ route('formulario.editar', $formulario->FRM_id) }}">
-                                <i class="bi bi-pencil-square"></i> Editar formulario
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </a>
+                            <a class="btn btn-danger" href="{{ route('formulario.eliminar', $formulario->FRM_id) }}">
+                                <i class="bi bi-trash"></i> Eliminar
                             </a>
                         </div>
                     </div>
@@ -57,7 +60,82 @@
 </div>
 
 <script>
+    
+    
+
     $(document).ready(function() {
+        $(document).on('click', '.btn-danger', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            var card = $(this).closest('.col-md-4');
+            
+            Swal.fire({
+                title: '¿Estás seguro?',
+                // text: "Esta acción desactivará el formulario (no elimina)",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Hacer la petición AJAX para eliminar
+                    $.ajax({
+                        url: url,
+                        method: 'DELETE',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                // Eliminar el card del DOM
+                                card.fadeOut(300, function() {
+                                    $(this).remove();
+                                });
+                                
+                                Swal.fire(
+                                    '¡Desactivado!',
+                                    response.message,
+                                    'success'
+                                );
+                            } else {
+                                // Mostrar detalles del porqué no se puede eliminar
+                                var mensajeDetalle = response.message;
+                                if (response.stats) {
+                                    mensajeDetalle += '\n\n📊 Estadísticas:';
+                                    mensajeDetalle += '\n• Preguntas: ' + response.stats.preguntas;
+                                    mensajeDetalle += '\n• Instancias: ' + response.stats.agrupadores;
+                                    mensajeDetalle += '\n• Respuestas: ' + response.stats.respuestas;
+                                }
+                                
+                                Swal.fire({
+                                    title: 'No se puede desactivar',
+                                    text: mensajeDetalle,
+                                    icon: 'error',
+                                    width: 600,
+                                    customClass: {
+                                        popup: 'text-left'
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr) {
+                            var errorMessage = 'Error al desactivar el formulario';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            Swal.fire(
+                                'Error',
+                                errorMessage,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+        
         // Detectar la escritura del usuario en el campo de búsqueda
         $('#titulo').on('keyup', function() {
             var titulo = $(this).val();

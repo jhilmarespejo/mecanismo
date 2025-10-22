@@ -224,6 +224,89 @@ class FormularioController extends Controller
         return view('formulario.formulario-editar', compact('formulario', 'preguntas', 'breadcrumbs'));
     }
     
+    // función que elimina un formulario seleccionado por el usuario verificando que no tenga respuestas asociadas
+// ruta: .../formulario/1283/eliminar
+
+public function eliminar($FRM_id){
+    try {
+        $formulario = ModFormulario::findOrFail($FRM_id);
+        
+        // Obtener estadísticas detalladas
+        $cantidadPreguntas = ModPreguntasFormulario::where('FK_FRM_id', $FRM_id)->count();
+        
+        $agrupadores = ModAgrupadorFormulario::where('FK_FRM_id', $FRM_id)->get();
+        $cantidadAgrupadores = $agrupadores->count();
+        
+        // Contar respuestas por cada agrupador
+        $respuestasTotales = 0;
+        $detalleRespuestas = [];
+        
+        foreach ($agrupadores as $agrupador) {
+            $respuestasCount = DB::table('respuestas')->where('FK_AGF_id', $agrupador->AGF_id)->count();
+            $respuestasTotales += $respuestasCount;
+            if ($respuestasCount > 0) {
+                $detalleRespuestas[] = "Instancia {$agrupador->AGF_id}: {$respuestasCount} respuestas";
+            }
+        }
+        
+        // Verificar si tiene elementos que impidan la eliminación
+        if ($respuestasTotales > 0 || $cantidadAgrupadores > 0) {
+            $mensajeDetalle = "Este formulario no puede ser eliminado porque tiene:<br/>";
+            $mensajeDetalle .= "• {$cantidadPreguntas} preguntas configuradas\n<br/>";
+            $mensajeDetalle .= "• {$cantidadAgrupadores} veces aplicado\n<br/>";
+            
+            if ($respuestasTotales > 0) {
+                $mensajeDetalle .= "• {$respuestasTotales} respuestas registradas en total\n\n<br/><br/>";
+                // descomentar si se quiere mostrar el detalle por instancia
+                
+                // $mensajeDetalle .= "Detalle de respuestas por instancia:\n<br/>";
+                // $mensajeDetalle .= implode("\n<br/>", $detalleRespuestas);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $mensajeDetalle,
+                'stats' => [
+                    'preguntas' => $cantidadPreguntas,
+                    'agrupadores' => $cantidadAgrupadores,
+                    'respuestas' => $respuestasTotales,
+                    'detalle_respuestas' => $detalleRespuestas
+                ]
+            ], 400);
+        }
+        
+        // Si no tiene elementos que impidan la eliminación, proceder con soft delete
+        DB::transaction(function () use ($FRM_id, $formulario) {
+            // 1. Desactivar las relaciones de preguntas en r_bpreguntas_formularios
+            DB::table('r_bpreguntas_formularios')
+                ->where('FK_FRM_id', $FRM_id)
+                ->update(['estado' => 0]);
+            
+            // 2. Actualizar el estado del formulario a 0 (soft delete)
+            $formulario->update(['estado' => 0]);
+        });
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Formulario desactivado correctamente.',
+            'stats' => [
+                'preguntas_afectadas' => $cantidadPreguntas
+            ]
+        ]);
+        
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'El formulario no existe.'
+        ], 404);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al eliminar el formulario: ' . $e->getMessage()
+        ], 500);
+    }
+}
+    
 
     // función que guarda los datos editados de un formulario seleccionado por el usuario 
     // ruta: .../formulario/1283/editar
