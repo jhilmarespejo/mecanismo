@@ -48,12 +48,14 @@ class RecomendacionesController extends Controller{
     // ruta: recomendaciones/guardarNuevaRecomendacion
     public function guardarNuevaRecomendacion( Request $request ){
         $ids = [];
-        // dump($request->except('_token'));exit;
+        //dump($request->except('_token'));exit;
 
         $validator = Validator::make( $request->all(), [
             'REC_recomendacion' => 'required|min:5',
             'REC_autoridad_competente' => 'required|min:5',
             'ARC_descripcion.*' => 'required|min:5',
+            'REC_fecha_recomendacion_estatal' => 'required|date',
+            
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30505 ', // 30 mb
         ], [
             'required' => '¡El dato es requerido!',
@@ -63,8 +65,9 @@ class RecomendacionesController extends Controller{
             'min' => 'Dato muy reducido',
             'ARC_descripcion.required' => 'Agregue una descripción',
         ]);
-
+        
         if ( $validator->fails() ){
+            //dump($validator->errors());exit;
             return response()->json( [ 'errors' => $validator->errors() ] );
         } else {
             DB::beginTransaction();
@@ -75,16 +78,16 @@ class RecomendacionesController extends Controller{
                     $rec = ModRecomendacion::create( [
                         'REC_recomendacion' => $request->REC_recomendacion, 
                         'REC_estado' => $request->VIS_estado, 
-                        'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 
+                        'REC_fechaRecomendacion' => $request->REC_fecha_recomendacion_estatal, 
                         'REC_autoridad_competente' => $request->REC_autoridad_competente] );
                 }elseif($request->VIS_id){
                     $rec = ModRecomendacion::create( [
                         'REC_recomendacion' => $request->REC_recomendacion, 
                         'FK_VIS_id' => $request->VIS_id, 
-                        'REC_fechaRecomendacion' => date("d-m-Y h:i:s"), 
+                        'REC_fechaRecomendacion' => $request->REC_fecha_recomendacion_estatal, 
                         'REC_autoridad_competente' => $request->REC_autoridad_competente] );
                 }
-
+                
 
                 //  dump($REC->REC_id);exit;
                 // verifica si el request trae un archivo
@@ -199,14 +202,27 @@ class RecomendacionesController extends Controller{
 
     // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una visita, son recomendaciones al gobierno boliviano y son provienen den informe anual del MNP
     // metodo: GET
-    // ruta: .../recomendaciones/estatales
-    public function recomendacionesEstatales(){
+    // ruta: .../recomendacionesEstatales
+    public function recomendacionesEstatales(Request $request){
+        $anioActual = date('Y');
+        if( is_null($request->anio_actual ) ){
+            $anioActual = date('Y');
+        } else {
+            $anioActual = $request->anio_actual;
+        }
+        $breadcrumbs = [
+            ['name' => 'Inicio', 'url' => route('panel')],
+            // ['name' => 'Módulo de asesoría', 'url' => route('establecimientos.index')],
+            ['name' => 'Recomendaciones informe anual', 'url' => ''],
+        ];
+        // dump($anioActual);exit;
         DB::enableQueryLog();
         
         $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
         ->from('recomendaciones as r')
         ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
         ->where('r.REC_estado', 'Si')
+        ->whereYear('r.REC_fechaRecomendacion', $anioActual)
         ->orderBy('r.REC_id', 'desc')
         ->get()->toArray();
         
@@ -214,6 +230,7 @@ class RecomendacionesController extends Controller{
         ->from('seguimiento_recomendaciones as sr')
         ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
         ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
+        ->whereYear('r.REC_fechaRecomendacion', $anioActual)
         ->where('r.REC_estado', "Si")
         ->get()->toArray();
         
@@ -225,7 +242,7 @@ class RecomendacionesController extends Controller{
         
         // dump($recomendaciones, $progresos);exit;
         
-        return view('recomendaciones.recomendaciones-estatales', compact('progresos', 'recomendaciones'));
+        return view('recomendaciones.recomendaciones-estatales', compact('progresos', 'recomendaciones', 'breadcrumbs', 'anioActual'));
         //mostrar una ventana donde se realicen recomendaciones al estado
     }
 

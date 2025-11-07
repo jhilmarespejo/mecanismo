@@ -2,138 +2,165 @@
 @section('title', 'Recomendaciones Estatales')
 @section('content')
 
-
-<div class="accordion" id="accordion_observaciones">
-    {{-- Controles para nueva recomendacion --}}
-    <div class="accordion-item bg-primary">
-        <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button bg-primary text-light text-shadow collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevo" aria-expanded="false" aria-controls="collapseNuevo">
-            NUEVA RECOMENDACION ESTATAL
-            </button>
-        </h2>
-        <div id="collapseNuevo" class="aaccordion-collapse ms-2 collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_observaciones">
-            <div class="accordion-body bg-light">
-                <form id="form_recomendaciones_1" method="POST" enctype="multipart/form-data" action="javascript:void(0)">@csrf
-                    <input type="hidden" name="VIS_estado" value="Si">
-
-                    <div class="form-floating border-bottom row" id="recomendacion_1">
-                        <textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea>
-                        <label>Recomendación:</label>
-                        <small class="error text-danger" id="REC_recomendacion_err" ></small>
-                    </div>
-                    <div class="form-floating border-bottom row mt-1" id="">
-
-                        <input type="text" class="form-control" name="REC_autoridad_competente">
-                        <label>Autoridad competente:</label>
-                        <small class="error text-danger" id="REC_autoridad_competente_err" ></small>
-                    </div>
-
-                    <div class="row my-1 " id="archivos">  </div>
-                    <div id="botones_1">
-                        <span class="my-2 btn btn-danger nuevo-adjunto text-light text-shadow" id="nuevo_archivo_1"><i class="bi bi-file-earmark-plus adicionar-archivo"></i> Adicionar imagen o documento
-                        </span>
-                        <span class="my-2 btn btn-primary d-none cargando text-light text-shadow" id="cargando_1" disabled="">
-                            <span class="spinner-border spinner-border-sm ">
-                            </span> Guardando... </span>
-                            <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Recomendación
-                        </span>
-                    </div>
-                </form>
-            </div>
+<div class="container mt-3 p-4 bg-white">
+        @include('layouts.breadcrumbs', $breadcrumbs)
+        <div class="d-flex justify-content-between align-items-center mb-3 ">
+            <h2 class="text-primary">Módulo Recomendaciones del Informe anual</h2>
+           
         </div>
-    </div>
-
-    {{-- SE MUESTRAN LAS recomendaciones  --}}
-    @if (count($recomendaciones)>0)
-        @foreach ( $recomendaciones as $k=>$reco )
-        {{-- @dump(($reco['archivos'])) --}}
-            <div class="accordion-reco bg-info mt-2">
-                <h2 class="accordion-header " id="heading_{{ $reco['REC_id'] }}">
-                    <button class="accordion-button collapsed bg-info text-light text-shadow" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ $reco['REC_id'] }}" aria-expanded="false" aria-controls="collapse_{{ $reco['REC_id'] }}">
-                        <strong>{{ count($recomendaciones)-$k}}.</strong>&nbsp; {{ substr($reco['REC_recomendacion'], 0, 25) }}... </span>
+        <!-- Select box para Filtrar por el año -->
+        <div class="row m-4 p-3 " style="background-color: #cfe2ff;">
+            <form action="/recomendacionesEstatales" method="GET" class="mb-3">
+                <label for="anio_actual" class="col-sm-8 col-form-label col-form-label-lg">Filtrar por año:</label>
+                <select name="anio_actual" id="anio_actual" class="form-select form-select-lg" onchange="this.form.submit()">
+                    <option value="">Seleccionar año</option>
+                    <option value="2024" {{ $anioActual == '2024' ? 'selected' : '' }}>2024</option>
+                    <option value="2025" {{ $anioActual == '2025' ? 'selected' : '' }}>2025</option>
+                    <option value="2026" {{ $anioActual == '2026' ? 'selected' : '' }}>2026</option>
+                    <option value="2027" {{ $anioActual == '2027' ? 'selected' : '' }}>2027</option>
+                    <option value="2028" {{ $anioActual == '2028' ? 'selected' : '' }}>2028</option>
+                </select>
+            </form>
+        </div>
+        
+        <div class="accordion" id="accordion_observaciones">
+            {{-- Controles para nueva recomendacion --}}
+            <div class="accordion-item bg-primary">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button bg-primary text-light text-shadow collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevo" aria-expanded="false" aria-controls="collapseNuevo">
+                    NUEVA RECOMENDACION ESTATAL
                     </button>
                 </h2>
-                <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
+                <div id="collapseNuevo" class="aaccordion-collapse ms-2 collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_observaciones">
                     <div class="accordion-body bg-light">
-                       <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>REcomendacion: </strong>{{ $reco['REC_recomendacion'] }} </p>
-                       <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la recomendación: </strong><span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
-                       <p>
-                        @if ($reco['REC_cumplimiento'] == 0)
-                            <i class="bi bi-x-circle text-danger text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-danger ">Recomendacion no cumplida </span>
-                        @elseif ($reco['REC_cumplimiento'] == 1)
-                            <i class="bi bi-check-circle text-success text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-success ">Recomendacion cumplida </span>
-                        @elseif ($reco['REC_cumplimiento'] == 2)
-                            <i class="bi bi-upload text-warning text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-warning ">Recomendacion parcialmente cumplida </span>
-                        @endif
-                        </p>
-                        <p><i class="bi bi-person-check-fill text-primary fs-5"></i> <strong> Autoridad competente: </strong> <span class="fw-bold text-primary"> {{ $reco['REC_autoridad_competente'] }}</span></p>
-                        <p><i class="bi bi-file-richtext text-primary fs-5"></i> Archivos adjuntos:
-                            @if (count($reco['archivos']) > 0 )
-                                @include('includes.archivos', ['archivos' => $reco['archivos'] ])
-                            @else
-                                <div class="alert alert-warning" role="alert">
-                                    <i class="bi bi-info-circle"></i> Sin archivos adjuntos
-                                </div>
-                            @endif
-                        </p>
+                        <form id="form_recomendaciones_1" method="POST" enctype="multipart/form-data" action="javascript:void(0)">@csrf
+                            <input type="hidden" name="VIS_estado" value="Si">
 
-                        <hr>
-                        <!-- Avances para esta recomendación -->
-                        <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> ACCIONES PARA EL CUMPLIMIENTO A LA RECOMENDACIÓN: </strong>
-                        @foreach ($progresos as $p=>$progreso)
-                            @if ($reco['REC_id'] == $p)
-                                {{-- @dump($progreso) --}}
-                                {{-- @dump($avance['SREC_descripcion']) --}}
-                                <div class="accordion mt-2" id="accordionAvance_{{$reco['REC_id']}}">
-                                @foreach ($progreso as $avance)
-                                    <div class="accordion-item">
-                                        
-                                            <h2 class="accordion-header" id="headingAvance{{$avance['SREC_id']}}">
-                                                
-                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvance{{$avance['SREC_id']}}" aria-expanded="true" aria-controls="collapseAvance{{$avance['SREC_id']}}">
-                                                    <i class="bi bi-calendar3 text-blue"></i> <strong>Fecha de registro:</strong> <span class="fw-bold ms-4">{{$avance['SREC_fecha_seguimiento']}}</span>
-                                                </button>
-                                            </h2>
-                                        <div id="collapseAvance{{$avance['SREC_id']}}" class="accordion-collapse collapse" aria-labelledby="headingAvance{{$avance['SREC_id']}}" data-bs-parent="#accordionAvance_{{$reco['REC_id']}}">
-                                            <div class="accordion-body">
-                                            <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i><strong> Detalles sobre el progreso: </strong> {{$avance['SREC_descripcion']}}</p>
-                                            <p><i class="bi bi-paperclip text-primary fs-5"></i> <strong>Archivos adjuntos:</strong> 
-                                                @if ( count($avance['archivos']) > 0 )
-                                                    @include('includes.archivos', ['archivos' => $avance['archivos'] ])
-                                                @else
-                                                    <div class="alert alert-warning" role="alert">
-                                                        <i class="bi bi-info-circle"></i> Sin archivos adjuntos
-                                                    </div>
-                                                @endif
-                                            </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            @endif
-                        @endforeach
+                            <div class="form-floating border-bottom row" id="recomendacion_1">
+                                <textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea>
+                                <label>Recomendación:</label>
+                                <small class="error text-danger" id="REC_recomendacion_err" ></small>
+                            </div>
+                            <div class="form-floating border-bottom row mt-1" id="">
+                                
+                                <input type="text" class="form-control" name="REC_autoridad_competente">
+                                <label>Autoridad competente:</label>
+                                <small class="error text-danger" id="REC_autoridad_competente_err" ></small>
+                            </div>
+                            <div class="form-floating border-bottom row mt-1" id="">
+                                
+                                <input type="date" class="form-control" name="REC_fecha_recomendacion_estatal">
+                                <label>Fecha de recomendación:</label>
+                                <small class="error text-danger" id="REC_fecha_recomendacion_estatal_err" ></small>
+                            </div>
 
-                        {{-- Boton para agregar nuevos progresos o avances en la recomendacion --}}
-                        <hr>
-                            @if ( $reco['REC_cumplimiento'] == 0 || $reco['REC_cumplimiento'] == 2 )
-                                <p class="p-2 mt-2 fs-6 btn bg-primary text-light text-shadow box-shadow" data-bs-target="#modal_cumplimiento" data-bs-toggle="modal" title="Marcar cumplimiento" onclick="agregarCumplimiento('{{$reco['REC_recomendacion']}}', '{{$reco['REC_fechaRecomendacion']}}', '{{$reco['REC_id']}}')">
-                                    <i class="bi bi-fast-forward-circle fs-5 acciones" > </i> Registrar avances en ésta recomendación
-                                </p>
-                            @endif
-                        <hr>
-
+                            <div class="row my-1 " id="archivos">  </div>
+                            <div id="botones_1">
+                                <span class="my-2 btn btn-danger nuevo-adjunto text-light text-shadow" id="nuevo_archivo_1"><i class="bi bi-file-earmark-plus adicionar-archivo"></i> Adicionar imagen o documento
+                                </span>
+                                <span class="my-2 btn btn-primary d-none cargando text-light text-shadow" id="cargando_1" disabled="">
+                                    <span class="spinner-border spinner-border-sm ">
+                                    </span> Guardando... </span>
+                                    <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Recomendación
+                                </span>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        @endforeach
-    @else
-        <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
-            Aún no se asignaron recomendaciones Estatales
+
+            {{-- SE MUESTRAN LAS recomendaciones  --}}
+            @if (count($recomendaciones)>0)
+                @foreach ( $recomendaciones as $k=>$reco )
+                {{-- @dump(($reco['archivos'])) --}}
+                    <div class="accordion-reco bg-info mt-2">
+                        <h2 class="accordion-header " id="heading_{{ $reco['REC_id'] }}">
+                            <button class="accordion-button collapsed bg-info text-light text-shadow" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ $reco['REC_id'] }}" aria-expanded="false" aria-controls="collapse_{{ $reco['REC_id'] }}">
+                                <strong>{{ count($recomendaciones)-$k}}.</strong>&nbsp; {{ substr($reco['REC_recomendacion'], 0, 25) }}... </span>
+                            </button>
+                        </h2>
+                        <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
+                            <div class="accordion-body bg-light">
+                            <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>REcomendacion: </strong>{{ $reco['REC_recomendacion'] }} </p>
+                            <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la recomendación: </strong><span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
+                            <p>
+                                @if ($reco['REC_cumplimiento'] == 0)
+                                    <i class="bi bi-x-circle text-danger text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-danger ">Recomendacion no cumplida </span>
+                                @elseif ($reco['REC_cumplimiento'] == 1)
+                                    <i class="bi bi-check-circle text-success text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-success ">Recomendacion cumplida </span>
+                                @elseif ($reco['REC_cumplimiento'] == 2)
+                                    <i class="bi bi-upload text-warning text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-warning ">Recomendacion parcialmente cumplida </span>
+                                @endif
+                                </p>
+                                <p><i class="bi bi-person-check-fill text-primary fs-5"></i> <strong> Autoridad competente: </strong> <span class="fw-bold text-primary"> {{ $reco['REC_autoridad_competente'] }}</span></p>
+                                <p><i class="bi bi-file-richtext text-primary fs-5"></i> Archivos adjuntos:
+                                    @if (count($reco['archivos']) > 0 )
+                                        @include('includes.archivos', ['archivos' => $reco['archivos'] ])
+                                    @else
+                                        <div class="alert alert-warning" role="alert">
+                                            <i class="bi bi-info-circle"></i> Sin archivos adjuntos
+                                        </div>
+                                    @endif
+                                </p>
+
+                                <hr>
+                                <!-- Avances para esta recomendación -->
+                                <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> ACCIONES PARA EL CUMPLIMIENTO A LA RECOMENDACIÓN: </strong>
+                                @foreach ($progresos as $p=>$progreso)
+                                    @if ($reco['REC_id'] == $p)
+                                        {{-- @dump($progreso) --}}
+                                        {{-- @dump($avance['SREC_descripcion']) --}}
+                                        <div class="accordion mt-2" id="accordionAvance_{{$reco['REC_id']}}">
+                                        @foreach ($progreso as $avance)
+                                            <div class="accordion-item">
+                                                
+                                                    <h2 class="accordion-header" id="headingAvance{{$avance['SREC_id']}}">
+                                                        
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvance{{$avance['SREC_id']}}" aria-expanded="true" aria-controls="collapseAvance{{$avance['SREC_id']}}">
+                                                            <i class="bi bi-calendar3 text-blue"></i> <strong>Fecha de registro:</strong> <span class="fw-bold ms-4">{{$avance['SREC_fecha_seguimiento']}}</span>
+                                                        </button>
+                                                    </h2>
+                                                <div id="collapseAvance{{$avance['SREC_id']}}" class="accordion-collapse collapse" aria-labelledby="headingAvance{{$avance['SREC_id']}}" data-bs-parent="#accordionAvance_{{$reco['REC_id']}}">
+                                                    <div class="accordion-body">
+                                                    <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i><strong> Detalles sobre el progreso: </strong> {{$avance['SREC_descripcion']}}</p>
+                                                    <p><i class="bi bi-paperclip text-primary fs-5"></i> <strong>Archivos adjuntos:</strong> 
+                                                        @if ( count($avance['archivos']) > 0 )
+                                                            @include('includes.archivos', ['archivos' => $avance['archivos'] ])
+                                                        @else
+                                                            <div class="alert alert-warning" role="alert">
+                                                                <i class="bi bi-info-circle"></i> Sin archivos adjuntos
+                                                            </div>
+                                                        @endif
+                                                    </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @endforeach
+
+                                {{-- Boton para agregar nuevos progresos o avances en la recomendacion --}}
+                                <hr>
+                                    @if ( $reco['REC_cumplimiento'] == 0 || $reco['REC_cumplimiento'] == 2 )
+                                        <p class="p-2 mt-2 fs-6 btn bg-primary text-light text-shadow box-shadow" data-bs-target="#modal_cumplimiento" data-bs-toggle="modal" title="Marcar cumplimiento" onclick="agregarCumplimiento('{{$reco['REC_recomendacion']}}', '{{$reco['REC_fechaRecomendacion']}}', '{{$reco['REC_id']}}')">
+                                            <i class="bi bi-fast-forward-circle fs-5 acciones" > </i> Registrar acciones para el cumplimiento de ésta recomendación
+                                        </p>
+                                    @endif
+                                <hr>
+
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div class="alert alert-danger mx-5 mt-2 text-center" role="alert">
+                    Aún no se asignaron recomendaciones Estatales
+                </div>
+            @endif
+
+
         </div>
-    @endif
-
-
 </div>
 
 
@@ -142,7 +169,7 @@
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" >Registro de avances o progresos para el cumplimiento de ésta recomendación </h5>
+                <h5 class="modal-title" >Registro de acciones para el cumplimiento de ésta recomendación </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" id="recomendaciones_form" enctype="multipart/form-data" action="javascript:void(0)" >@csrf
@@ -166,15 +193,15 @@
                     {{-- mensaje de error: --}}
                     <small class="text-danger error" id="REC_cumplimiento_err"></small>
 
-                    <label class="form-label mt-4">Fecha de cumplimiento: </label>
+                    <label class="form-label mt-4">Fecha de registro: </label>
                     <input type="date"  id="fecha" class="form-control" name="SREC_fecha_seguimiento" value="{{ date("Y-m-d"); }}">
 
                     {{-- <input type="date" id="start" name="trip-start" value="2018-07-22" min="2018-01-01" max="2018-12-31"> --}}
-
+                    
                     {{-- mensaje de error: --}}
                     <small class="text-danger error" id="SREC_fecha_seguimiento_err"></small>
                     <br/>
-                    <label class="form-label mt-3">Detalles del cumplimiento: </label>
+                    <label class="form-label mt-3">Detalles de la acción: </label>
                     <textarea name="SREC_descripcion" id="detalles" class="form-control" rows="3"></textarea>
                     {{-- mensaje de error: --}}
                     <small class="text-danger error" id="SREC_descripcion_err"></small>
