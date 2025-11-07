@@ -21,19 +21,25 @@
                     <label for="edu_beneficiarios" class="form-label">Beneficiarios <span class="text-danger">*</span></label>
                     <select name="edu_beneficiarios" id="edu_beneficiarios" class="form-select">
                         <option value="">Selecciona una opción</option>
+                        <option value="Policías" {{ old('edu_beneficiarios') == 'Policías' ? 'selected' : '' }}>Policías</option>
+                        <option value="Militares" {{ old('edu_beneficiarios') == 'Militares' ? 'selected' : '' }}>Militares</option>
+                        <option value="Personas privadas de libertad" {{ old('edu_beneficiarios') == 'Personas privadas de libertad' ? 'selected' : '' }}>Personas privadas de libertad</option>
+                        <option value="Peronal de centros de acogimiento" {{ old('edu_beneficiarios') == 'Peronal de centros de acogimiento' ? 'selected' : '' }}>Peronal de centros de acogimiento</option>
+                        <option value="Niños" {{ old('edu_beneficiarios') == 'Niños' ? 'selected' : '' }}>Niños</option>
+                        <option value="Niños y adolescentes" {{ old('edu_beneficiarios') == 'Niños y adolescentes' ? 'selected' : '' }}>Niños y adolescentes</option>
+                        <option value="Soldados" {{ old('edu_beneficiarios') == 'Soldados' ? 'selected' : '' }}>Soldados</option>
                         <option value="Abogados defensores" {{ old('edu_beneficiarios') == 'Abogados defensores' ? 'selected' : '' }}>Abogados defensores</option>
-                        <option value="Abogados del Estado" {{ old('edu_beneficiarios') == 'Abogados del Estado' ? 'selected' : '' }}>Abogados del Estado</option>
-                        <option value="Comisiones de derechos humanos" {{ old('edu_beneficiarios') == 'Comisiones de derechos humanos' ? 'selected' : '' }}>Comisiones de derechos humanos</option>
+                        {{-- <option value="Abogados del Estado" {{ old('edu_beneficiarios') == 'Abogados del Estado' ? 'selected' : '' }}>Abogados del Estado</option> --}}
+                        {{-- <option value="Comisiones de derechos humanos" {{ old('edu_beneficiarios') == 'Comisiones de derechos humanos' ? 'selected' : '' }}>Comisiones de derechos humanos</option> --}}
                         <option value="Directores de cárceles" {{ old('edu_beneficiarios') == 'Directores de cárceles' ? 'selected' : '' }}>Directores de cárceles</option>
                         <option value="Fiscales y jueces" {{ old('edu_beneficiarios') == 'Fiscales y jueces' ? 'selected' : '' }}>Fiscales y jueces</option>
-                        <option value="Guardias Penitenciarios" {{ old('edu_beneficiarios') == 'Guardias Penitenciarios' ? 'selected' : '' }}>Guardias Penitenciarios</option>
-                        <option value="Militares" {{ old('edu_beneficiarios') == 'Militares' ? 'selected' : '' }}>Militares</option>
+                        {{-- <option value="Guardias Penitenciarios" {{ old('edu_beneficiarios') == 'Guardias Penitenciarios' ? 'selected' : '' }}>Guardias Penitenciarios</option> --}}
                         <option value="Médicos forenses" {{ old('edu_beneficiarios') == 'Médicos forenses' ? 'selected' : '' }}>Médicos forenses</option>
                         <option value="Periodistas" {{ old('edu_beneficiarios') == 'Periodistas' ? 'selected' : '' }}>Periodistas</option>
                         <option value="Personal administrativo de cárceles" {{ old('edu_beneficiarios') == 'Personal administrativo de cárceles' ? 'selected' : '' }}>Personal administrativo de cárceles</option>
                         <option value="Personal de salud en centros de detención" {{ old('edu_beneficiarios') == 'Personal de salud en centros de detención' ? 'selected' : '' }}>Personal de salud en centros de detención</option>
                         <option value="Personal penitenciario" {{ old('edu_beneficiarios') == 'Personal penitenciario' ? 'selected' : '' }}>Personal penitenciario</option>
-                        <option value="Policías y Militares" {{ old('edu_beneficiarios') == 'Policías y Militares' ? 'selected' : '' }}>Policías y Militares</option>
+                        {{-- <option value="Policías y Militares" {{ old('edu_beneficiarios') == 'Policías y Militares' ? 'selected' : '' }}>Policías y Militares</option> --}}
                         <option value="Personal Centro para Adultos Mayores" {{ old('edu_beneficiarios') == 'Personal Centro para Adultos Mayores' ? 'selected' : '' }}>Personal Centro para Adultos Mayores</option>
                     </select>
                     @error('edu_beneficiarios')

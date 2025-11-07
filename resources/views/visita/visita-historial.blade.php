@@ -261,19 +261,29 @@
                                             <div class="col-9">
                                                 <h5>Reglamento del centro</h5>
                                                 @if(isset($documentos['reglamento']))
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            data-bs-toggle="modal" data-bs-target="#modalVerReglamento">
-                                                        <i class="bi bi-eye"></i> Ver documento
-                                                    </button>
-                                                    <a href="{{ asset($documentos['reglamento']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
-                                                        <i class="bi bi-download"></i> Descargar
-                                                    </a>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-primary" 
+                                                                data-bs-toggle="modal" data-bs-target="#modalVerReglamento">
+                                                            <i class="bi bi-eye"></i> Ver documento
+                                                        </button>
+                                                        <a href="{{ asset($documentos['reglamento']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-download"></i> Descargar
+                                                        </a>
+                                                        @if(Auth::user()->rol == 'Administrador')
+                                                            <button type="button" class="btn btn-sm btn-warning" 
+                                                                    data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
+                                                                    onclick="prepararModal('reglamento', 'modificar')">
+                                                                <i class="bi bi-arrow-repeat"></i> Cambiar
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                    
                                                 @else
-                                                    <p class="text-muted">No disponible</p>
+                                                    
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('reglamento')">  
+                                                                onclick="prepararModal('reglamento', 'nuevo')">  
                                                             <i class="bi bi-upload"></i> Subir documento
                                                         </button>
                                                     @endif
@@ -291,19 +301,29 @@
                                             <div class="col-9">
                                                 <h5>Fotografía de la fachada</h5>
                                                 @if(isset($documentos['fachada']))
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            data-bs-toggle="modal" data-bs-target="#modalVerFachada">
-                                                        <i class="bi bi-eye"></i> Ampliar imagen
-                                                    </button>
-                                                    <a href="{{ asset($documentos['fachada']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
-                                                        <i class="bi bi-download"></i> Descargar
-                                                    </a>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-primary" 
+                                                                data-bs-toggle="modal" data-bs-target="#modalVerFachada">
+                                                            <i class="bi bi-eye"></i> Ampliar imagen
+                                                        </button>
+                                                        <a href="{{ asset($documentos['fachada']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-download"></i> Descargar
+                                                        </a>
+                                                        @if(Auth::user()->rol == 'Administrador')
+                                                            <button type="button" class="btn btn-sm btn-warning" 
+                                                                    data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
+                                                                    onclick="prepararModal('fachada', 'modificar')">
+                                                                <i class="bi bi-arrow-repeat"></i> Cambiar
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                    
                                                 @else
-                                                    <p class="text-muted">No disponible</p>
+                                                    
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('fachada')" > 
+                                                                onclick="prepararModal('fachada', 'nuevo')"> 
                                                             <i class="bi bi-upload"></i> Subir imagen
                                                         </button>
                                                     @endif
@@ -324,19 +344,29 @@
                                             <div class="col-9">
                                                 <h5>Licencia de funcionamiento</h5>
                                                 @if(isset($documentos['licencia']))
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            data-bs-toggle="modal" data-bs-target="#modalVerLicencia">
-                                                        <i class="bi bi-eye"></i> Ver documento
-                                                    </button>
-                                                    <a href="{{ asset($documentos['licencia']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
-                                                        <i class="bi bi-download"></i> Descargar
-                                                    </a>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-sm btn-primary" 
+                                                                data-bs-toggle="modal" data-bs-target="#modalVerLicencia">
+                                                            <i class="bi bi-eye"></i> Ver documento
+                                                        </button>
+                                                        <a href="{{ asset($documentos['licencia']->ARC_ruta) }}" download class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-download"></i> Descargar
+                                                        </a>
+                                                        @if(Auth::user()->rol == 'Administrador')
+                                                            <button type="button" class="btn btn-sm btn-warning" 
+                                                                    data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
+                                                                    onclick="prepararModal('licencia', 'modificar')">
+                                                                <i class="bi bi-arrow-repeat"></i> Cambiar
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                    
                                                 @else
-                                                    <p class="text-muted">No disponible</p>
+                                                    
                                                     @if(Auth::user()->rol == 'Administrador')
                                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                                 data-bs-toggle="modal" data-bs-target="#modalSubirDocumento" 
-                                                                onclick="prepararModal('licencia')"> 
+                                                                onclick="prepararModal('licencia', 'nuevo')"> 
                                                             <i class="bi bi-upload"></i> Subir documento
                                                         </button>
                                                     @endif
@@ -751,7 +781,7 @@ function guardarEstablecimiento() {
     });
 }
 
-function prepararModal(tipoDocumento) {
+function prepararModal(tipoDocumento, accion) {
     const tipoDocumentoElement = document.getElementById('tipo_documento');
     const modalTitle = document.getElementById('modalSubirDocumentoLabel');
     const documentoLabel = document.getElementById('documento_label');
@@ -765,21 +795,33 @@ function prepararModal(tipoDocumento) {
     // Establecer el tipo de documento en el campo oculto
     tipoDocumentoElement.value = tipoDocumento;
     
-    // Cambiar el título del modal según el tipo
+    // Cambiar el título del modal según el tipo y acción
+    let titulo = '';
+    let textoLabel = '';
+    
     switch(tipoDocumento) {
         case 'reglamento':
-            modalTitle.textContent = 'Subir Reglamento del Centro';
-            documentoLabel.textContent = 'Seleccione el archivo del reglamento (PDF recomendado)';
+            titulo = (accion === 'modificar') ? 'Modificar Reglamento del Centro' : 'Subir Reglamento del Centro';
+            textoLabel = (accion === 'modificar') ? 
+                'Seleccione el nuevo archivo del reglamento (reemplazará el actual)' : 
+                'Seleccione el archivo del reglamento (PDF recomendado)';
             break;
         case 'licencia':
-            modalTitle.textContent = 'Subir Licencia de Funcionamiento';
-            documentoLabel.textContent = 'Seleccione el archivo de la licencia (PDF o imagen)';
+            titulo = (accion === 'modificar') ? 'Modificar Licencia de Funcionamiento' : 'Subir Licencia de Funcionamiento';
+            textoLabel = (accion === 'modificar') ? 
+                'Seleccione el nuevo archivo de la licencia (reemplazará el actual)' : 
+                'Seleccione el archivo de la licencia (PDF o imagen)';
             break;
         case 'fachada':
-            modalTitle.textContent = 'Subir Fotografía de la Fachada';
-            documentoLabel.textContent = 'Seleccione la imagen de la fachada (JPG, PNG)';
+            titulo = (accion === 'modificar') ? 'Modificar Fotografía de la Fachada' : 'Subir Fotografía de la Fachada';
+            textoLabel = (accion === 'modificar') ? 
+                'Seleccione la nueva imagen de la fachada (reemplazará la actual)' : 
+                'Seleccione la imagen de la fachada (JPG, PNG)';
             break;
     }
+    
+    modalTitle.textContent = titulo;
+    documentoLabel.textContent = textoLabel;
     
     // Limpiar el input file
     documentoInput.value = '';
