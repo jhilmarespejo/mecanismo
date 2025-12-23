@@ -48,8 +48,8 @@
                         <i class="bi bi-bar-chart-line me-3"></i>
                         {{ $resultadoGeneral == 1 ? 'Resultado General del Cuestionario' : 'Resultados del Cuestionario por Visita' }}
                     </h1>
-                    <h2 class="h4 mb-2">{{ session('EST_nombre') }}</h2>
-                    <h3 class="h5 mb-0 opacity-90">{{ $FRM_titulo }}</h3>
+                    <!-- <h2 class="h4 mb-2">{{ session('EST_nombre') }}</h2> -->
+                    <h3 class="h5 mb-0 opacity-90">{{ strtoupper($FRM_titulo) }}</h3>
                     <div class="mt-3">
                         <span class="badge bg-white text-primary fs-6 px-3 py-2">
                             <i class="bi bi-clipboard-check me-2"></i>{{ $totalAplicaciones ?? $estadisticas['total_aplicaciones'] ?? 0 }} Aplicaciones

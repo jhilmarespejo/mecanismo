@@ -114,7 +114,7 @@ class FormularioController extends Controller
             $datos = $request->all();
         
             $nuevoFormulario = ModFormulario::create([
-                'FRM_titulo' => $datos['FRM_titulo'],
+                'FRM_titulo' => strtoupper($datos['FRM_titulo']),
                 'FRM_tipo' => $datos['FRM_tipo'],
                 'FK_USER_id' => Auth::id(),
             ]);

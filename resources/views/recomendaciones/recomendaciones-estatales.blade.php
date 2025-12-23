@@ -82,14 +82,14 @@
                         <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
                             <div class="accordion-body bg-light">
                             <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>REcomendacion: </strong>{{ $reco['REC_recomendacion'] }} </p>
-                            <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la recomendación: </strong><span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
+                            <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la observación: </strong><span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
                             <p>
                                 @if ($reco['REC_cumplimiento'] == 0)
                                     <i class="bi bi-x-circle text-danger text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-danger ">Recomendacion no cumplida </span>
                                 @elseif ($reco['REC_cumplimiento'] == 1)
                                     <i class="bi bi-check-circle text-success text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-success ">Recomendacion cumplida </span>
                                 @elseif ($reco['REC_cumplimiento'] == 2)
-                                    <i class="bi bi-upload text-warning text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-warning ">Recomendacion parcialmente cumplida </span>
+                                    <i class="bi bi-upload text-warning text-primary fs-5"></i> <strong>Nivel de cumplimiento: </strong> <span class="fw-bold text-warning ">Observación parcialmente cumplida </span>
                                 @endif
                                 </p>
                                 <p><i class="bi bi-person-check-fill text-primary fs-5"></i> <strong> Autoridad competente: </strong> <span class="fw-bold text-primary"> {{ $reco['REC_autoridad_competente'] }}</span></p>
@@ -104,8 +104,8 @@
                                 </p>
 
                                 <hr>
-                                <!-- Avances para esta recomendación -->
-                                <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> ACCIONES PARA EL CUMPLIMIENTO A LA RECOMENDACIÓN: </strong>
+                                <!-- Avances para esta observación -->
+                                <strong class="text-success fs-6" > <i class="bi bi-check-circle"></i> ACCIONES PARA EL CUMPLIMIENTO A LA OBSERVACIÓN: </strong>
                                 @foreach ($progresos as $p=>$progreso)
                                     @if ($reco['REC_id'] == $p)
                                         {{-- @dump($progreso) --}}
@@ -144,7 +144,7 @@
                                 <hr>
                                     @if ( $reco['REC_cumplimiento'] == 0 || $reco['REC_cumplimiento'] == 2 )
                                         <p class="p-2 mt-2 fs-6 btn bg-primary text-light text-shadow box-shadow" data-bs-target="#modal_cumplimiento" data-bs-toggle="modal" title="Marcar cumplimiento" onclick="agregarCumplimiento('{{$reco['REC_recomendacion']}}', '{{$reco['REC_fechaRecomendacion']}}', '{{$reco['REC_id']}}')">
-                                            <i class="bi bi-fast-forward-circle fs-5 acciones" > </i> Registrar acciones para el cumplimiento de ésta recomendación
+                                            <i class="bi bi-fast-forward-circle fs-5 acciones" > </i> Registrar acciones para el cumplimiento de ésta observación
                                         </p>
                                     @endif
                                 <hr>

@@ -3,7 +3,7 @@
     <div class="accordion-item bg-primary">
         <h2 class="accordion-header" id="headingOne">
             <button class="accordion-button bg-primary text-light text-shadow collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuevo" aria-expanded="false" aria-controls="collapseNuevo">
-            Nueva recomendación
+            Nueva observación
             </button>
         </h2>
         <div id="collapseNuevo" class="aaccordion-collapse ms-2 collapse" aria-labelledby="headingOne" data-bs-parent="#accordion_observaciones">
@@ -13,7 +13,7 @@
 
                     <div class="form-floating border-bottom row" id="recomendacion_1">
                         <textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea>
-                        <label>Recomendación:</label>
+                        <label>Observación:</label>
                         <small class="error text-danger" id="REC_recomendacion_err" ></small>
                     </div>
                     <div class="form-floating border-bottom row mt-1" id="">
@@ -30,7 +30,7 @@
                         <span class="my-2 btn btn-primary d-none cargando text-light text-shadow" id="cargando_1" disabled="">
                             <span class="spinner-border spinner-border-sm ">
                             </span> Guardando... </span>
-                            <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Recomendación
+                            <span class="btn btn-success nueva-recomendacion text-light text-shadow" id="guardar_recomendacion_1"><i class="bi bi-save2"></i> Guardar Observación
                         </span>
                     </div>
                 </form>

@@ -488,7 +488,7 @@
                                                         </li>
                                                         <li class="list-group-item border-0">
                                                             <a class="text-decoration-none" href="/recomendaciones/{{$VIS_id}}">
-                                                                <i class="bi bi-file-earmark-text-fill"></i> Recomendaciones
+                                                                <i class="bi bi-file-earmark-text-fill"></i> Observaciones
                                                             </a>
                                                         </li>
                                                     </ul>
