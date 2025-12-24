@@ -141,9 +141,9 @@
 {{-- SUB MENU --}}
 <div class="btn-toolbar mb-4" role="toolbar">
     <div class="btn-group" role="group">
-        <a href="javascript:history.back()" class="btn btn-outline-primary">
+        <button class="btn btn-outline-primary" onclick="navegarPaginaAnterior()">
             <i class="bi bi-arrow-return-left me-2"></i>Página anterior
-        </a>
+        </button>
     </div>
 </div>
 
@@ -423,6 +423,15 @@
 
 @section('js')
 <script>
+    function navegarPaginaAnterior() {
+        // Usar replaceState para ir atrás sin historial
+        if (document.referrer && document.referrer !== window.location.href) {
+            // Ir directamente a la URL anterior (forzando nueva carga)
+            window.location.replace(document.referrer);
+        } else {
+            history.back();
+        }
+    }
 // Inicializar tooltips
 document.addEventListener('DOMContentLoaded', function() {
     
