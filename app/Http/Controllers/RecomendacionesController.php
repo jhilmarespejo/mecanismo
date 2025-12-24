@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use Intervention\Image\Facades\Image;
 use App\Http\Controllers\CustomController;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 class RecomendacionesController extends Controller{
    
     // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas recomendaciones PARA UNA VISITA
@@ -74,18 +77,20 @@ class RecomendacionesController extends Controller{
             try {
                  /* Guarda la recomendacion enviada */
                 //Verificar si la recomendacion es para el Estado o para un establecimiento
-                if($request->VIS_estado){
+                if($request->VIS_estado){ // Recomendación para el Estado
                     $rec = ModRecomendacion::create( [
                         'REC_recomendacion' => $request->REC_recomendacion, 
-                        'REC_estado' => $request->VIS_estado, 
+                        'REC_estatal' => $request->VIS_estado, 
                         'REC_fechaRecomendacion' => $request->REC_fecha_recomendacion_estatal, 
-                        'REC_autoridad_competente' => $request->REC_autoridad_competente] );
-                }elseif($request->VIS_id){
+                        'REC_autoridad_competente' => $request->REC_autoridad_competente,
+                        'estado' => '1'] );
+                }elseif($request->VIS_id){ // Recomendación para un establecimiento durante una visita
                     $rec = ModRecomendacion::create( [
                         'REC_recomendacion' => $request->REC_recomendacion, 
                         'FK_VIS_id' => $request->VIS_id, 
                         'REC_fechaRecomendacion' => $request->REC_fecha_recomendacion_estatal, 
-                        'REC_autoridad_competente' => $request->REC_autoridad_competente] );
+                        'REC_autoridad_competente' => $request->REC_autoridad_competente,
+                        'estado' => '1'] );
                 }
                 
 
@@ -97,21 +102,48 @@ class RecomendacionesController extends Controller{
                         $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
                         // dump($tipoArchivo);
                         if( $tipoArchivo[0] == 'image'){
-                            $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_origen' => 'recomendaciones', 'ARC_formatoArchivo' => $tipoArchivo[0], 'FK_REC_id' => $rec->REC_id ] );
+                            // Usar store() para obtener la ruta
+                             $rutaAlmacenada = $archivo->store('uploads/recomendaciones', 'public');
+                            
+                            
+                            $idArchivo = ModArchivo::create( [ 
+                                'ARC_NombreOriginal' => $archivo->getClientOriginalName(),
+                                'ARC_ruta' => 'storage/' . $rutaAlmacenada, 
+                                'ARC_extension' => $archivo->extension(), 
+                                'ARC_tamanio' => $archivo->getSize(), 
+                                'ARC_descripcion' =>  $request->ARC_descripcion[$key], 
+                                'ARC_origen' => 'recomendaciones', 
+                                'ARC_formatoArchivo' => $tipoArchivo[0], 
+                                'FK_REC_id' => $rec->REC_id, 
+                                'estado' => '1' 
+                            ]);
 
-                            // array_push( $ids, $idArchivo->ARC_id );
-
-                            /* GUARDA Y COMPRIME las imagenes en el bucle */
-                            $image = Image::make($archivo->path());
-                            $image->resize(null, 600, function ($const) {
-                                $const->aspectRatio();
-                            })->save( public_path('/uploads/recomendaciones/').$archivo->store('') );
+                            // Procesar la imagen usando la ruta del archivo ya guardado
+                            $rutaCompleta = storage_path('app/public/' . $rutaAlmacenada);
+                            if (file_exists($rutaCompleta)) {
+                                $image = Image::make($rutaCompleta);
+                                $image->resize(null, 600, function ($const) {
+                                    $const->aspectRatio();
+                                })->save($rutaCompleta);
+                            }
                         /* Guarda los docmentos que no son imagenes */
                         } else {
-                            $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'ARC_origen' => 'recomendaciones', 'ARC_formatoArchivo' => $tipoArchivo[0], 'FK_REC_id' => $rec->REC_id ] );
+                            // Para archivos no-imagen
+                            $rutaAlmacenada = $archivo->store('uploads/recomendaciones', 'public');
+                            
+                            $idArchivo = ModArchivo::create( [
+                                'ARC_NombreOriginal' => $archivo->getClientOriginalName(),
+                                'ARC_ruta' => 'storage/' . $rutaAlmacenada,  
+                                'ARC_extension' => $archivo->extension(), 
+                                'ARC_tamanio' => $archivo->getSize(), 
+                                'ARC_descripcion' =>  $request->ARC_descripcion[$key], 
+                                'ARC_origen' => 'recomendaciones', 
+                                'ARC_formatoArchivo' => $tipoArchivo[0], 
+                                'FK_REC_id' => $rec->REC_id, 
+                                'estado' => '1' 
+                            ]);
 
                             array_push( $ids, $idArchivo->ARC_id );
-                            $archivo->move( public_path('uploads/recomendaciones/'),$archivo->store('') );
                         }
                     }
                 }
@@ -121,6 +153,7 @@ class RecomendacionesController extends Controller{
             catch (\Exception $e) {
                 dump($e);
                 DB::rollback();
+                return response()->json([ "error" => "Error al guardar: " . $e->getMessage() ]);
             }
             // exit;
         }
@@ -170,17 +203,23 @@ class RecomendacionesController extends Controller{
                     $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
                     if( $tipoArchivo[0] == 'image'){
                         $tipoArchivo =  explode( "/", $archivo->getClientMimeType() );
+                        
+                        $rutaAlmacenada = $archivo->store('uploads/seguimiento_recomendaciones', 'public');
 
-                        $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(), 'ARC_ruta' => $archivo->store('/uploads/seguimiento_recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'FK_SREC_id' => $SREC_id, 'ARC_formatoArchivo' => $tipoArchivo[0] ] );
+                        $idArchivo = ModArchivo::create( [ 'ARC_NombreOriginal' => $archivo->getClientOriginalName(), 
+                        'ARC_ruta' => 'storage/' . $rutaAlmacenada, 
+                        'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'FK_SREC_id' => $SREC_id, 'ARC_formatoArchivo' => $tipoArchivo[0],'estado' => '1' ] );
 
                         $image = Image::make($archivo->path());
 
                         /* Para redimensionar imagenes a 600px */
+                        $rutaCompleta = storage_path('app/public/' . $rutaAlmacenada);
                         $staus = $image->resize(null, 600, function ($const) {
                             $const->aspectRatio();
-                        })->save( public_path('/uploads/seguimiento_recomendaciones/').$archivo->store('') );
+                        })->save($rutaCompleta);
                     } else {
-                        $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(),'ARC_ruta' => $archivo->store('/uploads/seguimiento_recomendaciones'), 'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'FK_SREC_id' => $SREC_id, 'ARC_formatoArchivo' => $tipoArchivo[0] ]);
+                        $rutaAlmacenada = $archivo->store('uploads/seguimiento_recomendaciones', 'public');
+                        $idArchivo = ModArchivo::create( ['ARC_NombreOriginal' => $archivo->getClientOriginalName(), 'ARC_ruta' => 'storage/' . $rutaAlmacenada, 'ARC_extension' => $archivo->extension(), 'ARC_tamanio' => $archivo->getSize(), 'ARC_descripcion' =>  $request->ARC_descripcion[$key], 'FK_SREC_id' => $SREC_id, 'ARC_formatoArchivo' => $tipoArchivo[0],'estado' => '1' ]);
                         // array_push( $ids, $idArchivo->ARC_id );
                         $archivo->move(public_path('/uploads/seguimiento_recomendaciones/'), $archivo->store(''));
                     }
@@ -200,50 +239,247 @@ class RecomendacionesController extends Controller{
     }
 
 
-    // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una visita, son recomendaciones al gobierno boliviano y son provienen den informe anual del MNP
+    // Función que muestra la vista donde el usuario puede ver las recomendaciones o crear nuevas RECOMENDACIONES ESTATALES, estas recomendaciones NO tienen relacion con una VISITA en particular, son recomendaciones al gobierno boliviano y provienen del INFORME ANUAL del MNP
     // metodo: GET
     // ruta: .../recomendacionesEstatales
-    public function recomendacionesEstatales(Request $request){
-        $anioActual = date('Y');
-        if( is_null($request->anio_actual ) ){
-            $anioActual = date('Y');
-        } else {
-            $anioActual = $request->anio_actual;
-        }
+    public function recomendacionesEstatales(Request $request)
+    {
+        $anioActual = $request->anio_actual ?? date('Y');
+        
         $breadcrumbs = [
             ['name' => 'Inicio', 'url' => route('panel')],
-            // ['name' => 'Módulo de asesoría', 'url' => route('establecimientos.index')],
             ['name' => 'Recomendaciones informe anual', 'url' => ''],
         ];
-        // dump($anioActual);exit;
+        
         DB::enableQueryLog();
         
-        $recomendaciones = ModRecomendacion::select('r.REC_id', 'r.REC_recomendacion', 'r.REC_fechaRecomendacion', 'r.REC_cumplimiento', 'r.REC_fechaCumplimiento', 'r.REC_autoridad_competente', 'a.ARC_id', 'a.FK_REC_id', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.ARC_formatoArchivo')
-        ->from('recomendaciones as r')
-        ->leftJoin('archivos as a', 'a.FK_REC_id', 'r.REC_id')
-        ->where('r.REC_estado', 'Si')
-        ->whereYear('r.REC_fechaRecomendacion', $anioActual)
-        ->orderBy('r.REC_id', 'desc')
-        ->get()->toArray();
+        // CORRECCIÓN: Usar leftJoin con condiciones en el join, no en el where
+        $recomendaciones = ModRecomendacion::select(
+                'r.REC_id', 
+                'r.REC_recomendacion', 
+                'r.REC_fechaRecomendacion', 
+                'r.REC_cumplimiento', 
+                'r.REC_fechaCumplimiento', 
+                'r.REC_autoridad_competente',
+                'a.ARC_id', 
+                'a.FK_REC_id', 
+                'a.ARC_descripcion', 
+                'a.ARC_ruta', 
+                'a.ARC_extension', 
+                'a.ARC_formatoArchivo'
+            )
+            ->from('recomendaciones as r')
+            // CORRECCIÓN: Mover condiciones del where al join
+            ->leftJoin('archivos as a', function($join) {
+                $join->on('a.FK_REC_id', '=', 'r.REC_id')
+                    ->where('a.estado', '1'); // Solo archivos activos
+            })
+            ->where('r.REC_estatal', 'Si')
+            ->where('r.estado', '1')
+            ->whereYear('r.REC_fechaRecomendacion', $anioActual)
+            ->orderBy('r.REC_id', 'desc')
+            ->get()
+            ->toArray();
         
-        $progresos = ModSeguimientoRecomendacion::select('sr.SREC_id', 'sr.SREC_descripcion','sr.SREC_fecha_seguimiento', 'sr.FK_REC_id', 'sr.SREC_autoridad_competente',  'a.ARC_id', 'a.ARC_formatoArchivo', 'a.ARC_descripcion', 'a.ARC_ruta', 'a.ARC_extension', 'a.FK_SREC_id')
-        ->from('seguimiento_recomendaciones as sr')
-        ->leftJoin('archivos as a', 'a.FK_SREC_id', 'sr.SREC_id')
-        ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
-        ->whereYear('r.REC_fechaRecomendacion', $anioActual)
-        ->where('r.REC_estado', "Si")
-        ->get()->toArray();
+        // CORRECCIÓN: Lo mismo para los progresos
+        $progresos = ModSeguimientoRecomendacion::select(
+                'sr.SREC_id', 
+                'sr.SREC_descripcion',
+                'sr.SREC_fecha_seguimiento', 
+                'sr.FK_REC_id', 
+                'sr.SREC_autoridad_competente',  
+                'a.ARC_id', 
+                'a.ARC_formatoArchivo', 
+                'a.ARC_descripcion', 
+                'a.ARC_ruta', 
+                'a.ARC_extension', 
+                'a.FK_SREC_id'
+            )
+            ->from('seguimiento_recomendaciones as sr')
+            // CORRECCIÓN: Mover condiciones del where al join para archivos
+            ->leftJoin('archivos as a', function($join) {
+                $join->on('a.FK_SREC_id', '=', 'sr.SREC_id')
+                    ->where('a.estado', '1'); // Solo archivos activos
+            })
+            ->leftJoin('recomendaciones as r', 'r.REC_id', 'sr.FK_REC_id')
+            ->whereYear('r.REC_fechaRecomendacion', $anioActual)
+            ->where('r.REC_estatal', 'Si')
+            //->where('sr.estado', '1') // Asegurar que el seguimiento esté activo
+            ->get()
+            ->toArray();
         
-
-        // $quries = DB::getQueryLog();
+        // Opcional: Ver la consulta SQL generada
+        // $queries = DB::getQueryLog();
+        // \Log::info('Consulta recomendaciones:', $queries);
         
-        $progresos = CustomController::agruparSeguimientosImagenes( $progresos );
-        $recomendaciones = CustomController::agruparRecomendacionesImagenes( $recomendaciones);
+        $progresos = CustomController::agruparSeguimientosImagenes($progresos);
+        $recomendaciones = CustomController::agruparRecomendacionesImagenes($recomendaciones);
         
-        // dump($recomendaciones, $progresos);exit;
-        
-        return view('recomendaciones.recomendaciones-estatales', compact('progresos', 'recomendaciones', 'breadcrumbs', 'anioActual'));
-        //mostrar una ventana donde se realicen recomendaciones al estado
+        return view('recomendaciones.recomendaciones-estatales', 
+            compact('progresos', 'recomendaciones', 'breadcrumbs', 'anioActual')
+        );
     }
+    
+    /**
+     * Actualizar una recomendación estatal
+     */
+    public function actualizarRecomendacionEstatal(Request $request)
+    {
+        // Validación (mantener igual)
+        $validator = Validator::make($request->all(), [
+            'REC_id' => 'required|exists:recomendaciones,REC_id',
+            'REC_recomendacion' => 'required|min:5',
+            'REC_fechaRecomendacion' => 'required|date',
+            'REC_cumplimiento' => 'nullable|in:0,1,2',
+            'REC_autoridad_competente' => 'required|min:5',
+            'ARC_archivo_nuevo.*' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30505',
+            'ARC_descripcion_nuevo.*' => 'required_with:ARC_archivo_nuevo.*|min:5',
+        ], [
+            'required' => '¡El dato es requerido!',
+            'ARC_archivo_nuevo.*.max' => '¡El archivo debe ser menor o igual a 30MB!',
+            'ARC_archivo_nuevo.*.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
+            'min' => 'Dato muy reducido',
+            'ARC_descripcion_nuevo.*.required_with' => 'La descripción es requerida para el archivo',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Actualizar la recomendación (igual)
+            $recomendacion = ModRecomendacion::findOrFail($request->REC_id);
+            $recomendacion->update([
+                'REC_recomendacion' => $request->REC_recomendacion,
+                'REC_fechaRecomendacion' => $request->REC_fechaRecomendacion,
+                'REC_cumplimiento' => $request->REC_cumplimiento,
+                'REC_autoridad_competente' => $request->REC_autoridad_competente,
+                'updatedBy' => auth()->id(),
+                'updatedAt' => now(),
+            ]);
+
+            // Eliminar archivos marcados para eliminar (igual)
+            if ($request->has('archivos_eliminados')) {
+                $archivosEliminar = array_filter($request->input('archivos_eliminados', []));
+                if (!empty($archivosEliminar)) {
+                    ModArchivo::whereIn('ARC_id', $archivosEliminar)
+                        ->where('FK_REC_id', $recomendacion->REC_id)
+                        ->where('estado', 1)
+                        ->update([
+                            'estado' => 0,
+                            'updatedBy' => auth()->id(),
+                            'updatedAt' => now(),
+                        ]);
+                }
+            }
+            
+            // Agregar nuevos archivos
+            if ($request->hasFile('ARC_archivo_nuevo')) {
+                foreach ($request->file('ARC_archivo_nuevo') as $key => $archivo) {
+                    $tipoArchivo = explode("/", $archivo->getClientMimeType());
+                    
+                    // Usar store() para obtener la ruta
+                    $rutaAlmacenada = $archivo->store('uploads/recomendaciones', 'public');
+                    
+                    if ($tipoArchivo[0] == 'image') {
+                        
+                        // Para imágenes: Guardar en BD
+                        $idArchivo = ModArchivo::create([
+                            'ARC_NombreOriginal' => $archivo->getClientOriginalName(),
+                            'ARC_ruta' => 'storage/' . $rutaAlmacenada,
+                            'ARC_extension' => $archivo->extension(),
+                            'ARC_tamanio' => $archivo->getSize(),
+                            'ARC_descripcion' => $request->ARC_descripcion_nuevo[$key] ?? '',
+                            'ARC_origen' => 'recomendaciones',
+                            'ARC_formatoArchivo' => $tipoArchivo[0],
+                            'FK_REC_id' => $recomendacion->REC_id,
+                            'estado' => '1',
+                            'createdBy' => auth()->id(),
+                            'createdAt' => now(),
+                        ]);
+                        
+                        // Procesar imagen DESPUÉS de guardarla
+                        $rutaCompleta = storage_path('app/public/' . $rutaAlmacenada);
+                        if (file_exists($rutaCompleta)) {
+                            try {
+                                $image = Image::make($rutaCompleta);
+                                $image->resize(null, 600, function ($const) {
+                                    $const->aspectRatio();
+                                })->save($rutaCompleta);
+                            } catch (\Exception $e) {
+                                Log::warning('No se pudo procesar imagen: ' . $e->getMessage());
+                            }
+                        }
+                    } else {
+                        // Para archivos no-imagen
+                        $idArchivo = ModArchivo::create([
+                            'ARC_NombreOriginal' => $archivo->getClientOriginalName(),
+                            'ARC_ruta' => 'storage/' . $rutaAlmacenada,
+                            'ARC_extension' => $archivo->extension(),
+                            'ARC_tamanio' => $archivo->getSize(),
+                            'ARC_descripcion' => $request->ARC_descripcion_nuevo[$key] ?? '',
+                            'ARC_origen' => 'recomendaciones',
+                            'ARC_formatoArchivo' => $tipoArchivo[0],
+                            'FK_REC_id' => $recomendacion->REC_id,
+                            'estado' => '1',
+                            'createdBy' => auth()->id(),
+                            'createdAt' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            
+            return response()->json([
+                'success' => 'Recomendación actualizada correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error al actualizar recomendación: ' . $e->getMessage());
+            
+            return response()->json([
+                'error' => 'Error al actualizar la recomendación: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+        
+
+
+    /**
+     * Eliminar una recomendación estatal (versión mínima)
+     */
+    public function eliminarEstatal(Request $request)
+    {
+        try {
+            $request->validate([
+                'REC_id' => 'required|exists:recomendaciones,REC_id'
+            ]);
+            
+            $afectadas = ModRecomendacion::where('REC_id', $request->REC_id)
+                ->where('estado', 1) // Solo si está activa
+                ->update([
+                    'estado' => 0,
+                    'updatedBy' => auth()->id(),
+                    'updatedAt' => now()
+                ]);
+            
+            if ($afectadas === 0) {
+                return response()->json([
+                    'error' => 'La recomendación no existe o ya fue eliminada'
+                ], 404);
+            }
+            
+            return response()->json([
+                'success' => 'Recomendación eliminada correctamente'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al procesar la solicitud'
+            ], 500);
+        }
+    }
 }

@@ -35,6 +35,7 @@
                     <div class="accordion-body bg-light">
                         <form id="form_recomendaciones_1" method="POST" enctype="multipart/form-data" action="javascript:void(0)">@csrf
                             <input type="hidden" name="VIS_estado" value="Si">
+                            {{-- En el bucle de recomendaciones, después de mostrar los detalles --}}
 
                             <div class="form-floating border-bottom row" id="recomendacion_1">
                                 <textarea style="height: 80px" name="REC_recomendacion" class="form-control" placeholder=""></textarea>
@@ -73,14 +74,40 @@
             @if (count($recomendaciones)>0)
                 @foreach ( $recomendaciones as $k=>$reco )
                 {{-- @dump(($reco['archivos'])) --}}
+
+                    
                     <div class="accordion-reco bg-info mt-2">
                         <h2 class="accordion-header " id="heading_{{ $reco['REC_id'] }}">
                             <button class="accordion-button collapsed bg-info text-light text-shadow" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ $reco['REC_id'] }}" aria-expanded="false" aria-controls="collapse_{{ $reco['REC_id'] }}">
                                 <strong>{{ count($recomendaciones)-$k}}.</strong>&nbsp; {{ substr($reco['REC_recomendacion'], 0, 25) }}... </span>
                             </button>
                         </h2>
+                        
+                    
                         <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
                             <div class="accordion-body bg-light">
+                              
+                                <div class="mt-3 d-flex gap-2">
+                                    <button type="button" 
+                                            class="btn btn-warning btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEditarRecomendacion"
+                                            data-id="{{ $reco['REC_id'] }}"
+                                            data-texto="{{ $reco['REC_recomendacion'] }}"
+                                            data-fecha="{{ $reco['REC_fechaRecomendacion'] }}"
+                                            data-cumplimiento="{{ $reco['REC_cumplimiento'] }}"
+                                            data-autoridad="{{ $reco['REC_autoridad_competente'] }}"
+                                            data-archivos="{{ json_encode($reco['archivos'] ?? []) }}">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </button>
+                                    
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm btn-eliminar-recomendacion"
+                                            data-id="{{ $reco['REC_id'] }}"
+                                            data-texto="{{ $reco['REC_recomendacion'] }}">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
                             <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>REcomendacion: </strong>{{ $reco['REC_recomendacion'] }} </p>
                             <p><i class="bi bi-calendar3 text-primary fs-5"></i> <strong>Fecha de la observación: </strong><span class="fw-bold text-primary">{{ $reco['REC_fechaRecomendacion'] }}</span></p>
                             <p>
@@ -222,6 +249,7 @@
     </div>
 </div>
 
+@include('includes.modal-editar-recomendacion-estatal')
 
 <script>
      /*Guarda los avances o progresos de una recomendación*/
@@ -320,7 +348,7 @@
                 <small class="text-danger col" id="descripcion_`+j+`_err"></small>
             </p>
 
-
+        
         </fieldset>`);
         ++j;
     });
@@ -407,6 +435,94 @@
             error: function(response){ console.log(response) }
         });
     });
+</script>
+<script>
+$(document).ready(function() {
+    // Eliminar recomendación con SweetAlert
+    $(document).on('click', '.btn-eliminar-recomendacion', function(e) {
+        e.preventDefault();
+        
+        const button = $(this);
+        const recomendacionId = button.data('id');
+        const recomendacionTexto = button.data('texto');
+        const textoRecortado = recomendacionTexto.length > 100 
+            ? recomendacionTexto.substring(0, 100) + '...' 
+            : recomendacionTexto;
+        
+        // Mostrar confirmación con SweetAlert
+        Swal.fire({
+            title: '¿Eliminar Recomendación?',
+            html: `
+                <div class="text-start">
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+                    <p>¿Está seguro de eliminar la siguiente recomendación?</p>
+                    <div class="border rounded p-3 bg-light">
+                        <strong>${textoRecortado}</strong>
+                    </div>
+                    <p class="text-danger mt-2 small">
+                        <i class="bi bi-info-circle"></i>
+                        Se eliminarán también todos los archivos adjuntos.
+                    </p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="bi bi-trash"></i> Sí, eliminar',
+            cancelButtonText: '<i class="bi bi-x-circle"></i> Cancelar',
+            reverseButtons: true,
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch("{{ route('recomendaciones.eliminar-estatal') }}", {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        REC_id: recomendacionId
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.errors) {
+                        throw new Error(Object.values(data.errors).join('\n'));
+                    }
+                    return data;
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(`Error: ${error.message}`);
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: '¡Eliminada!',
+                    text: result.value.success || 'Recomendación eliminada correctamente',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        // Recargar la página para actualizar la lista
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+});
 </script>
 
 @endsection

@@ -107,7 +107,13 @@ Route::get('/recomendacionesEstatales', [RecomendacionesController::class, 'reco
 Route::post('recomendaciones/cumplimiento', [RecomendacionesController::class, 'guardarCumplimientoRecomendaciones'])->name('recomendaciones.cumplimiento')->middleware('auth');
 Route::post('recomendaciones/guardarNuevaRecomendacion', [RecomendacionesController::class, 'guardarNuevaRecomendacion'])->name('recomendaciones.nueva')->middleware('auth');
 
+Route::put('recomendaciones/actualizar-estatal', [RecomendacionesController::class, 'actualizarRecomendacionEstatal'])
+    ->name('recomendaciones.actualizar-estatal')
+    ->middleware('auth');
 
+Route::delete('recomendaciones/eliminar-estatal', [RecomendacionesController::class, 'eliminarEstatal'])
+    ->name('recomendaciones.eliminar-estatal')
+    ->middleware('auth');
 
 /*  CATEGORIAS
  Route::post('categorias/buscarSubcategoria', [CategoriasController::class, 'buscarSubcategoria'])->name('categorias.buscarSubcategoria')->middleware('auth');
