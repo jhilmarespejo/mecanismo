@@ -408,29 +408,20 @@ class VisitaController extends Controller{
                 ->first();
                 
             if ($documentoExistente) {
-                // Eliminar el archivo anterior del sistema de archivos
-                if (Storage::exists($documentoExistente->ARC_ruta)) {
-                    Storage::delete($documentoExistente->ARC_ruta);
-                }
-                // También eliminar del public path si existe
-                $publicPath = public_path($documentoExistente->ARC_ruta);
-                if (file_exists($publicPath)) {
-                    unlink($publicPath);
-                }
+                // Eliminar el archivo anterior del storage
+                Storage::disk('public')->delete($documentoExistente->ARC_ruta);
                 // Eliminar registro de la base de datos
                 $documentoExistente->delete();
             }
             
-            // Generar nombre único para el archivo
-            $nombreArchivo = time() . '_' . $request->tipo_documento . '.' . $request->documento->extension();
-            
-            // Definir la ruta completa
-            $rutaCompleta = 'uploads/establecimientos/' . $carpeta . '/' . $nombreArchivo;
+            // Usar store() con disco 'public'
+            $rutaAlmacenada = $request->documento->store("uploads/establecimientos/{$carpeta}", 'public');
             
             // Guardar datos del archivo en la tabla archivos
             $archivo = ModArchivo::create([
                 'ARC_NombreOriginal' => $request->documento->getClientOriginalName(),
-                'ARC_ruta' => $rutaCompleta,
+                //  Guardar ruta con prefijo 'storage/'
+                'ARC_ruta' => 'storage/' . $rutaAlmacenada,
                 'ARC_extension' => $request->documento->extension(),
                 'ARC_tamanio' => $request->documento->getSize(),
                 'ARC_descripcion' => $descripcion,
@@ -440,24 +431,21 @@ class VisitaController extends Controller{
                 'estado' => 1
             ]);
 
-            // Crear el directorio si no existe
-            $directorio = public_path('uploads/establecimientos/' . $carpeta);
-            if (!file_exists($directorio)) {
-                mkdir($directorio, 0755, true);
-            }
-
-            // Guardar el archivo
+            // Procesar imagen DESPUÉS de guardarla
             if($tipoArchivo[0] == 'image'){
-                // Redimensionar y guardar imagen
-                Image::make($request->documento)
-                    ->resize(1200, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    })->save(public_path($rutaCompleta), 80);
-            } else {
-                // Mover archivo PDF
-                $request->documento->move($directorio, $nombreArchivo);
+                // Ruta completa en storage
+                $rutaCompleta = storage_path('app/public/' . $rutaAlmacenada);
+                
+                if (file_exists($rutaCompleta)) {
+                    // Redimensionar y guardar imagen
+                    Image::make($rutaCompleta)
+                        ->resize(1200, null, function ($constraint) {
+                            $constraint->aspectRatio();
+                            $constraint->upsize();
+                        })->save($rutaCompleta, 80);
+                }
             }
+            // Para PDFs, no se necesita hacer nada más porque store() ya lo guardó
 
             DB::commit();
             return redirect()->back()->with('success', 'Documento guardado correctamente');
