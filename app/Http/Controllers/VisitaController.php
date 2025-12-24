@@ -261,6 +261,7 @@ class VisitaController extends Controller{
             'ARC_origen'
         )
         ->where('FK_EST_id', $id)
+        ->where('estado', 1)
         ->whereIn('ARC_origen', ['reglamento', 'licencia', 'fachada'])
         ->get()
         ->keyBy('ARC_origen');
@@ -331,10 +332,13 @@ class VisitaController extends Controller{
         try {
             // Guardar el archivo en la tabla de archivos y en la carpeta actas
             $tipoArchivo = explode("/", $request->VIS_acta->getClientMimeType());
+            //  Usar store() con disco 'public'
+            $rutaAlmacenada = $request->VIS_acta->store('actas', 'public');
+        
             //Guarda datos del archivo en la tabla archivos
             ModArchivo::create([
                 'ARC_NombreOriginal' => $request->VIS_acta->getClientOriginalName(),
-                'ARC_ruta' => $request->VIS_acta->store('/uploads/actas'),
+                'ARC_ruta' => 'storage/' . $rutaAlmacenada,
                 'ARC_extension' => $request->VIS_acta->extension(),
                 'ARC_tamanio' => $request->VIS_acta->getSize(),
                 'ARC_descripcion' => 'Acta de visita',
@@ -343,15 +347,20 @@ class VisitaController extends Controller{
                 'ARC_origen' => 'acta'
             ]);
 
+            //  Procesar imagen DESPUÉS de guardarla
             if($tipoArchivo[0] == 'image'){
-                Image::make($request->VIS_acta)
-                ->resize(null, 600, function ($constraint) {
-                    $constraint->aspectRatio();
-                })->save(public_path('uploads/actas/').$request->VIS_acta->store(''));
-            } else {
-                $request->VIS_acta->move(public_path('uploads/actas/'), $request->VIS_acta->store(''));
+                $rutaCompleta = storage_path('app/public/' . $rutaAlmacenada);
+                
+                // Verificar que el archivo existe antes de procesarlo
+                if (file_exists($rutaCompleta)) {
+                    Image::make($rutaCompleta)
+                    ->resize(null, 600, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })->save($rutaCompleta);
+                }
             }
-
+        // Para archivos que no son imágenes, no se necesita hacer nada más
+        // porque store() ya los guardó
             DB::commit();
             return redirect()->back()->with('success', 'Correcto');
         }
