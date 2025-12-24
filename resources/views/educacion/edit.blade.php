@@ -26,7 +26,7 @@
                         <option value="">Selecciona una opción</option>
                         @php
                             $beneficiarios = [
-                                'Abogados defensores', 'Abogados del Estado', 'Comisiones de derechos humanos',
+                                'Policías','Militares','Estudiantes','Abogados defensores', 'Abogados del Estado', 'Comisiones de derechos humanos',
                                 'Directores de cárceles', 'Fiscales y jueces', 'Guardias Penitenciarios',
                                 'Militares', 'Médicos forenses', 'Periodistas', 'Personal administrativo de cárceles',
                                 'Personal de salud en centros de detención', 'Personal penitenciario',

@@ -87,9 +87,9 @@
                         <div id="collapse_{{ $reco['REC_id'] }}" class="accordion-collapse collapse  ms-2" aria-labelledby="heading_{{ $reco['REC_id'] }}" data-bs-parent="#accordion_observaciones">
                             <div class="accordion-body bg-light">
                               
-                                <div class="mt-3 d-flex gap-2">
+                                <div class="mt-3 d-flex gap-2 justify-content-end ">
                                     <button type="button" 
-                                            class="btn btn-warning btn-sm" 
+                                            class="btn btn-warning btn-sm box-shadow " 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#modalEditarRecomendacion"
                                             data-id="{{ $reco['REC_id'] }}"
@@ -97,15 +97,16 @@
                                             data-fecha="{{ $reco['REC_fechaRecomendacion'] }}"
                                             data-cumplimiento="{{ $reco['REC_cumplimiento'] }}"
                                             data-autoridad="{{ $reco['REC_autoridad_competente'] }}"
-                                            data-archivos="{{ json_encode($reco['archivos'] ?? []) }}">
-                                        <i class="bi bi-pencil"></i> Editar
+                                            data-archivos="{{ json_encode($reco['archivos'] ?? []) }}"
+                                            >
+                                        <i class="bi bi-pencil"></i> Editar Recomendación
                                     </button>
                                     
                                     <button type="button" 
-                                            class="btn btn-danger btn-sm btn-eliminar-recomendacion"
+                                            class="btn btn-danger btn-sm btn-eliminar-recomendacion box-shadow "
                                             data-id="{{ $reco['REC_id'] }}"
                                             data-texto="{{ $reco['REC_recomendacion'] }}">
-                                        <i class="bi bi-trash"></i> Eliminar
+                                        <i class="bi bi-trash"></i> Eliminar Recomendación
                                     </button>
                                 </div>
                             <p><i class="bi bi-chat-left-text-fill text-primary fs-5"></i> <strong>REcomendacion: </strong>{{ $reco['REC_recomendacion'] }} </p>

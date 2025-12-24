@@ -23,6 +23,7 @@
                         <option value="">Selecciona una opción</option>
                         <option value="Policías" {{ old('edu_beneficiarios') == 'Policías' ? 'selected' : '' }}>Policías</option>
                         <option value="Militares" {{ old('edu_beneficiarios') == 'Militares' ? 'selected' : '' }}>Militares</option>
+                        <option value="Estudiantes" {{ old('edu_beneficiarios') == 'Estudiantes' ? 'selected' : '' }}>Estudiantes</option>
                         <option value="Personas privadas de libertad" {{ old('edu_beneficiarios') == 'Personas privadas de libertad' ? 'selected' : '' }}>Personas privadas de libertad</option>
                         <option value="Peronal de centros de acogimiento" {{ old('edu_beneficiarios') == 'Peronal de centros de acogimiento' ? 'selected' : '' }}>Peronal de centros de acogimiento</option>
                         <option value="Niños" {{ old('edu_beneficiarios') == 'Niños' ? 'selected' : '' }}>Niños</option>

@@ -57,8 +57,6 @@ class RecomendacionesController extends Controller{
             'REC_recomendacion' => 'required|min:5',
             'REC_autoridad_competente' => 'required|min:5',
             'ARC_descripcion.*' => 'required|min:5',
-            'REC_fecha_recomendacion_estatal' => 'required|date',
-            
             'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30505 ', // 30 mb
         ], [
             'required' => '¡El dato es requerido!',
@@ -68,6 +66,13 @@ class RecomendacionesController extends Controller{
             'min' => 'Dato muy reducido',
             'ARC_descripcion.required' => 'Agregue una descripción',
         ]);
+        
+        // Si el campo REC_fecha_recomendacion_estatal existe, agregar regla de fecha
+        if ($request->filled('REC_fecha_recomendacion_estatal')) {
+            $validator->addRules([
+                'REC_fecha_recomendacion_estatal' => 'required|date'
+            ]);
+        }
         
         if ( $validator->fails() ){
             //dump($validator->errors());exit;
@@ -93,7 +98,7 @@ class RecomendacionesController extends Controller{
                         'estado' => '1'] );
                 }
                 
-
+                
                 //  dump($REC->REC_id);exit;
                 // verifica si el request trae un archivo
                 if ( $request->file('ARC_archivo') ){
