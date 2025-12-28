@@ -853,8 +853,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Validar tamaño del archivo (20MB máximo)
-            const maxSize = 20 * 1024 * 1024; // 20MB en bytes
+            // Validar tamaño del archivo (24MB máximo)
+            const maxSize = 24 * 1024 * 1024; // 24MB en bytes, pero le indicamos que es 20MB en el mensaje
             if (documento.files[0].size > maxSize) {
                 Swal.fire({
                     icon: 'error',

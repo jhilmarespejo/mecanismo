@@ -57,10 +57,10 @@ class RecomendacionesController extends Controller{
             'REC_recomendacion' => 'required|min:5',
             'REC_autoridad_competente' => 'required|min:5',
             'ARC_descripcion.*' => 'required|min:5',
-            'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30505 ', // 30 mb
+            'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:24576 ', // el limite maximo es 24MB en bytes, pero le indicamos que es 20MB en el mensaje
         ], [
             'required' => '¡El dato es requerido!',
-            'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 30MB!',
+            'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 20MB!',
             'ARC_archivo.*.mimes' => 'El archivos debe ser: imagen, documento, audio o video',
             'max' => 'Dato muy extenso',
             'min' => 'Dato muy reducido',
@@ -168,16 +168,17 @@ class RecomendacionesController extends Controller{
     // Para una recomendación de una visita específica es posible hacer un seguimiento de los avances realizados para cumplir con ésta, cada recomendación de visita podria tener una serie de avances, estos avances se guardan en la tabla seguimiento_recomendaciones
     // metodo: POST
     // ruta: recomendaciones/guardarCumplimientoRecomendaciones
+    
     public function guardarCumplimientoRecomendaciones( Request $request ){
         // dump($request->except('_token'));exit;
         $validator = Validator::make( $request->all(), [
             'SREC_fecha_seguimiento' => 'required',
             'SREC_descripcion' => 'required|min:10',
             'REC_cumplimiento' => 'required',
-            'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30905 ', // 30 mb
+            'ARC_archivo.*' => 'required|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:24576 ', // el limite maximo es 24MB en bytes, pero le indicamos que es 20MB en el mensaje
             // 'ARC_descripcion.*' => 'required',
         ], [
-            'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 30MB!',
+            'ARC_archivo.*.max' => '¡El archivos debe ser menor o igual a 20MB!',
             'required' => 'El dato es necesario!!!!',
             'min' => 'Dato reducido',
         ]);
@@ -328,6 +329,7 @@ class RecomendacionesController extends Controller{
     /**
      * Actualizar una recomendación estatal
      */
+
     public function actualizarRecomendacionEstatal(Request $request)
     {
         // Validación (mantener igual)
@@ -337,11 +339,11 @@ class RecomendacionesController extends Controller{
             'REC_fechaRecomendacion' => 'required|date',
             'REC_cumplimiento' => 'nullable|in:0,1,2',
             'REC_autoridad_competente' => 'required|min:5',
-            'ARC_archivo_nuevo.*' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:30505',
+            'ARC_archivo_nuevo.*' => 'nullable|mimes:jpg,jpeg,png,pdf,webm,mp4,mov,flv,mkv,wmv,avi,mp3,ogg,acc,flac,wav,xls,xlsx,ppt,pptx,doc,docx|max:24576 ', // el limite maximo es 24MB en bytes, pero le indicamos que es 20MB en el mensaje
             'ARC_descripcion_nuevo.*' => 'required_with:ARC_archivo_nuevo.*|min:5',
         ], [
             'required' => '¡El dato es requerido!',
-            'ARC_archivo_nuevo.*.max' => '¡El archivo debe ser menor o igual a 30MB!',
+            'ARC_archivo_nuevo.*.max' => '¡El archivo debe ser menor o igual a 20MB!',
             'ARC_archivo_nuevo.*.mimes' => 'El archivo debe ser: imagen, documento, audio o video',
             'min' => 'Dato muy reducido',
             'ARC_descripcion_nuevo.*.required_with' => 'La descripción es requerida para el archivo',

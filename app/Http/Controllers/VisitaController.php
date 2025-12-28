@@ -376,8 +376,9 @@ class VisitaController extends Controller{
      * ruta: .../visita/guardarDocumentoEstablecimiento
      */
     public function guardarDocumentoEstablecimiento(Request $request){
+        // el limite maximo es 24MB en bytes, pero le indicamos que es 20MB en el mensaje
         $request->validate([
-            'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:20048',
+            'documento' => 'required|mimes:pdf,jpg,jpeg,png|max:24576',
             'tipo_documento' => 'required|in:reglamento,licencia,fachada',
             'EST_id' => 'required|exists:establecimientos,EST_id'
         ], [
