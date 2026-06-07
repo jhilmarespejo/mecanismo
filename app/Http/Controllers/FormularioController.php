@@ -419,11 +419,16 @@ public function eliminar($FRM_id){
             -- CONTEO CORRECTO: Solo preguntas reales (no secciones/subsecciones)
             COALESCE(preguntas_reales.total_preguntas, 0) AS preguntas,
             -- CONTEO DE RESPUESTAS DADAS
-            COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas
+            COALESCE(respuestas_dadas.total_respuestas, 0) AS respuestas,
+            -- Fechas de la visita
+            v.\"VIS_fechas\",
+            v.\"VIS_fecha_fin\"
         FROM formularios f
         LEFT JOIN agrupador_formularios af ON af.\"FK_FRM_id\" = f.\"FRM_id\"
         -- Agregado JOIN con la tabla users para obtener el username
         LEFT JOIN users u ON u.\"id_usuario_dp\" = af.\"createdBy\"
+        -- AGREGADO JOIN con la tabla visitas para obtener las fechas
+        LEFT JOIN visitas v ON v.\"VIS_id\" = af.\"FK_VIS_id\"
 
         -- Subquery para contar solo preguntas reales
         LEFT JOIN (

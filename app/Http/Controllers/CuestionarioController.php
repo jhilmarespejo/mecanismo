@@ -36,7 +36,7 @@ class CuestionarioController extends Controller {
             ->select('f.FRM_titulo', 'agf.AGF_id', 'agf.AGF_copia')
             ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
             ->where('agf.FK_FRM_id', $FRM_id)
-            ->whereYear('agf.createdAt', Carbon::now()->year)
+            //->whereYear('agf.createdAt', Carbon::now()->year)
             ->get()->toArray();
         
         
@@ -313,7 +313,7 @@ class CuestionarioController extends Controller {
             ->join('formularios as f', 'f.FRM_id', 'agf.FK_FRM_id')
             ->where('agf.FK_FRM_id', $FRM_id)
             ->where('agf.FK_VIS_id', $VIS_id)  // Filtro añadido por visita
-            ->whereYear('agf.createdAt', Carbon::now()->year)
+            //->whereYear('agf.createdAt', Carbon::now()->year)
             ->get()->toArray();
         
         // Verificar si existen aplicaciones del formulario para esta visita
@@ -834,11 +834,6 @@ class CuestionarioController extends Controller {
             exit ($e->getMessage());
         }
     }
-    
-  
-   
-
-
 
 }
 
